@@ -510,7 +510,6 @@ function wrongChoices(correct) {
 
 // ── Handle Answer ─────────────────────────────────────────────────────────────
 function handleAnswer(chosen, correct, btn) {
-  startBgMusic();
   document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
 
   if (chosen === correct) {
@@ -709,57 +708,6 @@ function playWrong() {
     gn.gain.exponentialRampToValueAtTime(0.001, t + 1.45);
     osc.start(t + 0.92); osc.stop(t + 1.5);
   });
-}
-
-// ── Background Music ──────────────────────────────────────────────────────────
-let bgStarted = false;
-
-// Cheerful looping melody (C major, nursery-rhyme feel)
-const BG_MELODY = [
-  // freq, duration (seconds)
-  [523, 0.3], [523, 0.3], [784, 0.3], [784, 0.3],
-  [880, 0.3], [880, 0.3], [784, 0.6],
-  [698, 0.3], [698, 0.3], [659, 0.3], [659, 0.3],
-  [587, 0.3], [587, 0.3], [523, 0.6],
-  [784, 0.3], [784, 0.3], [698, 0.3], [698, 0.3],
-  [659, 0.3], [659, 0.3], [587, 0.6],
-  [784, 0.3], [784, 0.3], [698, 0.3], [698, 0.3],
-  [659, 0.3], [659, 0.3], [587, 0.6],
-  [523, 0.3], [523, 0.3], [784, 0.3], [784, 0.3],
-  [880, 0.3], [880, 0.3], [784, 0.6],
-  [698, 0.3], [698, 0.3], [659, 0.3], [659, 0.3],
-  [587, 0.3], [587, 0.3], [523, 0.9],
-];
-
-function startBgMusic() {
-  if (bgStarted) return;
-  bgStarted = true;
-  const ctx = getCtx();
-  ctx.resume().then(() => scheduleBgLoop(ctx, ctx.currentTime));
-}
-
-function scheduleBgLoop(ctx, startAt) {
-  let t = startAt;
-  BG_MELODY.forEach(([freq, dur]) => {
-    const osc = ctx.createOscillator();
-    const gn  = ctx.createGain();
-    // Add a gentle low-pass so it sounds soft/distant
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 1200;
-    osc.connect(filter); filter.connect(gn); gn.connect(ctx.destination);
-    osc.type = 'triangle';
-    osc.frequency.value = freq;
-    gn.gain.setValueAtTime(0.001, t);
-    gn.gain.linearRampToValueAtTime(0.08, t + 0.02);
-    gn.gain.setValueAtTime(0.08, t + dur - 0.06);
-    gn.gain.linearRampToValueAtTime(0.001, t + dur);
-    osc.start(t); osc.stop(t + dur + 0.02);
-    t += dur;
-  });
-  // Schedule next loop just before this one ends
-  const loopDuration = BG_MELODY.reduce((s, [, d]) => s + d, 0);
-  setTimeout(() => scheduleBgLoop(ctx, startAt + loopDuration), (loopDuration - 0.5) * 1000);
 }
 
 // ── Start ─────────────────────────────────────────────────────────────────────
