@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number Fun! 🎉</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+
+  :root {
+    --bg: #1a1a2e;
+    --card: #16213e;
+    --accent1: #e94560;
+    --accent2: #0f3460;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Fredoka One', 'Nunito', cursive;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Floating background shapes */
+  .bg-shape {
+    position: fixed;
+    border-radius: 50%;
+    opacity: 0.15;
+    animation: floatBg 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .bg-shape:nth-child(1) { width:120px; height:120px; background:#fff; top:5%; left:5%; animation-delay:0s; }
+  .bg-shape:nth-child(2) { width:80px;  height:80px;  background:#ffeb3b; top:15%; right:8%; animation-delay:1s; }
+  .bg-shape:nth-child(3) { width:100px; height:100px; background:#ff80ab; bottom:10%; left:10%; animation-delay:2s; }
+  .bg-shape:nth-child(4) { width:60px;  height:60px;  background:#80deea; bottom:20%; right:5%; animation-delay:3s; }
+  .bg-shape:nth-child(5) { width:90px;  height:90px;  background:#a5d6a7; top:50%; left:2%; animation-delay:1.5s; }
+
+  @keyframes floatBg {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    50%      { transform: translateY(-30px) rotate(10deg); }
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 16px;
+    z-index: 10;
+  }
+  .header h1 {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    color: #fff;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    letter-spacing: 2px;
+    animation: titleBounce 2s ease-in-out infinite;
+  }
+  @keyframes titleBounce {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.04); }
+  }
+
+  /* ── Score Bar ── */
+  .score-bar {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 14px;
+    z-index: 10;
+  }
+  .score-pill {
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 50px;
+    padding: 8px 22px;
+    color: #fff;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  }
+  .score-pill span { font-size: 1.5rem; }
+
+  /* ── Main Card ── */
+  .game-card {
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(20px);
+    border: 3px solid rgba(255,255,255,0.35);
+    border-radius: 32px;
+    padding: clamp(20px, 4vw, 36px) clamp(20px, 5vw, 48px);
+    max-width: 680px;
+    width: 95vw;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    z-index: 10;
+    transition: transform 0.3s;
+  }
+  .game-card.shake {
+    animation: shake 0.5s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    15%  { transform: translateX(-12px) rotate(-2deg); }
+    30%  { transform: translateX(12px) rotate(2deg); }
+    45%  { transform: translateX(-8px); }
+    60%  { transform: translateX(8px); }
+    75%  { transform: translateX(-4px); }
+  }
+  .game-card.pop {
+    animation: pop 0.4s ease;
+  }
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.07); }
+    100% { transform: scale(1); }
+  }
+
+  /* ── Question ── */
+  .question-label {
+    font-size: clamp(1.1rem, 3vw, 1.6rem);
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+
+  /* ── Emoji Display Area ── */
+  .emoji-stage {
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 16px 12px;
+    margin: 10px 0 18px;
+    min-height: 90px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed rgba(255,255,255,0.35);
+  }
+  .emoji-item {
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    display: inline-block;
+    animation: emojiBounce 1.5s ease-in-out infinite;
+    cursor: default;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));
+  }
+  .emoji-item:nth-child(odd)  { animation-delay: 0s; }
+  .emoji-item:nth-child(even) { animation-delay: 0.3s; }
+  @keyframes emojiBounce {
+    0%,100% { transform: translateY(0) rotate(0deg) scale(1); }
+    50%      { transform: translateY(-8px) rotate(5deg) scale(1.05); }
+  }
+
+  /* ── Choices ── */
+  .choices {
+    display: flex;
+    gap: clamp(10px, 2vw, 18px);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .choice-btn {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.2rem, 7vw, 4rem);
+    width: clamp(90px, 22vw, 150px);
+    height: clamp(90px, 22vw, 150px);
+    border-radius: 24px;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 900;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    position: relative;
+    overflow: hidden;
+    outline: none;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .choice-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 60%);
+    border-radius: 24px;
+  }
+  .choice-btn:hover  { transform: translateY(-6px) scale(1.06); box-shadow: 0 14px 35px rgba(0,0,0,0.3); }
+  .choice-btn:active { transform: translateY(0) scale(0.96); }
+
+  .choice-btn:nth-child(1) { background: linear-gradient(135deg, #f093fb, #f5576c); }
+  .choice-btn:nth-child(2) { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+  .choice-btn:nth-child(3) { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+
+  .choice-btn.correct {
+    animation: correctFlash 0.6s ease;
+    background: linear-gradient(135deg, #f9d423, #ff4e50) !important;
+  }
+  .choice-btn.wrong {
+    animation: wrongFlash 0.4s ease;
+    background: linear-gradient(135deg, #636363, #a8a8a8) !important;
+    opacity: 0.6;
+  }
+  @keyframes correctFlash {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.3) rotate(5deg); }
+    60%  { transform: scale(1.15) rotate(-3deg); }
+    100% { transform: scale(1); }
+  }
+  @keyframes wrongFlash {
+    0%,100% { transform: scale(1); }
+    50%     { transform: scale(0.88); }
+  }
+
+  .choice-btn:disabled { cursor: not-allowed; }
+
+  /* ── Feedback Overlay ── */
+  .feedback-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .feedback-overlay.show    { opacity: 1; }
+  .feedback-overlay.dismiss { opacity: 0; transition: opacity 0.35s; }
+
+  .feedback-box {
+    background: rgba(255,255,255,0.97);
+    border-radius: 32px;
+    padding: 30px 50px 28px;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+    animation: feedbackPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    max-width: 90vw;
+    position: relative;
+  }
+  @keyframes feedbackPop {
+    from { transform: scale(0.4) rotate(-10deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .feedback-emoji {
+    font-size: clamp(4rem, 15vw, 8rem);
+    display: block;
+    animation: spinBounce 0.6s ease;
+    line-height: 1.1;
+  }
+  @keyframes spinBounce {
+    0%   { transform: rotate(-20deg) scale(0.5); }
+    60%  { transform: rotate(10deg) scale(1.2); }
+    100% { transform: rotate(0deg) scale(1); }
+  }
+
+  .feedback-text {
+    font-size: clamp(1.4rem, 5vw, 2.2rem);
+    font-weight: 900;
+    margin-top: 10px;
+    letter-spacing: 1px;
+  }
+  .feedback-text.correct-text { color: #2e7d32; }
+  .feedback-text.wrong-text   { color: #c62828; }
+
+  .feedback-sub {
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    color: #555;
+    margin-top: 6px;
+  }
+
+  /* ── Auto-dismiss timer ring ── */
+  .timer-ring {
+    margin: 14px auto 0;
+    width: 44px;
+    height: 44px;
+    position: relative;
+    display: block;
+  }
+  .timer-ring svg {
+    transform: rotate(-90deg);
+  }
+  .timer-ring circle.track {
+    fill: none;
+    stroke: #eee;
+    stroke-width: 4;
+  }
+  .timer-ring circle.progress {
+    fill: none;
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition: none;
+  }
+  .timer-ring.correct-ring circle.progress { stroke: #43a047; }
+  .timer-ring.wrong-ring   circle.progress { stroke: #e53935; }
+
+  /* ── Confetti ── */
+  .confetti-piece {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+    pointer-events: none;
+    z-index: 200;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── Next Button (end screen only) ── */
+  .next-btn {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    padding: 14px 40px;
+    border-radius: 50px;
+    border: none;
+    background: linear-gradient(135deg, #f9d423, #ff4e50);
+    color: #fff;
+    cursor: pointer;
+    margin-top: 18px;
+    box-shadow: 0 8px 25px rgba(255,78,80,0.45);
+    transition: transform 0.15s, box-shadow 0.15s;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    animation: nextPulse 1.5s ease-in-out infinite;
+  }
+  .next-btn:hover  { transform: translateY(-4px) scale(1.05); box-shadow: 0 14px 35px rgba(255,78,80,0.5); }
+  .next-btn:active { transform: translateY(0) scale(0.97); }
+  @keyframes nextPulse {
+    0%,100% { box-shadow: 0 8px 25px rgba(255,78,80,0.45); }
+    50%     { box-shadow: 0 8px 40px rgba(255,78,80,0.75); }
+  }
+  @keyframes slideUp {
+    from { opacity:1; transform: translateY(0) scale(1); }
+    to   { opacity:0; transform: translateY(-40px) scale(0.85); }
+  }
+
+  /* ── Progress Dots ── */
+  .progress-dots {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 18px;
+    z-index: 10;
+  }
+  .dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    transition: all 0.3s;
+    border: 2px solid rgba(255,255,255,0.5);
+  }
+  .dot.answered.correct-dot { background: #69f0ae; border-color: #00e676; box-shadow: 0 0 10px #00e676; }
+  .dot.answered.wrong-dot   { background: #ff5252; border-color: #ff1744; box-shadow: 0 0 10px #ff1744; }
+  .dot.current              { background: #fff; box-shadow: 0 0 12px #fff; transform: scale(1.2); }
+
+  /* ── Stars decorating the card ── */
+  .star-deco {
+    position: absolute;
+    font-size: 1.4rem;
+    animation: starSpin 4s linear infinite;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  @keyframes starSpin {
+    from { transform: rotate(0deg) scale(1); }
+    50%  { transform: rotate(180deg) scale(1.3); }
+    to   { transform: rotate(360deg) scale(1); }
+  }
+
+  /* ── Responsive tweaks ── */
+  @media (max-width: 480px) {
+    .choices { gap: 10px; }
+    .choice-btn { font-size: 2rem; width: 80px; height: 80px; border-radius: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Background shapes -->
+<div class="bg-shape"></div>
+<div class="bg-shape"></div>
+<div class="bg-shape"></div>
+<div class="bg-shape"></div>
+<div class="bg-shape"></div>
+
+<!-- Header -->
+<div class="header">
+  <h1>🔢 Number Fun! 🎉</h1>
+</div>
+
+<!-- Score Bar -->
+<div class="score-bar">
+  <div class="score-pill"><span>⭐</span> Stars: <strong id="score">0</strong></div>
+  <div class="score-pill"><span>🎯</span> Round: <strong id="round">1</strong>/10</div>
+</div>
+
+<!-- Game Card -->
+<div class="game-card" id="gameCard">
+  <div class="question-label" id="questionLabel">How many do you see? 👀</div>
+  <div class="emoji-stage" id="emojiStage"></div>
+  <div class="choices" id="choices"></div>
+</div>
+
+<!-- Progress Dots -->
+<div class="progress-dots" id="progressDots"></div>
+
+<!-- Feedback Overlay -->
+<div class="feedback-overlay" id="feedbackOverlay">
+  <div class="feedback-box" id="feedbackBox">
+    <span class="feedback-emoji" id="feedbackEmoji"></span>
+    <div class="feedback-text" id="feedbackText"></div>
+    <div class="feedback-sub" id="feedbackSub"></div>
+    <!-- auto-dismiss ring — no button needed -->
+    <div class="timer-ring" id="timerRing">
+      <svg width="44" height="44" viewBox="0 0 44 44">
+        <circle class="track"    cx="22" cy="22" r="18"/>
+        <circle class="progress" cx="22" cy="22" r="18" id="timerArc"
+                stroke-dasharray="113" stroke-dashoffset="0"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+const ROUNDS = [
+  { number:1,  emoji:'🐻',  label:'teddy bear' },
+  { number:2,  emoji:'🍎',  label:'apple' },
+  { number:3,  emoji:'🐱',  label:'kitty cat' },
+  { number:4,  emoji:'🌟',  label:'shiny star' },
+  { number:5,  emoji:'🦋',  label:'butterfly' },
+  { number:6,  emoji:'🍓',  label:'strawberry' },
+  { number:7,  emoji:'🐸',  label:'frog' },
+  { number:8,  emoji:'🐥',  label:'baby chick' },
+  { number:9,  emoji:'🎈',  label:'balloon' },
+  { number:10, emoji:'🍦',  label:'ice cream' },
+];
+
+const CORRECT_MSGS = [
+  ["🥳🎉🌟", "AMAZING!", "You got it right!"],
+  ["🎊⭐🦄", "SUPER STAR!", "Fantastic counting!"],
+  ["🌈🎶🎠", "WOW WOW WOW!", "You're so smart!"],
+  ["🏆🎁🍭", "BRILLIANT!", "High five! ✋"],
+  ["🚀✨💫", "INCREDIBLE!", "You rock!"],
+];
+
+const WRONG_MSGS = [
+  ["😢💧", "Oops!", "Try again next time!"],
+  ["😭🌧️", "Aww...", "Keep going, you can do it!"],
+  ["😿💦", "Oh no!", "Let's try another one!"],
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let questions   = [];
+let current     = 0;
+let score       = 0;
+let dotResults  = [];
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+function init() {
+  questions  = shuffle([...ROUNDS]).slice(0, 10);
+  current    = 0;
+  score      = 0;
+  dotResults = Array(10).fill(null);
+  buildDots();
+  showQuestion();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ── Build Progress Dots ────────────────────────────────────────────────────────
+function buildDots() {
+  const container = document.getElementById('progressDots');
+  container.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' current' : '');
+    d.id = `dot-${i}`;
+    container.appendChild(d);
+  }
+}
+
+function updateDot(idx, result) {
+  const d = document.getElementById(`dot-${idx}`);
+  d.classList.remove('current');
+  d.classList.add('answered', result === 'correct' ? 'correct-dot' : 'wrong-dot');
+  const next = document.getElementById(`dot-${idx + 1}`);
+  if (next) next.classList.add('current');
+}
+
+// ── Show Question ─────────────────────────────────────────────────────────────
+function showQuestion() {
+  const q = questions[current];
+  document.getElementById('round').textContent = current + 1;
+  document.getElementById('score').textContent = score;
+
+  // Question label
+  const label = document.getElementById('questionLabel');
+  label.textContent = `How many ${q.label}s do you see? 👀`;
+
+  // Emoji stage
+  const stage = document.getElementById('emojiStage');
+  stage.innerHTML = '';
+  for (let i = 0; i < q.number; i++) {
+    const span = document.createElement('span');
+    span.className = 'emoji-item';
+    span.textContent = q.emoji;
+    span.style.animationDelay = (i * 0.12) + 's';
+    stage.appendChild(span);
+  }
+
+  // Build choices (correct + 2 wrong)
+  const wrong = wrongChoices(q.number);
+  const opts  = shuffle([q.number, ...wrong]);
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  opts.forEach(num => {
+    const btn = document.createElement('button');
+    btn.className  = 'choice-btn';
+    btn.textContent = num;
+    btn.onclick    = () => handleAnswer(num, q.number, btn);
+    choicesEl.appendChild(btn);
+  });
+
+  // Reset card state
+  document.getElementById('gameCard').classList.remove('shake', 'pop');
+}
+
+function wrongChoices(correct) {
+  const pool = [];
+  for (let n = 1; n <= 10; n++) if (n !== correct) pool.push(n);
+  shuffle(pool);
+  return pool.slice(0, 2);
+}
+
+// ── Handle Answer ─────────────────────────────────────────────────────────────
+function handleAnswer(chosen, correct, btn) {
+  // Disable all buttons
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+
+  if (chosen === correct) {
+    score++;
+    btn.classList.add('correct');
+    dotResults[current] = 'correct';
+    updateDot(current, 'correct');
+    document.getElementById('score').textContent = score;
+    document.getElementById('gameCard').classList.add('pop');
+    spawnConfetti();
+    setTimeout(() => showFeedback(true), 300);
+  } else {
+    btn.classList.add('wrong');
+    dotResults[current] = 'wrong';
+    updateDot(current, 'wrong');
+    document.getElementById('gameCard').classList.add('shake');
+    setTimeout(() => showFeedback(false), 200);
+  }
+}
+
+// ── Feedback (auto-dismiss) ───────────────────────────────────────────────────
+let feedbackTimer   = null;
+let feedbackRafId   = null;
+
+const DISPLAY_MS    = { correct: 1800, wrong: 2200 }; // how long to show
+
+function showFeedback(isCorrect) {
+  // Clear any running timer
+  clearTimeout(feedbackTimer);
+  cancelAnimationFrame(feedbackRafId);
+
+  const overlay = document.getElementById('feedbackOverlay');
+  const emojiEl = document.getElementById('feedbackEmoji');
+  const textEl  = document.getElementById('feedbackText');
+  const subEl   = document.getElementById('feedbackSub');
+  const ring    = document.getElementById('timerRing');
+  const arc     = document.getElementById('timerArc');
+
+  const CIRCUMFERENCE = 113; // 2π × r18
+  const duration = isCorrect ? DISPLAY_MS.correct : DISPLAY_MS.wrong;
+
+  if (isCorrect) {
+    const [emojis, title, sub] = CORRECT_MSGS[Math.floor(Math.random() * CORRECT_MSGS.length)];
+    emojiEl.textContent = emojis;
+    textEl.textContent  = title;
+    subEl.textContent   = sub;
+    textEl.className    = 'feedback-text correct-text';
+    ring.className      = 'timer-ring correct-ring';
+  } else {
+    const [emojis, title, sub] = WRONG_MSGS[Math.floor(Math.random() * WRONG_MSGS.length)];
+    emojiEl.textContent = emojis;
+    textEl.textContent  = title;
+    subEl.textContent   = sub;
+    textEl.className    = 'feedback-text wrong-text';
+    ring.className      = 'timer-ring wrong-ring';
+  }
+
+  // Reset arc
+  arc.style.strokeDashoffset = '0';
+  overlay.classList.remove('dismiss');
+  overlay.classList.add('show');
+
+  // Animate the countdown ring
+  const startTime = performance.now();
+  function tickRing(now) {
+    const elapsed  = now - startTime;
+    const fraction = Math.min(elapsed / duration, 1);
+    arc.style.strokeDashoffset = (CIRCUMFERENCE * fraction).toFixed(2);
+    if (fraction < 1) {
+      feedbackRafId = requestAnimationFrame(tickRing);
+    }
+  }
+  feedbackRafId = requestAnimationFrame(tickRing);
+
+  // Auto-dismiss after duration
+  feedbackTimer = setTimeout(() => {
+    cancelAnimationFrame(feedbackRafId);
+    // Slide the box up while fading overlay
+    const box = document.getElementById('feedbackBox');
+    box.style.animation = 'slideUp 0.35s ease forwards';
+    overlay.classList.add('dismiss');
+    setTimeout(() => {
+      overlay.classList.remove('show', 'dismiss');
+      box.style.animation = '';
+      advanceQuestion();
+    }, 370);
+  }, duration);
+}
+
+function advanceQuestion() {
+  current++;
+  if (current >= 10) {
+    showEndScreen();
+  } else {
+    showQuestion();
+  }
+}
+
+// ── End Screen ────────────────────────────────────────────────────────────────
+function showEndScreen() {
+  const card = document.getElementById('gameCard');
+  const pct  = Math.round((score / 10) * 100);
+  let trophy, msg;
+
+  if (score >= 9)      { trophy = '🏆🥇🎉'; msg = 'You\'re a NUMBER SUPERSTAR!'; }
+  else if (score >= 7) { trophy = '🌟🎊🥳'; msg = 'Amazing job, keep it up!'; }
+  else if (score >= 5) { trophy = '👍😊🌈'; msg = 'Good try, practice more!'; }
+  else                 { trophy = '💪😄🎈'; msg = 'Keep counting, you\'ll get there!'; }
+
+  card.innerHTML = `
+    <div style="font-size:clamp(3rem,10vw,5rem); margin-bottom:10px; animation: spinBounce 0.8s ease;">${trophy}</div>
+    <div style="font-size:clamp(1.5rem,5vw,2.5rem); color:#fff; text-shadow:0 2px 10px rgba(0,0,0,0.3); margin-bottom:6px;">${msg}</div>
+    <div style="font-size:clamp(1.1rem,4vw,1.8rem); color:rgba(255,255,255,0.9); margin-bottom:20px;">
+      You got <strong style="color:#f9d423; font-size:1.4em;">${score}</strong> out of 10 right! (${pct}%)
+    </div>
+    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:22px;">
+      ${dotResults.map(r => `<span style="font-size:1.8rem;">${r === 'correct' ? '⭐' : '💧'}</span>`).join('')}
+    </div>
+    <button class="next-btn" onclick="init()" style="font-size:clamp(1.2rem,4vw,1.7rem);">
+      🔄 Play Again!
+    </button>
+  `;
+
+  spawnConfetti(80);
+}
+
+// ── Confetti ──────────────────────────────────────────────────────────────────
+const CONFETTI_COLORS = ['#f9d423','#ff4e50','#4facfe','#43e97b','#f093fb','#fff','#ff80ab','#80deea'];
+
+function spawnConfetti(count = 50) {
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left     = Math.random() * 100 + 'vw';
+      el.style.top      = '-20px';
+      el.style.background = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+      el.style.width    = (8 + Math.random() * 12) + 'px';
+      el.style.height   = (8 + Math.random() * 12) + 'px';
+      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      const dur = 1.5 + Math.random() * 2;
+      el.style.animationDuration  = dur + 's';
+      el.style.animationDelay     = Math.random() * 0.5 + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 0.6) * 1000);
+    }, i * 25);
+  }
+}
+
+// ── Start! ────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
