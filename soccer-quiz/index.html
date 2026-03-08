@@ -341,7 +341,7 @@ const QUESTIONS = [
   // ── EASY ──────────────────────────────────────────────────────────────────
   {
     level: 1,
-    visual: { type:'flag', emoji:'🇦🇷', label:'Argentina' },
+    visual: { type:'flag', code:'ar', label:'Argentina' },
     question: 'Which country won the 2022 FIFA World Cup?',
     options: ['Argentina', 'France', 'Brazil'],
     answer: 'Argentina',
@@ -365,7 +365,7 @@ const QUESTIONS = [
   },
   {
     level: 1,
-    visual: { type:'flag', emoji:'🇫🇷', label:'France' },
+    visual: { type:'flag', code:'fr', label:'France' },
     question: 'Which country does superstar Kylian Mbappé play for?',
     options: ['France', 'Belgium', 'Senegal'],
     answer: 'France',
@@ -406,7 +406,7 @@ const QUESTIONS = [
   },
   {
     level: 2,
-    visual: { type:'flag', emoji:'🇩🇪', label:'Germany 2006' },
+    visual: { type:'flag', code:'de', label:'Germany 2006' },
     question: 'Which country hosted the 2006 FIFA World Cup?',
     options: ['Germany', 'France', 'Spain'],
     answer: 'Germany',
@@ -414,7 +414,7 @@ const QUESTIONS = [
   },
   {
     level: 2,
-    visual: { type:'flag', emoji:'🇵🇹', label:'Portugal 2018' },
+    visual: { type:'flag', code:'pt', label:'Portugal 2018' },
     question: 'Who scored a hat-trick for Portugal vs Spain at the 2018 World Cup?',
     options: ['Cristiano Ronaldo', 'João Félix', 'Bernardo Silva'],
     answer: 'Cristiano Ronaldo',
@@ -423,7 +423,7 @@ const QUESTIONS = [
   // ── HARD ──────────────────────────────────────────────────────────────────
   {
     level: 3,
-    visual: { type:'flag', emoji:'🇫🇷', label:'France 1998' },
+    visual: { type:'flag', code:'fr', label:'France 1998' },
     question: 'France won the 1998 World Cup at home — who did they beat in the final?',
     options: ['Brazil', 'Germany', 'Italy'],
     answer: 'Brazil',
@@ -439,7 +439,7 @@ const QUESTIONS = [
   },
   {
     level: 3,
-    visual: { type:'flag', emoji:'🇪🇸', label:'Spain 2010' },
+    visual: { type:'flag', code:'es', label:'Spain 2010' },
     question: 'Who scored the winning goal in the 2010 World Cup final for Spain?',
     options: ['Andrés Iniesta', 'David Villa', 'Fernando Torres'],
     answer: 'Andrés Iniesta',
@@ -595,7 +595,13 @@ function showQuestion() {
   // Visual card
   const vc = document.getElementById('visualCard');
   const v = q.visual;
-  if (v.type === 'jersey') {
+  if (v.type === 'flag') {
+    vc.innerHTML = `
+      <img src="https://flagcdn.com/w160/${v.code}.png"
+           style="width:clamp(100px,28vw,160px);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.5);"
+           alt="${v.label}">
+      <div class="visual-label">${v.label}</div>`;
+  } else if (v.type === 'jersey') {
     vc.innerHTML = `
       <div class="jersey-wrap">
         <span class="visual-emoji">${v.emoji}</span>
