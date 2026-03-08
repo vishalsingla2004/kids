@@ -373,7 +373,7 @@ const QUESTIONS = [
   },
   {
     level: 1,
-    visual: { type:'emoji', emoji:'🔵', label:'Manchester City' },
+    visual: { type:'jersey', emoji:'👕', number:'#9', label:'Premier League' },
     question: 'Which Premier League club does Erling Haaland play for?',
     options: ['Manchester City', 'Real Madrid', 'Barcelona'],
     answer: 'Manchester City',
@@ -608,9 +608,7 @@ function showQuestion() {
       </div>
       <div class="visual-label">${v.label}</div>`;
   } else {
-    vc.innerHTML = `
-      <span class="visual-emoji">${v.emoji}</span>
-      <div class="visual-label">${v.label}</div>`;
+    vc.innerHTML = `<span class="visual-emoji">${v.emoji}</span>`;
   }
 
   document.getElementById('questionText').textContent = q.question;
