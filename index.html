@@ -437,6 +437,14 @@ function init() {
   current    = 0;
   score      = 0;
   dotResults = Array(5).fill(null);
+  // Restore card structure if end screen replaced it
+  const card = document.getElementById('gameCard');
+  if (!document.getElementById('emojiStage')) {
+    card.innerHTML = `
+      <div class="question-label" id="questionLabel">How many do you see? 👀</div>
+      <div class="emoji-stage" id="emojiStage"></div>
+      <div class="choices" id="choices"></div>`;
+  }
   buildDots();
   showQuestion();
 }
