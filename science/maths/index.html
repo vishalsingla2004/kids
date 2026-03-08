@@ -255,7 +255,7 @@ function handleAnswer(chosen, correct, btn, fact) {
   setTimeout(()=>showFeedback(isCorrect,fact),300);
 }
 let feedbackTimer=null, feedbackRafId=null;
-const DISPLAY_MS={correct:1200,wrong:4000};
+const DISPLAY_MS={correct:1200,wrong:8000};
 function showFeedback(isCorrect, fact) {
   clearTimeout(feedbackTimer); cancelAnimationFrame(feedbackRafId);
   const overlay=document.getElementById('feedbackOverlay'), box=document.getElementById('feedbackBox');
