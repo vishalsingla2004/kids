@@ -93,14 +93,18 @@
     background: rgba(255,255,255,0.18);
     backdrop-filter: blur(20px);
     border: 3px solid rgba(255,255,255,0.35);
-    border-radius: 32px;
-    padding: clamp(20px, 4vw, 36px) clamp(20px, 5vw, 48px);
-    max-width: 680px;
-    width: 95vw;
+    border-radius: 0;
+    padding: clamp(24px, 5vw, 48px) clamp(24px, 6vw, 60px);
+    width: 100vw;
+    min-height: 100vh;
     text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    box-shadow: none;
     z-index: 10;
     transition: transform 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
   .game-card.shake {
     animation: shake 0.5s ease;
@@ -145,7 +149,7 @@
     border: 2px dashed rgba(255,255,255,0.35);
   }
   .emoji-item {
-    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-size: clamp(3.5rem, 12vw, 7rem);
     display: inline-block;
     animation: emojiBounce 1.5s ease-in-out infinite;
     cursor: default;
@@ -168,9 +172,9 @@
   }
   .choice-btn {
     font-family: 'Fredoka One', cursive;
-    font-size: clamp(2.2rem, 7vw, 4rem);
-    width: clamp(90px, 22vw, 150px);
-    height: clamp(90px, 22vw, 150px);
+    font-size: clamp(3rem, 12vw, 6rem);
+    width: clamp(120px, 28vw, 200px);
+    height: clamp(120px, 28vw, 200px);
     border-radius: 24px;
     border: none;
     cursor: pointer;
@@ -379,8 +383,8 @@
 
   /* ── Responsive tweaks ── */
   @media (max-width: 480px) {
-    .choices { gap: 10px; }
-    .choice-btn { font-size: 2rem; width: 80px; height: 80px; border-radius: 18px; }
+    .choices { gap: 14px; }
+    .choice-btn { font-size: 3rem; width: 110px; height: 110px; border-radius: 22px; }
   }
 </style>
 </head>
@@ -401,7 +405,7 @@
 <!-- Score Bar -->
 <div class="score-bar">
   <div class="score-pill"><span>⭐</span> Stars: <strong id="score">0</strong></div>
-  <div class="score-pill"><span>🎯</span> Round: <strong id="round">1</strong>/10</div>
+  <div class="score-pill"><span>🎯</span> Round: <strong id="round">1</strong>/5</div>
 </div>
 
 <!-- Game Card -->
@@ -434,16 +438,11 @@
 <script>
 // ── Data ──────────────────────────────────────────────────────────────────────
 const ROUNDS = [
-  { number:1,  emoji:'🐻',  label:'teddy bear' },
-  { number:2,  emoji:'🍎',  label:'apple' },
-  { number:3,  emoji:'🐱',  label:'kitty cat' },
-  { number:4,  emoji:'🌟',  label:'shiny star' },
-  { number:5,  emoji:'🦋',  label:'butterfly' },
-  { number:6,  emoji:'🍓',  label:'strawberry' },
-  { number:7,  emoji:'🐸',  label:'frog' },
-  { number:8,  emoji:'🐥',  label:'baby chick' },
-  { number:9,  emoji:'🎈',  label:'balloon' },
-  { number:10, emoji:'🍦',  label:'ice cream' },
+  { number:1, emoji:'🐻', label:'teddy bear' },
+  { number:2, emoji:'🍎', label:'apple' },
+  { number:3, emoji:'🐱', label:'kitty cat' },
+  { number:4, emoji:'🌟', label:'shiny star' },
+  { number:5, emoji:'🦋', label:'butterfly' },
 ];
 
 const CORRECT_MSGS = [
@@ -468,10 +467,10 @@ let dotResults  = [];
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 function init() {
-  questions  = shuffle([...ROUNDS]).slice(0, 10);
+  questions  = shuffle([...ROUNDS]).slice(0, 5);
   current    = 0;
   score      = 0;
-  dotResults = Array(10).fill(null);
+  dotResults = Array(5).fill(null);
   buildDots();
   showQuestion();
 }
@@ -488,7 +487,7 @@ function shuffle(arr) {
 function buildDots() {
   const container = document.getElementById('progressDots');
   container.innerHTML = '';
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 5; i++) {
     const d = document.createElement('div');
     d.className = 'dot' + (i === 0 ? ' current' : '');
     d.id = `dot-${i}`;
@@ -545,7 +544,7 @@ function showQuestion() {
 
 function wrongChoices(correct) {
   const pool = [];
-  for (let n = 1; n <= 10; n++) if (n !== correct) pool.push(n);
+  for (let n = 1; n <= 5; n++) if (n !== correct) pool.push(n);
   shuffle(pool);
   return pool.slice(0, 2);
 }
@@ -644,7 +643,7 @@ function showFeedback(isCorrect) {
 
 function advanceQuestion() {
   current++;
-  if (current >= 10) {
+  if (current >= 5) {
     showEndScreen();
   } else {
     showQuestion();
@@ -654,19 +653,19 @@ function advanceQuestion() {
 // ── End Screen ────────────────────────────────────────────────────────────────
 function showEndScreen() {
   const card = document.getElementById('gameCard');
-  const pct  = Math.round((score / 10) * 100);
+  const pct  = Math.round((score / 5) * 100);
   let trophy, msg;
 
-  if (score >= 9)      { trophy = '🏆🥇🎉'; msg = 'You\'re a NUMBER SUPERSTAR!'; }
-  else if (score >= 7) { trophy = '🌟🎊🥳'; msg = 'Amazing job, keep it up!'; }
-  else if (score >= 5) { trophy = '👍😊🌈'; msg = 'Good try, practice more!'; }
+  if (score === 5)     { trophy = '🏆🥇🎉'; msg = 'You\'re a NUMBER SUPERSTAR!'; }
+  else if (score >= 4) { trophy = '🌟🎊🥳'; msg = 'Amazing job, keep it up!'; }
+  else if (score >= 3) { trophy = '👍😊🌈'; msg = 'Good try, practice more!'; }
   else                 { trophy = '💪😄🎈'; msg = 'Keep counting, you\'ll get there!'; }
 
   card.innerHTML = `
     <div style="font-size:clamp(3rem,10vw,5rem); margin-bottom:10px; animation: spinBounce 0.8s ease;">${trophy}</div>
     <div style="font-size:clamp(1.5rem,5vw,2.5rem); color:#fff; text-shadow:0 2px 10px rgba(0,0,0,0.3); margin-bottom:6px;">${msg}</div>
     <div style="font-size:clamp(1.1rem,4vw,1.8rem); color:rgba(255,255,255,0.9); margin-bottom:20px;">
-      You got <strong style="color:#f9d423; font-size:1.4em;">${score}</strong> out of 10 right! (${pct}%)
+      You got <strong style="color:#f9d423; font-size:1.4em;">${score}</strong> out of 5 right! (${pct}%)
     </div>
     <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:22px;">
       ${dotResults.map(r => `<span style="font-size:1.8rem;">${r === 'correct' ? '⭐' : '💧'}</span>`).join('')}
