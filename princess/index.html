@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Princess Counting! 👸</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Fredoka One', 'Nunito', cursive;
+    background: linear-gradient(160deg, #ff9de2 0%, #c471ed 45%, #7b2ff7 100%);
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* ── Floating sparkles ── */
+  .sparkle {
+    position: fixed;
+    font-size: 1.6rem;
+    opacity: 0.35;
+    pointer-events: none;
+    animation: floatSparkle ease-in-out infinite;
+  }
+  .sparkle:nth-child(1) { top:4%;  left:6%;  animation-duration:5s; animation-delay:0s; }
+  .sparkle:nth-child(2) { top:10%; right:8%; animation-duration:6s; animation-delay:1s; }
+  .sparkle:nth-child(3) { top:55%; left:3%;  animation-duration:7s; animation-delay:2s; }
+  .sparkle:nth-child(4) { bottom:8%; right:6%; animation-duration:5.5s; animation-delay:0.5s; }
+  .sparkle:nth-child(5) { bottom:20%; left:8%; animation-duration:6.5s; animation-delay:1.5s; }
+  .sparkle:nth-child(6) { top:30%; right:4%; animation-duration:4.5s; animation-delay:3s; }
+
+  @keyframes floatSparkle {
+    0%,100% { transform: translateY(0) rotate(0deg) scale(1); }
+    50%      { transform: translateY(-22px) rotate(15deg) scale(1.2); }
+  }
+
+  /* ── Full-screen layout ── */
+  .screen {
+    width: 100vw;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: env(safe-area-inset-top, 12px) 16px env(safe-area-inset-bottom, 12px);
+    position: relative;
+    z-index: 10;
+  }
+  .screen.shake { animation: shake 0.5s ease; }
+  .screen.pop   { animation: pop   0.4s ease; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    15%  { transform: translateX(-10px) rotate(-1.5deg); }
+    30%  { transform: translateX(10px)  rotate(1.5deg); }
+    45%  { transform: translateX(-7px); }
+    60%  { transform: translateX(7px); }
+    75%  { transform: translateX(-3px); }
+  }
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.04); }
+    100% { transform: scale(1); }
+  }
+
+  /* ── Top section ── */
+  .top {
+    width: 100%;
+    text-align: center;
+    flex-shrink: 0;
+    padding-top: 8px;
+  }
+  .top h1 {
+    font-size: clamp(1.6rem, 7vw, 2.8rem);
+    color: #fff;
+    text-shadow: 0 3px 12px rgba(120,0,160,0.45), 0 0 30px rgba(255,180,255,0.5);
+    letter-spacing: 1px;
+    animation: titleBounce 2.5s ease-in-out infinite;
+    line-height: 1.2;
+  }
+  @keyframes titleBounce {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.04); }
+  }
+
+  .score-bar {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 8px;
+  }
+  .score-pill {
+    background: rgba(255,255,255,0.22);
+    backdrop-filter: blur(12px);
+    border: 2px solid rgba(255,255,255,0.45);
+    border-radius: 50px;
+    padding: 6px 18px;
+    color: #fff;
+    font-size: clamp(1rem, 4vw, 1.3rem);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 14px rgba(120,0,160,0.2);
+  }
+
+  /* ── Middle (question + emoji) ── */
+  .middle {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 0;
+    padding: 10px 0;
+  }
+
+  .question-label {
+    font-size: clamp(1.1rem, 5vw, 1.8rem);
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 2px 8px rgba(120,0,160,0.4);
+    margin-bottom: 12px;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  .emoji-stage {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border: 3px dashed rgba(255,255,255,0.45);
+    border-radius: 28px;
+    padding: 18px 14px;
+    width: 92vw;
+    max-width: 480px;
+    min-height: clamp(100px, 22vw, 160px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(120,0,160,0.2), inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  .emoji-item {
+    font-size: clamp(4.5rem, 18vw, 10rem);
+    display: inline-block;
+    animation: emojiBounce 1.6s ease-in-out infinite;
+    filter: drop-shadow(0 3px 8px rgba(120,0,160,0.3));
+  }
+  .emoji-item:nth-child(odd)  { animation-delay: 0s; }
+  .emoji-item:nth-child(even) { animation-delay: 0.35s; }
+  @keyframes emojiBounce {
+    0%,100% { transform: translateY(0) rotate(0deg) scale(1); }
+    50%      { transform: translateY(-10px) rotate(6deg) scale(1.08); }
+  }
+
+  /* ── Bottom (buttons + dots) ── */
+  .bottom {
+    flex-shrink: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 10px;
+    gap: 14px;
+  }
+
+  .choices {
+    display: flex;
+    gap: clamp(12px, 3vw, 22px);
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+  .choice-btn {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(3.5rem, 14vw, 7rem);
+    width: clamp(120px, 30vw, 220px);
+    height: clamp(120px, 30vw, 220px);
+    border-radius: 28px;
+    border: 3px solid rgba(255,255,255,0.5);
+    cursor: pointer;
+    color: #fff;
+    font-weight: 900;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 8px 28px rgba(120,0,160,0.35), inset 0 2px 0 rgba(255,255,255,0.35);
+    position: relative;
+    overflow: hidden;
+    outline: none;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .choice-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0) 55%);
+    border-radius: 26px;
+  }
+  .choice-btn:active { transform: scale(0.93); }
+
+  .choice-btn:nth-child(1) { background: linear-gradient(135deg, #ff6eb4, #d4006c); }
+  .choice-btn:nth-child(2) { background: linear-gradient(135deg, #c471ed, #7b2ff7); }
+  .choice-btn:nth-child(3) { background: linear-gradient(135deg, #f9d423, #e07b00); }
+
+  .choice-btn.correct {
+    animation: correctFlash 0.6s ease;
+    background: linear-gradient(135deg, #ffe066, #ff9de2) !important;
+    border-color: #fff !important;
+  }
+  .choice-btn.wrong {
+    animation: wrongFlash 0.4s ease;
+    background: linear-gradient(135deg, #636363, #a8a8a8) !important;
+    opacity: 0.55;
+  }
+  @keyframes correctFlash {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.28) rotate(6deg); }
+    60%  { transform: scale(1.12) rotate(-3deg); }
+    100% { transform: scale(1); }
+  }
+  @keyframes wrongFlash {
+    0%,100% { transform: scale(1); }
+    50%     { transform: scale(0.87); }
+  }
+  .choice-btn:disabled { cursor: not-allowed; }
+
+  /* ── Progress dots ── */
+  .progress-dots {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  .dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    border: 2px solid rgba(255,255,255,0.55);
+    transition: all 0.3s;
+  }
+  .dot.answered.correct-dot { background: #ffb3e6; border-color: #ff6eb4; box-shadow: 0 0 10px #ff6eb4; }
+  .dot.answered.wrong-dot   { background: #e0a0ff; border-color: #c471ed; box-shadow: 0 0 10px #c471ed; }
+  .dot.current              { background: #fff; border-color: #fff; box-shadow: 0 0 14px #fff; transform: scale(1.3); }
+
+  /* ── Feedback Overlay ── */
+  .feedback-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    background: rgba(180,0,160,0.12);
+    backdrop-filter: blur(2px);
+    transition: opacity 0.35s;
+  }
+  .feedback-overlay.show    { opacity: 1; }
+  .feedback-overlay.dismiss { opacity: 0; }
+
+  .feedback-box {
+    background: linear-gradient(160deg, #fff9fe, #ffeaf7);
+    border: 3px solid #ffb3e6;
+    border-radius: 36px;
+    padding: clamp(22px, 6vw, 36px) clamp(28px, 8vw, 56px);
+    text-align: center;
+    box-shadow: 0 20px 70px rgba(180,0,160,0.35);
+    animation: feedbackPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    max-width: 88vw;
+  }
+  @keyframes feedbackPop {
+    from { transform: scale(0.4) rotate(-10deg); opacity: 0; }
+    to   { transform: scale(1)   rotate(0deg);   opacity: 1; }
+  }
+
+  .feedback-emoji {
+    font-size: clamp(4rem, 16vw, 8rem);
+    display: block;
+    animation: spinBounce 0.6s ease;
+    line-height: 1.1;
+  }
+  @keyframes spinBounce {
+    0%   { transform: rotate(-20deg) scale(0.5); }
+    60%  { transform: rotate(10deg)  scale(1.2); }
+    100% { transform: rotate(0deg)   scale(1); }
+  }
+
+  .feedback-text {
+    font-size: clamp(1.5rem, 6vw, 2.4rem);
+    font-weight: 900;
+    margin-top: 10px;
+    letter-spacing: 1px;
+  }
+  .feedback-text.correct-text { color: #b5006e; }
+  .feedback-text.wrong-text   { color: #7b2ff7; }
+
+  .feedback-sub {
+    font-size: clamp(1rem, 3.5vw, 1.5rem);
+    color: #9e4ab5;
+    margin-top: 6px;
+  }
+
+  .timer-ring {
+    margin: 14px auto 0;
+    width: 44px; height: 44px;
+    display: block;
+  }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring circle.track    { fill: none; stroke: #f5d0f0; stroke-width: 4; }
+  .timer-ring circle.progress { fill: none; stroke-width: 4; stroke-linecap: round; transition: none; }
+  .timer-ring.correct-ring circle.progress { stroke: #e91e8c; }
+  .timer-ring.wrong-ring   circle.progress { stroke: #9c27b0; }
+
+  /* ── Confetti ── */
+  .confetti-piece {
+    position: fixed;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+    pointer-events: none;
+    z-index: 200;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(-20px) rotate(0deg);   opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── Play Again button ── */
+  .next-btn {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.3rem, 5vw, 2rem);
+    padding: 16px 44px;
+    border-radius: 50px;
+    border: 3px solid rgba(255,255,255,0.6);
+    background: linear-gradient(135deg, #ff6eb4, #c471ed);
+    color: #fff;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 8px 28px rgba(196,113,237,0.5);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    animation: nextPulse 1.6s ease-in-out infinite;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .next-btn:active { transform: scale(0.95); }
+  @keyframes nextPulse {
+    0%,100% { box-shadow: 0 8px 28px rgba(196,113,237,0.5); }
+    50%     { box-shadow: 0 8px 44px rgba(196,113,237,0.85); }
+  }
+  @keyframes slideUp {
+    from { opacity:1; transform: translateY(0) scale(1); }
+    to   { opacity:0; transform: translateY(-40px) scale(0.85); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Floating sparkles -->
+<div class="sparkle">✨</div>
+<div class="sparkle">⭐</div>
+<div class="sparkle">💫</div>
+<div class="sparkle">🌸</div>
+<div class="sparkle">💕</div>
+<div class="sparkle">👑</div>
+
+<!-- Full-screen game layout -->
+<div class="screen" id="gameCard">
+
+  <div class="top">
+    <h1>👑 Princess Counting! 👸</h1>
+    <div class="score-bar">
+      <div class="score-pill">⭐ <strong id="score">0</strong> stars</div>
+      <div class="score-pill">🎀 Round <strong id="round">1</strong>/5</div>
+    </div>
+  </div>
+
+  <div class="middle">
+    <div class="question-label" id="questionLabel">How many do you see? 👀</div>
+    <div class="emoji-stage" id="emojiStage"></div>
+  </div>
+
+  <div class="bottom">
+    <div class="choices" id="choices"></div>
+    <div class="progress-dots" id="progressDots"></div>
+  </div>
+
+</div>
+
+<!-- Feedback Overlay -->
+<div class="feedback-overlay" id="feedbackOverlay">
+  <div class="feedback-box" id="feedbackBox">
+    <span class="feedback-emoji" id="feedbackEmoji"></span>
+    <div class="feedback-text" id="feedbackText"></div>
+    <div class="feedback-sub"  id="feedbackSub"></div>
+    <div class="timer-ring" id="timerRing">
+      <svg width="44" height="44" viewBox="0 0 44 44">
+        <circle class="track"    cx="22" cy="22" r="18"/>
+        <circle class="progress" cx="22" cy="22" r="18" id="timerArc"
+                stroke-dasharray="113" stroke-dashoffset="0"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Princess characters from movies ───────────────────────────────────────────
+const ROUNDS = [
+  { number:1, emoji:'🧜‍♀️', label:'little mermaid' },   // Ariel
+  { number:2, emoji:'🌹',   label:'enchanted rose' },    // Belle (Beauty & the Beast)
+  { number:3, emoji:'❄️',   label:'ice crystal' },       // Elsa (Frozen)
+  { number:4, emoji:'🦎',   label:'magic chameleon' },   // Rapunzel (Tangled / Pascal)
+  { number:5, emoji:'👸',   label:'princess' },          // Cinderella / general
+];
+
+const CORRECT_MSGS = [
+  ['👑✨💖', 'ROYAL STAR!',    'You counted perfectly!'],
+  ['🌸🎀💫', 'AMAZING!',       'You\'re so smart, princess!'],
+  ['🏰⭐🦄', 'WOW WOW WOW!',   'Just like a true princess!'],
+  ['💎👸🎊', 'BRILLIANT!',     'Your magic is glowing!'],
+  ['🦋✨🌟', 'ENCHANTING!',    'The kingdom is proud!'],
+];
+
+const WRONG_MSGS = [
+  ['💜🌸', 'Keep trying!',   'Even princesses practice!'],
+  ['🎀💕', 'Oops!',          'Try again, brave one!'],
+  ['🦄💧', 'Oh no!',         'Let\'s try the next one!'],
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let questions  = [];
+let current    = 0;
+let score      = 0;
+let dotResults = [];
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+function init() {
+  questions  = shuffle([...ROUNDS]).slice(0, 5);
+  current    = 0;
+  score      = 0;
+  dotResults = Array(5).fill(null);
+  // Restore full card structure if end screen replaced it
+  if (!document.getElementById('emojiStage')) {
+    document.getElementById('gameCard').innerHTML = `
+      <div class="top">
+        <h1>👑 Princess Counting! 👸</h1>
+        <div class="score-bar">
+          <div class="score-pill">⭐ <strong id="score">0</strong> stars</div>
+          <div class="score-pill">🎀 Round <strong id="round">1</strong>/5</div>
+        </div>
+      </div>
+      <div class="middle">
+        <div class="question-label" id="questionLabel">How many do you see? 👀</div>
+        <div class="emoji-stage" id="emojiStage"></div>
+      </div>
+      <div class="bottom">
+        <div class="choices" id="choices"></div>
+        <div class="progress-dots" id="progressDots"></div>
+      </div>`;
+  }
+  buildDots();
+  showQuestion();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ── Progress Dots ─────────────────────────────────────────────────────────────
+function buildDots() {
+  const container = document.getElementById('progressDots');
+  container.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' current' : '');
+    d.id = `dot-${i}`;
+    container.appendChild(d);
+  }
+}
+
+function updateDot(idx, result) {
+  const d = document.getElementById(`dot-${idx}`);
+  d.classList.remove('current');
+  d.classList.add('answered', result === 'correct' ? 'correct-dot' : 'wrong-dot');
+  const next = document.getElementById(`dot-${idx + 1}`);
+  if (next) next.classList.add('current');
+}
+
+// ── Show Question ─────────────────────────────────────────────────────────────
+function showQuestion() {
+  const q = questions[current];
+  document.getElementById('round').textContent = current + 1;
+  document.getElementById('score').textContent = score;
+  document.getElementById('questionLabel').textContent = `How many ${q.label}s do you see? 👀`;
+
+  const stage = document.getElementById('emojiStage');
+  stage.innerHTML = '';
+  for (let i = 0; i < q.number; i++) {
+    const span = document.createElement('span');
+    span.className = 'emoji-item';
+    span.textContent = q.emoji;
+    span.style.animationDelay = (i * 0.14) + 's';
+    stage.appendChild(span);
+  }
+
+  const wrong = wrongChoices(q.number);
+  const opts  = shuffle([q.number, ...wrong]);
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  opts.forEach(num => {
+    const btn = document.createElement('button');
+    btn.className   = 'choice-btn';
+    btn.textContent = num;
+    btn.onclick     = () => handleAnswer(num, q.number, btn);
+    choicesEl.appendChild(btn);
+  });
+
+  document.getElementById('gameCard').classList.remove('shake', 'pop');
+}
+
+function wrongChoices(correct) {
+  const pool = [];
+  for (let n = 1; n <= 5; n++) if (n !== correct) pool.push(n);
+  shuffle(pool);
+  return pool.slice(0, 2);
+}
+
+// ── Handle Answer ─────────────────────────────────────────────────────────────
+function handleAnswer(chosen, correct, btn) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+
+  if (chosen === correct) {
+    score++;
+    btn.classList.add('correct');
+    dotResults[current] = 'correct';
+    updateDot(current, 'correct');
+    document.getElementById('score').textContent = score;
+    document.getElementById('gameCard').classList.add('pop');
+    playCorrect();
+    spawnConfetti();
+    setTimeout(() => showFeedback(true), 300);
+  } else {
+    btn.classList.add('wrong');
+    dotResults[current] = 'wrong';
+    updateDot(current, 'wrong');
+    document.getElementById('gameCard').classList.add('shake');
+    playWrong();
+    setTimeout(() => showFeedback(false), 200);
+  }
+}
+
+// ── Feedback (auto-dismiss) ───────────────────────────────────────────────────
+let feedbackTimer = null;
+let feedbackRafId = null;
+const DISPLAY_MS  = { correct: 1800, wrong: 2200 };
+
+function showFeedback(isCorrect) {
+  clearTimeout(feedbackTimer);
+  cancelAnimationFrame(feedbackRafId);
+
+  const overlay = document.getElementById('feedbackOverlay');
+  const emojiEl = document.getElementById('feedbackEmoji');
+  const textEl  = document.getElementById('feedbackText');
+  const subEl   = document.getElementById('feedbackSub');
+  const ring    = document.getElementById('timerRing');
+  const arc     = document.getElementById('timerArc');
+  const CIRC    = 113;
+  const duration = isCorrect ? DISPLAY_MS.correct : DISPLAY_MS.wrong;
+
+  const msgs = isCorrect
+    ? CORRECT_MSGS[Math.floor(Math.random() * CORRECT_MSGS.length)]
+    : WRONG_MSGS[Math.floor(Math.random() * WRONG_MSGS.length)];
+
+  emojiEl.textContent = msgs[0];
+  textEl.textContent  = msgs[1];
+  subEl.textContent   = msgs[2];
+  textEl.className    = 'feedback-text ' + (isCorrect ? 'correct-text' : 'wrong-text');
+  ring.className      = 'timer-ring '    + (isCorrect ? 'correct-ring' : 'wrong-ring');
+
+  arc.style.strokeDashoffset = '0';
+  overlay.classList.remove('dismiss');
+  overlay.classList.add('show');
+
+  const startTime = performance.now();
+  function tickRing(now) {
+    const fraction = Math.min((now - startTime) / duration, 1);
+    arc.style.strokeDashoffset = (CIRC * fraction).toFixed(2);
+    if (fraction < 1) feedbackRafId = requestAnimationFrame(tickRing);
+  }
+  feedbackRafId = requestAnimationFrame(tickRing);
+
+  feedbackTimer = setTimeout(() => {
+    cancelAnimationFrame(feedbackRafId);
+    const box = document.getElementById('feedbackBox');
+    box.style.animation = 'slideUp 0.35s ease forwards';
+    overlay.classList.add('dismiss');
+    setTimeout(() => {
+      overlay.classList.remove('show', 'dismiss');
+      box.style.animation = '';
+      advanceQuestion();
+    }, 370);
+  }, duration);
+}
+
+function advanceQuestion() {
+  current++;
+  if (current >= 5) showEndScreen();
+  else showQuestion();
+}
+
+// ── End Screen ────────────────────────────────────────────────────────────────
+function showEndScreen() {
+  const card = document.getElementById('gameCard');
+  const pct  = Math.round((score / 5) * 100);
+  let trophy, msg;
+
+  if (score === 5)     { trophy = '👑💎🏆'; msg = 'You\'re a TRUE PRINCESS!'; }
+  else if (score >= 4) { trophy = '🌸🎀✨'; msg = 'Magical counting!'; }
+  else if (score >= 3) { trophy = '💜🦋🌟'; msg = 'Good try, princess!'; }
+  else                 { trophy = '💪🌸💕'; msg = 'Keep practicing, brave one!'; }
+
+  card.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;padding:20px;">
+      <div style="font-size:clamp(3rem,12vw,6rem); animation: spinBounce 0.8s ease;">${trophy}</div>
+      <div style="font-size:clamp(1.5rem,6vw,2.8rem);color:#fff;text-shadow:0 3px 12px rgba(120,0,160,0.5);">${msg}</div>
+      <div style="font-size:clamp(1.1rem,4.5vw,1.8rem);color:rgba(255,255,255,0.9);">
+        You got <strong style="color:#ffe066;font-size:1.4em;">${score}</strong> out of 5! (${pct}%)
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        ${dotResults.map(r => `<span style="font-size:2rem;">${r === 'correct' ? '⭐' : '💜'}</span>`).join('')}
+      </div>
+      <button class="next-btn" onclick="init()">🎀 Play Again!</button>
+    </div>
+  `;
+
+  spawnConfetti(90);
+}
+
+// ── Confetti (princess colors) ────────────────────────────────────────────────
+const CONFETTI_COLORS = ['#ff6eb4','#c471ed','#f9d423','#fff','#ffb3e6','#e0a0ff','#ff9de2','#ffe066'];
+
+function spawnConfetti(count = 50) {
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left       = Math.random() * 100 + 'vw';
+      el.style.top        = '-20px';
+      el.style.background = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+      el.style.width      = (8 + Math.random() * 12) + 'px';
+      el.style.height     = (8 + Math.random() * 12) + 'px';
+      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '3px';
+      const dur = 1.5 + Math.random() * 2;
+      el.style.animationDuration = dur + 's';
+      el.style.animationDelay    = Math.random() * 0.5 + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 0.6) * 1000);
+    }, i * 25);
+  }
+}
+
+// ── Sounds (Web Audio API) ────────────────────────────────────────────────────
+let audioCtx = null;
+
+function getCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function note(ctx, type, freq, time, dur, vol) {
+  const osc = ctx.createOscillator();
+  const gn  = ctx.createGain();
+  osc.connect(gn); gn.connect(ctx.destination);
+  osc.type = type;
+  osc.frequency.value = freq;
+  gn.gain.setValueAtTime(0.001, time);
+  gn.gain.linearRampToValueAtTime(vol, time + 0.015);
+  gn.gain.exponentialRampToValueAtTime(0.001, time + dur);
+  osc.start(time); osc.stop(time + dur + 0.06);
+}
+
+function playCorrect() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    // Sparkle blips — rapid high ping-pong
+    [1047, 1319, 1568, 2093, 1568, 1319].forEach((f, i) =>
+      note(ctx, 'triangle', f, t + i * 0.07, 0.14, 0.5)
+    );
+    // Victory fanfare underneath
+    [[523,0.52,0.14], [659,0.66,0.14], [784,0.80,0.14], [1047,0.94,0.5]]
+      .forEach(([f, d, dur]) => {
+        note(ctx, 'triangle', f, t + d, dur, 0.55);
+        note(ctx, 'sine', f * 2, t + d, dur * 0.5, 0.14); // octave shimmer
+      });
+  });
+}
+
+function playWrong() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    // Cartoon wah-wah-wah: descending sawtooth sweeps
+    [[400, 260, 0.00], [340, 220, 0.28], [280, 160, 0.56]].forEach(([f1, f2, delay]) => {
+      const osc = ctx.createOscillator();
+      const gn  = ctx.createGain();
+      osc.connect(gn); gn.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(f1, t + delay);
+      osc.frequency.exponentialRampToValueAtTime(f2, t + delay + 0.22);
+      gn.gain.setValueAtTime(0.001, t + delay);
+      gn.gain.linearRampToValueAtTime(0.3, t + delay + 0.02);
+      gn.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.25);
+      osc.start(t + delay); osc.stop(t + delay + 0.3);
+    });
+    // Sad boing at the end — pitch drops to floor
+    const osc = ctx.createOscillator();
+    const gn  = ctx.createGain();
+    osc.connect(gn); gn.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(380, t + 0.92);
+    osc.frequency.exponentialRampToValueAtTime(55, t + 1.4);
+    gn.gain.setValueAtTime(0.001, t + 0.92);
+    gn.gain.linearRampToValueAtTime(0.55, t + 0.93);
+    gn.gain.exponentialRampToValueAtTime(0.001, t + 1.45);
+    osc.start(t + 0.92); osc.stop(t + 1.5);
+  });
+}
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

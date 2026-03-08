@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Chemistry Quiz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+  :root { --c1:#1a003d; --c2:#4a0080; --acc:#c471ed; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Fredoka One',cursive; background:linear-gradient(160deg,var(--c1) 0%,var(--c2) 50%,var(--c1) 100%); min-height:100dvh; overflow:hidden; position:relative; }
+  .bg-deco { position:fixed; font-size:2rem; opacity:0.07; pointer-events:none; animation:floatDeco ease-in-out infinite; }
+  @keyframes floatDeco { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-22px) rotate(15deg)} }
+  .back-btn { position:fixed; top:10px; left:10px; z-index:50; font-family:'Fredoka One',cursive; font-size:0.9rem; padding:5px 12px; border-radius:50px; border:2px solid rgba(255,255,255,0.25); background:rgba(255,255,255,0.1); color:#fff; cursor:pointer; text-decoration:none; -webkit-tap-highlight-color:transparent; }
+  .screen { width:100vw; height:100dvh; display:flex; flex-direction:column; align-items:center; padding:10px 14px 8px; position:relative; z-index:10; }
+  .screen.shake { animation:shakeScreen 0.5s ease; }
+  @keyframes shakeScreen { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-10px) rotate(-1deg)} 30%{transform:translateX(10px) rotate(1deg)} 45%{transform:translateX(-7px)} 60%{transform:translateX(7px)} 75%{transform:translateX(-3px)} }
+  .top { width:100%; flex-shrink:0; text-align:center; padding-top:28px; }
+  .title { font-size:clamp(1.5rem,6vw,2.4rem); color:var(--acc); text-shadow:0 3px 10px rgba(0,0,0,0.5); }
+  .top-row { display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:8px; }
+  .level-badge { padding:4px 14px; border-radius:50px; font-size:clamp(0.8rem,3vw,1rem); border:2px solid; }
+  .level-badge.easy   { background:rgba(46,204,113,0.2);  color:#2ecc71; border-color:#2ecc71; }
+  .level-badge.medium { background:rgba(230,126,34,0.2);  color:#e67e22; border-color:#e67e22; }
+  .level-badge.hard   { background:rgba(231,76,60,0.2);   color:#e74c3c; border-color:#e74c3c; }
+  .score-pill { background:rgba(255,255,255,0.1); border:2px solid rgba(255,255,255,0.25); border-radius:50px; padding:4px 14px; color:#fff; font-size:clamp(0.85rem,3vw,1.1rem); }
+  .progress-bar-wrap { width:100%; height:7px; background:rgba(255,255,255,0.1); border-radius:10px; margin-top:7px; overflow:hidden; }
+  .progress-bar-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--acc),#fff); transition:width 0.5s ease; }
+  .middle { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; min-height:0; padding:6px 0; gap:10px; }
+  .visual-card { background:rgba(0,0,0,0.3); backdrop-filter:blur(8px); border:2px solid rgba(255,255,255,0.15); border-radius:22px; padding:14px 22px; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 28px rgba(0,0,0,0.4); min-width:100px; }
+  .visual-emoji { font-size:clamp(3.5rem,14vw,6rem); line-height:1; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+  .question-text { font-size:clamp(1.05rem,4.2vw,1.6rem); color:#fff; text-align:center; text-shadow:0 2px 8px rgba(0,0,0,0.5); line-height:1.35; padding:0 6px; max-width:480px; }
+  .bottom { flex-shrink:0; width:100%; display:flex; flex-direction:column; align-items:center; gap:9px; padding-bottom:6px; }
+  .choices { display:flex; flex-direction:column; gap:9px; width:100%; max-width:460px; }
+  .choice-btn { font-family:'Fredoka One',cursive; font-size:clamp(1rem,3.8vw,1.4rem); padding:clamp(10px,2.5vw,16px) 16px; border-radius:14px; border:2px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.09); backdrop-filter:blur(8px); color:#fff; cursor:pointer; text-align:left; transition:background 0.15s; box-shadow:0 4px 12px rgba(0,0,0,0.3); -webkit-tap-highlight-color:transparent; display:flex; align-items:center; gap:10px; }
+  .choice-btn:active { transform:scale(0.97); }
+  .choice-letter { width:30px; height:30px; border-radius:50%; flex-shrink:0; background:rgba(255,255,255,0.12); border:2px solid var(--acc); color:var(--acc); display:flex; align-items:center; justify-content:center; font-size:0.9rem; }
+  .choice-btn.correct { background:rgba(46,204,113,0.35)!important; border-color:#2ecc71!important; animation:correctPop 0.5s ease; }
+  .choice-btn.wrong   { background:rgba(231,76,60,0.3)!important; border-color:#e74c3c!important; opacity:0.65; }
+  @keyframes correctPop { 0%{transform:scale(1)} 40%{transform:scale(1.04)} 100%{transform:scale(1)} }
+  .choice-btn:disabled { cursor:not-allowed; }
+  .progress-dots { display:flex; gap:5px; justify-content:center; flex-wrap:wrap; max-width:280px; }
+  .dot { width:12px; height:12px; border-radius:50%; background:rgba(255,255,255,0.18); border:2px solid rgba(255,255,255,0.3); transition:all 0.3s; }
+  .dot.easy-dot   { border-color:rgba(46,204,113,0.6); }
+  .dot.medium-dot { border-color:rgba(230,126,0.6); }
+  .dot.hard-dot   { border-color:rgba(231,76,60,0.6); }
+  .dot.answered.correct-dot { background:#2ecc71; border-color:#2ecc71; box-shadow:0 0 7px #2ecc71; }
+  .dot.answered.wrong-dot   { background:#e74c3c; border-color:#e74c3c; box-shadow:0 0 7px #e74c3c; }
+  .dot.current { background:#fff; border-color:#fff; box-shadow:0 0 10px #fff; transform:scale(1.3); }
+  .feedback-overlay { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; pointer-events:none; opacity:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(4px); transition:opacity 0.3s; }
+  .feedback-overlay.show { opacity:1; }
+  .feedback-overlay.dismiss { opacity:0; }
+  .feedback-box { border:3px solid; border-radius:28px; background:rgba(15,15,25,0.95); padding:clamp(18px,5vw,30px) clamp(22px,6vw,44px); text-align:center; max-width:86vw; width:360px; box-shadow:0 20px 60px rgba(0,0,0,0.6); animation:feedbackPop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  .feedback-box.correct-box { border-color:#2ecc71; }
+  .feedback-box.wrong-box   { border-color:#e74c3c; }
+  @keyframes feedbackPop { from{transform:scale(0.4) rotate(-8deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
+  .feedback-emoji { font-size:clamp(3rem,13vw,5.5rem); display:block; animation:spinBounce 0.6s ease; line-height:1.1; }
+  @keyframes spinBounce { 0%{transform:rotate(-15deg) scale(0.5)} 60%{transform:rotate(8deg) scale(1.15)} 100%{transform:rotate(0) scale(1)} }
+  .feedback-title { font-size:clamp(1.4rem,5.5vw,2.1rem); font-weight:900; margin-top:8px; }
+  .feedback-title.correct-text { color:#2ecc71; }
+  .feedback-title.wrong-text   { color:#e74c3c; }
+  .feedback-fact  { font-size:clamp(0.85rem,3vw,1.1rem); color:rgba(255,255,255,0.85); margin-top:8px; line-height:1.4; }
+  .timer-ring { margin:12px auto 0; width:40px; height:40px; display:block; }
+  .timer-ring svg { transform:rotate(-90deg); }
+  .timer-ring circle.track    { fill:none; stroke:rgba(255,255,255,0.12); stroke-width:4; }
+  .timer-ring circle.progress { fill:none; stroke-width:4; stroke-linecap:round; }
+  .correct-ring circle.progress { stroke:#2ecc71; }
+  .wrong-ring   circle.progress { stroke:#e74c3c; }
+  .levelup-overlay { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:200; background:rgba(0,0,0,0.88); backdrop-filter:blur(8px); opacity:0; pointer-events:none; transition:opacity 0.4s; }
+  .levelup-overlay.show { opacity:1; pointer-events:all; }
+  .levelup-box { text-align:center; animation:feedbackPop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+  .levelup-icon  { font-size:clamp(4rem,16vw,7rem); }
+  .levelup-title { font-size:clamp(2rem,8vw,3.5rem); color:var(--acc); text-shadow:0 0 30px var(--acc); margin-top:10px; }
+  .levelup-sub   { font-size:clamp(1rem,4vw,1.5rem); color:rgba(255,255,255,0.8); margin-top:8px; }
+  .levelup-btn { font-family:'Fredoka One',cursive; font-size:clamp(1.2rem,5vw,1.6rem); padding:13px 38px; border-radius:50px; border:3px solid rgba(255,255,255,0.35); background:var(--acc); color:#fff; cursor:pointer; margin-top:18px; box-shadow:0 8px 24px rgba(0,0,0,0.4); animation:pulseBtn 1.5s ease-in-out infinite; -webkit-tap-highlight-color:transparent; }
+  .action-btn { font-family:'Fredoka One',cursive; font-size:clamp(1.2rem,5vw,1.6rem); padding:13px 38px; border-radius:50px; border:3px solid rgba(255,255,255,0.35); background:var(--acc); color:#fff; cursor:pointer; margin-top:16px; box-shadow:0 8px 24px rgba(0,0,0,0.4); animation:pulseBtn 1.5s ease-in-out infinite; -webkit-tap-highlight-color:transparent; }
+  @keyframes pulseBtn { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+  .confetti-piece { position:fixed; border-radius:2px; animation:confettiFall linear forwards; pointer-events:none; z-index:300; }
+  @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+  @keyframes slideUp { from{opacity:1;transform:translateY(0) scale(1)} to{opacity:0;transform:translateY(-40px) scale(0.85)} }
+</style>
+</head>
+<body>
+<div class="bg-deco" style="top:8%;left:5%;animation-duration:6s;animation-delay:0s;">⚗️</div>
+<div class="bg-deco" style="top:15%;right:8%;animation-duration:7s;animation-delay:1s;">🧪</div>
+<div class="bg-deco" style="top:45%;left:3%;animation-duration:8s;animation-delay:2s;">⚛️</div>
+<div class="bg-deco" style="top:60%;right:5%;animation-duration:5.5s;animation-delay:0.5s;">🔬</div>
+<div class="bg-deco" style="top:78%;left:12%;animation-duration:7.5s;animation-delay:1.5s;">💊</div>
+<div class="bg-deco" style="top:30%;right:15%;animation-duration:6.5s;animation-delay:3s;">🌡️</div>
+<a class="back-btn" href="../../">← Home</a>
+<div class="screen" id="gameScreen">
+  <div class="top">
+    <div class="title">🧪 Chemistry Quiz</div>
+    <div class="top-row"><div class="level-badge easy" id="levelBadge">⭐ Easy</div><div class="score-pill">🎯 <strong id="score">0</strong> / 15</div></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+  <div class="middle" id="middle">
+    <div class="visual-card" id="visualCard"></div>
+    <div class="question-text" id="questionText"></div>
+  </div>
+  <div class="bottom">
+    <div class="choices" id="choices"></div>
+    <div class="progress-dots" id="progressDots"></div>
+  </div>
+</div>
+<div class="feedback-overlay" id="feedbackOverlay">
+  <div class="feedback-box" id="feedbackBox">
+    <span class="feedback-emoji" id="feedbackEmoji"></span>
+    <div class="feedback-title" id="feedbackTitle"></div>
+    <div class="feedback-fact"  id="feedbackFact"></div>
+    <div class="timer-ring" id="timerRing"><svg width="40" height="40" viewBox="0 0 40 40"><circle class="track" cx="20" cy="20" r="16"/><circle class="progress" cx="20" cy="20" r="16" id="timerArc" stroke-dasharray="100.5" stroke-dashoffset="0"/></svg></div>
+  </div>
+</div>
+<div class="levelup-overlay" id="levelupOverlay">
+  <div class="levelup-box">
+    <div class="levelup-icon" id="levelupIcon"></div>
+    <div class="levelup-title" id="levelupTitle"></div>
+    <div class="levelup-sub" id="levelupSub"></div>
+    <button class="levelup-btn" onclick="dismissLevelUp()">Let's Go! 🚀</button>
+  </div>
+</div>
+<script>
+const QUESTIONS = [
+  // EASY
+  { level:1, visual:'💧', question:'What is the chemical formula for water?', options:['H₂O','CO₂','O₂'], answer:'H₂O', fact:'💧 Water is made of 2 hydrogen atoms bonded to 1 oxygen atom — that\'s why it\'s H₂O!' },
+  { level:1, visual:'⚗️', question:'What are the three common states of matter?', options:['Solid, liquid, gas','Hot, warm, cold','Big, medium, small'], answer:'Solid, liquid, gas', fact:'🧊 Ice is solid, water is liquid, steam is gas — all the same molecule in different states!' },
+  { level:1, visual:'🏅', question:'What is the chemical symbol for Gold?', options:['Au','Go','Gd'], answer:'Au', fact:'🏅 Gold\'s symbol Au comes from the Latin word "Aurum" — gold has been treasured for thousands of years!' },
+  { level:1, visual:'🧪', question:'What gas is released when baking soda and vinegar are mixed?', options:['Carbon dioxide','Oxygen','Nitrogen'], answer:'Carbon dioxide', fact:'🫧 Baking soda (base) + vinegar (acid) = a chemical reaction that produces CO₂ bubbles!' },
+  { level:1, visual:'⚛️', question:'What is the tiny particle that makes up all matter?', options:['Atom','Molecule','Cell'], answer:'Atom', fact:'⚛️ Everything around you — air, water, you! — is made of atoms. They\'re unimaginably tiny!' },
+  // MEDIUM
+  { level:2, visual:'🔬', question:'What is the pH value of pure water?', options:['7','5','9'], answer:'7', fact:'⚖️ pH 7 is neutral — below 7 is acidic (like lemon juice), above 7 is alkaline (like soap)!' },
+  { level:2, visual:'🌿', question:'What gas do plants absorb from the air to make food?', options:['Carbon dioxide','Oxygen','Nitrogen'], answer:'Carbon dioxide', fact:'🌱 Plants take in CO₂ and sunlight to make glucose — this process is called photosynthesis!' },
+  { level:2, visual:'🧂', question:'What is the chemical formula for table salt?', options:['NaCl','KCl','MgO'], answer:'NaCl', fact:'🧂 NaCl = Sodium + Chlorine. Sodium is a metal and chlorine is a toxic gas — but together they make salt!' },
+  { level:2, visual:'🔥', question:'Burning wood is an example of what type of change?', options:['Chemical change','Physical change','Nuclear change'], answer:'Chemical change', fact:'🔥 In a chemical change, new substances are formed. Burnt wood can\'t become wood again!' },
+  { level:2, visual:'⚛️', question:'Which particle inside an atom carries a NEGATIVE charge?', options:['Electron','Proton','Neutron'], answer:'Electron', fact:'⚡ Electrons orbit the nucleus and carry negative charge. Protons (positive) and neutrons (neutral) are in the nucleus!' },
+  // HARD
+  { level:3, visual:'⚛️', question:'What is the centre of an atom called?', options:['Nucleus','Core','Shell'], answer:'Nucleus', fact:'🎯 The nucleus contains protons and neutrons. It\'s incredibly dense — if an atom were a stadium, the nucleus would be a pea!' },
+  { level:3, visual:'🌡️', question:'What gas makes up about 78% of Earth\'s atmosphere?', options:['Nitrogen','Oxygen','Carbon dioxide'], answer:'Nitrogen', fact:'🌍 78% Nitrogen, 21% Oxygen, 1% other gases. We breathe mostly nitrogen but our bodies can\'t use it!' },
+  { level:3, visual:'🧊', question:'What is it called when a solid turns DIRECTLY into a gas (skipping liquid)?', options:['Sublimation','Evaporation','Condensation'], answer:'Sublimation', fact:'❄️ Dry ice (solid CO₂) sublimates directly into gas. That\'s the cool foggy effect at concerts!' },
+  { level:3, visual:'⚙️', question:'What is the chemical symbol for Iron?', options:['Fe','Ir','In'], answer:'Fe', fact:'⚙️ Iron\'s symbol Fe comes from "Ferrum" in Latin. Iron is essential for our blood to carry oxygen!' },
+  { level:3, visual:'📊', question:'How many elements are currently in the Periodic Table?', options:['118','100','92'], answer:'118', fact:'🔬 Dmitri Mendeleev created the first periodic table in 1869 with just 63 elements. Scientists have added many more since!' },
+];
+
+let current = 0, score = 0, dotResults = [];
+let audioCtx = null;
+function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+function note(ctx, type, freq, time, dur, vol) {
+  const osc = ctx.createOscillator(), gn = ctx.createGain();
+  osc.connect(gn); gn.connect(ctx.destination);
+  osc.type = type; osc.frequency.value = freq;
+  gn.gain.setValueAtTime(0.001, time);
+  gn.gain.linearRampToValueAtTime(vol, time + 0.015);
+  gn.gain.exponentialRampToValueAtTime(0.001, time + dur);
+  osc.start(time); osc.stop(time + dur + 0.06);
+}
+function playCorrect() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    [1047,1319,1568,2093,1568,1319].forEach((f,i) => note(ctx,'triangle',f,t+i*0.07,0.14,0.5));
+    [[523,0.52,0.14],[659,0.66,0.14],[784,0.80,0.14],[1047,0.94,0.5]].forEach(([f,d,dur]) => {
+      note(ctx,'triangle',f,t+d,dur,0.55); note(ctx,'sine',f*2,t+d,dur*0.5,0.14);
+    });
+  });
+}
+function playWrong() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    [[400,260,0.00],[340,220,0.28],[280,160,0.56]].forEach(([f1,f2,delay]) => {
+      const osc=ctx.createOscillator(), gn=ctx.createGain();
+      osc.connect(gn); gn.connect(ctx.destination); osc.type='sawtooth';
+      osc.frequency.setValueAtTime(f1,t+delay); osc.frequency.exponentialRampToValueAtTime(f2,t+delay+0.22);
+      gn.gain.setValueAtTime(0.001,t+delay); gn.gain.linearRampToValueAtTime(0.3,t+delay+0.02); gn.gain.exponentialRampToValueAtTime(0.001,t+delay+0.25);
+      osc.start(t+delay); osc.stop(t+delay+0.3);
+    });
+    const osc=ctx.createOscillator(), gn=ctx.createGain();
+    osc.connect(gn); gn.connect(ctx.destination); osc.type='sine';
+    osc.frequency.setValueAtTime(380,t+0.92); osc.frequency.exponentialRampToValueAtTime(55,t+1.4);
+    gn.gain.setValueAtTime(0.001,t+0.92); gn.gain.linearRampToValueAtTime(0.55,t+0.93); gn.gain.exponentialRampToValueAtTime(0.001,t+1.45);
+    osc.start(t+0.92); osc.stop(t+1.5);
+  });
+}
+function playLevelUp() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    [[262,0],[330,0.12],[392,0.24],[523,0.36],[659,0.52],[784,0.68],[1047,0.84]].forEach(([f,d]) => note(ctx,'triangle',f,t+d,0.25,0.45));
+    note(ctx,'sine',1047,t+0.84,0.8,0.3); note(ctx,'sine',1319,t+0.90,0.7,0.25); note(ctx,'sine',1568,t+0.96,0.6,0.2);
+  });
+}
+function init() {
+  current = 0; score = 0; dotResults = Array(15).fill(null);
+  if (!document.getElementById('visualCard')) {
+    document.getElementById('gameScreen').innerHTML = `
+      <a class="back-btn" href="../../">← Home</a>
+      <div class="top">
+        <div class="title">🧪 Chemistry Quiz</div>
+        <div class="top-row"><div class="level-badge easy" id="levelBadge">⭐ Easy</div><div class="score-pill">🎯 <strong id="score">0</strong> / 15</div></div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+      <div class="middle" id="middle">
+        <div class="visual-card" id="visualCard"></div>
+        <div class="question-text" id="questionText"></div>
+      </div>
+      <div class="bottom">
+        <div class="choices" id="choices"></div>
+        <div class="progress-dots" id="progressDots"></div>
+      </div>`;
+  }
+  buildDots(); showQuestion();
+}
+function shuffle(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function buildDots() {
+  const c = document.getElementById('progressDots'); c.innerHTML = '';
+  QUESTIONS.forEach((q,i) => {
+    const cls = q.level===1?'easy-dot':q.level===2?'medium-dot':'hard-dot';
+    const d = document.createElement('div');
+    d.className = `dot ${cls}`+(i===0?' current':''); d.id=`dot-${i}`; c.appendChild(d);
+  });
+}
+function updateDot(idx, result) {
+  const d = document.getElementById(`dot-${idx}`); if(!d) return;
+  d.classList.remove('current'); d.classList.add('answered', result==='correct'?'correct-dot':'wrong-dot');
+  const next = document.getElementById(`dot-${idx+1}`); if(next) next.classList.add('current');
+}
+function showQuestion() {
+  const q = QUESTIONS[current];
+  const badge = document.getElementById('levelBadge');
+  if(q.level===1){badge.className='level-badge easy';badge.textContent='⭐ Easy';}
+  if(q.level===2){badge.className='level-badge medium';badge.textContent='⭐⭐ Medium';}
+  if(q.level===3){badge.className='level-badge hard';badge.textContent='⭐⭐⭐ Hard';}
+  document.getElementById('progressFill').style.width=(current/15*100)+'%';
+  document.getElementById('score').textContent=score;
+  document.getElementById('visualCard').innerHTML=`<span class="visual-emoji">${q.visual}</span>`;
+  document.getElementById('questionText').textContent=q.question;
+  const shuffled=shuffle([...q.options]);
+  const choicesEl=document.getElementById('choices'); choicesEl.innerHTML='';
+  ['A','B','C'].forEach((letter,i) => {
+    const btn=document.createElement('button'); btn.className='choice-btn'; btn.dataset.value=shuffled[i];
+    btn.innerHTML=`<span class="choice-letter">${letter}</span>${shuffled[i]}`;
+    btn.onclick=()=>handleAnswer(shuffled[i],q.answer,btn,q.fact); choicesEl.appendChild(btn);
+  });
+  document.getElementById('gameScreen').classList.remove('shake');
+}
+function handleAnswer(chosen, correct, btn, fact) {
+  document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+  const isCorrect = chosen===correct;
+  if(isCorrect){
+    score++; btn.classList.add('correct'); dotResults[current]='correct'; updateDot(current,'correct');
+    document.getElementById('score').textContent=score; playCorrect(); spawnConfetti(35);
+  } else {
+    btn.classList.add('wrong'); dotResults[current]='wrong'; updateDot(current,'wrong');
+    document.querySelectorAll('.choice-btn').forEach(b=>{if(b.dataset.value===correct)b.classList.add('correct');});
+    document.getElementById('gameScreen').classList.add('shake'); playWrong();
+  }
+  setTimeout(()=>showFeedback(isCorrect,fact),300);
+}
+let feedbackTimer=null, feedbackRafId=null;
+const DISPLAY_MS={correct:2400,wrong:3000};
+function showFeedback(isCorrect, fact) {
+  clearTimeout(feedbackTimer); cancelAnimationFrame(feedbackRafId);
+  const overlay=document.getElementById('feedbackOverlay'), box=document.getElementById('feedbackBox');
+  const arc=document.getElementById('timerArc'), ring=document.getElementById('timerRing');
+  const CIRC=100.5, duration=isCorrect?DISPLAY_MS.correct:DISPLAY_MS.wrong;
+  if(isCorrect){
+    const msgs=[['🎉✨','CORRECT!'],['🌟💡','BRILLIANT!'],['🏆⭐','GENIUS!'],['🔥💫','AMAZING!'],['👑✅','PERFECT!']];
+    const [em,title]=msgs[Math.floor(Math.random()*msgs.length)];
+    document.getElementById('feedbackEmoji').textContent=em;
+    document.getElementById('feedbackTitle').textContent=title;
+    document.getElementById('feedbackTitle').className='feedback-title correct-text';
+    box.className='feedback-box correct-box'; ring.className='timer-ring correct-ring';
+  } else {
+    const msgs=[['😬❌','Not quite...'],['🤔💭','Wrong one!'],['😅🔄','Keep going!']];
+    const [em,title]=msgs[Math.floor(Math.random()*msgs.length)];
+    document.getElementById('feedbackEmoji').textContent=em;
+    document.getElementById('feedbackTitle').textContent=title;
+    document.getElementById('feedbackTitle').className='feedback-title wrong-text';
+    box.className='feedback-box wrong-box'; ring.className='timer-ring wrong-ring';
+  }
+  document.getElementById('feedbackFact').textContent=fact;
+  arc.style.strokeDashoffset='0'; overlay.classList.remove('dismiss'); overlay.classList.add('show');
+  const startTime=performance.now();
+  function tickRing(now){const frac=Math.min((now-startTime)/duration,1);arc.style.strokeDashoffset=(CIRC*frac).toFixed(2);if(frac<1)feedbackRafId=requestAnimationFrame(tickRing);}
+  feedbackRafId=requestAnimationFrame(tickRing);
+  feedbackTimer=setTimeout(()=>{
+    cancelAnimationFrame(feedbackRafId);
+    const b=document.getElementById('feedbackBox'); b.style.animation='slideUp 0.35s ease forwards';
+    overlay.classList.add('dismiss');
+    setTimeout(()=>{overlay.classList.remove('show','dismiss');b.style.animation='';advanceQuestion();},370);
+  },duration);
+}
+function advanceQuestion(){
+  const prev=current; current++;
+  if(prev===4){showLevelUp('medium');return;}
+  if(prev===9){showLevelUp('hard');return;}
+  if(current>=15){showEndScreen();return;}
+  showQuestion();
+}
+function showLevelUp(level){
+  const overlay=document.getElementById('levelupOverlay');
+  if(level==='medium'){document.getElementById('levelupIcon').textContent='⭐⭐';document.getElementById('levelupTitle').textContent='LEVEL UP!';document.getElementById('levelupSub').textContent='🔥 Medium — getting trickier!';}
+  else{document.getElementById('levelupIcon').textContent='⭐⭐⭐';document.getElementById('levelupTitle').textContent='EXPERT MODE!';document.getElementById('levelupSub').textContent='🧠 Hard — only the best know these!';}
+  overlay.classList.add('show'); playLevelUp(); spawnConfetti(60);
+}
+function dismissLevelUp(){document.getElementById('levelupOverlay').classList.remove('show');showQuestion();}
+function showEndScreen(){
+  const screen=document.getElementById('gameScreen');
+  let rank,icon,msg,color;
+  if(score>=13){rank='GENIUS';icon='🏆🧠⭐';msg='Outstanding! You\'re a true scholar!';color='#f1c40f';}
+  else if(score>=10){rank='EXPERT';icon='🌟💡🎯';msg='Excellent knowledge!';color='#2ecc71';}
+  else if(score>=7){rank='LEARNER';icon='👍📚😊';msg='Good effort! Keep studying!';color='#e67e22';}
+  else{rank='BEGINNER';icon='💪📖🌱';msg='Great start! Practice makes perfect!';color='#e74c3c';}
+  const e=dotResults.slice(0,5).filter(r=>r==='correct').length;
+  const m=dotResults.slice(5,10).filter(r=>r==='correct').length;
+  const h=dotResults.slice(10,15).filter(r=>r==='correct').length;
+  screen.innerHTML=`
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;padding:20px;text-align:center;">
+      <div style="font-size:clamp(2.8rem,11vw,5.5rem);">${icon}</div>
+      <div style="font-size:clamp(1.8rem,7vw,3rem);color:${color};text-shadow:0 0 20px ${color}55;">${rank}</div>
+      <div style="font-size:clamp(0.95rem,3.5vw,1.3rem);color:rgba(255,255,255,0.82);max-width:340px;">${msg}</div>
+      <div style="font-size:clamp(1.4rem,5.5vw,2rem);color:var(--acc);">🎯 ${score} / 15</div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <div style="background:rgba(46,204,113,0.18);border:2px solid #2ecc71;border-radius:12px;padding:8px 12px;"><div style="color:#2ecc71;font-size:0.85rem;">⭐ Easy</div><div style="color:#fff;font-size:1.4rem;">${e}/5</div></div>
+        <div style="background:rgba(230,126,34,0.18);border:2px solid #e67e22;border-radius:12px;padding:8px 12px;"><div style="color:#e67e22;font-size:0.85rem;">⭐⭐ Medium</div><div style="color:#fff;font-size:1.4rem;">${m}/5</div></div>
+        <div style="background:rgba(231,76,60,0.18);border:2px solid #e74c3c;border-radius:12px;padding:8px 12px;"><div style="color:#e74c3c;font-size:0.85rem;">⭐⭐⭐ Hard</div><div style="color:#fff;font-size:1.4rem;">${h}/5</div></div>
+      </div>
+      <div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;max-width:280px;">
+        ${dotResults.map((r,i)=>`<span style="font-size:1.3rem;">${r==='correct'?(i<5?'⭐':i<10?'🌟':'💎'):'❌'}</span>`).join('')}
+      </div>
+      <button class="action-btn" onclick="init()">🔄 Play Again!</button>
+      <a href="../../" style="color:rgba(255,255,255,0.5);font-size:1rem;margin-top:4px;">← Back to Hub</a>
+    </div>`;
+  spawnConfetti(score>=10?90:40);
+}
+const CONFETTI_COLORS=['#f1c40f','#2ecc71','#e74c3c','#fff','#3498db','#9b59b6','#e67e22','#1abc9c'];
+function spawnConfetti(count=35){
+  for(let i=0;i<count;i++){setTimeout(()=>{
+    const el=document.createElement('div'); el.className='confetti-piece';
+    el.style.left=Math.random()*100+'vw'; el.style.top='-20px';
+    el.style.background=CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)];
+    el.style.width=(6+Math.random()*10)+'px'; el.style.height=(6+Math.random()*10)+'px';
+    el.style.borderRadius=Math.random()>0.5?'50%':'2px';
+    const dur=1.5+Math.random()*2; el.style.animationDuration=dur+'s'; el.style.animationDelay=Math.random()*0.4+'s';
+    document.body.appendChild(el); setTimeout(()=>el.remove(),(dur+0.6)*1000);
+  },i*20);}
+}
+init();
+</script>
+</body>
+</html>
