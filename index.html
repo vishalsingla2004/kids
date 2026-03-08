@@ -650,38 +650,63 @@ function getCtx() {
   return audioCtx;
 }
 
-function playTone(ctx, freq, startTime, duration, gainVal) {
-  const osc  = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(freq, startTime);
-  gain.gain.setValueAtTime(0.001, startTime);
-  gain.gain.linearRampToValueAtTime(gainVal, startTime + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-  osc.start(startTime);
-  osc.stop(startTime + duration + 0.05);
+function note(ctx, type, freq, time, dur, vol) {
+  const osc = ctx.createOscillator();
+  const gn  = ctx.createGain();
+  osc.connect(gn); gn.connect(ctx.destination);
+  osc.type = type;
+  osc.frequency.value = freq;
+  gn.gain.setValueAtTime(0.001, time);
+  gn.gain.linearRampToValueAtTime(vol, time + 0.015);
+  gn.gain.exponentialRampToValueAtTime(0.001, time + dur);
+  osc.start(time); osc.stop(time + dur + 0.06);
 }
 
 function playCorrect() {
   const ctx = getCtx();
   ctx.resume().then(() => {
-    const now = ctx.currentTime;
-    // Happy ascending arpeggio: C5 E5 G5 C6 + shimmer
-    [[523, 0, 0.3], [659, 0.1, 0.3], [784, 0.2, 0.3], [1047, 0.32, 0.5], [1568, 0.42, 0.4]]
-      .forEach(([freq, delay, dur]) => playTone(ctx, freq, now + delay, dur, 0.4));
+    const t = ctx.currentTime;
+    // Sparkle blips — rapid high ping-pong
+    [1047, 1319, 1568, 2093, 1568, 1319].forEach((f, i) =>
+      note(ctx, 'triangle', f, t + i * 0.07, 0.14, 0.5)
+    );
+    // Victory fanfare underneath
+    [[523,0.52,0.14], [659,0.66,0.14], [784,0.80,0.14], [1047,0.94,0.5]]
+      .forEach(([f, d, dur]) => {
+        note(ctx, 'triangle', f, t + d, dur, 0.55);
+        note(ctx, 'sine', f * 2, t + d, dur * 0.5, 0.14); // octave shimmer
+      });
   });
 }
 
 function playWrong() {
   const ctx = getCtx();
   ctx.resume().then(() => {
-    const now = ctx.currentTime;
-    // Sad descending: E4 D4 C4 + low thud
-    [[330, 0, 0.35], [294, 0.2, 0.35], [262, 0.4, 0.5]]
-      .forEach(([freq, delay, dur]) => playTone(ctx, freq, now + delay, dur, 0.38));
-    playTone(ctx, 110, now, 0.5, 0.25);
+    const t = ctx.currentTime;
+    // Cartoon wah-wah-wah: descending sawtooth sweeps
+    [[400, 260, 0.00], [340, 220, 0.28], [280, 160, 0.56]].forEach(([f1, f2, delay]) => {
+      const osc = ctx.createOscillator();
+      const gn  = ctx.createGain();
+      osc.connect(gn); gn.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(f1, t + delay);
+      osc.frequency.exponentialRampToValueAtTime(f2, t + delay + 0.22);
+      gn.gain.setValueAtTime(0.001, t + delay);
+      gn.gain.linearRampToValueAtTime(0.3, t + delay + 0.02);
+      gn.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.25);
+      osc.start(t + delay); osc.stop(t + delay + 0.3);
+    });
+    // Sad boing at the end — pitch drops to floor
+    const osc = ctx.createOscillator();
+    const gn  = ctx.createGain();
+    osc.connect(gn); gn.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(380, t + 0.92);
+    osc.frequency.exponentialRampToValueAtTime(55, t + 1.4);
+    gn.gain.setValueAtTime(0.001, t + 0.92);
+    gn.gain.linearRampToValueAtTime(0.55, t + 0.93);
+    gn.gain.exponentialRampToValueAtTime(0.001, t + 1.45);
+    osc.start(t + 0.92); osc.stop(t + 1.5);
   });
 }
 
