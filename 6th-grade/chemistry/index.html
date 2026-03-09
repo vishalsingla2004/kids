@@ -861,16 +861,28 @@ function showEndScreen(){
   const e=dotResults.slice(0,5).filter(r=>r==='correct').length;
   const m=dotResults.slice(5,10).filter(r=>r==='correct').length;
   const h=dotResults.slice(10,15).filter(r=>r==='correct').length;
+  let earned=0;
+  if(e===5) earned+=1;
+  if(m===5) earned+=3;
+  if(h===5) earned+=6;
+  if(earned>0) addPoints(earned);
+  const tierRows=[
+    e===5?'<span style="color:#4ade80">⭐ Easy +1✓</span>':'<span style="color:rgba(255,255,255,0.3)">⭐ Easy +1</span>',
+    m===5?'<span style="color:#fbbf24">⭐⭐ Med +3✓</span>':'<span style="color:rgba(255,255,255,0.3)">⭐⭐ Med +3</span>',
+    h===5?'<span style="color:#f87171">⭐⭐⭐ Hard +6✓</span>':'<span style="color:rgba(255,255,255,0.3)">⭐⭐⭐ Hard +6</span>',
+  ].join('');
   let pointsHtml='';
-  if(score===15){
-    addPoints(10);
-    pointsHtml=`<div style="background:linear-gradient(135deg,rgba(255,215,0,0.25),rgba(255,165,0,0.25));border:2px solid #ffd700;border-radius:16px;padding:12px 24px;animation:correctPop 0.5s ease;">
-      <div style="font-size:1.6rem;">🎉⭐🎉</div>
-      <div style="color:#ffd700;font-size:1.15rem;font-weight:700;margin-top:2px;">PERFECT! +10 Points!</div>
-      <div style="color:rgba(255,255,255,0.85);font-size:0.95rem;margin-top:3px;">Total: ⭐ ${getPoints()} points</div>
+  if(earned>0){
+    pointsHtml=`<div style="background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,165,0,0.2));border:2px solid rgba(255,215,0,0.45);border-radius:16px;padding:10px 18px;text-align:center;">
+      <div style="font-size:0.9rem;margin-bottom:5px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">${tierRows}</div>
+      <div style="color:#ffd700;font-size:1.15rem;font-weight:700;">+${earned} point${earned===1?'':'s'} earned!</div>
+      <div style="color:rgba(255,255,255,0.7);font-size:0.9rem;margin-top:3px;">Total: ⭐ ${getPoints()} points</div>
     </div>`;
   } else {
-    pointsHtml=`<div style="color:rgba(255,215,0,0.7);font-size:0.95rem;">⭐ ${getPoints()} points total</div>`;
+    pointsHtml=`<div style="text-align:center;">
+      <div style="font-size:0.85rem;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:3px;">${tierRows}</div>
+      <div style="color:rgba(255,215,0,0.5);font-size:0.85rem;">⭐ ${getPoints()} pts · Complete a full level to earn points</div>
+    </div>`;
   }
   screen.innerHTML=`
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;padding:20px;text-align:center;">
