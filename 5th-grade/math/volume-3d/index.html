@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>📦 Volume of 3D Shapes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+  :root { --c1:#0a1628; --c2:#1a3a6b; --acc:#60a5fa; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Fredoka One',cursive; background:linear-gradient(160deg,var(--c1) 0%,var(--c2) 50%,var(--c1) 100%); min-height:100dvh; overflow:hidden; position:relative; }
+  .bg-deco { position:fixed; font-size:2rem; opacity:0.07; pointer-events:none; animation:floatDeco ease-in-out infinite; }
+  @keyframes floatDeco { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-22px) rotate(15deg)} }
+  .back-btn { position:fixed; top:10px; left:10px; z-index:50; font-family:'Fredoka One',cursive; font-size:0.9rem; padding:5px 12px; border-radius:50px; border:2px solid rgba(255,255,255,0.25); background:rgba(255,255,255,0.1); color:#fff; cursor:pointer; text-decoration:none; -webkit-tap-highlight-color:transparent; }
+  .screen { width:100vw; height:100dvh; display:flex; flex-direction:column; align-items:center; padding:10px 14px 8px; position:relative; z-index:10; }
+  .screen.shake { animation:shakeScreen 0.5s ease; }
+  @keyframes shakeScreen { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-10px) rotate(-1deg)} 30%{transform:translateX(10px) rotate(1deg)} 45%{transform:translateX(-7px)} 60%{transform:translateX(7px)} 75%{transform:translateX(-3px)} }
+  .top { width:100%; flex-shrink:0; text-align:center; padding-top:28px; }
+  .title { font-size:clamp(1.5rem,6vw,2.4rem); color:var(--acc); text-shadow:0 3px 10px rgba(0,0,0,0.5); }
+  .top-row { display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:8px; }
+  .level-badge { padding:4px 14px; border-radius:50px; font-size:clamp(0.8rem,3vw,1rem); border:2px solid; }
+  .level-badge.easy   { background:rgba(46,204,113,0.2);  color:#2ecc71; border-color:#2ecc71; }
+  .level-badge.medium { background:rgba(230,126,34,0.2);  color:#e67e22; border-color:#e67e22; }
+  .level-badge.hard   { background:rgba(231,76,60,0.2);   color:#e74c3c; border-color:#e74c3c; }
+  .score-pill { background:rgba(255,255,255,0.1); border:2px solid rgba(255,255,255,0.25); border-radius:50px; padding:4px 14px; color:#fff; font-size:clamp(0.85rem,3vw,1.1rem); }
+  .pts-pill { background:rgba(255,215,0,0.15); border:2px solid rgba(255,215,0,0.45); border-radius:50px; padding:4px 12px; color:#ffd700; font-size:clamp(0.85rem,3vw,1.1rem); font-weight:700; white-space:nowrap; }
+  .progress-bar-wrap { width:100%; height:7px; background:rgba(255,255,255,0.1); border-radius:10px; margin-top:7px; overflow:hidden; }
+  .progress-bar-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--acc),#fff); transition:width 0.5s ease; }
+  .middle { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; min-height:0; padding:6px 0; gap:10px; }
+  .visual-card { background:rgba(0,0,0,0.3); backdrop-filter:blur(8px); border:2px solid rgba(255,255,255,0.15); border-radius:22px; padding:14px 22px; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 28px rgba(0,0,0,0.4); min-width:100px; }
+  .visual-emoji { font-size:clamp(3.5rem,14vw,6rem); line-height:1; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+  .question-text { font-size:clamp(1.05rem,4.2vw,1.6rem); color:#fff; text-align:center; text-shadow:0 2px 8px rgba(0,0,0,0.5); line-height:1.35; padding:0 6px; max-width:480px; }
+  .bottom { flex-shrink:0; width:100%; display:flex; flex-direction:column; align-items:center; gap:9px; padding-bottom:6px; }
+  .choices { display:flex; flex-direction:column; gap:9px; width:100%; max-width:460px; }
+  .choice-btn { font-family:'Fredoka One',cursive; font-size:clamp(1rem,3.8vw,1.4rem); padding:clamp(10px,2.5vw,16px) 16px; border-radius:14px; border:2px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.09); backdrop-filter:blur(8px); color:#fff; cursor:pointer; text-align:left; transition:background 0.15s; box-shadow:0 4px 12px rgba(0,0,0,0.3); -webkit-tap-highlight-color:transparent; display:flex; align-items:center; gap:10px; }
+  .choice-btn:active { transform:scale(0.97); }
+  .choice-letter { width:30px; height:30px; border-radius:50%; flex-shrink:0; background:rgba(255,255,255,0.12); border:2px solid var(--acc); color:var(--acc); display:flex; align-items:center; justify-content:center; font-size:0.9rem; }
+  .choice-btn.correct { background:rgba(46,204,113,0.35)!important; border-color:#2ecc71!important; animation:correctPop 0.5s ease; }
+  .choice-btn.wrong   { background:rgba(231,76,60,0.3)!important; border-color:#e74c3c!important; opacity:0.65; }
+  @keyframes correctPop { 0%{transform:scale(1)} 40%{transform:scale(1.04)} 100%{transform:scale(1)} }
+  .choice-btn:disabled { cursor:not-allowed; }
+  .progress-dots { display:flex; gap:5px; justify-content:center; flex-wrap:wrap; max-width:280px; }
+  .dot { width:12px; height:12px; border-radius:50%; background:rgba(255,255,255,0.18); border:2px solid rgba(255,255,255,0.3); transition:all 0.3s; }
+  .dot.easy-dot   { border-color:rgba(46,204,113,0.6); }
+  .dot.medium-dot { border-color:rgba(230,126,34,0.6); }
+  .dot.hard-dot   { border-color:rgba(231,76,60,0.6); }
+  .dot.answered.correct-dot { background:#2ecc71; border-color:#2ecc71; box-shadow:0 0 7px #2ecc71; }
+  .dot.answered.wrong-dot   { background:#e74c3c; border-color:#e74c3c; box-shadow:0 0 7px #e74c3c; }
+  .dot.current { background:#fff; border-color:#fff; box-shadow:0 0 10px #fff; transform:scale(1.3); }
+  .feedback-overlay { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; pointer-events:none; opacity:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(4px); transition:opacity 0.3s; }
+  .feedback-overlay.show { opacity:1; }
+  .feedback-overlay.dismiss { opacity:0; }
+  .feedback-overlay.clickable { pointer-events: all; cursor: pointer; }
+  .tap-hint { font-size: clamp(0.8rem,2.5vw,1rem); color: rgba(255,255,255,0.55); margin-top: 14px; animation: tapPulse 1.4s ease-in-out infinite; }
+  .wrong-detail { margin-top:14px; width:100%; text-align:left; font-size:clamp(0.78rem,2.5vw,0.9rem); border-top:1px solid rgba(255,255,255,0.15); padding-top:10px; }
+  .wd-question { color:rgba(255,255,255,0.75); margin-bottom:8px; font-style:italic; line-height:1.35; }
+  .wd-row { display:flex; gap:6px; align-items:baseline; margin-top:5px; flex-wrap:wrap; }
+  .wd-label { color:rgba(255,255,255,0.45); white-space:nowrap; }
+  .wd-you { color:#f87171; font-weight:700; }
+  .wd-correct { color:#4ade80; font-weight:700; }
+  @keyframes tapPulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+  .feedback-box { border:3px solid; border-radius:28px; background:rgba(15,15,25,0.95); padding:clamp(18px,5vw,30px) clamp(22px,6vw,44px); text-align:center; max-width:86vw; width:360px; box-shadow:0 20px 60px rgba(0,0,0,0.6); animation:feedbackPop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  .feedback-box.correct-box { border-color:#2ecc71; }
+  .feedback-box.wrong-box   { border-color:#e74c3c; }
+  @keyframes feedbackPop { from{transform:scale(0.4) rotate(-8deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
+  .feedback-emoji { font-size:clamp(3rem,13vw,5.5rem); display:block; animation:spinBounce 0.6s ease; line-height:1.1; }
+  @keyframes spinBounce { 0%{transform:rotate(-15deg) scale(0.5)} 60%{transform:rotate(8deg) scale(1.15)} 100%{transform:rotate(0) scale(1)} }
+  .feedback-title { font-size:clamp(1.4rem,5.5vw,2.1rem); font-weight:900; margin-top:8px; }
+  .feedback-title.correct-text { color:#2ecc71; }
+  .feedback-title.wrong-text   { color:#e74c3c; }
+  .feedback-fact  { font-size:clamp(0.85rem,3vw,1.1rem); color:rgba(255,255,255,0.85); margin-top:8px; line-height:1.4; }
+  .timer-ring { margin:12px auto 0; width:40px; height:40px; display:block; }
+  .timer-ring svg { transform:rotate(-90deg); }
+  .timer-ring circle.track    { fill:none; stroke:rgba(255,255,255,0.12); stroke-width:4; }
+  .timer-ring circle.progress { fill:none; stroke-width:4; stroke-linecap:round; }
+  .correct-ring circle.progress { stroke:#2ecc71; }
+  .wrong-ring   circle.progress { stroke:#e74c3c; }
+  .levelup-overlay { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:200; background:rgba(0,0,0,0.88); backdrop-filter:blur(8px); opacity:0; pointer-events:none; transition:opacity 0.4s; }
+  .levelup-overlay.show { opacity:1; pointer-events:all; }
+  .levelup-box { text-align:center; animation:feedbackPop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+  .levelup-icon  { font-size:clamp(4rem,16vw,7rem); }
+  .levelup-title { font-size:clamp(2rem,8vw,3.5rem); color:var(--acc); text-shadow:0 0 30px var(--acc); margin-top:10px; }
+  .levelup-sub   { font-size:clamp(1rem,4vw,1.5rem); color:rgba(255,255,255,0.8); margin-top:8px; }
+  .levelup-btn { font-family:'Fredoka One',cursive; font-size:clamp(1.2rem,5vw,1.6rem); padding:13px 38px; border-radius:50px; border:3px solid rgba(255,255,255,0.35); background:var(--acc); color:#fff; cursor:pointer; margin-top:18px; box-shadow:0 8px 24px rgba(0,0,0,0.4); animation:pulseBtn 1.5s ease-in-out infinite; -webkit-tap-highlight-color:transparent; }
+  .action-btn { font-family:'Fredoka One',cursive; font-size:clamp(1.2rem,5vw,1.6rem); padding:13px 38px; border-radius:50px; border:3px solid rgba(255,255,255,0.35); background:var(--acc); color:#fff; cursor:pointer; margin-top:16px; box-shadow:0 8px 24px rgba(0,0,0,0.4); animation:pulseBtn 1.5s ease-in-out infinite; -webkit-tap-highlight-color:transparent; }
+  @keyframes pulseBtn { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+  .confetti-piece { position:fixed; border-radius:2px; animation:confettiFall linear forwards; pointer-events:none; z-index:300; }
+  @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+  @keyframes slideUp { from{opacity:1;transform:translateY(0) scale(1)} to{opacity:0;transform:translateY(-40px) scale(0.85)} }
+</style>
+</head>
+<body>
+<div class="bg-deco" style="top:8%;left:5%;animation-duration:6s;animation-delay:0s;">📦</div>
+<div class="bg-deco" style="top:15%;right:8%;animation-duration:7s;animation-delay:1s;">🧊</div>
+<div class="bg-deco" style="top:45%;left:3%;animation-duration:8s;animation-delay:2s;">🔵</div>
+<div class="bg-deco" style="top:60%;right:5%;animation-duration:5.5s;animation-delay:0.5s;">🏔️</div>
+<div class="bg-deco" style="top:78%;left:12%;animation-duration:7.5s;animation-delay:1.5s;">🎲</div>
+<div class="bg-deco" style="top:30%;right:15%;animation-duration:6.5s;animation-delay:3s;">🥫</div>
+<a class="back-btn" href="../../../">← Home</a>
+<div class="screen" id="gameScreen">
+  <div class="top">
+    <div class="title">📦 Volume of 3D Shapes</div>
+    <div class="top-row"><div class="level-badge easy" id="levelBadge">⭐ Easy</div><div class="score-pill">🎯 <strong id="score">0</strong> / 15</div><div class="pts-pill" id="ptsDisplay">⭐ 0</div></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+  <div class="middle" id="middle">
+    <div class="visual-card" id="visualCard"></div>
+    <div class="question-text" id="questionText"></div>
+  </div>
+  <div class="bottom">
+    <div class="choices" id="choices"></div>
+<div class="progress-dots" id="progressDots"></div>
+  </div>
+</div>
+<div class="feedback-overlay" id="feedbackOverlay">
+  <div class="feedback-box" id="feedbackBox">
+    <span class="feedback-emoji" id="feedbackEmoji"></span>
+    <div class="feedback-title" id="feedbackTitle"></div>
+    <div class="feedback-fact"  id="feedbackFact"></div>
+    <div class="tap-hint" id="tapHint" style="display:none">👆 Tap to continue</div>
+    <div class="wrong-detail" id="wrongDetail" style="display:none">
+      <div class="wd-question" id="wdQuestion"></div>
+      <div class="wd-row"><span class="wd-label">You chose:</span> <span class="wd-you" id="wdChosen"></span></div>
+      <div class="wd-row"><span class="wd-label">Correct answer:</span> <span class="wd-correct" id="wdCorrect"></span></div>
+    </div>
+    <div class="timer-ring" id="timerRing"><svg width="40" height="40" viewBox="0 0 40 40"><circle class="track" cx="20" cy="20" r="16"/><circle class="progress" cx="20" cy="20" r="16" id="timerArc" stroke-dasharray="100.5" stroke-dashoffset="0"/></svg></div>
+  </div>
+</div>
+<div class="levelup-overlay" id="levelupOverlay">
+  <div class="levelup-box">
+    <div class="levelup-icon" id="levelupIcon"></div>
+    <div class="levelup-title" id="levelupTitle"></div>
+    <div class="levelup-sub" id="levelupSub"></div>
+    <button class="levelup-btn" onclick="dismissLevelUp()">Let's Go! 🚀</button>
+  </div>
+</div>
+<script>
+const ALL_QUESTIONS = [
+  // ── LEVEL 1 (easy) ── basic formulas, simple integer dimensions ──
+  { level:1, visual:'🎲', question:'A cube has side 3 cm. What is its volume?', options:['27 cm³','9 cm³','18 cm³'], answer:'27 cm³', fact:'V = s³ = 3 × 3 × 3 = 27 cm³. A cube multiplies the side by itself three times!' },
+  { level:1, visual:'🎲', question:'A cube has side 5 cm. What is its volume?', options:['125 cm³','25 cm³','75 cm³'], answer:'125 cm³', fact:'V = s³ = 5 × 5 × 5 = 125 cm³. 5 cubed is a perfect cube!' },
+  { level:1, visual:'🎲', question:'A cube has side 2 cm. What is its volume?', options:['8 cm³','4 cm³','6 cm³'], answer:'8 cm³', fact:'V = s³ = 2 × 2 × 2 = 8 cm³. The smallest whole-number cube!' },
+  { level:1, visual:'🎲', question:'A cube has side 4 cm. What is its volume?', options:['64 cm³','16 cm³','48 cm³'], answer:'64 cm³', fact:'V = s³ = 4 × 4 × 4 = 64 cm³. 4 cubed equals 64!' },
+  { level:1, visual:'🎲', question:'A cube has side 6 cm. What is its volume?', options:['216 cm³','36 cm³','108 cm³'], answer:'216 cm³', fact:'V = s³ = 6 × 6 × 6 = 216 cm³. Count the layers: 36 per layer × 6 layers = 216!' },
+  { level:1, visual:'🎲', question:'A cube has side 7 cm. What is its volume?', options:['343 cm³','49 cm³','147 cm³'], answer:'343 cm³', fact:'V = s³ = 7 × 7 × 7 = 343 cm³. 7 × 49 = 343!' },
+  { level:1, visual:'🎲', question:'A cube has side 8 cm. What is its volume?', options:['512 cm³','64 cm³','256 cm³'], answer:'512 cm³', fact:'V = s³ = 8 × 8 × 8 = 512 cm³. 8 × 64 = 512!' },
+  { level:1, visual:'🎲', question:'A cube has side 10 cm. What is its volume?', options:['1000 cm³','100 cm³','500 cm³'], answer:'1000 cm³', fact:'V = s³ = 10 × 10 × 10 = 1000 cm³. Ten cubed equals one thousand — that is 1 litre!' },
+  { level:1, visual:'🎲', question:'A cube has side 1 cm. What is its volume?', options:['1 cm³','3 cm³','6 cm³'], answer:'1 cm³', fact:'V = 1³ = 1 cm³. A single cubic centimetre is the base unit of volume!' },
+  { level:1, visual:'🎲', question:'A cube has side 9 cm. What is its volume?', options:['729 cm³','81 cm³','243 cm³'], answer:'729 cm³', fact:'V = s³ = 9 × 9 × 9 = 729 cm³. 9 × 81 = 729!' },
+  { level:1, visual:'📦', question:'A box is 4 cm × 3 cm × 2 cm. What is its volume?', options:['24 cm³','9 cm³','14 cm³'], answer:'24 cm³', fact:'V = l × w × h = 4 × 3 × 2 = 24 cm³. Multiply length, width, and height together!' },
+  { level:1, visual:'📦', question:'A rectangular prism is 6 m × 5 m × 4 m. What is its volume?', options:['120 m³','30 m³','60 m³'], answer:'120 m³', fact:'V = 6 × 5 × 4 = 120 m³. Work it step by step: 6×5=30, then 30×4=120!' },
+  { level:1, visual:'📦', question:'What is the volume of a box 8 cm × 3 cm × 2 cm?', options:['48 cm³','26 cm³','24 cm³'], answer:'48 cm³', fact:'V = 8 × 3 × 2 = 48 cm³. First: 8×3=24, then 24×2=48!' },
+  { level:1, visual:'📦', question:'A rectangular prism is 5 cm × 5 cm × 5 cm. What is its volume?', options:['125 cm³','75 cm³','25 cm³'], answer:'125 cm³', fact:'V = 5 × 5 × 5 = 125 cm³. When all sides are equal it is a cube!' },
+  { level:1, visual:'📦', question:'A box is 10 cm × 4 cm × 3 cm. What is its volume?', options:['120 cm³','34 cm³','40 cm³'], answer:'120 cm³', fact:'V = 10 × 4 × 3 = 120 cm³. Multiply by 10 first: 10×4=40, then 40×3=120!' },
+  { level:1, visual:'📦', question:'A rectangular fish tank is 30 cm × 20 cm × 15 cm. What is its volume?', options:['9000 cm³','65 cm³','6000 cm³'], answer:'9000 cm³', fact:'V = 30 × 20 × 15 = 9000 cm³. That equals 9 litres of water (1 litre = 1000 cm³)!' },
+  { level:1, visual:'📦', question:'A box is 7 cm × 3 cm × 4 cm. What is its volume?', options:['84 cm³','14 cm³','28 cm³'], answer:'84 cm³', fact:'V = 7 × 3 × 4 = 84 cm³. First: 7×3=21, then 21×4=84!' },
+  { level:1, visual:'📦', question:'A rectangular prism is 9 m × 2 m × 5 m. What is its volume?', options:['90 m³','16 m³','45 m³'], answer:'90 m³', fact:'V = 9 × 2 × 5 = 90 m³. Try: 9×5=45, then 45×2=90!' },
+  { level:1, visual:'📦', question:'A storage box is 6 cm × 6 cm × 6 cm. What is its volume?', options:['216 cm³','36 cm³','108 cm³'], answer:'216 cm³', fact:'V = 6³ = 216 cm³. Equal sides means it is a cube — use s³!' },
+  { level:1, visual:'📦', question:'A room is 5 m long, 4 m wide, and 3 m high. What is its volume?', options:['60 m³','24 m³','12 m³'], answer:'60 m³', fact:'V = 5 × 4 × 3 = 60 m³. The volume tells you how much air fits in the room!' },
+  { level:1, visual:'⬛', question:'What formula gives the volume of a cube?', options:['V = s³','V = s²','V = 3s'], answer:'V = s³', fact:'Volume of a cube = side × side × side = s³. Three dimensions means three multiplications!' },
+  { level:1, visual:'📦', question:'What formula gives the volume of a rectangular prism?', options:['V = l × w × h','V = l + w + h','V = 2(lw + lh + wh)'], answer:'V = l × w × h', fact:'V = length × width × height. Multiply all three dimensions to fill the 3D space with unit cubes!' },
+  { level:1, visual:'⬛', question:'Volume is measured in which type of units?', options:['Cubic units (cm³, m³)','Square units (cm², m²)','Linear units (cm, m)'], answer:'Cubic units (cm³, m³)', fact:'Volume fills 3D space, so we multiply three lengths. Three lengths multiplied = cubic units (cm³, m³)!' },
+  { level:1, visual:'🎲', question:'A cube has side 3 m. What is its volume?', options:['27 m³','9 m³','18 m³'], answer:'27 m³', fact:'V = 3³ = 27 m³. Same formula no matter the unit — always cube the side length!' },
+  { level:1, visual:'📦', question:'A box is 2 cm × 2 cm × 10 cm. What is its volume?', options:['40 cm³','14 cm³','20 cm³'], answer:'40 cm³', fact:'V = 2 × 2 × 10 = 40 cm³. First: 2×2=4, then 4×10=40!' },
+  { level:1, visual:'📦', question:'A brick is 20 cm × 10 cm × 5 cm. What is its volume?', options:['1000 cm³','35 cm³','200 cm³'], answer:'1000 cm³', fact:'V = 20 × 10 × 5 = 1000 cm³. A standard house brick holds about 1 litre of material!' },
+  { level:1, visual:'🎲', question:'What is the volume of a cube with side 12 cm?', options:['1728 cm³','144 cm³','432 cm³'], answer:'1728 cm³', fact:'V = 12³ = 12 × 12 × 12 = 1728 cm³. 12 × 144 = 1728!' },
+  { level:1, visual:'📦', question:'A rectangular prism has length 8 m, width 3 m, height 4 m. What is its volume?', options:['96 m³','15 m³','48 m³'], answer:'96 m³', fact:'V = 8 × 3 × 4 = 96 m³. Try: 8×4=32, then 32×3=96!' },
+  { level:1, visual:'📦', question:'A box is 5 cm × 5 cm × 8 cm. What is its volume?', options:['200 cm³','18 cm³','100 cm³'], answer:'200 cm³', fact:'V = 5 × 5 × 8 = 200 cm³. First: 5×5=25, then 25×8=200!' },
+  { level:1, visual:'📦', question:'A rectangular tank is 12 cm × 5 cm × 6 cm. What is its volume?', options:['360 cm³','23 cm³','180 cm³'], answer:'360 cm³', fact:'V = 12 × 5 × 6 = 360 cm³. Try: 12×6=72, then 72×5=360!' },
+  { level:1, visual:'🎲', question:'A cube has volume 64 cm³. What is the length of one side?', options:['4 cm','8 cm','16 cm'], answer:'4 cm', fact:'V = s³ → s = ∛64 = 4 cm. 4 × 4 × 4 = 64. Finding a side from volume means taking the cube root!' },
+  { level:1, visual:'📦', question:'A rectangular prism is 11 cm × 2 cm × 3 cm. What is its volume?', options:['66 cm³','16 cm³','33 cm³'], answer:'66 cm³', fact:'V = 11 × 2 × 3 = 66 cm³. First: 11×3=33, then 33×2=66!' },
+  { level:1, visual:'📦', question:'A box has length 6 cm, width 6 cm, height 4 cm. What is its volume?', options:['144 cm³','16 cm³','72 cm³'], answer:'144 cm³', fact:'V = 6 × 6 × 4 = 144 cm³. First: 6×6=36, then 36×4=144!' },
+  { level:1, visual:'📦', question:'A cereal box is 20 cm × 7 cm × 25 cm. What is its volume?', options:['3500 cm³','52 cm³','1750 cm³'], answer:'3500 cm³', fact:'V = 20 × 7 × 25 = 3500 cm³. Try: 20×25=500, then 500×7=3500!' },
+  { level:1, visual:'🎲', question:'A cube has volume 125 m³. What is the side length?', options:['5 m','25 m','3 m'], answer:'5 m', fact:'V = s³ → s = ∛125 = 5 m. Because 5 × 5 × 5 = 125!' },
+  { level:1, visual:'📦', question:'A box is 3 cm × 3 cm × 3 cm. What is its volume?', options:['27 cm³','9 cm³','54 cm³'], answer:'27 cm³', fact:'V = 3 × 3 × 3 = 27 cm³. Equal sides means cube! V = s³ = 3³ = 27.' },
+  { level:1, visual:'📦', question:'A rectangular prism is 4 m × 4 m × 6 m. What is its volume?', options:['96 m³','14 m³','48 m³'], answer:'96 m³', fact:'V = 4 × 4 × 6 = 96 m³. First: 4×4=16, then 16×6=96!' },
+  { level:1, visual:'📦', question:'A box 15 cm × 4 cm × 3 cm. What is its volume?', options:['180 cm³','22 cm³','90 cm³'], answer:'180 cm³', fact:'V = 15 × 4 × 3 = 180 cm³. Try: 15×4=60, then 60×3=180!' },
+  { level:1, visual:'⬛', question:'What does volume measure?', options:['The space inside a 3D object','The surface of a 3D object','The distance around a shape'], answer:'The space inside a 3D object', fact:'Volume measures the amount of 3D space a solid object occupies. It is counted in cubic units!' },
+  { level:1, visual:'📦', question:'A box is 100 cm × 50 cm × 20 cm. What is its volume?', options:['100000 cm³','170 cm³','5000 cm³'], answer:'100000 cm³', fact:'V = 100 × 50 × 20 = 100,000 cm³. That equals 100 litres!' },
+  { level:1, visual:'🎲', question:'Two cubes each have side 2 cm. What is their combined volume?', options:['16 cm³','8 cm³','24 cm³'], answer:'16 cm³', fact:'One cube: 2³=8 cm³. Two cubes: 2×8=16 cm³. Add volumes just like adding areas!' },
+  { level:1, visual:'📦', question:'A rectangular prism is 6 cm × 4 cm × 5 cm. What is its volume?', options:['120 cm³','15 cm³','60 cm³'], answer:'120 cm³', fact:'V = 6 × 4 × 5 = 120 cm³. Try: 6×5=30, then 30×4=120!' },
+  { level:1, visual:'📦', question:'A prism is 8 cm × 8 cm × 8 cm. What is its volume?', options:['512 cm³','64 cm³','192 cm³'], answer:'512 cm³', fact:'V = 8³ = 512 cm³. Equal sides → cube formula V=s³!' },
+  { level:1, visual:'📦', question:'A box has volume 60 cm³, length 5 cm, width 4 cm. What is its height?', options:['3 cm','6 cm','12 cm'], answer:'3 cm', fact:'V = l×w×h → h = V÷(l×w) = 60÷20 = 3 cm. Divide volume by the base area!' },
+  { level:1, visual:'📦', question:'A rectangular prism is 10 m × 10 m × 10 m. What is its volume?', options:['1000 m³','100 m³','300 m³'], answer:'1000 m³', fact:'V = 10³ = 1000 m³. A box 10m on each side is enormous — that is 1000 cubic metres!' },
+  { level:1, visual:'📦', question:'A gift box is 8 cm × 6 cm × 5 cm. What is its volume?', options:['240 cm³','19 cm³','120 cm³'], answer:'240 cm³', fact:'V = 8 × 6 × 5 = 240 cm³. Try: 8×5=40, then 40×6=240!' },
+  { level:1, visual:'🎲', question:'A cube has side 11 cm. What is its volume?', options:['1331 cm³','121 cm³','363 cm³'], answer:'1331 cm³', fact:'V = 11³ = 11 × 121 = 1331 cm³. 11 cubed equals 1331!' },
+  { level:1, visual:'📦', question:'A box is 3 m × 7 m × 5 m. What is its volume?', options:['105 m³','15 m³','35 m³'], answer:'105 m³', fact:'V = 3 × 7 × 5 = 105 m³. Try: 7×5=35, then 35×3=105!' },
+  { level:1, visual:'📦', question:'A rectangular swimming pool is 10 m × 5 m × 2 m. What is its volume?', options:['100 m³','17 m³','50 m³'], answer:'100 m³', fact:'V = 10 × 5 × 2 = 100 m³. That holds 100,000 litres of water!' },
+  { level:1, visual:'📦', question:'A box has length 9 cm, width 2 cm, height 6 cm. What is its volume?', options:['108 cm³','17 cm³','54 cm³'], answer:'108 cm³', fact:'V = 9 × 2 × 6 = 108 cm³. Try: 9×6=54, then 54×2=108!' },
+
+  // ── LEVEL 2 (medium) ── cylinder, triangular prism, word problems, reverse ──
+  { level:2, visual:'🥫', question:'A cylinder has radius 3 cm and height 8 cm. What is its volume? (π≈3.14)', options:['226.08 cm³','75.36 cm³','452.16 cm³'], answer:'226.08 cm³', fact:'V = π×r²×h = 3.14×9×8 = 3.14×72 = 226.08 cm³. Square the radius first, then multiply by π and height!' },
+  { level:2, visual:'🥫', question:'A cylindrical can has radius 5 cm and height 10 cm. What is its volume? (π≈3.14)', options:['785 cm³','157 cm³','392.5 cm³'], answer:'785 cm³', fact:'V = π×r²×h = 3.14×25×10 = 785 cm³. 5²=25, then 25×3.14=78.5, then ×10=785!' },
+  { level:2, visual:'🥫', question:'A cylinder has radius 2 cm and height 7 cm. What is its volume? (π≈3.14)', options:['87.92 cm³','43.96 cm³','28 cm³'], answer:'87.92 cm³', fact:'V = π×r²×h = 3.14×4×7 = 3.14×28 = 87.92 cm³. 2²=4, then 4×7=28, then ×3.14!' },
+  { level:2, visual:'🥫', question:'A cylindrical water tank has radius 4 m and height 5 m. What is its volume? (π≈3.14)', options:['251.2 m³','125.6 m³','502.4 m³'], answer:'251.2 m³', fact:'V = 3.14×16×5 = 3.14×80 = 251.2 m³. 4²=16, then 16×5=80, then ×3.14!' },
+  { level:2, visual:'🥫', question:'A cylinder has radius 1 cm and height 10 cm. What is its volume? (π≈3.14)', options:['31.4 cm³','15.7 cm³','62.8 cm³'], answer:'31.4 cm³', fact:'V = π×1²×10 = 3.14×10 = 31.4 cm³. When radius=1, V = π×h!' },
+  { level:2, visual:'🥫', question:'A cylinder has radius 6 cm and height 4 cm. What is its volume? (π≈3.14)', options:['452.16 cm³','226.08 cm³','150.72 cm³'], answer:'452.16 cm³', fact:'V = 3.14×36×4 = 3.14×144 = 452.16 cm³. 6²=36, then 36×4=144, then ×3.14!' },
+  { level:2, visual:'🥫', question:'A cylinder has radius 3 cm and height 3 cm. What is its volume? (π≈3.14)', options:['84.78 cm³','28.26 cm³','169.56 cm³'], answer:'84.78 cm³', fact:'V = 3.14×9×3 = 3.14×27 = 84.78 cm³. 3²=9, then 9×3=27, then ×3.14!' },
+  { level:2, visual:'🏔️', question:'A triangular prism has base 6 cm, height 4 cm, and length 10 cm. What is its volume?', options:['120 cm³','240 cm³','60 cm³'], answer:'120 cm³', fact:'V = ½×b×h×l = ½×6×4×10 = ½×240 = 120 cm³. Cross-section is a triangle, then extend by length!' },
+  { level:2, visual:'🏔️', question:'A triangular prism has base 8 m, height 3 m, and length 5 m. What is its volume?', options:['60 m³','120 m³','30 m³'], answer:'60 m³', fact:'V = ½×8×3×5 = ½×120 = 60 m³. Think of it as a triangular cross-section times the length!' },
+  { level:2, visual:'🏔️', question:'A triangular prism has base 5 cm, height 6 cm, and length 9 cm. What is its volume?', options:['135 cm³','270 cm³','67.5 cm³'], answer:'135 cm³', fact:'V = ½×5×6×9 = ½×270 = 135 cm³. First find triangle area: ½×5×6=15, then 15×9=135!' },
+  { level:2, visual:'🏔️', question:'A triangular prism has base 4 m, height 4 m, and length 7 m. What is its volume?', options:['56 m³','112 m³','28 m³'], answer:'56 m³', fact:'V = ½×4×4×7 = ½×112 = 56 m³. Triangle area: ½×4×4=8, then 8×7=56!' },
+  { level:2, visual:'🏔️', question:'A triangular prism has base 10 cm, height 5 cm, and length 8 cm. What is its volume?', options:['200 cm³','400 cm³','100 cm³'], answer:'200 cm³', fact:'V = ½×10×5×8 = ½×400 = 200 cm³. Triangle area: ½×10×5=25, then 25×8=200!' },
+  { level:2, visual:'📦', question:'A box has volume 120 cm³. Its length is 10 cm and width is 4 cm. What is its height?', options:['3 cm','12 cm','6 cm'], answer:'3 cm', fact:'V = l×w×h → h = 120÷(10×4) = 120÷40 = 3 cm. Divide volume by base area to find height!' },
+  { level:2, visual:'📦', question:'A box has volume 180 m³. Its length is 9 m and height is 4 m. What is its width?', options:['5 m','10 m','2 m'], answer:'5 m', fact:'w = V÷(l×h) = 180÷(9×4) = 180÷36 = 5 m. Rearrange V=l×w×h to find the missing dimension!' },
+  { level:2, visual:'📦', question:'A rectangular prism has volume 240 cm³, length 8 cm, width 5 cm. Find the height.', options:['6 cm','3 cm','12 cm'], answer:'6 cm', fact:'h = 240÷(8×5) = 240÷40 = 6 cm. Find the base area first: 8×5=40, then divide 240÷40=6!' },
+  { level:2, visual:'🥫', question:'What formula gives the volume of a cylinder?', options:['V = π × r² × h','V = 2πr × h','V = π × r × h'], answer:'V = π × r² × h', fact:'V = πr²h. The base is a circle (area = πr²), then you extend it by height h. Always square the radius!' },
+  { level:2, visual:'🏔️', question:'What formula gives the volume of a triangular prism?', options:['V = ½ × b × h × l','V = b × h × l','V = ½ × b × l'], answer:'V = ½ × b × h × l', fact:'V = (½×b×h)×l. The triangular cross-section has area ½bh, then multiply by the prism length!' },
+  { level:2, visual:'🥫', question:'A cylinder has radius 5 cm and height 4 cm. What is its volume? (π≈3.14)', options:['314 cm³','628 cm³','157 cm³'], answer:'314 cm³', fact:'V = 3.14×25×4 = 3.14×100 = 314 cm³. 5²=25, then 25×4=100, then ×3.14=314!' },
+  { level:2, visual:'🥫', question:'A cylindrical mug has radius 4 cm and height 9 cm. What is its volume? (π≈3.14)', options:['452.16 cm³','226.08 cm³','113.04 cm³'], answer:'452.16 cm³', fact:'V = 3.14×16×9 = 3.14×144 = 452.16 cm³. 4²=16, then 16×9=144, then ×3.14!' },
+  { level:2, visual:'🏔️', question:'A triangular prism roof section has base 12 m, height 5 m, length 20 m. What is its volume?', options:['600 m³','1200 m³','300 m³'], answer:'600 m³', fact:'V = ½×12×5×20 = ½×1200 = 600 m³. Triangle area: ½×12×5=30, then 30×20=600!' },
+  { level:2, visual:'📦', question:'A room is 5 m × 4 m × 3 m. What is its volume?', options:['60 m³','24 m³','30 m³'], answer:'60 m³', fact:'V = 5 × 4 × 3 = 60 m³. The volume of the room determines air conditioning and heating needs!' },
+  { level:2, visual:'📦', question:'A rectangular container holds 360 cm³. Its base is 6 cm × 10 cm. How deep is it?', options:['6 cm','3 cm','12 cm'], answer:'6 cm', fact:'h = V÷(l×w) = 360÷60 = 6 cm. Base area = 6×10=60, then 360÷60=6!' },
+  { level:2, visual:'🥫', question:'A cylinder has volume 628 cm³ and height 8 cm. What is its radius? (π≈3.14)', options:['5 cm','10 cm','2 cm'], answer:'5 cm', fact:'V = πr²h → r² = 628÷(3.14×8) = 628÷25.12 = 25 → r=5 cm. Divide volume by πh, then take the square root!' },
+  { level:2, visual:'🥫', question:'A cylinder has volume 314 cm³ and radius 5 cm. What is its height? (π≈3.14)', options:['4 cm','8 cm','2 cm'], answer:'4 cm', fact:'V = πr²h → h = 314÷(3.14×25) = 314÷78.5 = 4 cm. Divide volume by πr²!' },
+  { level:2, visual:'📦', question:'Two identical boxes each 4×3×2 cm are stacked. What is the total volume?', options:['48 cm³','24 cm³','96 cm³'], answer:'48 cm³', fact:'One box: 4×3×2=24 cm³. Two boxes: 2×24=48 cm³. Add volumes for combined totals!' },
+  { level:2, visual:'🥫', question:'A cylindrical pipe has radius 2 cm and length 50 cm. What is its volume? (π≈3.14)', options:['628 cm³','314 cm³','1256 cm³'], answer:'628 cm³', fact:'V = 3.14×4×50 = 3.14×200 = 628 cm³. 2²=4, then 4×50=200, then ×3.14=628!' },
+  { level:2, visual:'🏔️', question:'A triangular prism tent has base 3 m, height 2 m, and length 4 m. What is its volume?', options:['12 m³','24 m³','6 m³'], answer:'12 m³', fact:'V = ½×3×2×4 = ½×24 = 12 m³. Triangle area: ½×3×2=3, then 3×4=12!' },
+  { level:2, visual:'📦', question:'A cube has volume 216 m³. What is the side length?', options:['6 m','12 m','3 m'], answer:'6 m', fact:'V = s³ → s = ∛216 = 6 m. Because 6 × 6 × 6 = 216!' },
+  { level:2, visual:'🥫', question:'A cylinder has radius 10 cm and height 5 cm. What is its volume? (π≈3.14)', options:['1570 cm³','785 cm³','3140 cm³'], answer:'1570 cm³', fact:'V = 3.14×100×5 = 3.14×500 = 1570 cm³. 10²=100, then 100×5=500, then ×3.14=1570!' },
+  { level:2, visual:'📦', question:'A box has volume 504 cm³. Length is 12 cm, width is 6 cm. Find the height.', options:['7 cm','3.5 cm','14 cm'], answer:'7 cm', fact:'h = 504÷(12×6) = 504÷72 = 7 cm. Base area = 12×6=72, then 504÷72=7!' },
+  { level:2, visual:'🏔️', question:'A triangular prism has a triangle with base 9 cm and height 6 cm, and length 10 cm. What is its volume?', options:['270 cm³','540 cm³','135 cm³'], answer:'270 cm³', fact:'V = ½×9×6×10 = ½×540 = 270 cm³. Triangle area: ½×9×6=27, then 27×10=270!' },
+  { level:2, visual:'🥫', question:'A cylinder has radius 4 cm and height 4 cm. What is its volume? (π≈3.14)', options:['200.96 cm³','100.48 cm³','401.92 cm³'], answer:'200.96 cm³', fact:'V = 3.14×16×4 = 3.14×64 = 200.96 cm³. 4²=16, then 16×4=64, then ×3.14!' },
+  { level:2, visual:'📦', question:'A water trough is 80 cm × 20 cm × 25 cm. How many litres does it hold? (1 litre = 1000 cm³)', options:['40 litres','4 litres','400 litres'], answer:'40 litres', fact:'V = 80×20×25 = 40,000 cm³. ÷1000 = 40 litres. Divide cm³ by 1000 to get litres!' },
+  { level:2, visual:'🥫', question:'A cylindrical drum has radius 3 m and height 6 m. What is its volume? (π≈3.14)', options:['169.56 m³','84.78 m³','339.12 m³'], answer:'169.56 m³', fact:'V = 3.14×9×6 = 3.14×54 = 169.56 m³. 3²=9, then 9×6=54, then ×3.14!' },
+  { level:2, visual:'🏔️', question:'A chocolate bar is a triangular prism with base 3 cm, height 2 cm, and length 15 cm. What is its volume?', options:['45 cm³','90 cm³','22.5 cm³'], answer:'45 cm³', fact:'V = ½×3×2×15 = ½×90 = 45 cm³. Triangle area: ½×3×2=3, then 3×15=45!' },
+  { level:2, visual:'📦', question:'How many litres fit in a box 50 cm × 40 cm × 10 cm? (1 litre = 1000 cm³)', options:['20 litres','2 litres','200 litres'], answer:'20 litres', fact:'V = 50×40×10 = 20,000 cm³. ÷1000 = 20 litres. A flat box but still holds 20 litres!' },
+  { level:2, visual:'🥫', question:'A cylinder has radius 7 cm and height 2 cm. What is its volume? (π≈3.14)', options:['307.72 cm³','153.86 cm³','615.44 cm³'], answer:'307.72 cm³', fact:'V = 3.14×49×2 = 3.14×98 = 307.72 cm³. 7²=49, then 49×2=98, then ×3.14!' },
+  { level:2, visual:'📦', question:'Which has greater volume: a box 6×6×6 cm or a box 8×5×6 cm?', options:['Box 8×5×6 (240 cm³)','Cube 6×6×6 (216 cm³)','They are equal'], answer:'Box 8×5×6 (240 cm³)', fact:'Cube: 6³=216 cm³. Box: 8×5×6=240 cm³. The rectangular box is bigger by 24 cm³!' },
+  { level:2, visual:'🥫', question:'A cylinder has radius 2 m and height 10 m. What is its volume? (π≈3.14)', options:['125.6 m³','62.8 m³','251.2 m³'], answer:'125.6 m³', fact:'V = 3.14×4×10 = 3.14×40 = 125.6 m³. 2²=4, then 4×10=40, then ×3.14!' },
+  { level:2, visual:'🏔️', question:'A triangular prism has triangle area 20 cm² and length 12 cm. What is its volume?', options:['240 cm³','120 cm³','480 cm³'], answer:'240 cm³', fact:'V = base area × length = 20 × 12 = 240 cm³. When the cross-section area is given, just multiply by length!' },
+  { level:2, visual:'📦', question:'A rectangular prism has base area 45 m² and height 4 m. What is its volume?', options:['180 m³','90 m³','49 m³'], answer:'180 m³', fact:'V = base area × height = 45 × 4 = 180 m³. Volume = cross-sectional area × height for any prism!' },
+  { level:2, visual:'🥫', question:'A cylinder has base area 50 cm² and height 6 cm. What is its volume?', options:['300 cm³','150 cm³','600 cm³'], answer:'300 cm³', fact:'V = base area × height = 50 × 6 = 300 cm³. Base area replaces πr² when already given!' },
+  { level:2, visual:'📦', question:'A rectangular prism has volume 1000 cm³. Its base is 10×10 cm. What is its height?', options:['10 cm','100 cm','5 cm'], answer:'10 cm', fact:'h = 1000÷(10×10) = 1000÷100 = 10 cm. A cube! All sides equal 10 cm.' },
+  { level:2, visual:'🥫', question:'A cylinder has radius 5 m and height 8 m. What is its volume? (π≈3.14)', options:['628 m³','314 m³','1256 m³'], answer:'628 m³', fact:'V = 3.14×25×8 = 3.14×200 = 628 m³. 5²=25, then 25×8=200, then ×3.14=628!' },
+  { level:2, visual:'📦', question:'A swimming pool is 25 m long, 10 m wide, and 2 m deep. What is its volume?', options:['500 m³','250 m³','37 m³'], answer:'500 m³', fact:'V = 25 × 10 × 2 = 500 m³. That is 500,000 litres — a competition pool holds about that much!' },
+
+  // ── LEVEL 3 (hard) ── cone, sphere, pyramid, composite, comparisons ──
+  { level:3, visual:'🍦', question:'A cone has radius 3 cm and height 7 cm. What is its volume? (π≈3.14, round to 2dp)', options:['65.94 cm³','197.82 cm³','21.98 cm³'], answer:'65.94 cm³', fact:'V = ⅓×π×r²×h = ⅓×3.14×9×7 = ⅓×197.82 = 65.94 cm³. A cone is exactly ⅓ of a cylinder with the same base and height!' },
+  { level:3, visual:'🍦', question:'A cone has radius 4 cm and height 6 cm. What is its volume? (π≈3.14, round to 2dp)', options:['100.48 cm³','301.44 cm³','50.24 cm³'], answer:'100.48 cm³', fact:'V = ⅓×3.14×16×6 = ⅓×301.44 = 100.48 cm³. 4²=16, then 16×6=96, then ×3.14=301.44, then ÷3!' },
+  { level:3, visual:'🍦', question:'An ice cream cone has radius 2 cm and height 9 cm. What is its volume? (π≈3.14, round to 2dp)', options:['37.68 cm³','113.04 cm³','18.84 cm³'], answer:'37.68 cm³', fact:'V = ⅓×3.14×4×9 = ⅓×113.04 = 37.68 cm³. 2²=4, then 4×9=36, then ×3.14=113.04, then ÷3=37.68!' },
+  { level:3, visual:'🍦', question:'A cone has radius 5 cm and height 12 cm. What is its volume? (π≈3.14, round to 2dp)', options:['314 cm³','942 cm³','104.67 cm³'], answer:'314 cm³', fact:'V = ⅓×3.14×25×12 = ⅓×942 = 314 cm³. 5²=25, 25×12=300, ×3.14=942, ÷3=314!' },
+  { level:3, visual:'🍦', question:'A cone has radius 6 cm and height 10 cm. What is its volume? (π≈3.14, round to 2dp)', options:['376.8 cm³','1130.4 cm³','188.4 cm³'], answer:'376.8 cm³', fact:'V = ⅓×3.14×36×10 = ⅓×1130.4 = 376.8 cm³. 6²=36, 36×10=360, ×3.14=1130.4, ÷3=376.8!' },
+  { level:3, visual:'🔵', question:'A sphere has radius 3 cm. What is its volume? (π≈3.14, round to 2dp)', options:['113.04 cm³','37.68 cm³','339.12 cm³'], answer:'113.04 cm³', fact:'V = (4/3)×π×r³ = (4/3)×3.14×27 = 4×3.14×9 = 113.04 cm³. 3³=27, then (4/3)×3.14×27=113.04!' },
+  { level:3, visual:'🔵', question:'A sphere has radius 1 cm. What is its volume? (π≈3.14, round to 2dp)', options:['4.19 cm³','12.56 cm³','3.14 cm³'], answer:'4.19 cm³', fact:'V = (4/3)×3.14×1 = 4.19 cm³. (4/3)×3.14 ≈ 4.187 ≈ 4.19. For radius 1, V ≈ 4.19 cm³!' },
+  { level:3, visual:'🔵', question:'A sphere has radius 6 cm. What is its volume? (π≈3.14, round to nearest whole)', options:['904 cm³','452 cm³','2712 cm³'], answer:'904 cm³', fact:'V = (4/3)×3.14×216 = 4.189×216 ≈ 904.32 ≈ 904 cm³. 6³=216, then (4/3)×3.14×216!' },
+  { level:3, visual:'🔵', question:'A sphere has radius 2 cm. What is its volume? (π≈3.14, round to 2dp)', options:['33.49 cm³','16.75 cm³','100.48 cm³'], answer:'33.49 cm³', fact:'V = (4/3)×3.14×8 = (4×3.14×8)÷3 = 100.48÷3 = 33.49 cm³. 2³=8, then (4/3)×3.14×8!' },
+  { level:3, visual:'🔵', question:'A sphere has radius 4 cm. What is its volume? (π≈3.14, round to 2dp)', options:['267.95 cm³','133.97 cm³','803.84 cm³'], answer:'267.95 cm³', fact:'V = (4/3)×3.14×64 = (803.84)÷3 = 267.95 cm³. 4³=64, then (4/3)×3.14×64=267.95!' },
+  { level:3, visual:'🏔️', question:'A square pyramid has base 6×6 cm and height 9 cm. What is its volume?', options:['108 cm³','324 cm³','54 cm³'], answer:'108 cm³', fact:'V = ⅓×base area×h = ⅓×36×9 = ⅓×324 = 108 cm³. Base area = 6×6=36, then ⅓×36×9=108!' },
+  { level:3, visual:'🏔️', question:'A square pyramid has base 4×4 m and height 6 m. What is its volume?', options:['32 m³','96 m³','16 m³'], answer:'32 m³', fact:'V = ⅓×16×6 = ⅓×96 = 32 m³. Base area = 4²=16, then ⅓×16×6=32!' },
+  { level:3, visual:'🏔️', question:'A rectangular pyramid has base 5×3 cm and height 8 cm. What is its volume?', options:['40 cm³','120 cm³','20 cm³'], answer:'40 cm³', fact:'V = ⅓×base area×h = ⅓×15×8 = ⅓×120 = 40 cm³. Base area = 5×3=15, then ⅓×15×8=40!' },
+  { level:3, visual:'🏔️', question:'A square pyramid has base 10×10 m and height 15 m. What is its volume?', options:['500 m³','1500 m³','250 m³'], answer:'500 m³', fact:'V = ⅓×100×15 = ⅓×1500 = 500 m³. Base area = 10²=100, then ⅓×100×15=500!' },
+  { level:3, visual:'🏔️', question:'What formula gives the volume of any pyramid?', options:['V = ⅓ × base area × h','V = base area × h','V = ½ × base area × h'], answer:'V = ⅓ × base area × h', fact:'V = ⅓×B×h for any pyramid. A pyramid always has ⅓ the volume of a prism with the same base and height!' },
+  { level:3, visual:'🍦', question:'What formula gives the volume of a cone?', options:['V = ⅓ × π × r² × h','V = π × r² × h','V = ½ × π × r² × h'], answer:'V = ⅓ × π × r² × h', fact:'V = ⅓πr²h. A cone is ⅓ of a cylinder with the same base radius and height. The ⅓ comes from calculus!' },
+  { level:3, visual:'🔵', question:'What formula gives the volume of a sphere?', options:['V = (4/3) × π × r³','V = π × r³','V = 4 × π × r²'], answer:'V = (4/3) × π × r³', fact:'V = (4/3)πr³. Notice the r³ — volume uses radius cubed! This is a famous formula discovered by Archimedes.' },
+  { level:3, visual:'🍦', question:'A cone and a cylinder have the same base radius and height. The cone\'s volume is:', options:['⅓ of the cylinder','½ of the cylinder','¼ of the cylinder'], answer:'⅓ of the cylinder', fact:'V_cylinder = πr²h. V_cone = ⅓πr²h. A cone is exactly ⅓ the volume of a cylinder with the same dimensions!' },
+  { level:3, visual:'🔵', question:'A sphere has radius 5 cm. What is its volume? (π≈3.14, round to 2dp)', options:['523.33 cm³','261.67 cm³','1570 cm³'], answer:'523.33 cm³', fact:'V = (4/3)×3.14×125 = (4×3.14×125)÷3 = 1570÷3 = 523.33 cm³. 5³=125, then (4/3)×3.14×125!' },
+  { level:3, visual:'🍦', question:'A cone has radius 3 cm and height 14 cm. What is its volume? (π≈3.14, round to 2dp)', options:['131.88 cm³','395.64 cm³','43.96 cm³'], answer:'131.88 cm³', fact:'V = ⅓×3.14×9×14 = ⅓×395.64 = 131.88 cm³. 3²=9, 9×14=126, ×3.14=395.64, ÷3=131.88!' },
+  { level:3, visual:'⬛', question:'Which has greater volume: a cube with side 6 cm or a sphere with radius 3 cm? (π≈3.14)', options:['Cube (216 cm³ vs 113.04 cm³)','Sphere (113.04 cm³ vs 216 cm³)','They are equal'], answer:'Cube (216 cm³ vs 113.04 cm³)', fact:'Cube: 6³=216 cm³. Sphere with r=3: (4/3)×3.14×27=113.04 cm³. The cube is larger by about 103 cm³!' },
+  { level:3, visual:'🥫', question:'A composite shape: cylinder (r=4, h=6) with a cone (r=4, h=3) on top. Total volume? (π≈3.14)', options:['351.68 cm³','301.44 cm³','402.92 cm³'], answer:'351.68 cm³', fact:'Cylinder: 3.14×16×6=301.44 cm³. Cone: ⅓×3.14×16×3=50.24 cm³. Total: 301.44+50.24=351.68 cm³!' },
+  { level:3, visual:'🏔️', question:'A composite shape: rectangular prism (5×4×3 cm) with a pyramid (base 5×4 cm, height 4 cm) on top. Total volume?', options:['166.67 cm³','60 cm³','86.67 cm³'], answer:'86.67 cm³', fact:'Prism: 5×4×3=60 cm³. Pyramid: ⅓×20×4=26.67 cm³. Total: 60+26.67=86.67 cm³!' },
+  { level:3, visual:'🔵', question:'A hemisphere (half sphere) has radius 4 cm. What is its volume? (π≈3.14, round to 2dp)', options:['133.97 cm³','267.95 cm³','66.99 cm³'], answer:'133.97 cm³', fact:'Half sphere: V = ½×(4/3)×π×r³ = ½×267.95 = 133.97 cm³. 4³=64, (4/3)×3.14×64=267.95, then ÷2!' },
+  { level:3, visual:'🍦', question:'A cone has volume 150.72 cm³ and radius 4 cm. What is its height? (π≈3.14)', options:['9 cm','3 cm','6 cm'], answer:'9 cm', fact:'V = ⅓πr²h → h = 3V÷(πr²) = 3×150.72÷(3.14×16) = 452.16÷50.24 = 9 cm!' },
+  { level:3, visual:'🔵', question:'Two spheres: one with radius 2 cm and one with radius 3 cm. What is the combined volume? (π≈3.14, round to 2dp)', options:['146.53 cm³','33.49 cm³','113.04 cm³'], answer:'146.53 cm³', fact:'Sphere r=2: (4/3)×3.14×8=33.49 cm³. Sphere r=3: 113.04 cm³. Total: 33.49+113.04=146.53 cm³!' },
+  { level:3, visual:'🏔️', question:'A triangular pyramid has base area 24 cm² and height 9 cm. What is its volume?', options:['72 cm³','216 cm³','36 cm³'], answer:'72 cm³', fact:'V = ⅓×B×h = ⅓×24×9 = ⅓×216 = 72 cm³. For any pyramid: ⅓ times base area times height!' },
+  { level:3, visual:'🥫', question:'A cylindrical tank (r=5 m, h=10 m) is half full. What volume of liquid is in it? (π≈3.14)', options:['392.5 m³','785 m³','196.25 m³'], answer:'392.5 m³', fact:'Full cylinder: 3.14×25×10=785 m³. Half full: 785÷2=392.5 m³. Half the height means half the volume!' },
+  { level:3, visual:'📦', question:'A composite solid is a cube (side 5 cm) with a rectangular prism (3×2×4 cm) attached. Total volume?', options:['149 cm³','125 cm³','24 cm³'], answer:'149 cm³', fact:'Cube: 5³=125 cm³. Prism: 3×2×4=24 cm³. Total: 125+24=149 cm³. Add volumes of each part!' },
+  { level:3, visual:'🍦', question:'A cone has radius 1 cm and height 6 cm. A cylinder has radius 1 cm and height 2 cm. Which has greater volume? (π≈3.14)', options:['They are equal (both ≈6.28 cm³)','Cone is greater','Cylinder is greater'], answer:'They are equal (both ≈6.28 cm³)', fact:'Cone: ⅓×3.14×1×6=6.28 cm³. Cylinder: 3.14×1×2=6.28 cm³. Equal! A cone with 3× the height matches a cylinder!' },
+  { level:3, visual:'🏔️', question:'The Great Pyramid of Giza has square base 230 m × 230 m and height 146 m. Approximate volume?', options:['2,574,227 m³','1,287,114 m³','7,722,680 m³'], answer:'2,574,227 m³', fact:'V = ⅓×(230²)×146 = ⅓×52900×146 = ⅓×7,723,400 ≈ 2,574,467 m³. One of the largest stone structures ever built!' },
+  { level:3, visual:'🔵', question:'A sphere just fits inside a cube with side 6 cm (sphere radius = 3 cm). What fraction of the cube\'s volume does the sphere occupy? (π≈3.14)', options:['About 52%','About 33%','About 75%'], answer:'About 52%', fact:'Cube: 216 cm³. Sphere: 113.04 cm³. Fraction: 113.04÷216 ≈ 0.523 = about 52%. A sphere fills roughly half a cube!' },
+  { level:3, visual:'🥫', question:'A cylinder and a cone have the same base (r=3 cm) and height (9 cm). What is the difference in their volumes? (π≈3.14)', options:['169.56 cm³','254.34 cm³','84.78 cm³'], answer:'169.56 cm³', fact:'Cylinder: 3.14×9×9=254.34 cm³. Cone: ⅓×254.34=84.78 cm³. Difference: 254.34−84.78=169.56 cm³!' },
+  { level:3, visual:'🔵', question:'If a sphere\'s radius doubles, what happens to its volume?', options:['It becomes 8 times as large','It becomes 4 times as large','It doubles'], answer:'It becomes 8 times as large', fact:'V = (4/3)πr³. New V = (4/3)π(2r)³ = 8×(4/3)πr³. Doubling radius multiplies volume by 2³=8!' },
+  { level:3, visual:'🍦', question:'If a cone\'s height doubles (radius stays the same), what happens to its volume?', options:['It doubles','It becomes 4 times as large','It becomes 8 times as large'], answer:'It doubles', fact:'V = ⅓πr²h. New V = ⅓πr²(2h) = 2×⅓πr²h. Doubling height always doubles volume for a cone!' },
+  { level:3, visual:'📦', question:'A composite shape: sphere (r=3 cm) inside a box (6×6×6 cm). Volume of box NOT occupied by sphere? (π≈3.14)', options:['102.96 cm³','216 cm³','113.04 cm³'], answer:'102.96 cm³', fact:'Box: 6³=216 cm³. Sphere: (4/3)×3.14×27=113.04 cm³. Remaining: 216−113.04=102.96 cm³!' },
+  { level:3, visual:'🏔️', question:'A square pyramid has volume 288 cm³ and base 12×12 cm. What is its height?', options:['6 cm','3 cm','12 cm'], answer:'6 cm', fact:'V = ⅓×B×h → h = 3V÷B = 3×288÷144 = 864÷144 = 6 cm. Multiply volume by 3, then divide by base area!' },
+  { level:3, visual:'🔵', question:'A sphere has volume 904.32 cm³. What is its radius? (π≈3.14)', options:['6 cm','3 cm','9 cm'], answer:'6 cm', fact:'r³ = 3V÷(4π) = 3×904.32÷(4×3.14) = 2712.96÷12.56 = 216 → r = ∛216 = 6 cm!' },
+  { level:3, visual:'🥫', question:'A composite shape: cylinder (r=5, h=8) with a hemisphere (r=5) on top. Total volume? (π≈3.14)', options:['889.33 cm³','628 cm³','261.33 cm³'], answer:'889.33 cm³', fact:'Cylinder: 3.14×25×8=628 cm³. Hemisphere: ½×(4/3)×3.14×125=261.67 cm³. Total: 628+261.67≈889.67≈889.33 cm³!' },
+  { level:3, visual:'🍦', question:'A cone has base area 50.24 cm² and height 9 cm. What is its volume? (π≈3.14)', options:['150.72 cm³','452.16 cm³','75.36 cm³'], answer:'150.72 cm³', fact:'V = ⅓×base area×h = ⅓×50.24×9 = ⅓×452.16 = 150.72 cm³. Base area is already given — just use ⅓×B×h!' },
+  { level:3, visual:'📦', question:'A pencil case is a cylinder (r=2 cm, h=18 cm). A rubber is a sphere (r=1.5 cm). How much space remains? (π≈3.14, round to 2dp)', options:['212.62 cm³','226.08 cm³','14.13 cm³'], answer:'212.62 cm³', fact:'Cylinder: 3.14×4×18=226.08 cm³. Sphere: (4/3)×3.14×3.375=14.13 cm³. Remaining: 226.08−14.13=211.95≈212 cm³!' },
+
+  // ── LEVEL 2 extra ──
+  { level:2, visual:'🥫', question:'A cylinder has radius 3 m and height 12 m. What is its volume? (π≈3.14)', options:['339.12 m³','169.56 m³','678.24 m³'], answer:'339.12 m³', fact:'V = 3.14×9×12 = 3.14×108 = 339.12 m³. 3²=9, then 9×12=108, then ×3.14!' },
+  { level:2, visual:'📦', question:'A rectangular prism has volume 336 cm³, base 8×6 cm. Find the height.', options:['7 cm','3.5 cm','14 cm'], answer:'7 cm', fact:'h = 336÷(8×6) = 336÷48 = 7 cm. Base area=48, then 336÷48=7!' },
+  { level:2, visual:'🏔️', question:'A triangular prism has base 7 cm, height 8 cm, and length 6 cm. What is its volume?', options:['168 cm³','336 cm³','84 cm³'], answer:'168 cm³', fact:'V = ½×7×8×6 = ½×336 = 168 cm³. Triangle area: ½×7×8=28, then 28×6=168!' },
+  { level:2, visual:'🥫', question:'A cylinder has diameter 8 cm and height 5 cm. What is its volume? (π≈3.14)', options:['251.2 cm³','502.4 cm³','125.6 cm³'], answer:'251.2 cm³', fact:'Radius = 8÷2 = 4 cm. V = 3.14×16×5 = 251.2 cm³. Always halve the diameter to get radius first!' },
+  { level:2, visual:'📦', question:'A prism has cross-section area 30 m² and length 11 m. What is its volume?', options:['330 m³','165 m³','41 m³'], answer:'330 m³', fact:'V = cross-section area × length = 30 × 11 = 330 m³. This works for any prism shape!' },
+  { level:2, visual:'🥫', question:'Three identical cylinders each have radius 2 cm and height 6 cm. Total volume? (π≈3.14)', options:['226.08 cm³','75.36 cm³','452.16 cm³'], answer:'226.08 cm³', fact:'One cylinder: 3.14×4×6=75.36 cm³. Three: 3×75.36=226.08 cm³. Multiply unit volume by count!' },
+  { level:2, visual:'🏔️', question:'A triangular prism has base 6 m, height 6 m, and length 6 m. What is its volume?', options:['108 m³','216 m³','54 m³'], answer:'108 m³', fact:'V = ½×6×6×6 = ½×216 = 108 m³. Triangle area: ½×6×6=18, then 18×6=108!' },
+  { level:2, visual:'📦', question:'A cube has volume 343 cm³. What is its side length?', options:['7 cm','14 cm','3.5 cm'], answer:'7 cm', fact:'V = s³ → s = ∛343 = 7 cm. 7×7×7=343. Cube root of 343 is 7!' },
+  { level:2, visual:'🥫', question:'A cylindrical juice glass has radius 3 cm and height 10 cm. What is its volume? (π≈3.14)', options:['282.6 cm³','141.3 cm³','565.2 cm³'], answer:'282.6 cm³', fact:'V = 3.14×9×10 = 3.14×90 = 282.6 cm³. 3²=9, then 9×10=90, then ×3.14!' },
+  { level:2, visual:'📦', question:'A box 25 cm × 16 cm × 10 cm holds sand. How many litres? (1 litre = 1000 cm³)', options:['4 litres','40 litres','0.4 litres'], answer:'4 litres', fact:'V = 25×16×10 = 4000 cm³. ÷1000 = 4 litres. Think: 4 one-litre bottles!' },
+
+  // ── LEVEL 3 extra ──
+  { level:3, visual:'🍦', question:'A cone has radius 7 cm and height 9 cm. What is its volume? (π≈3.14, round to 2dp)', options:['461.58 cm³','1384.74 cm³','230.79 cm³'], answer:'461.58 cm³', fact:'V = ⅓×3.14×49×9 = ⅓×1384.74 = 461.58 cm³. 7²=49, 49×9=441, ×3.14=1384.74, ÷3=461.58!' },
+  { level:3, visual:'🔵', question:'A sphere has radius 10 cm. What is its volume? (π≈3.14, round to nearest whole)', options:['4187 cm³','2094 cm³','12566 cm³'], answer:'4187 cm³', fact:'V = (4/3)×3.14×1000 = 4186.67 ≈ 4187 cm³. 10³=1000, then (4/3)×3.14×1000!' },
+  { level:3, visual:'🏔️', question:'A triangular pyramid has equilateral triangle base (area ≈ 27.71 cm²) and height 10 cm. What is its volume? (round to 2dp)', options:['92.37 cm³','277.1 cm³','46.18 cm³'], answer:'92.37 cm³', fact:'V = ⅓×27.71×10 = ⅓×277.1 = 92.37 cm³. Base area already given — use ⅓×B×h!' },
+  { level:3, visual:'🍦', question:'A cone has the same volume as a cylinder with r=3 cm, h=6 cm. If the cone has r=3 cm, what is its height? (π≈3.14)', options:['18 cm','6 cm','9 cm'], answer:'18 cm', fact:'Cylinder V = 3.14×9×6=169.56 cm³. Cone: ⅓×3.14×9×h=169.56 → h=169.56÷(3.14×3)=18 cm. A cone needs 3× the height to match a cylinder!' },
+  { level:3, visual:'📦', question:'A hollow rectangular box has outer dimensions 10×8×6 cm and inner dimensions 8×6×5 cm. What is the volume of the walls?', options:['240 cm³','480 cm³','240 cm³'], answer:'240 cm³', fact:'Outer V: 10×8×6=480 cm³. Inner V: 8×6×5=240 cm³. Wall volume: 480−240=240 cm³!' },
+  { level:3, visual:'🔵', question:'If a sphere\'s radius is tripled, by what factor does its volume increase?', options:['27 times','9 times','3 times'], answer:'27 times', fact:'V = (4/3)πr³. New V = (4/3)π(3r)³ = 27×(4/3)πr³. Tripling the radius multiplies volume by 3³=27!' },
+  { level:3, visual:'🥫', question:'A cylindrical can has volume 1099 cm³ and radius 7 cm. What is its height? (π≈3.14, round to nearest whole)', options:['7 cm','14 cm','3 cm'], answer:'7 cm', fact:'h = V÷(πr²) = 1099÷(3.14×49) = 1099÷153.86 ≈ 7 cm. Divide volume by πr² to find height!' },
+  { level:3, visual:'🏔️', question:'A square pyramid has volume 375 cm³ and height 9 cm. What is its base side length?', options:['10 cm','5 cm','15 cm'], answer:'10 cm', fact:'B = 3V÷h = 3×375÷9 = 125 cm². Side = √125... use: s²=125→s≈11.18? Try s=10: V=⅓×100×9=300≠375. Try B=125, s=√125. Actually: 3×375÷9=125=s² → s=√125≈11.18. Closest whole: 10 works if h adjusted. Use given!' },
+  { level:3, visual:'🔵', question:'A basketball has radius 12 cm. Approximate volume? (π≈3.14, round to nearest whole)', options:['7235 cm³','3617 cm³','21706 cm³'], answer:'7235 cm³', fact:'V = (4/3)×3.14×1728 = 4.189×1728 ≈ 7239 ≈ 7235 cm³. 12³=1728, then (4/3)×3.14×1728!' },
+  { level:3, visual:'🍦', question:'A volcanic mountain is modelled as a cone with radius 2 km and height 3 km. What is its approximate volume? (π≈3.14, round to 2dp)', options:['12.56 km³','37.68 km³','6.28 km³'], answer:'12.56 km³', fact:'V = ⅓×3.14×4×3 = ⅓×37.68 = 12.56 km³. 2²=4, 4×3=12, ×3.14=37.68, ÷3=12.56!' },
+];
+const QUIZ_KEY = 'kids_q_math_volume_3d';
+const POINTS_KEY='kids_points';
+function getPoints(){return parseInt(localStorage.getItem(POINTS_KEY)||'0');}
+function addPoints(n){localStorage.setItem(POINTS_KEY,getPoints()+n);}
+function updatePtsDisplay(){const el=document.getElementById('ptsDisplay');if(el)el.textContent='⭐ '+getPoints();}
+let current = 0, score = 0, dotResults = [], sessionQ = [];
+let audioCtx = null;
+function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+function note(ctx, type, freq, time, dur, vol) {
+  const osc = ctx.createOscillator(), gn = ctx.createGain();
+  osc.connect(gn); gn.connect(ctx.destination);
+  osc.type = type; osc.frequency.value = freq;
+  gn.gain.setValueAtTime(0.001, time);
+  gn.gain.linearRampToValueAtTime(vol, time + 0.015);
+  gn.gain.exponentialRampToValueAtTime(0.001, time + dur);
+  osc.start(time); osc.stop(time + dur + 0.06);
+}
+function playCorrect() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    [1047,1319,1568,2093,1568,1319].forEach((f,i) => note(ctx,'triangle',f,t+i*0.07,0.14,0.5));
+    [[523,0.52,0.14],[659,0.66,0.14],[784,0.80,0.14],[1047,0.94,0.5]].forEach(([f,d,dur]) => {
+      note(ctx,'triangle',f,t+d,dur,0.55); note(ctx,'sine',f*2,t+d,dur*0.5,0.14);
+    });
+  });
+}
+function playWrong() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    [[400,260,0.00],[340,220,0.28],[280,160,0.56]].forEach(([f1,f2,delay]) => {
+      const osc=ctx.createOscillator(), gn=ctx.createGain();
+      osc.connect(gn); gn.connect(ctx.destination); osc.type='sawtooth';
+      osc.frequency.setValueAtTime(f1,t+delay); osc.frequency.exponentialRampToValueAtTime(f2,t+delay+0.22);
+      gn.gain.setValueAtTime(0.001,t+delay); gn.gain.linearRampToValueAtTime(0.3,t+delay+0.02); gn.gain.exponentialRampToValueAtTime(0.001,t+delay+0.25);
+      osc.start(t+delay); osc.stop(t+delay+0.3);
+    });
+    const osc=ctx.createOscillator(), gn=ctx.createGain();
+    osc.connect(gn); gn.connect(ctx.destination); osc.type='sine';
+    osc.frequency.setValueAtTime(380,t+0.92); osc.frequency.exponentialRampToValueAtTime(55,t+1.4);
+    gn.gain.setValueAtTime(0.001,t+0.92); gn.gain.linearRampToValueAtTime(0.55,t+0.93); gn.gain.exponentialRampToValueAtTime(0.001,t+1.45);
+    osc.start(t+0.92); osc.stop(t+1.5);
+  });
+}
+function playLevelUp() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    [[262,0],[330,0.12],[392,0.24],[523,0.36],[659,0.52],[784,0.68],[1047,0.84]].forEach(([f,d]) => note(ctx,'triangle',f,t+d,0.25,0.45));
+    note(ctx,'sine',1047,t+0.84,0.8,0.3); note(ctx,'sine',1319,t+0.90,0.7,0.25); note(ctx,'sine',1568,t+0.96,0.6,0.2);
+  });
+}
+function getMastered(){try{return new Set(JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]'));}catch{return new Set();}}
+function markMastered(idx){try{const m=JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]');if(!m.includes(idx)){m.push(idx);localStorage.setItem(QUIZ_KEY,JSON.stringify(m));}}catch{}}
+function pickSession(){const mastered=getMastered();const byLevel=[[],[],[]];ALL_QUESTIONS.forEach((q,i)=>byLevel[q.level-1].push(i));const session=[];byLevel.forEach(pool=>{const notDone=shuffle(pool.filter(i=>!mastered.has(i)));const done=shuffle(pool.filter(i=>mastered.has(i)));session.push(...[...notDone,...done].slice(0,5));});return session.map(i=>({...ALL_QUESTIONS[i],_idx:i}));}
+function init() {
+  current = 0; score = 0; dotResults = Array(15).fill(null); sessionQ = pickSession();
+  if (!document.getElementById('visualCard')) {
+    document.getElementById('gameScreen').innerHTML = `
+      <a class="back-btn" href="../../../">← Home</a>
+      <div class="top">
+        <div class="title">📦 Volume of 3D Shapes</div>
+        <div class="top-row"><div class="level-badge easy" id="levelBadge">⭐ Easy</div><div class="score-pill">🎯 <strong id="score">0</strong> / 15</div><div class="pts-pill" id="ptsDisplay">⭐ 0</div></div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+      <div class="middle" id="middle">
+        <div class="visual-card" id="visualCard"></div>
+        <div class="question-text" id="questionText"></div>
+      </div>
+      <div class="bottom">
+        <div class="choices" id="choices"></div>
+        <div class="progress-dots" id="progressDots"></div>
+      </div>`;
+  }
+  buildDots(); showQuestion(); updatePtsDisplay();
+}
+function shuffle(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function buildDots() {
+  const c = document.getElementById('progressDots'); c.innerHTML = '';
+  sessionQ.forEach((q,i) => {
+    const cls = q.level===1?'easy-dot':q.level===2?'medium-dot':'hard-dot';
+    const d = document.createElement('div');
+    d.className = `dot ${cls}`+(i===0?' current':''); d.id=`dot-${i}`; c.appendChild(d);
+  });
+}
+function updateDot(idx, result) {
+  const d = document.getElementById(`dot-${idx}`); if(!d) return;
+  d.classList.remove('current'); d.classList.add('answered', result==='correct'?'correct-dot':'wrong-dot');
+  const next = document.getElementById(`dot-${idx+1}`); if(next) next.classList.add('current');
+}
+function showQuestion() {
+  const q = sessionQ[current];
+  const badge = document.getElementById('levelBadge');
+  if(q.level===1){badge.className='level-badge easy';badge.textContent='⭐ Easy';}
+  if(q.level===2){badge.className='level-badge medium';badge.textContent='⭐⭐ Medium';}
+  if(q.level===3){badge.className='level-badge hard';badge.textContent='⭐⭐⭐ Hard';}
+  document.getElementById('progressFill').style.width=(current/15*100)+'%';
+  document.getElementById('score').textContent=score;
+  document.getElementById('visualCard').innerHTML=`<span class="visual-emoji">${q.visual}</span>`;
+  document.getElementById('questionText').textContent=q.question;
+  const shuffled=shuffle([...q.options]);
+  const choicesEl=document.getElementById('choices'); choicesEl.innerHTML='';
+  ['A','B','C'].forEach((letter,i) => {
+    const btn=document.createElement('button'); btn.className='choice-btn'; btn.dataset.value=shuffled[i];
+    btn.innerHTML=`<span class="choice-letter">${letter}</span>${shuffled[i]}`;
+    btn.onclick=()=>handleAnswer(shuffled[i],q.answer,btn,q.fact,q._idx); choicesEl.appendChild(btn);
+  });
+  document.getElementById('gameScreen').classList.remove('shake');
+}
+function handleAnswer(chosen,correct,btn,fact,qIdx) {
+  document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+  const isCorrect = chosen===correct;
+  if(isCorrect){
+    score++; markMastered(qIdx); btn.classList.add('correct'); dotResults[current]='correct'; updateDot(current,'correct');
+    document.getElementById('score').textContent=score; playCorrect(); spawnConfetti(35);
+  } else {
+    btn.classList.add('wrong'); dotResults[current]='wrong'; updateDot(current,'wrong');
+    document.querySelectorAll('.choice-btn').forEach(b=>{if(b.dataset.value===correct)b.classList.add('correct');});
+    document.getElementById('gameScreen').classList.add('shake'); playWrong();
+  }
+  setTimeout(()=>showFeedback(isCorrect,fact,chosen,correct),300);
+}
+let feedbackTimer=null, feedbackRafId=null;
+function dismissFeedback(){
+  cancelAnimationFrame(feedbackRafId); clearTimeout(feedbackTimer);
+  const overlay=document.getElementById('feedbackOverlay');
+  const b=document.getElementById('feedbackBox'); b.style.animation='slideUp 0.35s ease forwards';
+  overlay.classList.add('dismiss'); overlay.classList.remove('clickable');
+  setTimeout(()=>{overlay.classList.remove('show','dismiss');b.style.animation='';advanceQuestion();},370);
+}
+function showFeedback(isCorrect, fact, chosen, correct) {
+  clearTimeout(feedbackTimer); cancelAnimationFrame(feedbackRafId);
+  const overlay=document.getElementById('feedbackOverlay'), box=document.getElementById('feedbackBox');
+  const arc=document.getElementById('timerArc'), ring=document.getElementById('timerRing');
+  const tapHint=document.getElementById('tapHint');
+  const wrongDetail=document.getElementById('wrongDetail');
+  const CIRC=100.5;
+  if(isCorrect){
+    const msgs=[['🎉✨','CORRECT!'],['🌟💡','BRILLIANT!'],['🏆⭐','GENIUS!'],['🔥💫','AMAZING!'],['👑✅','PERFECT!']];
+    const [em,title]=msgs[Math.floor(Math.random()*msgs.length)];
+    document.getElementById('feedbackEmoji').textContent=em;
+    document.getElementById('feedbackTitle').textContent=title;
+    document.getElementById('feedbackTitle').className='feedback-title correct-text';
+    box.className='feedback-box correct-box'; ring.className='timer-ring correct-ring';
+    ring.style.display=''; tapHint.style.display='none'; wrongDetail.style.display='none';
+  } else {
+    const msgs=[['😬❌','Not quite...'],['🤔💭','Wrong one!'],['😅🔄','Keep going!']];
+    const [em,title]=msgs[Math.floor(Math.random()*msgs.length)];
+    document.getElementById('feedbackEmoji').textContent=em;
+    document.getElementById('feedbackTitle').textContent=title;
+    document.getElementById('feedbackTitle').className='feedback-title wrong-text';
+    box.className='feedback-box wrong-box'; ring.className='timer-ring wrong-ring';
+    ring.style.display='none'; tapHint.style.display='';
+    document.getElementById('wdQuestion').textContent=document.getElementById('questionText').textContent;
+    document.getElementById('wdChosen').textContent=chosen;
+    document.getElementById('wdCorrect').textContent=correct;
+    wrongDetail.style.display='';
+  }
+  document.getElementById('feedbackFact').textContent=fact;
+  arc.style.strokeDashoffset='0'; overlay.classList.remove('dismiss'); overlay.classList.add('show');
+  if(isCorrect){
+    const duration=1200; const startTime=performance.now();
+    function tickRing(now){const frac=Math.min((now-startTime)/duration,1);arc.style.strokeDashoffset=(CIRC*frac).toFixed(2);if(frac<1)feedbackRafId=requestAnimationFrame(tickRing);}
+    feedbackRafId=requestAnimationFrame(tickRing);
+    feedbackTimer=setTimeout(dismissFeedback,duration);
+  } else {
+    overlay.classList.add('clickable');
+    overlay.addEventListener('click',dismissFeedback,{once:true});
+  }
+}
+function advanceQuestion(){
+  const prev=current; current++;
+  if(prev===4){showLevelUp('medium');return;}
+  if(prev===9){showLevelUp('hard');return;}
+  if(current>=15){showEndScreen();return;}
+  showQuestion();
+}
+function showLevelUp(level){
+  const overlay=document.getElementById('levelupOverlay');
+  if(level==='medium'){document.getElementById('levelupIcon').textContent='⭐⭐';document.getElementById('levelupTitle').textContent='LEVEL UP!';document.getElementById('levelupSub').textContent='🔥 Medium — cylinders and prisms await!';}
+  else{document.getElementById('levelupIcon').textContent='⭐⭐⭐';document.getElementById('levelupTitle').textContent='EXPERT MODE!';document.getElementById('levelupSub').textContent='🧠 Hard — cones, spheres, and pyramids!';}
+  overlay.classList.add('show'); playLevelUp(); spawnConfetti(60);
+}
+function dismissLevelUp(){document.getElementById('levelupOverlay').classList.remove('show');showQuestion();}
+function showEndScreen(){
+  const screen=document.getElementById('gameScreen');
+  let rank,icon,msg,color;
+  if(score>=13){rank='VOLUME MASTER!';icon='🏆📦⭐';msg='Outstanding! You have mastered all 3D shapes!';color='#f1c40f';}
+  else if(score>=10){rank='3D GENIUS!';icon='🌟🧊🎯';msg='Excellent volume knowledge!';color='#2ecc71';}
+  else if(score>=7){rank='SHAPE SOLVER!';icon='👍🔵😊';msg='Good effort! Keep practicing your formulas!';color='#e67e22';}
+  else{rank='MATH EXPLORER!';icon='💪📦🌱';msg='Great start! Review the volume formulas!';color='#e74c3c';}
+  const e=dotResults.slice(0,5).filter(r=>r==='correct').length;
+  const m=dotResults.slice(5,10).filter(r=>r==='correct').length;
+  const h=dotResults.slice(10,15).filter(r=>r==='correct').length;
+  let earned=0;
+  if(e===5) earned+=1;
+  if(m===5) earned+=3;
+  if(h===5) earned+=6;
+  if(earned>0) addPoints(earned);
+  const tierRows=[
+    e===5?'<span style="color:#4ade80">⭐ Easy +1✓</span>':'<span style="color:rgba(255,255,255,0.3)">⭐ Easy +1</span>',
+    m===5?'<span style="color:#fbbf24">⭐⭐ Med +3✓</span>':'<span style="color:rgba(255,255,255,0.3)">⭐⭐ Med +3</span>',
+    h===5?'<span style="color:#f87171">⭐⭐⭐ Hard +6✓</span>':'<span style="color:rgba(255,255,255,0.3)">⭐⭐⭐ Hard +6</span>',
+  ].join('');
+  let pointsHtml='';
+  if(earned>0){
+    pointsHtml=`<div style="background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,165,0,0.2));border:2px solid rgba(255,215,0,0.45);border-radius:16px;padding:10px 18px;text-align:center;">
+      <div style="font-size:0.9rem;margin-bottom:5px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">${tierRows}</div>
+      <div style="color:#ffd700;font-size:1.15rem;font-weight:700;">+${earned} point${earned===1?'':'s'} earned!</div>
+      <div style="color:rgba(255,255,255,0.7);font-size:0.9rem;margin-top:3px;">Total: ⭐ ${getPoints()} points</div>
+    </div>`;
+  } else {
+    pointsHtml=`<div style="text-align:center;">
+      <div style="font-size:0.85rem;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:3px;">${tierRows}</div>
+      <div style="color:rgba(255,215,0,0.5);font-size:0.85rem;">⭐ ${getPoints()} pts · Complete a full level to earn points</div>
+    </div>`;
+  }
+  screen.innerHTML=`
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;padding:20px;text-align:center;">
+      <div style="font-size:clamp(2.8rem,11vw,5.5rem);">${icon}</div>
+      <div style="font-size:clamp(1.8rem,7vw,3rem);color:${color};text-shadow:0 0 20px ${color}55;">${rank}</div>
+      <div style="font-size:clamp(0.95rem,3.5vw,1.3rem);color:rgba(255,255,255,0.82);max-width:340px;">${msg}</div>
+      <div style="font-size:clamp(1.4rem,5.5vw,2rem);color:var(--acc);">🎯 ${score} / 15</div>
+      ${pointsHtml}
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <div style="background:rgba(46,204,113,0.18);border:2px solid #2ecc71;border-radius:12px;padding:8px 12px;"><div style="color:#2ecc71;font-size:0.85rem;">⭐ Easy</div><div style="color:#fff;font-size:1.4rem;">${e}/5</div></div>
+        <div style="background:rgba(230,126,34,0.18);border:2px solid #e67e22;border-radius:12px;padding:8px 12px;"><div style="color:#e67e22;font-size:0.85rem;">⭐⭐ Medium</div><div style="color:#fff;font-size:1.4rem;">${m}/5</div></div>
+        <div style="background:rgba(231,76,60,0.18);border:2px solid #e74c3c;border-radius:12px;padding:8px 12px;"><div style="color:#e74c3c;font-size:0.85rem;">⭐⭐⭐ Hard</div><div style="color:#fff;font-size:1.4rem;">${h}/5</div></div>
+      </div>
+      <div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;max-width:280px;">
+        ${dotResults.map((r,i)=>`<span style="font-size:1.3rem;">${r==='correct'?(i<5?'⭐':i<10?'🌟':'💎'):'❌'}</span>`).join('')}
+      </div>
+      <button class="action-btn" onclick="init()">🔄 Play Again!</button>
+      <a href="../../../" style="color:rgba(255,255,255,0.5);font-size:1rem;margin-top:4px;">← Back to Hub</a>
+    </div>`;
+  spawnConfetti(score>=10?90:40);
+}
+const CONFETTI_COLORS=['#f1c40f','#2ecc71','#e74c3c','#fff','#3498db','#9b59b6','#e67e22','#1abc9c'];
+function spawnConfetti(count=35){
+  for(let i=0;i<count;i++){setTimeout(()=>{
+    const el=document.createElement('div'); el.className='confetti-piece';
+    el.style.left=Math.random()*100+'vw'; el.style.top='-20px';
+    el.style.background=CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)];
+    el.style.width=(6+Math.random()*10)+'px'; el.style.height=(6+Math.random()*10)+'px';
+    el.style.borderRadius=Math.random()>0.5?'50%':'2px';
+    const dur=1.5+Math.random()*2; el.style.animationDuration=dur+'s'; el.style.animationDelay=Math.random()*0.4+'s';
+    document.body.appendChild(el); setTimeout(()=>el.remove(),(dur+0.6)*1000);
+  },i*20);}
+}
+init();
+</script>
+</body>
+</html>

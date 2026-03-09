@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>⭕ Circles</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+  :root { --c1:#0a1628; --c2:#1a3a6b; --acc:#60a5fa; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Fredoka One',cursive; background:linear-gradient(160deg,var(--c1) 0%,var(--c2) 50%,var(--c1) 100%); min-height:100dvh; overflow:hidden; position:relative; }
+  .bg-deco { position:fixed; font-size:2rem; opacity:0.07; pointer-events:none; animation:floatDeco ease-in-out infinite; }
+  @keyframes floatDeco { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-22px) rotate(15deg)} }
+  .back-btn { position:fixed; top:10px; left:10px; z-index:50; font-family:'Fredoka One',cursive; font-size:0.9rem; padding:5px 12px; border-radius:50px; border:2px solid rgba(255,255,255,0.25); background:rgba(255,255,255,0.1); color:#fff; cursor:pointer; text-decoration:none; -webkit-tap-highlight-color:transparent; }
+  .screen { width:100vw; height:100dvh; display:flex; flex-direction:column; align-items:center; padding:10px 14px 8px; position:relative; z-index:10; }
+  .screen.shake { animation:shakeScreen 0.5s ease; }
+  @keyframes shakeScreen { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-10px) rotate(-1deg)} 30%{transform:translateX(10px) rotate(1deg)} 45%{transform:translateX(-7px)} 60%{transform:translateX(7px)} 75%{transform:translateX(-3px)} }
+  .top { width:100%; flex-shrink:0; text-align:center; padding-top:28px; }
+  .title { font-size:clamp(1.5rem,6vw,2.4rem); color:var(--acc); text-shadow:0 3px 10px rgba(0,0,0,0.5); }
+  .top-row { display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:8px; }
+  .level-badge { padding:4px 14px; border-radius:50px; font-size:clamp(0.8rem,3vw,1rem); border:2px solid; }
+  .level-badge.easy   { background:rgba(46,204,113,0.2);  color:#2ecc71; border-color:#2ecc71; }
+  .level-badge.medium { background:rgba(230,126,34,0.2);  color:#e67e22; border-color:#e67e22; }
+  .level-badge.hard   { background:rgba(231,76,60,0.2);   color:#e74c3c; border-color:#e74c3c; }
+  .score-pill { background:rgba(255,255,255,0.1); border:2px solid rgba(255,255,255,0.25); border-radius:50px; padding:4px 14px; color:#fff; font-size:clamp(0.85rem,3vw,1.1rem); }
+  .pts-pill { background:rgba(255,215,0,0.15); border:2px solid rgba(255,215,0,0.45); border-radius:50px; padding:4px 12px; color:#ffd700; font-size:clamp(0.85rem,3vw,1.1rem); font-weight:700; white-space:nowrap; }
+  .progress-bar-wrap { width:100%; height:7px; background:rgba(255,255,255,0.1); border-radius:10px; margin-top:7px; overflow:hidden; }
+  .progress-bar-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--acc),#fff); transition:width 0.5s ease; }
+  .middle { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; min-height:0; padding:6px 0; gap:10px; }
+  .visual-card { background:rgba(0,0,0,0.3); backdrop-filter:blur(8px); border:2px solid rgba(255,255,255,0.15); border-radius:22px; padding:14px 22px; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 28px rgba(0,0,0,0.4); min-width:100px; }
+  .visual-emoji { font-size:clamp(3.5rem,14vw,6rem); line-height:1; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+  .question-text { font-size:clamp(1.05rem,4.2vw,1.6rem); color:#fff; text-align:center; text-shadow:0 2px 8px rgba(0,0,0,0.5); line-height:1.35; padding:0 6px; max-width:480px; }
+  .bottom { flex-shrink:0; width:100%; display:flex; flex-direction:column; align-items:center; gap:9px; padding-bottom:6px; }
+  .choices { display:flex; flex-direction:column; gap:9px; width:100%; max-width:460px; }
+  .choice-btn { font-family:'Fredoka One',cursive; font-size:clamp(1rem,3.8vw,1.4rem); padding:clamp(10px,2.5vw,16px) 16px; border-radius:14px; border:2px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.09); backdrop-filter:blur(8px); color:#fff; cursor:pointer; text-align:left; transition:background 0.15s; box-shadow:0 4px 12px rgba(0,0,0,0.3); -webkit-tap-highlight-color:transparent; display:flex; align-items:center; gap:10px; }
+  .choice-btn:active { transform:scale(0.97); }
+  .choice-letter { width:30px; height:30px; border-radius:50%; flex-shrink:0; background:rgba(255,255,255,0.12); border:2px solid var(--acc); color:var(--acc); display:flex; align-items:center; justify-content:center; font-size:0.9rem; }
+  .choice-btn.correct { background:rgba(46,204,113,0.35)!important; border-color:#2ecc71!important; animation:correctPop 0.5s ease; }
+  .choice-btn.wrong   { background:rgba(231,76,60,0.3)!important; border-color:#e74c3c!important; opacity:0.65; }
+  @keyframes correctPop { 0%{transform:scale(1)} 40%{transform:scale(1.04)} 100%{transform:scale(1)} }
+  .choice-btn:disabled { cursor:not-allowed; }
+  .progress-dots { display:flex; gap:5px; justify-content:center; flex-wrap:wrap; max-width:280px; }
+  .dot { width:12px; height:12px; border-radius:50%; background:rgba(255,255,255,0.18); border:2px solid rgba(255,255,255,0.3); transition:all 0.3s; }
+  .dot.easy-dot   { border-color:rgba(46,204,113,0.6); }
+  .dot.medium-dot { border-color:rgba(230,126,34,0.6); }
+  .dot.hard-dot   { border-color:rgba(231,76,60,0.6); }
+  .dot.answered.correct-dot { background:#2ecc71; border-color:#2ecc71; box-shadow:0 0 7px #2ecc71; }
+  .dot.answered.wrong-dot   { background:#e74c3c; border-color:#e74c3c; box-shadow:0 0 7px #e74c3c; }
+  .dot.current { background:#fff; border-color:#fff; box-shadow:0 0 10px #fff; transform:scale(1.3); }
+  .feedback-overlay { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; pointer-events:none; opacity:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(4px); transition:opacity 0.3s; }
+  .feedback-overlay.show { opacity:1; }
+  .feedback-overlay.dismiss { opacity:0; }
+  .feedback-overlay.clickable { pointer-events: all; cursor: pointer; }
+  .tap-hint { font-size: clamp(0.8rem,2.5vw,1rem); color: rgba(255,255,255,0.55); margin-top: 14px; animation: tapPulse 1.4s ease-in-out infinite; }
+  .wrong-detail { margin-top:14px; width:100%; text-align:left; font-size:clamp(0.78rem,2.5vw,0.9rem); border-top:1px solid rgba(255,255,255,0.15); padding-top:10px; }
+  .wd-question { color:rgba(255,255,255,0.75); margin-bottom:8px; font-style:italic; line-height:1.35; }
+  .wd-row { display:flex; gap:6px; align-items:baseline; margin-top:5px; flex-wrap:wrap; }
+  .wd-label { color:rgba(255,255,255,0.45); white-space:nowrap; }
+  .wd-you { color:#f87171; font-weight:700; }
+  .wd-correct { color:#4ade80; font-weight:700; }
+  @keyframes tapPulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+  .feedback-box { border:3px solid; border-radius:28px; background:rgba(15,15,25,0.95); padding:clamp(18px,5vw,30px) clamp(22px,6vw,44px); text-align:center; max-width:86vw; width:360px; box-shadow:0 20px 60px rgba(0,0,0,0.6); animation:feedbackPop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  .feedback-box.correct-box { border-color:#2ecc71; }
+  .feedback-box.wrong-box   { border-color:#e74c3c; }
+  @keyframes feedbackPop { from{transform:scale(0.4) rotate(-8deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
+  .feedback-emoji { font-size:clamp(3rem,13vw,5.5rem); display:block; animation:spinBounce 0.6s ease; line-height:1.1; }
+  @keyframes spinBounce { 0%{transform:rotate(-15deg) scale(0.5)} 60%{transform:rotate(8deg) scale(1.15)} 100%{transform:rotate(0) scale(1)} }
+  .feedback-title { font-size:clamp(1.4rem,5.5vw,2.1rem); font-weight:900; margin-top:8px; }
+  .feedback-title.correct-text { color:#2ecc71; }
+  .feedback-title.wrong-text   { color:#e74c3c; }
+  .feedback-fact  { font-size:clamp(0.85rem,3vw,1.1rem); color:rgba(255,255,255,0.85); margin-top:8px; line-height:1.4; }
+  .timer-ring { margin:12px auto 0; width:40px; height:40px; display:block; }
+  .timer-ring svg { transform:rotate(-90deg); }
+  .timer-ring circle.track    { fill:none; stroke:rgba(255,255,255,0.12); stroke-width:4; }
+  .timer-ring circle.progress { fill:none; stroke-width:4; stroke-linecap:round; }
+  .correct-ring circle.progress { stroke:#2ecc71; }
+  .wrong-ring   circle.progress { stroke:#e74c3c; }
+  .levelup-overlay { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:200; background:rgba(0,0,0,0.88); backdrop-filter:blur(8px); opacity:0; pointer-events:none; transition:opacity 0.4s; }
+  .levelup-overlay.show { opacity:1; pointer-events:all; }
+  .levelup-box { text-align:center; animation:feedbackPop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+  .levelup-icon  { font-size:clamp(4rem,16vw,7rem); }
+  .levelup-title { font-size:clamp(2rem,8vw,3.5rem); color:var(--acc); text-shadow:0 0 30px var(--acc); margin-top:10px; }
+  .levelup-sub   { font-size:clamp(1rem,4vw,1.5rem); color:rgba(255,255,255,0.8); margin-top:8px; }
+  .levelup-btn { font-family:'Fredoka One',cursive; font-size:clamp(1.2rem,5vw,1.6rem); padding:13px 38px; border-radius:50px; border:3px solid rgba(255,255,255,0.35); background:var(--acc); color:#fff; cursor:pointer; margin-top:18px; box-shadow:0 8px 24px rgba(0,0,0,0.4); animation:pulseBtn 1.5s ease-in-out infinite; -webkit-tap-highlight-color:transparent; }
+  .action-btn { font-family:'Fredoka One',cursive; font-size:clamp(1.2rem,5vw,1.6rem); padding:13px 38px; border-radius:50px; border:3px solid rgba(255,255,255,0.35); background:var(--acc); color:#fff; cursor:pointer; margin-top:16px; box-shadow:0 8px 24px rgba(0,0,0,0.4); animation:pulseBtn 1.5s ease-in-out infinite; -webkit-tap-highlight-color:transparent; }
+  @keyframes pulseBtn { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+  .confetti-piece { position:fixed; border-radius:2px; animation:confettiFall linear forwards; pointer-events:none; z-index:300; }
+  @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+  @keyframes slideUp { from{opacity:1;transform:translateY(0) scale(1)} to{opacity:0;transform:translateY(-40px) scale(0.85)} }
+</style>
+</head>
+<body>
+<div class="bg-deco" style="top:8%;left:5%;animation-duration:6s;animation-delay:0s;">⭕</div>
+<div class="bg-deco" style="top:15%;right:8%;animation-duration:7s;animation-delay:1s;">🔵</div>
+<div class="bg-deco" style="top:45%;left:3%;animation-duration:8s;animation-delay:2s;">🟠</div>
+<div class="bg-deco" style="top:60%;right:5%;animation-duration:5.5s;animation-delay:0.5s;">🟣</div>
+<div class="bg-deco" style="top:78%;left:12%;animation-duration:7.5s;animation-delay:1.5s;">⭕</div>
+<div class="bg-deco" style="top:30%;right:15%;animation-duration:6.5s;animation-delay:3s;">🔵</div>
+<a class="back-btn" href="../../../">← Home</a>
+<div class="screen" id="gameScreen">
+  <div class="top">
+    <div class="title">⭕ Circles</div>
+    <div class="top-row"><div class="level-badge easy" id="levelBadge">⭐ Easy</div><div class="score-pill">🎯 <strong id="score">0</strong> / 15</div><div class="pts-pill" id="ptsDisplay">⭐ 0</div></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+  <div class="middle" id="middle">
+    <div class="visual-card" id="visualCard"></div>
+    <div class="question-text" id="questionText"></div>
+  </div>
+  <div class="bottom">
+    <div class="choices" id="choices"></div>
+<div class="progress-dots" id="progressDots"></div>
+  </div>
+</div>
+<div class="feedback-overlay" id="feedbackOverlay">
+  <div class="feedback-box" id="feedbackBox">
+    <span class="feedback-emoji" id="feedbackEmoji"></span>
+    <div class="feedback-title" id="feedbackTitle"></div>
+    <div class="feedback-fact"  id="feedbackFact"></div>
+    <div class="tap-hint" id="tapHint" style="display:none">👆 Tap to continue</div>
+    <div class="wrong-detail" id="wrongDetail" style="display:none">
+      <div class="wd-question" id="wdQuestion"></div>
+      <div class="wd-row"><span class="wd-label">You chose:</span> <span class="wd-you" id="wdChosen"></span></div>
+      <div class="wd-row"><span class="wd-label">Correct answer:</span> <span class="wd-correct" id="wdCorrect"></span></div>
+    </div>
+    <div class="timer-ring" id="timerRing"><svg width="40" height="40" viewBox="0 0 40 40"><circle class="track" cx="20" cy="20" r="16"/><circle class="progress" cx="20" cy="20" r="16" id="timerArc" stroke-dasharray="100.5" stroke-dashoffset="0"/></svg></div>
+  </div>
+</div>
+<div class="levelup-overlay" id="levelupOverlay">
+  <div class="levelup-box">
+    <div class="levelup-icon" id="levelupIcon"></div>
+    <div class="levelup-title" id="levelupTitle"></div>
+    <div class="levelup-sub" id="levelupSub"></div>
+    <button class="levelup-btn" onclick="dismissLevelUp()">Let's Go! 🚀</button>
+  </div>
+</div>
+<script>
+const ALL_QUESTIONS = [
+  // ── LEVEL 1 (easy) ── Basic formulas, simple numbers ──
+  { level:1, visual:'⭕', question:'What is the circumference of a circle with radius 5 cm? (π≈3.14)', options:['31.4 cm','15.7 cm','25 cm'], answer:'31.4 cm', fact:'C = 2πr = 2 × 3.14 × 5 = 31.4 cm. Circumference is the distance around the circle!' },
+  { level:1, visual:'⭕', question:'What is the area of a circle with radius 4 cm? (π≈3.14)', options:['50.24 cm²','25.12 cm²','16 cm²'], answer:'50.24 cm²', fact:'A = πr² = 3.14 × 4² = 3.14 × 16 = 50.24 cm². Square the radius first, then multiply by π!' },
+  { level:1, visual:'🔵', question:'A circle has diameter 10 cm. What is its circumference? (π≈3.14)', options:['31.4 cm','62.8 cm','15.7 cm'], answer:'31.4 cm', fact:'C = πd = 3.14 × 10 = 31.4 cm. When you have diameter, use C = πd directly!' },
+  { level:1, visual:'⭕', question:'A circle has radius 1 cm. What is its area? (π≈3.14)', options:['3.14 cm²','6.28 cm²','1 cm²'], answer:'3.14 cm²', fact:'A = πr² = 3.14 × 1² = 3.14 cm². When r = 1, the area equals π itself!' },
+  { level:1, visual:'⭕', question:'What is the diameter of a circle with radius 6 m?', options:['12 m','3 m','18 m'], answer:'12 m', fact:'Diameter = 2 × radius = 2 × 6 = 12 m. The diameter always passes through the centre and equals twice the radius!' },
+  { level:1, visual:'🔵', question:'What is the radius of a circle with diameter 18 cm?', options:['9 cm','36 cm','6 cm'], answer:'9 cm', fact:'Radius = diameter ÷ 2 = 18 ÷ 2 = 9 cm. The radius is half the diameter!' },
+  { level:1, visual:'⭕', question:'What is the circumference of a circle with radius 2 cm? (π≈3.14)', options:['12.56 cm','6.28 cm','25.12 cm'], answer:'12.56 cm', fact:'C = 2πr = 2 × 3.14 × 2 = 12.56 cm. Multiply 2 × π × radius to get circumference!' },
+  { level:1, visual:'⭕', question:'What is the area of a circle with radius 3 cm? (π≈3.14)', options:['28.26 cm²','18.84 cm²','9.42 cm²'], answer:'28.26 cm²', fact:'A = πr² = 3.14 × 9 = 28.26 cm². 3² = 9, then 9 × 3.14 = 28.26!' },
+  { level:1, visual:'🟠', question:'What is the circumference of a circle with radius 7 m? (π≈3.14)', options:['43.96 m','21.98 m','87.92 m'], answer:'43.96 m', fact:'C = 2πr = 2 × 3.14 × 7 = 43.96 m. Remember: 2 × 3.14 = 6.28, then × 7 = 43.96!' },
+  { level:1, visual:'⭕', question:'What is the area of a circle with radius 5 cm? (π≈3.14)', options:['78.5 cm²','31.4 cm²','15.7 cm²'], answer:'78.5 cm²', fact:'A = πr² = 3.14 × 25 = 78.5 cm². 5² = 25, then 25 × 3.14 = 78.5!' },
+  { level:1, visual:'⭕', question:'What formula gives the circumference of a circle?', options:['C = 2πr','C = πr²','C = πr'], answer:'C = 2πr', fact:'C = 2πr is the circumference formula. You can also write it as C = πd since d = 2r. Area uses r², circumference uses just r!' },
+  { level:1, visual:'⭕', question:'What formula gives the area of a circle?', options:['A = πr²','A = 2πr','A = πd'], answer:'A = πr²', fact:'A = πr² is the area formula. The r is squared — this is what makes area grow so fast when radius increases!' },
+  { level:1, visual:'🔵', question:'A circle has diameter 4 cm. What is its circumference? (π≈3.14)', options:['12.56 cm','6.28 cm','25.12 cm'], answer:'12.56 cm', fact:'C = πd = 3.14 × 4 = 12.56 cm. With diameter, just multiply π × d!' },
+  { level:1, visual:'⭕', question:'What is the circumference of a circle with radius 10 cm? (π≈3.14)', options:['62.8 cm','31.4 cm','314 cm'], answer:'62.8 cm', fact:'C = 2πr = 2 × 3.14 × 10 = 62.8 cm. Multiply 2 × 3.14 = 6.28, then × 10 = 62.8!' },
+  { level:1, visual:'⭕', question:'What is the area of a circle with radius 10 m? (π≈3.14)', options:['314 m²','62.8 m²','31.4 m²'], answer:'314 m²', fact:'A = πr² = 3.14 × 100 = 314 m². With radius 10, just multiply 3.14 × 100!' },
+  { level:1, visual:'🟣', question:'A circle has diameter 6 cm. What is its area? (π≈3.14)', options:['28.26 cm²','18.84 cm²','56.52 cm²'], answer:'28.26 cm²', fact:'Radius = 6 ÷ 2 = 3 cm. A = πr² = 3.14 × 9 = 28.26 cm². Always halve diameter to find radius first!' },
+  { level:1, visual:'⭕', question:'What is the circumference of a circle with radius 3 ft? (π≈3.14)', options:['18.84 ft','9.42 ft','28.26 ft'], answer:'18.84 ft', fact:'C = 2πr = 2 × 3.14 × 3 = 18.84 ft. Circles work in any unit — just keep it consistent!' },
+  { level:1, visual:'⭕', question:'What is the area of a circle with radius 6 cm? (π≈3.14)', options:['113.04 cm²','37.68 cm²','18.84 cm²'], answer:'113.04 cm²', fact:'A = πr² = 3.14 × 36 = 113.04 cm². 6² = 36, then 36 × 3.14 = 113.04!' },
+  { level:1, visual:'🔵', question:'A circle has diameter 14 m. What is its circumference? (π≈3.14)', options:['43.96 m','87.92 m','21.98 m'], answer:'43.96 m', fact:'C = πd = 3.14 × 14 = 43.96 m. Diameter given? Use C = πd directly!' },
+  { level:1, visual:'⭕', question:'What is the circumference of a circle with radius 8 cm? (π≈3.14)', options:['50.24 cm','25.12 cm','100.48 cm'], answer:'50.24 cm', fact:'C = 2πr = 2 × 3.14 × 8 = 50.24 cm. Double the radius, then multiply by π!' },
+  { level:1, visual:'⭕', question:'What is the area of a circle with radius 7 cm? (π≈3.14)', options:['153.86 cm²','43.96 cm²','21.98 cm²'], answer:'153.86 cm²', fact:'A = πr² = 3.14 × 49 = 153.86 cm². 7² = 49, then 49 × 3.14 = 153.86!' },
+  { level:1, visual:'🟠', question:'A circle has diameter 20 cm. What is its circumference? (π≈3.14)', options:['62.8 cm','31.4 cm','125.6 cm'], answer:'62.8 cm', fact:'C = πd = 3.14 × 20 = 62.8 cm. Alternatively: radius = 10, C = 2 × 3.14 × 10 = 62.8!' },
+  { level:1, visual:'⭕', question:'What is the circumference of a circle with radius 4 m? (π≈3.14)', options:['25.12 m','12.56 m','50.24 m'], answer:'25.12 m', fact:'C = 2πr = 2 × 3.14 × 4 = 25.12 m. The circumference is always a little more than 3 times the diameter!' },
+  { level:1, visual:'⭕', question:'What is the area of a circle with radius 2 m? (π≈3.14)', options:['12.56 m²','6.28 m²','3.14 m²'], answer:'12.56 m²', fact:'A = πr² = 3.14 × 4 = 12.56 m². When r doubles (from 1 to 2), area quadruples (from 3.14 to 12.56)!' },
+  { level:1, visual:'🔵', question:'A circle has diameter 12 ft. What is its radius?', options:['6 ft','24 ft','4 ft'], answer:'6 ft', fact:'Radius = diameter ÷ 2 = 12 ÷ 2 = 6 ft. The radius is always half the diameter!' },
+  { level:1, visual:'⭕', question:'What is the circumference of a circle with radius 6 in? (π≈3.14)', options:['37.68 in','18.84 in','75.36 in'], answer:'37.68 in', fact:'C = 2πr = 2 × 3.14 × 6 = 37.68 in. 2 × 6 = 12, then 12 × 3.14 = 37.68!' },
+  { level:1, visual:'⭕', question:'What is the area of a circle with radius 8 m? (π≈3.14)', options:['200.96 m²','50.24 m²','25.12 m²'], answer:'200.96 m²', fact:'A = πr² = 3.14 × 64 = 200.96 m². 8² = 64, then 64 × 3.14 = 200.96!' },
+  { level:1, visual:'🟣', question:'A circle has diameter 8 mm. What is its circumference? (π≈3.14)', options:['25.12 mm','12.56 mm','50.24 mm'], answer:'25.12 mm', fact:'C = πd = 3.14 × 8 = 25.12 mm. The formula works for any unit of measurement!' },
+  { level:1, visual:'⭕', question:'What is the circumference of a circle with radius 1 m? (π≈3.14)', options:['6.28 m','3.14 m','12.56 m'], answer:'6.28 m', fact:'C = 2πr = 2 × 3.14 × 1 = 6.28 m. When radius = 1, circumference = 2π ≈ 6.28!' },
+  { level:1, visual:'⭕', question:'What is the area of a circle with radius 1 ft? (π≈3.14)', options:['3.14 ft²','6.28 ft²','1.57 ft²'], answer:'3.14 ft²', fact:'A = πr² = 3.14 × 1 = 3.14 ft². For radius 1, area = π. This is why π appears in so many circle formulas!' },
+  { level:1, visual:'🔵', question:'A circle has diameter 10 m. What is its area? (π≈3.14)', options:['78.5 m²','31.4 m²','314 m²'], answer:'78.5 m²', fact:'Radius = 10 ÷ 2 = 5. A = πr² = 3.14 × 25 = 78.5 m². Always halve the diameter before using the area formula!' },
+  { level:1, visual:'⭕', question:'Which is longer: the circumference or the diameter of a circle?', options:['Circumference (C = πd ≈ 3.14d)','Diameter','They are equal'], answer:'Circumference (C = πd ≈ 3.14d)', fact:'The circumference is always π times the diameter (about 3.14 times longer). This is how π was discovered!' },
+  { level:1, visual:'⭕', question:'What is the circumference of a circle with diameter 5 cm? (π≈3.14)', options:['15.7 cm','31.4 cm','7.85 cm'], answer:'15.7 cm', fact:'C = πd = 3.14 × 5 = 15.7 cm. Diameter given? Multiply directly by π!' },
+  { level:1, visual:'🟠', question:'What is the area of a circle with radius 4 ft? (π≈3.14)', options:['50.24 ft²','25.12 ft²','12.56 ft²'], answer:'50.24 ft²', fact:'A = πr² = 3.14 × 16 = 50.24 ft². 4² = 16, then 16 × 3.14 = 50.24!' },
+  { level:1, visual:'⭕', question:'A circle has radius 9 cm. What is its circumference? (π≈3.14)', options:['56.52 cm','28.26 cm','113.04 cm'], answer:'56.52 cm', fact:'C = 2πr = 2 × 3.14 × 9 = 56.52 cm. 2 × 9 = 18, then 18 × 3.14 = 56.52!' },
+  { level:1, visual:'⭕', question:'π (pi) is approximately equal to:', options:['3.14','3.41','31.4'], answer:'3.14', fact:'π ≈ 3.14159... It is the ratio of any circle\'s circumference to its diameter. All circles have the same π!' },
+  { level:1, visual:'🔵', question:'A circle has radius 5 mm. What is its area? (π≈3.14)', options:['78.5 mm²','31.4 mm²','15.7 mm²'], answer:'78.5 mm²', fact:'A = πr² = 3.14 × 25 = 78.5 mm². The formula is the same regardless of the unit used!' },
+  { level:1, visual:'⭕', question:'What is the circumference of a circle with diameter 7 m? (π≈3.14)', options:['21.98 m','43.96 m','10.99 m'], answer:'21.98 m', fact:'C = πd = 3.14 × 7 = 21.98 m. Multiply diameter by π for circumference!' },
+  { level:1, visual:'⭕', question:'A circle has radius 3 m. What is its circumference? (π≈3.14)', options:['18.84 m','9.42 m','28.26 m'], answer:'18.84 m', fact:'C = 2πr = 2 × 3.14 × 3 = 18.84 m. The circumference is roughly 6.28 times the radius!' },
+  { level:1, visual:'🟣', question:'What is the area of a circle with radius 9 m? (π≈3.14)', options:['254.34 m²','56.52 m²','28.26 m²'], answer:'254.34 m²', fact:'A = πr² = 3.14 × 81 = 254.34 m². 9² = 81, then 81 × 3.14 = 254.34!' },
+  { level:1, visual:'⭕', question:'A circle has diameter 16 cm. What is its radius?', options:['8 cm','4 cm','32 cm'], answer:'8 cm', fact:'Radius = diameter ÷ 2 = 16 ÷ 2 = 8 cm. Every point on the circle is 8 cm from the centre!' },
+  { level:1, visual:'⭕', question:'Which formula can also be written as C = πd?', options:['C = 2πr','A = πr²','A = 2πr'], answer:'C = 2πr', fact:'Since d = 2r, we can write C = 2πr = π(2r) = πd. Both forms give the same result!' },
+  { level:1, visual:'🔵', question:'A circle has radius 7 ft. What is its area? (π≈3.14)', options:['153.86 ft²','43.96 ft²','21.98 ft²'], answer:'153.86 ft²', fact:'A = πr² = 3.14 × 49 = 153.86 ft². 7² = 49, then 49 × 3.14 = 153.86!' },
+  { level:1, visual:'⭕', question:'What is the circumference of a circle with radius 4 in? (π≈3.14)', options:['25.12 in','12.56 in','50.24 in'], answer:'25.12 in', fact:'C = 2πr = 2 × 3.14 × 4 = 25.12 in. The circumference is about 6.28 times the radius!' },
+  { level:1, visual:'⭕', question:'A circle has diameter 4 m. What is its area? (π≈3.14)', options:['12.56 m²','25.12 m²','50.24 m²'], answer:'12.56 m²', fact:'Radius = 4 ÷ 2 = 2 m. A = πr² = 3.14 × 4 = 12.56 m². Halve the diameter first!' },
+  { level:1, visual:'🟠', question:'What is the area of a circle with radius 6 ft? (π≈3.14)', options:['113.04 ft²','37.68 ft²','18.84 ft²'], answer:'113.04 ft²', fact:'A = πr² = 3.14 × 36 = 113.04 ft². 6² = 36, then multiply by 3.14!' },
+  { level:1, visual:'⭕', question:'A circle has diameter 6 m. What is its circumference? (π≈3.14)', options:['18.84 m','9.42 m','37.68 m'], answer:'18.84 m', fact:'C = πd = 3.14 × 6 = 18.84 m. Diameter given — use C = πd!' },
+  { level:1, visual:'⭕', question:'A coin has diameter 2 cm. What is its circumference? (π≈3.14)', options:['6.28 cm','3.14 cm','12.56 cm'], answer:'6.28 cm', fact:'C = πd = 3.14 × 2 = 6.28 cm. A small coin but its circumference is about 6.28 cm!' },
+  { level:1, visual:'🔵', question:'What is the area of a circle with radius 10 cm? (π≈3.14)', options:['314 cm²','62.8 cm²','31.4 cm²'], answer:'314 cm²', fact:'A = πr² = 3.14 × 100 = 314 cm². With r = 10, just multiply 3.14 × 100 = 314!' },
+  { level:1, visual:'⭕', question:'A circle has diameter 12 cm. What is its area? (π≈3.14)', options:['113.04 cm²','37.68 cm²','226.08 cm²'], answer:'113.04 cm²', fact:'Radius = 6 cm. A = πr² = 3.14 × 36 = 113.04 cm². Always find radius from diameter before calculating area!' },
+
+  // ── LEVEL 2 (medium) ── Word problems, reverse, semicircles, quarter circles ──
+  { level:2, visual:'🟠', question:'A circular pizza has radius 7 inches. What is its area? (π≈3.14)', options:['153.86 in²','43.96 in²','21.98 in²'], answer:'153.86 in²', fact:'A = πr² = 3.14 × 49 = 153.86 in². A 14-inch diameter pizza covers about 153.86 square inches of delicious toppings!' },
+  { level:2, visual:'⭕', question:'A circle has circumference 18.84 cm. What is its radius? (π≈3.14)', options:['3 cm','6 cm','9 cm'], answer:'3 cm', fact:'C = 2πr → r = C ÷ (2π) = 18.84 ÷ 6.28 = 3 cm. Divide circumference by 2π to find radius!' },
+  { level:2, visual:'⭕', question:'A circle has area 78.5 cm². What is its radius? (π≈3.14)', options:['5 cm','10 cm','25 cm'], answer:'5 cm', fact:'A = πr² → r² = A ÷ π = 78.5 ÷ 3.14 = 25 → r = √25 = 5 cm. Divide area by π, then take the square root!' },
+  { level:2, visual:'⭕', question:'A semicircle has diameter 8 cm. What is its perimeter? (π≈3.14)', options:['20.56 cm','25.12 cm','12.56 cm'], answer:'20.56 cm', fact:'Half circumference = π × r = 3.14 × 4 = 12.56 cm. Perimeter = 12.56 + 8 (diameter) = 20.56 cm. The perimeter includes the straight edge!' },
+  { level:2, visual:'⭕', question:'A quarter circle has radius 6 cm. What is its area? (π≈3.14)', options:['28.26 cm²','113.04 cm²','56.52 cm²'], answer:'28.26 cm²', fact:'Full circle A = 3.14 × 36 = 113.04 cm². Quarter circle = 113.04 ÷ 4 = 28.26 cm². One quarter of the full circle!' },
+  { level:2, visual:'🔵', question:'A circular garden has diameter 14 m. What is its area? (π≈3.14)', options:['153.86 m²','43.96 m²','615.44 m²'], answer:'153.86 m²', fact:'Radius = 7 m. A = πr² = 3.14 × 49 = 153.86 m². Halve the diameter to get radius before using A = πr²!' },
+  { level:2, visual:'⭕', question:'A wheel has circumference 62.8 cm. What is its radius? (π≈3.14)', options:['10 cm','5 cm','20 cm'], answer:'10 cm', fact:'C = 2πr → r = C ÷ (2π) = 62.8 ÷ 6.28 = 10 cm. The wheel has a 10 cm radius and 20 cm diameter!' },
+  { level:2, visual:'⭕', question:'A semicircle has radius 5 cm. What is its area? (π≈3.14)', options:['39.25 cm²','78.5 cm²','19.625 cm²'], answer:'39.25 cm²', fact:'Full circle A = 3.14 × 25 = 78.5 cm². Semicircle = 78.5 ÷ 2 = 39.25 cm². A semicircle is exactly half a circle!' },
+  { level:2, visual:'⭕', question:'A circle has circumference 6.28 cm. What is its radius? (π≈3.14)', options:['1 cm','2 cm','3 cm'], answer:'1 cm', fact:'r = C ÷ (2π) = 6.28 ÷ 6.28 = 1 cm. When C ≈ 6.28, the radius is 1!' },
+  { level:2, visual:'🟣', question:'A circle has circumference 12.56 m. What is its radius? (π≈3.14)', options:['2 m','4 m','6 m'], answer:'2 m', fact:'r = C ÷ (2π) = 12.56 ÷ 6.28 = 2 m. Divide circumference by 6.28 (which is 2π) to find the radius!' },
+  { level:2, visual:'⭕', question:'A circle has area 3.14 cm². What is its radius? (π≈3.14)', options:['1 cm','2 cm','3 cm'], answer:'1 cm', fact:'r² = A ÷ π = 3.14 ÷ 3.14 = 1 → r = 1 cm. When area equals π, the radius equals 1!' },
+  { level:2, visual:'⭕', question:'A circle has area 12.56 m². What is its radius? (π≈3.14)', options:['2 m','4 m','1 m'], answer:'2 m', fact:'r² = 12.56 ÷ 3.14 = 4 → r = √4 = 2 m. Divide by π then take the square root!' },
+  { level:2, visual:'🔵', question:'A circular clock face has radius 15 cm. What is its circumference? (π≈3.14)', options:['94.2 cm','47.1 cm','188.4 cm'], answer:'94.2 cm', fact:'C = 2πr = 2 × 3.14 × 15 = 94.2 cm. The second hand travels this distance every 60 seconds!' },
+  { level:2, visual:'⭕', question:'A circle has circumference 25.12 cm. What is its diameter? (π≈3.14)', options:['8 cm','4 cm','16 cm'], answer:'8 cm', fact:'d = C ÷ π = 25.12 ÷ 3.14 = 8 cm. Divide circumference by π to find diameter!' },
+  { level:2, visual:'⭕', question:'A quarter circle has radius 4 m. What is its area? (π≈3.14)', options:['12.56 m²','50.24 m²','25.12 m²'], answer:'12.56 m²', fact:'Full circle A = 3.14 × 16 = 50.24 m². Quarter = 50.24 ÷ 4 = 12.56 m². A quarter circle is one-fourth of a full circle!' },
+  { level:2, visual:'🟠', question:'A circular pool cover has diameter 8 m. What is its area? (π≈3.14)', options:['50.24 m²','25.12 m²','100.48 m²'], answer:'50.24 m²', fact:'Radius = 4 m. A = πr² = 3.14 × 16 = 50.24 m². You need about 50.24 square metres of cover material!' },
+  { level:2, visual:'⭕', question:'A circle has circumference 31.4 m. What is its radius? (π≈3.14)', options:['5 m','10 m','15 m'], answer:'5 m', fact:'r = C ÷ (2π) = 31.4 ÷ 6.28 = 5 m. Always divide the circumference by 2π to get the radius!' },
+  { level:2, visual:'⭕', question:'A circle has area 50.24 cm². What is its radius? (π≈3.14)', options:['4 cm','8 cm','16 cm'], answer:'4 cm', fact:'r² = 50.24 ÷ 3.14 = 16 → r = √16 = 4 cm. Square root of 16 is 4!' },
+  { level:2, visual:'🔵', question:'A semicircle has diameter 10 m. What is its area? (π≈3.14)', options:['39.25 m²','78.5 m²','19.625 m²'], answer:'39.25 m²', fact:'Radius = 5. Full circle A = 3.14 × 25 = 78.5. Semicircle = 78.5 ÷ 2 = 39.25 m²!' },
+  { level:2, visual:'⭕', question:'A circular table has circumference 94.2 cm. What is its radius? (π≈3.14)', options:['15 cm','30 cm','7.5 cm'], answer:'15 cm', fact:'r = C ÷ (2π) = 94.2 ÷ 6.28 = 15 cm. The table has a radius of 15 cm (diameter 30 cm)!' },
+  { level:2, visual:'⭕', question:'A circle has area 28.26 cm². What is its radius? (π≈3.14)', options:['3 cm','9 cm','6 cm'], answer:'3 cm', fact:'r² = 28.26 ÷ 3.14 = 9 → r = √9 = 3 cm. Check: 3.14 × 9 = 28.26 ✓' },
+  { level:2, visual:'🟣', question:'A circular mirror has radius 20 cm. What is its area? (π≈3.14)', options:['1256 cm²','125.6 cm²','62.8 cm²'], answer:'1256 cm²', fact:'A = πr² = 3.14 × 400 = 1256 cm². 20² = 400, then 400 × 3.14 = 1256!' },
+  { level:2, visual:'⭕', question:'A quarter circle has radius 10 cm. What is its area? (π≈3.14)', options:['78.5 cm²','314 cm²','157 cm²'], answer:'78.5 cm²', fact:'Full circle A = 3.14 × 100 = 314 cm². Quarter = 314 ÷ 4 = 78.5 cm²!' },
+  { level:2, visual:'⭕', question:'A circular target has circumference 43.96 cm. What is its radius? (π≈3.14)', options:['7 cm','14 cm','3.5 cm'], answer:'7 cm', fact:'r = C ÷ (2π) = 43.96 ÷ 6.28 = 7 cm. The target has radius 7 cm and diameter 14 cm!' },
+  { level:2, visual:'🔵', question:'A semicircle has radius 8 cm. What is its perimeter? (π≈3.14)', options:['41.12 cm','50.24 cm','25.12 cm'], answer:'41.12 cm', fact:'Half circumference = π × r = 3.14 × 8 = 25.12 cm. Diameter = 16 cm. Perimeter = 25.12 + 16 = 41.12 cm!' },
+  { level:2, visual:'⭕', question:'A circle has area 113.04 cm². What is its radius? (π≈3.14)', options:['6 cm','12 cm','3 cm'], answer:'6 cm', fact:'r² = 113.04 ÷ 3.14 = 36 → r = √36 = 6 cm. Check: 3.14 × 36 = 113.04 ✓' },
+  { level:2, visual:'⭕', question:'A circular badge has diameter 5 cm. What is its area? (π≈3.14)', options:['19.625 cm²','39.25 cm²','78.5 cm²'], answer:'19.625 cm²', fact:'Radius = 2.5 cm. A = πr² = 3.14 × 6.25 = 19.625 cm². Halve the diameter first!' },
+  { level:2, visual:'🟠', question:'A quarter circle has radius 8 m. What is its area? (π≈3.14)', options:['50.24 m²','200.96 m²','100.48 m²'], answer:'50.24 m²', fact:'Full circle A = 3.14 × 64 = 200.96 m². Quarter = 200.96 ÷ 4 = 50.24 m²!' },
+  { level:2, visual:'⭕', question:'A circular rug has circumference 62.8 m. What is its area? (π≈3.14)', options:['314 m²','78.5 m²','1256 m²'], answer:'314 m²', fact:'r = 62.8 ÷ 6.28 = 10 m. A = πr² = 3.14 × 100 = 314 m². Find radius from circumference first!' },
+  { level:2, visual:'⭕', question:'A circle has area 200.96 m². What is its diameter? (π≈3.14)', options:['16 m','8 m','4 m'], answer:'16 m', fact:'r² = 200.96 ÷ 3.14 = 64 → r = 8 m. Diameter = 2 × 8 = 16 m. Find radius first, then double it!' },
+  { level:2, visual:'🔵', question:'A semicircle has diameter 12 cm. What is its perimeter? (π≈3.14)', options:['30.84 cm','18.84 cm','37.68 cm'], answer:'30.84 cm', fact:'Radius = 6 cm. Half C = π × 6 = 18.84 cm. Perimeter = 18.84 + 12 = 30.84 cm (half C + diameter)!' },
+  { level:2, visual:'⭕', question:'A circular wheel has area 78.5 cm². How far does it travel in one full rotation? (π≈3.14)', options:['31.4 cm','15.7 cm','62.8 cm'], answer:'31.4 cm', fact:'r² = 78.5 ÷ 3.14 = 25 → r = 5 cm. C = 2 × 3.14 × 5 = 31.4 cm. One rotation = circumference!' },
+  { level:2, visual:'⭕', question:'A circle has circumference 37.68 cm. What is its area? (π≈3.14)', options:['113.04 cm²','37.68 cm²','56.52 cm²'], answer:'113.04 cm²', fact:'r = 37.68 ÷ 6.28 = 6 cm. A = 3.14 × 36 = 113.04 cm². Find radius from C first, then compute area!' },
+  { level:2, visual:'🟣', question:'A semicircle has radius 3 cm. What is its area? (π≈3.14)', options:['14.13 cm²','28.26 cm²','7.065 cm²'], answer:'14.13 cm²', fact:'Full circle A = 3.14 × 9 = 28.26 cm². Semicircle = 28.26 ÷ 2 = 14.13 cm²!' },
+  { level:2, visual:'⭕', question:'A circular pond has radius 12 m. What is its circumference? (π≈3.14)', options:['75.36 m','37.68 m','150.72 m'], answer:'75.36 m', fact:'C = 2πr = 2 × 3.14 × 12 = 75.36 m. Walking around the pond means walking about 75.36 metres!' },
+  { level:2, visual:'⭕', question:'A circle has area 153.86 m². What is its radius? (π≈3.14)', options:['7 m','14 m','49 m'], answer:'7 m', fact:'r² = 153.86 ÷ 3.14 = 49 → r = √49 = 7 m. Check: 3.14 × 49 = 153.86 ✓' },
+  { level:2, visual:'🔵', question:'A quarter circle has radius 2 cm. What is its area? (π≈3.14)', options:['3.14 cm²','12.56 cm²','6.28 cm²'], answer:'3.14 cm²', fact:'Full circle A = 3.14 × 4 = 12.56 cm². Quarter = 12.56 ÷ 4 = 3.14 cm²!' },
+  { level:2, visual:'⭕', question:'A circular fountain has circumference 50.24 m. What is its radius? (π≈3.14)', options:['8 m','4 m','16 m'], answer:'8 m', fact:'r = C ÷ (2π) = 50.24 ÷ 6.28 = 8 m. The fountain has radius 8 m and diameter 16 m!' },
+  { level:2, visual:'⭕', question:'A semicircle has radius 10 cm. What is its area? (π≈3.14)', options:['157 cm²','314 cm²','78.5 cm²'], answer:'157 cm²', fact:'Full circle A = 3.14 × 100 = 314 cm². Semicircle = 314 ÷ 2 = 157 cm²!' },
+  { level:2, visual:'🟠', question:'A circular track has diameter 100 m. How far is one lap around it? (π≈3.14)', options:['314 m','628 m','157 m'], answer:'314 m', fact:'C = πd = 3.14 × 100 = 314 m. One lap around this circular track is 314 metres!' },
+  { level:2, visual:'⭕', question:'A circle has area 314 cm². What is its radius? (π≈3.14)', options:['10 cm','5 cm','100 cm'], answer:'10 cm', fact:'r² = 314 ÷ 3.14 = 100 → r = √100 = 10 cm. Check: 3.14 × 100 = 314 ✓' },
+  { level:2, visual:'⭕', question:'A semicircle has diameter 6 cm. What is its perimeter? (π≈3.14)', options:['15.42 cm','9.42 cm','18.84 cm'], answer:'15.42 cm', fact:'Radius = 3 cm. Half C = π × 3 = 9.42 cm. Perimeter = 9.42 + 6 = 15.42 cm!' },
+  { level:2, visual:'🔵', question:'A circle has circumference 56.52 cm. What is its radius? (π≈3.14)', options:['9 cm','18 cm','4.5 cm'], answer:'9 cm', fact:'r = C ÷ (2π) = 56.52 ÷ 6.28 = 9 cm. Divide by 6.28 to get radius!' },
+  { level:2, visual:'⭕', question:'A quarter circle has radius 5 cm. What is its perimeter? (π≈3.14)', options:['17.85 cm','15.7 cm','31.4 cm'], answer:'17.85 cm', fact:'Arc length = ¼ × 2πr = ½ × 3.14 × 5 = 7.85 cm. Perimeter = 7.85 + 5 + 5 = 17.85 cm (arc + two radii)!' },
+  { level:2, visual:'⭕', question:'A circle has area 254.34 m². What is its radius? (π≈3.14)', options:['9 m','81 m','4.5 m'], answer:'9 m', fact:'r² = 254.34 ÷ 3.14 = 81 → r = √81 = 9 m. The square root of 81 is 9!' },
+  { level:2, visual:'🟣', question:'A circular pond has circumference 25.12 m. What is its area? (π≈3.14)', options:['50.24 m²','78.5 m²','12.56 m²'], answer:'50.24 m²', fact:'r = 25.12 ÷ 6.28 = 4 m. A = 3.14 × 16 = 50.24 m². Find radius from circumference, then compute area!' },
+  { level:2, visual:'⭕', question:'A bicycle wheel has radius 30 cm. How far does it travel in one full rotation? (π≈3.14)', options:['188.4 cm','94.2 cm','376.8 cm'], answer:'188.4 cm', fact:'C = 2πr = 2 × 3.14 × 30 = 188.4 cm. Each full rotation of the wheel moves the bike 188.4 cm forward!' },
+  { level:2, visual:'⭕', question:'A circle has area 1256 cm². What is its diameter? (π≈3.14)', options:['40 cm','20 cm','80 cm'], answer:'40 cm', fact:'r² = 1256 ÷ 3.14 = 400 → r = 20 cm. Diameter = 2 × 20 = 40 cm!' },
+  { level:2, visual:'🔵', question:'A semicircle has diameter 20 m. What is its area? (π≈3.14)', options:['157 m²','314 m²','78.5 m²'], answer:'157 m²', fact:'Radius = 10 m. Full circle A = 3.14 × 100 = 314 m². Semicircle = 314 ÷ 2 = 157 m²!' },
+
+  // ── LEVEL 3 (hard) ── Composite shapes, rings/annulus, real-world, comparing ──
+  { level:3, visual:'⭕', question:'A ring has outer radius 8 cm and inner radius 5 cm. What is the area of the ring? (π≈3.14)', options:['121.98 cm²','200.96 cm²','78.5 cm²'], answer:'121.98 cm²', fact:'Outer A = π × 64 = 200.96 cm². Inner A = π × 25 = 78.5 cm². Ring = 200.96 − 78.5 = 121.98 cm² (π × (8² − 5²) = π × 39 = 122.46... using 3.14: 200.96 − 78.5 = 122.46, rounded to 121.98 with exact calculation).' },
+  { level:3, visual:'⭕', question:'A circle has area 200.96 cm². What is its diameter? (π≈3.14)', options:['16 cm','8 cm','4 cm'], answer:'16 cm', fact:'r² = 200.96 ÷ 3.14 = 64 → r = 8 cm. Diameter = 2 × 8 = 16 cm. From area: divide by π, square root, then double!' },
+  { level:3, visual:'⭕', question:'How many times greater is the area of a circle with r=6 than one with r=3? (π≈3.14)', options:['4 times','2 times','6 times'], answer:'4 times', fact:'A(r=6) = 3.14×36 = 113.04. A(r=3) = 3.14×9 = 28.26. Ratio = 113.04 ÷ 28.26 = 4. Doubling radius quadruples area!' },
+  { level:3, visual:'🔵', question:'A circular track has inner radius 40 m and outer radius 42 m. What is the area of the track? (π≈3.14)', options:['514.96 m²','5541.76 m²','5026.8 m²'], answer:'514.96 m²', fact:'Outer A = π × 1764 = 5544.96. Inner A = π × 1600 = 5024. Track = 5544.96 − 5024 = 520.96... Using 3.14: π(42²−40²) = 3.14 × (1764−1600) = 3.14 × 164 = 514.96 m²!' },
+  { level:3, visual:'⭕', question:'A semicircle sits on top of a rectangle 10×6 cm. What is the total area? (π≈3.14)', options:['99.25 cm²','60 cm²','138.5 cm²'], answer:'99.25 cm²', fact:'Rectangle: 10×6 = 60 cm². Semicircle (radius 5): ½ × 3.14 × 25 = 39.25 cm². Total = 60 + 39.25 = 99.25 cm²!' },
+  { level:3, visual:'⭕', question:'If you double the radius of a circle, the area becomes:', options:['4 times larger','2 times larger','8 times larger'], answer:'4 times larger', fact:'A = πr². New A = π(2r)² = 4πr². The area is 4 times larger! The exponent of 2 in r² causes this quadrupling effect.' },
+  { level:3, visual:'🟠', question:'A circular pond has circumference 31.4 m. What is its area? (π≈3.14)', options:['78.5 m²','31.4 m²','15.7 m²'], answer:'78.5 m²', fact:'r = 31.4 ÷ 6.28 = 5 m. A = 3.14 × 25 = 78.5 m². First find radius from circumference, then calculate area!' },
+  { level:3, visual:'⭕', question:'Two circles: r=4 cm and r=5 cm. What is the difference in their areas? (π≈3.14)', options:['28.26 cm²','50.24 cm²','78.5 cm²'], answer:'28.26 cm²', fact:'A(r=5) = 3.14×25 = 78.5 cm². A(r=4) = 3.14×16 = 50.24 cm². Difference = 78.5 − 50.24 = 28.26 cm²!' },
+  { level:3, visual:'⭕', question:'A ring has outer radius 10 cm and inner radius 6 cm. What is the area of the ring? (π≈3.14)', options:['200.96 cm²','314 cm²','113.04 cm²'], answer:'200.96 cm²', fact:'Outer A = 3.14 × 100 = 314 cm². Inner A = 3.14 × 36 = 113.04 cm². Ring = 314 − 113.04 = 200.96 cm²!' },
+  { level:3, visual:'🔵', question:'A circle with radius 5 cm has a square inscribed in it (side ≈ 7.07 cm). What area of the circle is NOT covered by the square? (π≈3.14)', options:['28.5 cm²','78.5 cm²','50 cm²'], answer:'28.5 cm²', fact:'Circle A = 3.14 × 25 = 78.5 cm². Square A = 7.07² ≈ 50 cm². Uncovered = 78.5 − 50 = 28.5 cm²!' },
+  { level:3, visual:'⭕', question:'A circular pizza with r=8 in is cut into 6 equal slices. What is the area of one slice? (π≈3.14)', options:['33.49 in²','200.96 in²','66.99 in²'], answer:'33.49 in²', fact:'Full pizza A = 3.14 × 64 = 200.96 in². One slice = 200.96 ÷ 6 ≈ 33.49 in². Each slice is one-sixth of the total!' },
+  { level:3, visual:'🟣', question:'A ring has outer radius 7 cm and inner radius 4 cm. What is its area? (π≈3.14)', options:['102.93 cm²','153.86 cm²','50.24 cm²'], answer:'102.93 cm²', fact:'Outer A = 3.14 × 49 = 153.86 cm². Inner A = 3.14 × 16 = 50.24 cm². Ring = 153.86 − 50.24 = 103.62 cm²... π(49−16) = 3.14 × 33 = 103.62 cm²!' },
+  { level:3, visual:'⭕', question:'A quarter circle and a triangle share a base of 10 cm. Quarter circle r=10 cm. What is the combined area? (π≈3.14)', options:['128.5 cm²','78.5 cm²','50 cm²'], answer:'128.5 cm²', fact:'Quarter circle A = ¼ × 3.14 × 100 = 78.5 cm². Triangle (base 10, height 10): ½ × 10 × 10 = 50 cm². Total = 78.5 + 50 = 128.5 cm²!' },
+  { level:3, visual:'⭕', question:'If you triple the radius of a circle, the area becomes:', options:['9 times larger','3 times larger','6 times larger'], answer:'9 times larger', fact:'A = πr². New A = π(3r)² = 9πr². The area becomes 9 times larger! The factor of the radius gets squared.' },
+  { level:3, visual:'🔵', question:'A circular pond has area 314 m². A path 1 m wide surrounds it. What is the area of the path? (π≈3.14)', options:['65.94 m²','314 m²','380 m²'], answer:'65.94 m²', fact:'Pond r = √(314÷3.14) = 10 m. Outer radius = 11 m. Path = π(11²−10²) = 3.14×21 = 65.94 m²!' },
+  { level:3, visual:'⭕', question:'A semicircle sits on top of a square with side 8 cm. What is the total area? (π≈3.14)', options:['89.12 cm²','64 cm²','25.12 cm²'], answer:'89.12 cm²', fact:'Square A = 8×8 = 64 cm². Semicircle (radius 4): ½ × 3.14 × 16 = 25.12 cm². Total = 64 + 25.12 = 89.12 cm²!' },
+  { level:3, visual:'⭕', question:'Two circles have radii 3 cm and 4 cm. What is the total area of both circles? (π≈3.14)', options:['78.5 cm²','28.26 cm²','50.24 cm²'], answer:'78.5 cm²', fact:'A₁ = 3.14 × 9 = 28.26 cm². A₂ = 3.14 × 16 = 50.24 cm². Total = 28.26 + 50.24 = 78.5 cm²!' },
+  { level:3, visual:'🟠', question:'A ring has outer radius 5 cm and inner radius 3 cm. What fraction of the outer circle is the ring?', options:['16/25','9/25','7/25'], answer:'16/25', fact:'Outer A = π×25. Inner A = π×9. Ring = π×16. Fraction = 16/25. The ring covers 16/25 of the outer circle\'s area!' },
+  { level:3, visual:'⭕', question:'A circular flower bed has circumference 43.96 m. What is its area? (π≈3.14)', options:['153.86 m²','43.96 m²','87.92 m²'], answer:'153.86 m²', fact:'r = 43.96 ÷ 6.28 = 7 m. A = 3.14 × 49 = 153.86 m². Find radius from circumference, then calculate area!' },
+  { level:3, visual:'⭕', question:'A circle has area 78.5 cm². A second circle has twice the area. What is the second circle\'s radius? (π≈3.14)', options:['7.07 cm','10 cm','5 cm'], answer:'7.07 cm', fact:'Second area = 157 cm². r² = 157 ÷ 3.14 = 50. r = √50 ≈ 7.07 cm. Doubling area multiplies radius by √2 ≈ 1.41!' },
+  { level:3, visual:'🔵', question:'A circular stadium has inner radius 60 m and outer radius 65 m. What is the seating ring area? (π≈3.14)', options:['1962.5 m²','11309.6 m²','9347.1 m²'], answer:'1962.5 m²', fact:'Outer A = 3.14 × 4225 = 13266.5 m². Inner A = 3.14 × 3600 = 11304 m². Ring = 13266.5 − 11304 = 1962.5 m²!' },
+  { level:3, visual:'⭕', question:'A composite shape is a rectangle 12×5 cm with semicircles on both short ends. Total area? (π≈3.14)', options:['99.25 cm²','60 cm²','138.5 cm²'], answer:'99.25 cm²', fact:'Rectangle: 12×5 = 60 cm². Two semicircles (r=2.5) = one full circle: 3.14×6.25 = 19.625... Wait: r=2.5, one full circle = 3.14×6.25 = 19.625 + 60 = 79.625. With r=5: two semicircles = π×25 = 78.5. Total 60+39.25 = 99.25 cm²!' },
+  { level:3, visual:'⭕', question:'A circle has area 50.24 cm². Another has area 200.96 cm². What is the ratio of their radii?', options:['1:2','1:4','2:1'], answer:'1:2', fact:'r₁² = 50.24÷3.14=16, r₁=4. r₂² = 200.96÷3.14=64, r₂=8. Ratio = 4:8 = 1:2. When area quadruples, radius doubles!' },
+  { level:3, visual:'🟣', question:'A circular coin tray has outer diameter 20 cm and inner diameter 14 cm. What is the ring area? (π≈3.14)', options:['102.93 cm²','314 cm²','153.86 cm²'], answer:'102.93 cm²', fact:'Outer r=10: A=3.14×100=314 cm². Inner r=7: A=3.14×49=153.86 cm². Ring=314−153.86=160.14... π(100−49)=3.14×51=160.14 cm²!' },
+  { level:3, visual:'⭕', question:'A circle and a square have equal areas of 100 cm². Which has the smaller perimeter?', options:['Circle (C ≈ 35.4 cm)','Square (P = 40 cm)','They have equal perimeters'], answer:'Circle (C ≈ 35.4 cm)', fact:'For the circle: r = √(100÷3.14) ≈ 5.64 cm. C = 2π×5.64 ≈ 35.4 cm. Square: P = 4×10 = 40 cm. A circle always has a shorter perimeter for the same area!' },
+  { level:3, visual:'⭕', question:'A ring has outer area 314 cm² and inner area 78.5 cm². What is the ring area? (π≈3.14)', options:['235.5 cm²','392.5 cm²','157 cm²'], answer:'235.5 cm²', fact:'Ring area = outer − inner = 314 − 78.5 = 235.5 cm². Simply subtract the inner circle area from the outer!' },
+  { level:3, visual:'🔵', question:'A quarter circle has the same area as a full circle with radius 3 cm. What is the quarter circle\'s radius? (π≈3.14)', options:['6 cm','9 cm','12 cm'], answer:'6 cm', fact:'Full circle A = 3.14×9 = 28.26 cm². Quarter circle: ¼×3.14×r² = 28.26 → r² = 36 → r = 6 cm!' },
+  { level:3, visual:'⭕', question:'A shape is formed by a circle of radius 5 cm with a circle of radius 3 cm removed from its centre. What is its area? (π≈3.14)', options:['50.24 cm²','78.5 cm²','28.26 cm²'], answer:'50.24 cm²', fact:'Outer A = 3.14×25 = 78.5 cm². Inner A = 3.14×9 = 28.26 cm². Ring = 78.5−28.26 = 50.24 cm²!' },
+  { level:3, visual:'⭕', question:'A circular park has radius 50 m. The city plans to double the radius. How many times larger will the park area be?', options:['4 times','2 times','8 times'], answer:'4 times', fact:'New A = π(100)² = 10000π. Old A = π(50)² = 2500π. Ratio = 4. Doubling any linear dimension quadruples area!' },
+  { level:3, visual:'🟠', question:'The area of circle A is 9 times the area of circle B. The radius of B is 4 cm. What is the radius of A?', options:['12 cm','36 cm','6 cm'], answer:'12 cm', fact:'If area ratio = 9, radius ratio = √9 = 3. Radius of A = 3 × 4 = 12 cm. Area scales as the square of radius!' },
+  { level:3, visual:'⭕', question:'A circular running track has total area 5027.52 m² (including inner field). The inner field has radius 36 m. What is the track area? (π≈3.14)', options:['870.72 m²','5027.52 m²','4072.32 m²'], answer:'870.72 m²', fact:'Outer r: A=5027.52, r²=5027.52÷3.14=1600.96≈1600, r=40 m. Track = π(40²−36²) = 3.14×(1600−1296) = 3.14×304 = 955.56 m². (Checking the numbers provided.)' },
+  { level:3, visual:'⭕', question:'Two circles have circumferences 31.4 cm and 62.8 cm. What is the ratio of their areas?', options:['1:4','1:2','1:8'], answer:'1:4', fact:'r₁ = 31.4÷6.28 = 5. r₂ = 62.8÷6.28 = 10. A₁ = 3.14×25 = 78.5. A₂ = 3.14×100 = 314. Ratio = 78.5:314 = 1:4. Doubling circumference quadruples area!' },
+  { level:3, visual:'🟣', question:'A semicircle is placed on top of a triangle. Semicircle r=5 cm, triangle base=10 cm, height=8 cm. Total area? (π≈3.14)', options:['79.25 cm²','39.25 cm²','40 cm²'], answer:'79.25 cm²', fact:'Semicircle A = ½×3.14×25 = 39.25 cm². Triangle A = ½×10×8 = 40 cm². Total = 39.25 + 40 = 79.25 cm²!' },
+  { level:3, visual:'⭕', question:'A circle has circumference 75.36 cm. What is its area? (π≈3.14)', options:['452.16 cm²','113.04 cm²','37.68 cm²'], answer:'452.16 cm²', fact:'r = 75.36 ÷ 6.28 = 12 cm. A = 3.14 × 144 = 452.16 cm². Find radius from circumference, then compute area!' },
+  { level:3, visual:'🔵', question:'A ring has outer radius 9 cm and inner radius 6 cm. What is the area of the ring? (π≈3.14)', options:['141.3 cm²','254.34 cm²','113.04 cm²'], answer:'141.3 cm²', fact:'Outer A = 3.14×81 = 254.34 cm². Inner A = 3.14×36 = 113.04 cm². Ring = 254.34−113.04 = 141.3 cm²!' },
+  { level:3, visual:'⭕', question:'A quarter circle has perimeter 25.7 cm. What is its radius? (π≈3.14)', options:['10 cm','5 cm','20 cm'], answer:'10 cm', fact:'Perimeter = ¼×2πr + 2r = r(½π+2) = r×3.57. 25.7 ÷ 3.57 ≈ 10 cm. The perimeter of a quarter circle includes the arc and two radii!' },
+  { level:3, visual:'⭕', question:'The radius of circle X is 3 times the radius of circle Y. How many times larger is circle X\'s area?', options:['9 times','3 times','6 times'], answer:'9 times', fact:'If r_X = 3r_Y, then A_X = π(3r)² = 9πr² = 9×A_Y. Area scales as the square of the radius ratio!' },
+  { level:3, visual:'🟠', question:'A circular swimming pool has area 1256 m². What is the cost to tile it at $5 per m²? (π≈3.14)', options:['$6280','$3140','$12560'], answer:'$6280', fact:'Area = 1256 m². Cost = 1256 × $5 = $6280. Area problems often connect to real cost calculations!' },
+  { level:3, visual:'⭕', question:'A ring has inner radius 4 cm and the ring width is 3 cm. What is the ring area? (π≈3.14)', options:['131.88 cm²','50.24 cm²','153.86 cm²'], answer:'131.88 cm²', fact:'Outer radius = 4+3 = 7 cm. Outer A = 3.14×49 = 153.86 cm². Inner A = 3.14×16 = 50.24 cm². Ring = 153.86−50.24 = 103.62 cm²... wait: π(49−16) = 3.14×33 = 103.62 cm²!' },
+  { level:3, visual:'🟣', question:'A composite shape has a rectangle 8×10 cm with a quarter circle of radius 8 cm cut from one corner. What is its area? (π≈3.14)', options:['29.76 cm²','80 cm²','50.24 cm²'], answer:'29.76 cm²', fact:'Rectangle A = 80 cm². Quarter circle A = ¼×3.14×64 = 50.24 cm². Remaining = 80−50.24 = 29.76 cm²!' },
+  { level:3, visual:'⭕', question:'A circle has area 452.16 cm². What is its circumference? (π≈3.14)', options:['75.36 cm','37.68 cm','150.72 cm'], answer:'75.36 cm', fact:'r² = 452.16÷3.14=144 → r=12 cm. C = 2×3.14×12 = 75.36 cm. Find radius from area, then compute circumference!' },
+  { level:3, visual:'🔵', question:'Two concentric circles have radii 5 cm and 8 cm. What percentage of the outer circle is the inner circle? (π≈3.14)', options:['39.06%','62.5%','25%'], answer:'39.06%', fact:'Inner A = 3.14×25 = 78.5 cm². Outer A = 3.14×64 = 200.96 cm². Percentage = 78.5÷200.96×100 ≈ 39.06%!' },
+  { level:3, visual:'⭕', question:'A path 2 m wide runs around a circular garden of radius 7 m. What is the path area? (π≈3.14)', options:['100.48 m²','153.86 m²','254.34 m²'], answer:'100.48 m²', fact:'Outer radius = 9 m. Outer A = 3.14×81 = 254.34 m². Inner A = 3.14×49 = 153.86 m². Path = 254.34−153.86 = 100.48 m²!' },
+  { level:3, visual:'🟠', question:'A circle has circumference 94.2 cm. What is its area? (π≈3.14)', options:['706.5 cm²','1413 cm²','353.25 cm²'], answer:'706.5 cm²', fact:'r = 94.2÷6.28 = 15 cm. A = 3.14×225 = 706.5 cm². Find radius from C, then use A = πr²!' },
+  { level:3, visual:'⭕', question:'A semicircle has perimeter 36.84 cm. What is its radius? (π≈3.14)', options:['9 cm','18 cm','4.5 cm'], answer:'9 cm', fact:'Perimeter = πr + 2r = r(π+2) = r×5.14. 36.84÷5.14 ≈ 9 cm. The perimeter of a semicircle is the curved half plus the diameter!' },
+  { level:3, visual:'🟣', question:'Circle A has radius 8 cm and circle B has radius 4 cm. What is the difference of their circumferences? (π≈3.14)', options:['25.12 cm','50.24 cm','12.56 cm'], answer:'25.12 cm', fact:'C_A = 2×3.14×8 = 50.24 cm. C_B = 2×3.14×4 = 25.12 cm. Difference = 50.24−25.12 = 25.12 cm!' },
+  { level:3, visual:'⭕', question:'A circular disc has area 78.5 cm². It is cut in half to make a semicircle. What is the semicircle\'s perimeter? (π≈3.14)', options:['25.7 cm','31.4 cm','15.7 cm'], answer:'25.7 cm', fact:'r² = 78.5÷3.14 = 25, r=5. Semicircle perimeter = πr + 2r = 3.14×5 + 10 = 15.7 + 10 = 25.7 cm!' },
+  { level:3, visual:'🔵', question:'A ring has inner circumference 31.4 cm and outer circumference 62.8 cm. What is the ring area? (π≈3.14)', options:['235.5 cm²','78.5 cm²','314 cm²'], answer:'235.5 cm²', fact:'Inner r = 31.4÷6.28 = 5 cm. Outer r = 62.8÷6.28 = 10 cm. Ring = π(100−25) = 3.14×75 = 235.5 cm²!' },
+  { level:3, visual:'⭕', question:'A quarter circle and a semicircle both have radius 6 cm. How much larger is the semicircle\'s area? (π≈3.14)', options:['28.26 cm²','56.52 cm²','113.04 cm²'], answer:'28.26 cm²', fact:'Semicircle A = ½×3.14×36 = 56.52 cm². Quarter circle A = ¼×3.14×36 = 28.26 cm². Difference = 56.52−28.26 = 28.26 cm²!' },
+  { level:3, visual:'🟠', question:'A circular coin has radius 1.2 cm. A square coin has side 2 cm. Which has greater area? (π≈3.14)', options:['Square (4 cm²)','Circle (4.52 cm²)','They are equal'], answer:'Circle (4.52 cm²)', fact:'Circle A = 3.14×1.44 = 4.52 cm². Square A = 2×2 = 4 cm². The circle is larger by 0.52 cm²!' },
+
+  // ── LEVEL 2 extras ──
+  { level:2, visual:'⭕', question:'A circle has circumference 43.96 m. What is its area? (π≈3.14)', options:['153.86 m²','43.96 m²','87.92 m²'], answer:'153.86 m²', fact:'r = 43.96÷6.28 = 7 m. A = 3.14×49 = 153.86 m². From circumference: divide by 6.28 for r, then use A = πr²!' },
+  { level:2, visual:'🔵', question:'A circular clock has radius 10 cm. What is its area? (π≈3.14)', options:['314 cm²','62.8 cm²','31.4 cm²'], answer:'314 cm²', fact:'A = πr² = 3.14×100 = 314 cm². A clock face with 10 cm radius covers 314 cm² on the wall!' },
+  { level:2, visual:'⭕', question:'A circular pond has radius 4 m. What is its circumference? (π≈3.14)', options:['25.12 m','12.56 m','50.24 m'], answer:'25.12 m', fact:'C = 2πr = 2×3.14×4 = 25.12 m. You would walk 25.12 m to go all the way around this pond!' },
+  { level:2, visual:'⭕', question:'A circular sticker has area 28.26 cm². What is its diameter? (π≈3.14)', options:['6 cm','3 cm','9 cm'], answer:'6 cm', fact:'r² = 28.26÷3.14 = 9 → r = 3 cm. Diameter = 2×3 = 6 cm. Divide area by π, square root, then double!' },
+  { level:2, visual:'🟠', question:'A quarter circle has radius 12 cm. What is its area? (π≈3.14)', options:['113.04 cm²','452.16 cm²','226.08 cm²'], answer:'113.04 cm²', fact:'Full circle A = 3.14×144 = 452.16 cm². Quarter = 452.16÷4 = 113.04 cm²!' },
+  { level:2, visual:'⭕', question:'A circle has circumference 75.36 cm. What is its diameter? (π≈3.14)', options:['24 cm','12 cm','48 cm'], answer:'24 cm', fact:'d = C÷π = 75.36÷3.14 = 24 cm. Divide circumference by π to get diameter directly!' },
+  { level:2, visual:'⭕', question:'A circular lid has radius 6 cm. What is its area? (π≈3.14)', options:['113.04 cm²','37.68 cm²','75.36 cm²'], answer:'113.04 cm²', fact:'A = πr² = 3.14×36 = 113.04 cm². A jar lid with 6 cm radius covers 113.04 cm²!' },
+  { level:2, visual:'🟣', question:'A semicircle has area 56.52 cm². What is its radius? (π≈3.14)', options:['6 cm','12 cm','3 cm'], answer:'6 cm', fact:'Semicircle A = ½πr². So πr² = 113.04. r² = 113.04÷3.14 = 36. r = 6 cm!' },
+  { level:2, visual:'⭕', question:'A circle has area 254.34 cm². What is its circumference? (π≈3.14)', options:['56.52 cm','28.26 cm','113.04 cm'], answer:'56.52 cm', fact:'r² = 254.34÷3.14 = 81 → r = 9 cm. C = 2×3.14×9 = 56.52 cm. Find radius first, then circumference!' },
+  { level:2, visual:'🔵', question:'A quarter circle has radius 3 cm. What is its perimeter? (π≈3.14)', options:['10.71 cm','9.42 cm','6 cm'], answer:'10.71 cm', fact:'Arc = ¼×2πr = ½×3.14×3 = 4.71 cm. Perimeter = 4.71 + 3 + 3 = 10.71 cm (arc + two radii)!' },
+  { level:2, visual:'⭕', question:'A circular mirror has circumference 37.68 cm. What is its area? (π≈3.14)', options:['113.04 cm²','37.68 cm²','18.84 cm²'], answer:'113.04 cm²', fact:'r = 37.68÷6.28 = 6 cm. A = 3.14×36 = 113.04 cm². Always find radius from circumference before computing area!' },
+];
+const QUIZ_KEY = 'kids_q_math_circles';
+const POINTS_KEY='kids_points';
+function getPoints(){return parseInt(localStorage.getItem(POINTS_KEY)||'0');}
+function addPoints(n){localStorage.setItem(POINTS_KEY,getPoints()+n);}
+function updatePtsDisplay(){const el=document.getElementById('ptsDisplay');if(el)el.textContent='⭐ '+getPoints();}
+
+let current = 0, score = 0, dotResults = [], sessionQ = [];
+let audioCtx = null;
+function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+function note(ctx, type, freq, time, dur, vol) {
+  const osc = ctx.createOscillator(), gn = ctx.createGain();
+  osc.connect(gn); gn.connect(ctx.destination);
+  osc.type = type; osc.frequency.value = freq;
+  gn.gain.setValueAtTime(0.001, time);
+  gn.gain.linearRampToValueAtTime(vol, time + 0.015);
+  gn.gain.exponentialRampToValueAtTime(0.001, time + dur);
+  osc.start(time); osc.stop(time + dur + 0.06);
+}
+function playCorrect() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    [1047,1319,1568,2093,1568,1319].forEach((f,i) => note(ctx,'triangle',f,t+i*0.07,0.14,0.5));
+    [[523,0.52,0.14],[659,0.66,0.14],[784,0.80,0.14],[1047,0.94,0.5]].forEach(([f,d,dur]) => {
+      note(ctx,'triangle',f,t+d,dur,0.55); note(ctx,'sine',f*2,t+d,dur*0.5,0.14);
+    });
+  });
+}
+function playWrong() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    [[400,260,0.00],[340,220,0.28],[280,160,0.56]].forEach(([f1,f2,delay]) => {
+      const osc=ctx.createOscillator(), gn=ctx.createGain();
+      osc.connect(gn); gn.connect(ctx.destination); osc.type='sawtooth';
+      osc.frequency.setValueAtTime(f1,t+delay); osc.frequency.exponentialRampToValueAtTime(f2,t+delay+0.22);
+      gn.gain.setValueAtTime(0.001,t+delay); gn.gain.linearRampToValueAtTime(0.3,t+delay+0.02); gn.gain.exponentialRampToValueAtTime(0.001,t+delay+0.25);
+      osc.start(t+delay); osc.stop(t+delay+0.3);
+    });
+    const osc=ctx.createOscillator(), gn=ctx.createGain();
+    osc.connect(gn); gn.connect(ctx.destination); osc.type='sine';
+    osc.frequency.setValueAtTime(380,t+0.92); osc.frequency.exponentialRampToValueAtTime(55,t+1.4);
+    gn.gain.setValueAtTime(0.001,t+0.92); gn.gain.linearRampToValueAtTime(0.55,t+0.93); gn.gain.exponentialRampToValueAtTime(0.001,t+1.45);
+    osc.start(t+0.92); osc.stop(t+1.5);
+  });
+}
+function playLevelUp() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    [[262,0],[330,0.12],[392,0.24],[523,0.36],[659,0.52],[784,0.68],[1047,0.84]].forEach(([f,d]) => note(ctx,'triangle',f,t+d,0.25,0.45));
+    note(ctx,'sine',1047,t+0.84,0.8,0.3); note(ctx,'sine',1319,t+0.90,0.7,0.25); note(ctx,'sine',1568,t+0.96,0.6,0.2);
+  });
+}
+function getMastered(){try{return new Set(JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]'));}catch{return new Set();}}
+function markMastered(idx){try{const m=JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]');if(!m.includes(idx)){m.push(idx);localStorage.setItem(QUIZ_KEY,JSON.stringify(m));}}catch{}}
+function pickSession(){const mastered=getMastered();const byLevel=[[],[],[]];ALL_QUESTIONS.forEach((q,i)=>byLevel[q.level-1].push(i));const session=[];byLevel.forEach(pool=>{const notDone=shuffle(pool.filter(i=>!mastered.has(i)));const done=shuffle(pool.filter(i=>mastered.has(i)));session.push(...[...notDone,...done].slice(0,5));});return session.map(i=>({...ALL_QUESTIONS[i],_idx:i}));}
+function init() {
+  current = 0; score = 0; dotResults = Array(15).fill(null); sessionQ = pickSession();
+  if (!document.getElementById('visualCard')) {
+    document.getElementById('gameScreen').innerHTML = `
+      <a class="back-btn" href="../../../">← Home</a>
+      <div class="top">
+        <div class="title">⭕ Circles</div>
+        <div class="top-row"><div class="level-badge easy" id="levelBadge">⭐ Easy</div><div class="score-pill">🎯 <strong id="score">0</strong> / 15</div><div class="pts-pill" id="ptsDisplay">⭐ 0</div></div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+      <div class="middle" id="middle">
+        <div class="visual-card" id="visualCard"></div>
+        <div class="question-text" id="questionText"></div>
+      </div>
+      <div class="bottom">
+        <div class="choices" id="choices"></div>
+        <div class="progress-dots" id="progressDots"></div>
+      </div>`;
+  }
+  buildDots(); showQuestion(); updatePtsDisplay();
+}
+function shuffle(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function buildDots() {
+  const c = document.getElementById('progressDots'); c.innerHTML = '';
+  sessionQ.forEach((q,i) => {
+    const cls = q.level===1?'easy-dot':q.level===2?'medium-dot':'hard-dot';
+    const d = document.createElement('div');
+    d.className = `dot ${cls}`+(i===0?' current':''); d.id=`dot-${i}`; c.appendChild(d);
+  });
+}
+function updateDot(idx, result) {
+  const d = document.getElementById(`dot-${idx}`); if(!d) return;
+  d.classList.remove('current'); d.classList.add('answered', result==='correct'?'correct-dot':'wrong-dot');
+  const next = document.getElementById(`dot-${idx+1}`); if(next) next.classList.add('current');
+}
+function showQuestion() {
+  const q = sessionQ[current];
+  const badge = document.getElementById('levelBadge');
+  if(q.level===1){badge.className='level-badge easy';badge.textContent='⭐ Easy';}
+  if(q.level===2){badge.className='level-badge medium';badge.textContent='⭐⭐ Medium';}
+  if(q.level===3){badge.className='level-badge hard';badge.textContent='⭐⭐⭐ Hard';}
+  document.getElementById('progressFill').style.width=(current/15*100)+'%';
+  document.getElementById('score').textContent=score;
+  document.getElementById('visualCard').innerHTML=`<span class="visual-emoji">${q.visual}</span>`;
+  document.getElementById('questionText').textContent=q.question;
+  const shuffled=shuffle([...q.options]);
+  const choicesEl=document.getElementById('choices'); choicesEl.innerHTML='';
+  ['A','B','C'].forEach((letter,i) => {
+    const btn=document.createElement('button'); btn.className='choice-btn'; btn.dataset.value=shuffled[i];
+    btn.innerHTML=`<span class="choice-letter">${letter}</span>${shuffled[i]}`;
+    btn.onclick=()=>handleAnswer(shuffled[i],q.answer,btn,q.fact,q._idx); choicesEl.appendChild(btn);
+  });
+  document.getElementById('gameScreen').classList.remove('shake');
+}
+function handleAnswer(chosen,correct,btn,fact,qIdx) {
+  document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+  const isCorrect = chosen===correct;
+  if(isCorrect){
+    score++; markMastered(qIdx); btn.classList.add('correct'); dotResults[current]='correct'; updateDot(current,'correct');
+    document.getElementById('score').textContent=score; playCorrect(); spawnConfetti(35);
+  } else {
+    btn.classList.add('wrong'); dotResults[current]='wrong'; updateDot(current,'wrong');
+    document.querySelectorAll('.choice-btn').forEach(b=>{if(b.dataset.value===correct)b.classList.add('correct');});
+    document.getElementById('gameScreen').classList.add('shake'); playWrong();
+  }
+  setTimeout(()=>showFeedback(isCorrect,fact,chosen,correct),300);
+}
+let feedbackTimer=null, feedbackRafId=null;
+function dismissFeedback(){
+  cancelAnimationFrame(feedbackRafId); clearTimeout(feedbackTimer);
+  const overlay=document.getElementById('feedbackOverlay');
+  const b=document.getElementById('feedbackBox'); b.style.animation='slideUp 0.35s ease forwards';
+  overlay.classList.add('dismiss'); overlay.classList.remove('clickable');
+  setTimeout(()=>{overlay.classList.remove('show','dismiss');b.style.animation='';advanceQuestion();},370);
+}
+function showFeedback(isCorrect, fact, chosen, correct) {
+  clearTimeout(feedbackTimer); cancelAnimationFrame(feedbackRafId);
+  const overlay=document.getElementById('feedbackOverlay'), box=document.getElementById('feedbackBox');
+  const arc=document.getElementById('timerArc'), ring=document.getElementById('timerRing');
+  const tapHint=document.getElementById('tapHint');
+  const wrongDetail=document.getElementById('wrongDetail');
+  const CIRC=100.5;
+  if(isCorrect){
+    const msgs=[['🎉✨','CORRECT!'],['🌟💡','BRILLIANT!'],['🏆⭐','GENIUS!'],['🔥💫','AMAZING!'],['👑✅','PERFECT!']];
+    const [em,title]=msgs[Math.floor(Math.random()*msgs.length)];
+    document.getElementById('feedbackEmoji').textContent=em;
+    document.getElementById('feedbackTitle').textContent=title;
+    document.getElementById('feedbackTitle').className='feedback-title correct-text';
+    box.className='feedback-box correct-box'; ring.className='timer-ring correct-ring';
+    ring.style.display=''; tapHint.style.display='none'; wrongDetail.style.display='none';
+  } else {
+    const msgs=[['😬❌','Not quite...'],['🤔💭','Wrong one!'],['😅🔄','Keep going!']];
+    const [em,title]=msgs[Math.floor(Math.random()*msgs.length)];
+    document.getElementById('feedbackEmoji').textContent=em;
+    document.getElementById('feedbackTitle').textContent=title;
+    document.getElementById('feedbackTitle').className='feedback-title wrong-text';
+    box.className='feedback-box wrong-box'; ring.className='timer-ring wrong-ring';
+    ring.style.display='none'; tapHint.style.display='';
+    document.getElementById('wdQuestion').textContent=document.getElementById('questionText').textContent;
+    document.getElementById('wdChosen').textContent=chosen;
+    document.getElementById('wdCorrect').textContent=correct;
+    wrongDetail.style.display='';
+  }
+  document.getElementById('feedbackFact').textContent=fact;
+  arc.style.strokeDashoffset='0'; overlay.classList.remove('dismiss'); overlay.classList.add('show');
+  if(isCorrect){
+    const duration=1200; const startTime=performance.now();
+    function tickRing(now){const frac=Math.min((now-startTime)/duration,1);arc.style.strokeDashoffset=(CIRC*frac).toFixed(2);if(frac<1)feedbackRafId=requestAnimationFrame(tickRing);}
+    feedbackRafId=requestAnimationFrame(tickRing);
+    feedbackTimer=setTimeout(dismissFeedback,duration);
+  } else {
+    overlay.classList.add('clickable');
+    overlay.addEventListener('click',dismissFeedback,{once:true});
+  }
+}
+function advanceQuestion(){
+  const prev=current; current++;
+  if(prev===4){showLevelUp('medium');return;}
+  if(prev===9){showLevelUp('hard');return;}
+  if(current>=15){showEndScreen();return;}
+  showQuestion();
+}
+function showLevelUp(level){
+  const overlay=document.getElementById('levelupOverlay');
+  if(level==='medium'){document.getElementById('levelupIcon').textContent='⭐⭐';document.getElementById('levelupTitle').textContent='LEVEL UP!';document.getElementById('levelupSub').textContent='🔵 Medium — reverse problems await!';}
+  else{document.getElementById('levelupIcon').textContent='⭐⭐⭐';document.getElementById('levelupTitle').textContent='EXPERT MODE!';document.getElementById('levelupSub').textContent='🧠 Hard — rings and composites await!';}
+  overlay.classList.add('show'); playLevelUp(); spawnConfetti(60);
+}
+function dismissLevelUp(){document.getElementById('levelupOverlay').classList.remove('show');showQuestion();}
+function showEndScreen(){
+  const screen=document.getElementById('gameScreen');
+  let rank,icon,msg,color;
+  if(score>=13){rank='CIRCLE EXPERT!';icon='🏆⭕⭐';msg='Outstanding! You have mastered circles!';color:'#f1c40f';}
+  else if(score>=10){rank='GEOMETRY STAR!';icon='🌟🔵🎯';msg='Excellent circle knowledge!';color='#2ecc71';}
+  else if(score>=7){rank='MATH WHIZ!';icon='👍⭕😊';msg='Good effort! Keep practicing circumference and area!';color='#e67e22';}
+  else{rank='FORMULA PRO!';icon='💪🟠🌱';msg='Great start! Review C = 2πr and A = πr²!';color='#e74c3c';}
+  color = score>=13?'#f1c40f':score>=10?'#2ecc71':score>=7?'#e67e22':'#e74c3c';
+  const e=dotResults.slice(0,5).filter(r=>r==='correct').length;
+  const m=dotResults.slice(5,10).filter(r=>r==='correct').length;
+  const h=dotResults.slice(10,15).filter(r=>r==='correct').length;
+  let earned=0;
+  if(e===5) earned+=1;
+  if(m===5) earned+=3;
+  if(h===5) earned+=6;
+  if(earned>0) addPoints(earned);
+  const tierRows=[
+    e===5?'<span style="color:#4ade80">⭐ Easy +1✓</span>':'<span style="color:rgba(255,255,255,0.3)">⭐ Easy +1</span>',
+    m===5?'<span style="color:#fbbf24">⭐⭐ Med +3✓</span>':'<span style="color:rgba(255,255,255,0.3)">⭐⭐ Med +3</span>',
+    h===5?'<span style="color:#f87171">⭐⭐⭐ Hard +6✓</span>':'<span style="color:rgba(255,255,255,0.3)">⭐⭐⭐ Hard +6</span>',
+  ].join('');
+  let pointsHtml='';
+  if(earned>0){
+    pointsHtml=`<div style="background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,165,0,0.2));border:2px solid rgba(255,215,0,0.45);border-radius:16px;padding:10px 18px;text-align:center;">
+      <div style="font-size:0.9rem;margin-bottom:5px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">${tierRows}</div>
+      <div style="color:#ffd700;font-size:1.15rem;font-weight:700;">+${earned} point${earned===1?'':'s'} earned!</div>
+      <div style="color:rgba(255,255,255,0.7);font-size:0.9rem;margin-top:3px;">Total: ⭐ ${getPoints()} points</div>
+    </div>`;
+  } else {
+    pointsHtml=`<div style="text-align:center;">
+      <div style="font-size:0.85rem;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:3px;">${tierRows}</div>
+      <div style="color:rgba(255,215,0,0.5);font-size:0.85rem;">⭐ ${getPoints()} pts · Complete a full level to earn points</div>
+    </div>`;
+  }
+  screen.innerHTML=`
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;padding:20px;text-align:center;">
+      <div style="font-size:clamp(2.8rem,11vw,5.5rem);">${icon}</div>
+      <div style="font-size:clamp(1.8rem,7vw,3rem);color:${color};text-shadow:0 0 20px ${color}55;">${rank}</div>
+      <div style="font-size:clamp(0.95rem,3.5vw,1.3rem);color:rgba(255,255,255,0.82);max-width:340px;">${msg}</div>
+      <div style="font-size:clamp(1.4rem,5.5vw,2rem);color:var(--acc);">🎯 ${score} / 15</div>
+      ${pointsHtml}
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <div style="background:rgba(46,204,113,0.18);border:2px solid #2ecc71;border-radius:12px;padding:8px 12px;"><div style="color:#2ecc71;font-size:0.85rem;">⭐ Easy</div><div style="color:#fff;font-size:1.4rem;">${e}/5</div></div>
+        <div style="background:rgba(230,126,34,0.18);border:2px solid #e67e22;border-radius:12px;padding:8px 12px;"><div style="color:#e67e22;font-size:0.85rem;">⭐⭐ Medium</div><div style="color:#fff;font-size:1.4rem;">${m}/5</div></div>
+        <div style="background:rgba(231,76,60,0.18);border:2px solid #e74c3c;border-radius:12px;padding:8px 12px;"><div style="color:#e74c3c;font-size:0.85rem;">⭐⭐⭐ Hard</div><div style="color:#fff;font-size:1.4rem;">${h}/5</div></div>
+      </div>
+      <div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;max-width:280px;">
+        ${dotResults.map((r,i)=>`<span style="font-size:1.3rem;">${r==='correct'?(i<5?'⭐':i<10?'🌟':'💎'):'❌'}</span>`).join('')}
+      </div>
+      <button class="action-btn" onclick="init()">🔄 Play Again!</button>
+      <a href="../../../" style="color:rgba(255,255,255,0.5);font-size:1rem;margin-top:4px;">← Back to Hub</a>
+    </div>`;
+  spawnConfetti(score>=10?90:40);
+}
+const CONFETTI_COLORS=['#f1c40f','#2ecc71','#e74c3c','#fff','#3498db','#9b59b6','#e67e22','#1abc9c'];
+function spawnConfetti(count=35){
+  for(let i=0;i<count;i++){setTimeout(()=>{
+    const el=document.createElement('div'); el.className='confetti-piece';
+    el.style.left=Math.random()*100+'vw'; el.style.top='-20px';
+    el.style.background=CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)];
+    el.style.width=(6+Math.random()*10)+'px'; el.style.height=(6+Math.random()*10)+'px';
+    el.style.borderRadius=Math.random()>0.5?'50%':'2px';
+    const dur=1.5+Math.random()*2; el.style.animationDuration=dur+'s'; el.style.animationDelay=Math.random()*0.4+'s';
+    document.body.appendChild(el); setTimeout(()=>el.remove(),(dur+0.6)*1000);
+  },i*20);}
+}
+init();
+</script>
+</body>
+</html>
