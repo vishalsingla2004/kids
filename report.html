@@ -108,6 +108,23 @@
     font-size: 0.92rem; color: rgba(255,255,255,0.8); line-height: 1.4;
   }
   .tip-box strong { color: #38bdf8; }
+  /* Tile manager */
+  .tile-manager { max-width:640px; margin:24px auto 0; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:18px; padding:18px 20px; }
+  .tile-manager h3 { font-size:1rem; color:rgba(255,255,255,0.7); margin:0 0 4px; }
+  .tile-manager p  { font-size:0.8rem; color:rgba(255,255,255,0.35); margin:0 0 14px; }
+  .tile-group-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:2px; color:rgba(255,255,255,0.3); margin:12px 0 6px; }
+  .tile-row { display:flex; align-items:center; justify-content:space-between; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .tile-row:last-child { border-bottom:none; }
+  .tile-info { display:flex; align-items:center; gap:10px; }
+  .tile-icon { font-size:1.2rem; width:26px; text-align:center; }
+  .tile-name { font-size:0.9rem; color:rgba(255,255,255,0.8); }
+  /* Toggle switch */
+  .toggle { position:relative; width:42px; height:24px; flex-shrink:0; }
+  .toggle input { opacity:0; width:0; height:0; }
+  .toggle-track { position:absolute; inset:0; background:rgba(255,255,255,0.15); border-radius:50px; cursor:pointer; transition:background 0.2s; }
+  .toggle input:checked + .toggle-track { background:#4ade80; }
+  .toggle-track::after { content:''; position:absolute; top:3px; left:3px; width:18px; height:18px; background:#fff; border-radius:50%; transition:transform 0.2s; }
+  .toggle input:checked + .toggle-track::after { transform:translateX(18px); }
 </style>
 </head>
 <body>
@@ -131,6 +148,29 @@
 
 <div class="section-label" style="margin-top:20px;">🎮 Other Quizzes</div>
 <div class="cards" id="otherCards"></div>
+
+<div class="tile-manager">
+  <h3>🔒 Manage Tiles</h3>
+  <p>Hide topics from the home screen. Changes take effect immediately.</p>
+  <div class="tile-group-label">🎮 Games</div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">👸</span><span class="tile-name">Princess Counting</span></div><label class="toggle"><input type="checkbox" id="t-princess" onchange="toggleTile('princess',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">⚽</span><span class="tile-name">Soccer Quiz</span></div><label class="toggle"><input type="checkbox" id="t-soccer" onchange="toggleTile('soccer',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-group-label">📝 5th Grade SBA</div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">📐</span><span class="tile-name">SBA Math</span></div><label class="toggle"><input type="checkbox" id="t-sba-math" onchange="toggleTile('sba-math',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">📚</span><span class="tile-name">SBA English</span></div><label class="toggle"><input type="checkbox" id="t-sba-ela" onchange="toggleTile('sba-ela',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">🔬</span><span class="tile-name">SBA Science</span></div><label class="toggle"><input type="checkbox" id="t-sba-science" onchange="toggleTile('sba-science',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-group-label">📐 Math Mastery</div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">📏</span><span class="tile-name">Area of 2D Shapes</span></div><label class="toggle"><input type="checkbox" id="t-area-2d" onchange="toggleTile('area-2d',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">⭕</span><span class="tile-name">Circles</span></div><label class="toggle"><input type="checkbox" id="t-circles" onchange="toggleTile('circles',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">📦</span><span class="tile-name">Volume of 3D Shapes</span></div><label class="toggle"><input type="checkbox" id="t-volume-3d" onchange="toggleTile('volume-3d',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-group-label">🔬 6th Grade Science</div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">🧪</span><span class="tile-name">Chemistry</span></div><label class="toggle"><input type="checkbox" id="t-chemistry" onchange="toggleTile('chemistry',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">⚡</span><span class="tile-name">Physics</span></div><label class="toggle"><input type="checkbox" id="t-physics" onchange="toggleTile('physics',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">📐</span><span class="tile-name">Maths</span></div><label class="toggle"><input type="checkbox" id="t-maths" onchange="toggleTile('maths',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">🌍</span><span class="tile-name">Environmental Science</span></div><label class="toggle"><input type="checkbox" id="t-environmental" onchange="toggleTile('environmental',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">🔬</span><span class="tile-name">Biology</span></div><label class="toggle"><input type="checkbox" id="t-biology" onchange="toggleTile('biology',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">🎓</span><span class="tile-name">NSC Science Bowl</span></div><label class="toggle"><input type="checkbox" id="t-nsc" onchange="toggleTile('nsc',this.checked)"><span class="toggle-track"></span></label></div>
+</div>
 
 <div class="actions">
   <button class="btn-reset-all" onclick="resetAll()">🗑️ Reset All Progress</button>
@@ -274,7 +314,26 @@ function resetAll() {
   }
 }
 
+const ALL_TILES = ['princess','soccer','sba-math','sba-ela','sba-science','area-2d','circles','volume-3d','chemistry','physics','maths','environmental','biology','nsc'];
+function getHidden() { return JSON.parse(localStorage.getItem('kids_hidden_tiles')||'[]'); }
+function saveHidden(arr) { localStorage.setItem('kids_hidden_tiles', JSON.stringify(arr)); }
+function toggleTile(id, visible) {
+  const hidden = getHidden();
+  const idx = hidden.indexOf(id);
+  if (visible && idx !== -1) hidden.splice(idx, 1);
+  if (!visible && idx === -1) hidden.push(id);
+  saveHidden(hidden);
+}
+function initToggles() {
+  const hidden = getHidden();
+  ALL_TILES.forEach(id => {
+    const el = document.getElementById('t-'+id);
+    if (el) el.checked = !hidden.includes(id);
+  });
+}
+
 render();
+initToggles();
 </script>
 </body>
 </html>

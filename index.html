@@ -125,18 +125,20 @@
   const pts=parseInt(localStorage.getItem('kids_points')||'0');
   const el=document.getElementById('hubPts');
   el.textContent='⭐ '+pts+' point'+(pts===1?'':'s');
+  const hidden=JSON.parse(localStorage.getItem('kids_hidden_tiles')||'[]');
+  hidden.forEach(id=>{const c=document.querySelector('[data-tile="'+id+'"]');if(c)c.style.display='none';});
 })();
 </script>
 
 <div class="section-label">🎮 Games</div>
 <div class="grid">
-  <a class="card card-princess" href="games/princess/">
+  <a class="card card-princess" href="games/princess/" data-tile="princess">
     <div class="card-icon">👸</div>
     <div class="card-name">Princess Counting</div>
     <div class="card-desc">Count 1 to 5 with princess friends</div>
     <div class="card-tag">Ages 3–6</div>
   </a>
-  <a class="card card-soccer" href="games/soccer/">
+  <a class="card card-soccer" href="games/soccer/" data-tile="soccer">
     <div class="card-icon">⚽</div>
     <div class="card-name">Soccer Quiz</div>
     <div class="card-desc">Test your football knowledge</div>
@@ -146,31 +148,31 @@
 
 <div class="section-label">🔬 6th Grade Science</div>
 <div class="grid">
-  <a class="card card-chem" href="6th-grade/chemistry/">
+  <a class="card card-chem" href="6th-grade/chemistry/" data-tile="chemistry">
     <div class="card-icon">🧪</div>
     <div class="card-name">Chemistry</div>
     <div class="card-desc">Atoms, elements & reactions</div>
     <div class="card-tag">15 Questions</div>
   </a>
-  <a class="card card-physics" href="6th-grade/physics/">
+  <a class="card card-physics" href="6th-grade/physics/" data-tile="physics">
     <div class="card-icon">⚡</div>
     <div class="card-name">Physics</div>
     <div class="card-desc">Forces, energy & light</div>
     <div class="card-tag">15 Questions</div>
   </a>
-  <a class="card card-maths" href="6th-grade/maths/">
+  <a class="card card-maths" href="6th-grade/maths/" data-tile="maths">
     <div class="card-icon">📐</div>
     <div class="card-name">Maths</div>
     <div class="card-desc">Numbers, algebra & geometry</div>
     <div class="card-tag">15 Questions</div>
   </a>
-  <a class="card card-env" href="6th-grade/environmental/">
+  <a class="card card-env" href="6th-grade/environmental/" data-tile="environmental">
     <div class="card-icon">🌍</div>
     <div class="card-name">Environmental Science</div>
     <div class="card-desc">Climate, ecosystems & Earth</div>
     <div class="card-tag">15 Questions</div>
   </a>
-  <a class="card card-bio" href="6th-grade/biology/">
+  <a class="card card-bio" href="6th-grade/biology/" data-tile="biology">
     <div class="card-icon">🔬</div>
     <div class="card-name">Biology</div>
     <div class="card-desc">Cells, plants & human body</div>
@@ -180,7 +182,7 @@
 
 <div class="section-label">🏆 Competition Prep</div>
 <div class="grid">
-  <a class="card card-nsc" href="6th-grade/nsc/">
+  <a class="card card-nsc" href="6th-grade/nsc/" data-tile="nsc">
     <div class="card-icon">🎓</div>
     <div class="card-name">NSC Science Bowl</div>
     <div class="card-desc">Real questions from national competition</div>
@@ -191,19 +193,19 @@
 
 <div class="section-label">📝 5th Grade SBA Practice</div>
 <div class="grid">
-  <a class="card card-sba-math" href="5th-grade/math/">
+  <a class="card card-sba-math" href="5th-grade/math/" data-tile="sba-math">
     <div class="card-icon">📐</div>
     <div class="card-name">SBA Math</div>
     <div class="card-desc">Fractions, geometry &amp; algebra</div>
     <div class="card-tag">5th Grade</div>
   </a>
-  <a class="card card-sba-ela" href="5th-grade/ela/">
+  <a class="card card-sba-ela" href="5th-grade/ela/" data-tile="sba-ela">
     <div class="card-icon">📚</div>
     <div class="card-name">SBA English</div>
     <div class="card-desc">Reading, writing &amp; vocabulary</div>
     <div class="card-tag">5th Grade</div>
   </a>
-  <a class="card card-sba-science" href="5th-grade/science/">
+  <a class="card card-sba-science" href="5th-grade/science/" data-tile="sba-science">
     <div class="card-icon">🔬</div>
     <div class="card-name">SBA Science</div>
     <div class="card-desc">Matter, ecosystems &amp; Earth</div>
@@ -213,19 +215,19 @@
 
 <div class="section-label">📐 Math Mastery Topics</div>
 <div class="grid">
-  <a class="card card-sba-math" href="5th-grade/math/area-2d/">
+  <a class="card card-sba-math" href="5th-grade/math/area-2d/" data-tile="area-2d">
     <div class="card-icon">📏</div>
     <div class="card-name">Area of 2D Shapes</div>
     <div class="card-desc">Squares, rectangles, triangles, circles & more</div>
     <div class="card-tag">Mastery</div>
   </a>
-  <a class="card card-sba-math" href="5th-grade/math/circles/">
+  <a class="card card-sba-math" href="5th-grade/math/circles/" data-tile="circles">
     <div class="card-icon">⭕</div>
     <div class="card-name">Circles</div>
     <div class="card-desc">Circumference, area, radius & diameter</div>
     <div class="card-tag">Mastery</div>
   </a>
-  <a class="card card-sba-math" href="5th-grade/math/volume-3d/">
+  <a class="card card-sba-math" href="5th-grade/math/volume-3d/" data-tile="volume-3d">
     <div class="card-icon">📦</div>
     <div class="card-name">Volume of 3D Shapes</div>
     <div class="card-desc">Cubes, prisms, cylinders, cones & spheres</div>
