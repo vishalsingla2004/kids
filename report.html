@@ -122,7 +122,10 @@
 <div id="tipBox"></div>
 <div class="summary-box" id="summaryBox"></div>
 
-<div class="section-label">📚 Science Subjects</div>
+<div class="section-label">📝 5th Grade SBA Practice</div>
+<div class="cards" id="sbaCards"></div>
+
+<div class="section-label" style="margin-top:20px;">🔬 6th Grade Science</div>
 <div class="cards" id="scienceCards"></div>
 
 <div class="section-label" style="margin-top:20px;">🎮 Other Quizzes</div>
@@ -134,15 +137,19 @@
 
 <script>
 const SUBJECTS = [
-  // Science
-  { key:'kids_q_chemistry',  name:'Chemistry',              icon:'🧪', color:'#c471ed', total:150, easyN:50, medN:50, hardN:50, group:'science' },
-  { key:'kids_q_physics',    name:'Physics',                icon:'⚡', color:'#4facfe', total:150, easyN:50, medN:50, hardN:50, group:'science' },
-  { key:'kids_q_maths',      name:'Maths',                  icon:'📐', color:'#f39c12', total:150, easyN:50, medN:50, hardN:50, group:'science' },
-  { key:'kids_q_env',        name:'Environmental Science',  icon:'🌍', color:'#26c6da', total:150, easyN:50, medN:50, hardN:50, group:'science' },
-  { key:'kids_q_biology',    name:'Biology',                icon:'🔬', color:'#4caf50', total:150, easyN:50, medN:50, hardN:50, group:'science' },
-  { key:'kids_q_nsc',        name:'NSC Science Bowl',       icon:'🎓', color:'#38bdf8', total:150, easyN:50, medN:50, hardN:50, group:'other'   },
+  // SBA 5th Grade
+  { key:'kids_q_sba_math',   name:'SBA Math (5th Grade)',   icon:'📐', color:'#60a5fa', total:509, easyN:170, medN:167, hardN:172, group:'sba'     },
+  { key:'kids_q_sba_ela',    name:'SBA English (5th Grade)',icon:'📚', color:'#c084fc', total:500, easyN:204, medN:155, hardN:141, group:'sba'     },
+  { key:'kids_q_sba_science',name:'SBA Science (5th Grade)',icon:'🔬', color:'#4ade80', total:501, easyN:190, medN:156, hardN:155, group:'sba'     },
+  // 6th Grade Science
+  { key:'kids_q_chemistry',  name:'Chemistry',              icon:'🧪', color:'#c471ed', total:501, easyN:167, medN:167, hardN:167, group:'science' },
+  { key:'kids_q_physics',    name:'Physics',                icon:'⚡', color:'#4facfe', total:500, easyN:167, medN:165, hardN:168, group:'science' },
+  { key:'kids_q_maths',      name:'Maths',                  icon:'📐', color:'#f39c12', total:501, easyN:167, medN:167, hardN:167, group:'science' },
+  { key:'kids_q_env',        name:'Environmental Science',  icon:'🌍', color:'#26c6da', total:500, easyN:184, medN:161, hardN:155, group:'science' },
+  { key:'kids_q_biology',    name:'Biology',                icon:'🔬', color:'#4caf50', total:501, easyN:171, medN:166, hardN:164, group:'science' },
   // Other
-  { key:'kids_q_soccer',     name:'Soccer Quiz',            icon:'⚽', color:'#2ecc71', total:150, easyN:50, medN:50, hardN:50, group:'other'   },
+  { key:'kids_q_nsc',        name:'NSC Science Bowl',       icon:'🎓', color:'#38bdf8', total:499, easyN:167, medN:168, hardN:164, group:'other'   },
+  { key:'kids_q_soccer',     name:'Soccer Quiz',            icon:'⚽', color:'#2ecc71', total:498, easyN:167, medN:169, hardN:162, group:'other'   },
 ];
 
 function getData(key) {
@@ -235,6 +242,7 @@ function render() {
   document.getElementById('tipBox').innerHTML = tip;
 
   // Cards
+  document.getElementById('sbaCards').innerHTML     = SUBJECTS.filter(s=>s.group==='sba').map(makeCard).join('');
   document.getElementById('scienceCards').innerHTML = SUBJECTS.filter(s=>s.group==='science').map(makeCard).join('');
   document.getElementById('otherCards').innerHTML   = SUBJECTS.filter(s=>s.group==='other').map(makeCard).join('');
 }
