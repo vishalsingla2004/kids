@@ -118,28 +118,47 @@
   </div>
 </div>
 <script>
-const QUESTIONS = [
+const ALL_QUESTIONS = [
   // EASY
   { level:1, visual:'💧', question:'What is the chemical formula for water?', options:['H₂O','CO₂','O₂'], answer:'H₂O', fact:'💧 Water is made of 2 hydrogen atoms bonded to 1 oxygen atom — that\'s why it\'s H₂O!' },
   { level:1, visual:'⚗️', question:'What are the three common states of matter?', options:['Solid, liquid, gas','Hot, warm, cold','Big, medium, small'], answer:'Solid, liquid, gas', fact:'🧊 Ice is solid, water is liquid, steam is gas — all the same molecule in different states!' },
   { level:1, visual:'🏅', question:'What is the chemical symbol for Gold?', options:['Au','Go','Gd'], answer:'Au', fact:'🏅 Gold\'s symbol Au comes from the Latin word "Aurum" — gold has been treasured for thousands of years!' },
   { level:1, visual:'🧪', question:'What gas is released when baking soda and vinegar are mixed?', options:['Carbon dioxide','Oxygen','Nitrogen'], answer:'Carbon dioxide', fact:'🫧 Baking soda (base) + vinegar (acid) = a chemical reaction that produces CO₂ bubbles!' },
   { level:1, visual:'⚛️', question:'What is the tiny particle that makes up all matter?', options:['Atom','Molecule','Cell'], answer:'Atom', fact:'⚛️ Everything around you — air, water, you! — is made of atoms. They\'re unimaginably tiny!' },
+  // EASY (additional 5)
+  { level:1, visual:'🥈', question:'What is the chemical symbol for Silver?', options:['Ag','Si','Se'], answer:'Ag', fact:'🥈 Ag comes from the Latin "Argentum". Argentina was named after the silver explorers hoped to find there!' },
+  { level:1, visual:'💧', question:'How many atoms are in one water molecule (H₂O)?', options:['3','2','4'], answer:'3', fact:'💧 2 hydrogen + 1 oxygen = 3 atoms per water molecule. Simple but essential for all life on Earth!' },
+  { level:1, visual:'🌍', question:'What is the most abundant element in Earth\'s crust?', options:['Oxygen','Silicon','Iron'], answer:'Oxygen', fact:'🌍 About 46% of Earth\'s crust is oxygen — mostly locked up in minerals and rocks, not as the gas we breathe!' },
+  { level:1, visual:'⚗️', question:'What do we call a pure substance made of only ONE type of atom?', options:['Element','Compound','Mixture'], answer:'Element', fact:'⚗️ Gold, iron, oxygen — each is a pure element. Compounds (like water) are made of two or more different elements bonded together!' },
+  { level:1, visual:'🧊', question:'Which state of matter has a definite volume but NO definite shape?', options:['Liquid','Solid','Gas'], answer:'Liquid', fact:'🧊 Liquids take the shape of their container but keep the same volume. Pour water into any cup — it adapts but doesn\'t expand!' },
   // MEDIUM
   { level:2, visual:'🔬', question:'What is the pH value of pure water?', options:['7','5','9'], answer:'7', fact:'⚖️ pH 7 is neutral — below 7 is acidic (like lemon juice), above 7 is alkaline (like soap)!' },
   { level:2, visual:'🌿', question:'What gas do plants absorb from the air to make food?', options:['Carbon dioxide','Oxygen','Nitrogen'], answer:'Carbon dioxide', fact:'🌱 Plants take in CO₂ and sunlight to make glucose — this process is called photosynthesis!' },
   { level:2, visual:'🧂', question:'What is the chemical formula for table salt?', options:['NaCl','KCl','MgO'], answer:'NaCl', fact:'🧂 NaCl = Sodium + Chlorine. Sodium is a metal and chlorine is a toxic gas — but together they make salt!' },
   { level:2, visual:'🔥', question:'Burning wood is an example of what type of change?', options:['Chemical change','Physical change','Nuclear change'], answer:'Chemical change', fact:'🔥 In a chemical change, new substances are formed. Burnt wood can\'t become wood again!' },
   { level:2, visual:'⚛️', question:'Which particle inside an atom carries a NEGATIVE charge?', options:['Electron','Proton','Neutron'], answer:'Electron', fact:'⚡ Electrons orbit the nucleus and carry negative charge. Protons (positive) and neutrons (neutral) are in the nucleus!' },
+  // MEDIUM (additional 5)
+  { level:2, visual:'🔗', question:'What type of chemical bond forms when atoms SHARE electrons?', options:['Covalent bond','Ionic bond','Metallic bond'], answer:'Covalent bond', fact:'🔗 Water, CO₂, and most organic molecules use covalent bonds. Ionic bonds TRANSFER electrons (like in salt, NaCl)!' },
+  { level:2, visual:'⚛️', question:'What is the electrical charge of a proton?', options:['Positive','Negative','Neutral'], answer:'Positive', fact:'⚛️ Protons (+) are in the nucleus. The number of protons = the atomic number, which determines which element the atom is!' },
+  { level:2, visual:'🦀', question:'Which of these is a CHEMICAL change (new substance formed)?', options:['Iron rusting','Ice melting','Glass breaking'], answer:'Iron rusting', fact:'🦀 Rust is iron oxide (Fe₂O₃) — a brand new substance! Melting ice and breaking glass are physical changes — same substance, different form!' },
+  { level:2, visual:'💨', question:'What is the chemical formula for carbon dioxide?', options:['CO₂','CO','C₂O'], answer:'CO₂', fact:'💨 CO₂ = 1 carbon + 2 oxygen atoms. Plants absorb it to make food; we breathe it out. Too much of it causes global warming!' },
+  { level:2, visual:'🧪', question:'What scale measures how acidic or alkaline a solution is?', options:['pH scale','Kelvin scale','Richter scale'], answer:'pH scale', fact:'🧪 pH runs 0–14. Lemon juice ~2 (acid), baking soda ~9 (base), pure water = 7 (neutral). Below 7 = acidic, above 7 = alkaline!' },
   // HARD
   { level:3, visual:'⚛️', question:'What is the centre of an atom called?', options:['Nucleus','Core','Shell'], answer:'Nucleus', fact:'🎯 The nucleus contains protons and neutrons. It\'s incredibly dense — if an atom were a stadium, the nucleus would be a pea!' },
   { level:3, visual:'🌡️', question:'What gas makes up about 78% of Earth\'s atmosphere?', options:['Nitrogen','Oxygen','Carbon dioxide'], answer:'Nitrogen', fact:'🌍 78% Nitrogen, 21% Oxygen, 1% other gases. We breathe mostly nitrogen but our bodies can\'t use it!' },
   { level:3, visual:'🧊', question:'What is it called when a solid turns DIRECTLY into a gas (skipping liquid)?', options:['Sublimation','Evaporation','Condensation'], answer:'Sublimation', fact:'❄️ Dry ice (solid CO₂) sublimates directly into gas. That\'s the cool foggy effect at concerts!' },
   { level:3, visual:'⚙️', question:'What is the chemical symbol for Iron?', options:['Fe','Ir','In'], answer:'Fe', fact:'⚙️ Iron\'s symbol Fe comes from "Ferrum" in Latin. Iron is essential for our blood to carry oxygen!' },
   { level:3, visual:'📊', question:'How many elements are currently in the Periodic Table?', options:['118','100','92'], answer:'118', fact:'🔬 Dmitri Mendeleev created the first periodic table in 1869 with just 63 elements. Scientists have added many more since!' },
+  // HARD (additional 5)
+  { level:3, visual:'⚡', question:'What minimum energy is required to START a chemical reaction?', options:['Activation energy','Potential energy','Thermal energy'], answer:'Activation energy', fact:'⚡ Even exothermic reactions need a small energy "kick" to start! A match provides activation energy to ignite gas — then the reaction sustains itself!' },
+  { level:3, visual:'💡', question:'In the electrolysis of water, which gas forms at the NEGATIVE electrode (cathode)?', options:['Hydrogen','Oxygen','Nitrogen'], answer:'Hydrogen', fact:'💡 At the cathode: 2H⁺ + 2e⁻ → H₂ gas. At the anode: oxygen forms. Electrolysis is how green hydrogen fuel is produced!' },
+  { level:3, visual:'💎', question:'What is the atomic number of Carbon?', options:['6','12','8'], answer:'6', fact:'💎 Carbon has 6 protons (atomic number = 6), atomic mass ~12. It\'s the backbone of all organic chemistry and all life on Earth!' },
+  { level:3, visual:'🔥', question:'What type of reaction releases heat energy to the surroundings?', options:['Exothermic','Endothermic','Catalytic'], answer:'Exothermic', fact:'🔥 Combustion and neutralisation are exothermic — they release energy. Endothermic reactions ABSORB heat, like dissolving ammonium nitrate in water!' },
+  { level:3, visual:'⚙️', question:'What type of reaction occurs when a more reactive metal pushes out a less reactive metal from a solution?', options:['Displacement reaction','Decomposition reaction','Synthesis reaction'], answer:'Displacement reaction', fact:'⚙️ Zinc + copper sulfate → zinc sulfate + copper. More reactive metals "kick out" less reactive ones — this is the reactivity series in action!' },
 ];
+const QUIZ_KEY = 'kids_q_chemistry';
 
-let current = 0, score = 0, dotResults = [];
+let current = 0, score = 0, dotResults = [], sessionQ = [];
 let audioCtx = null;
 function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
 function note(ctx, type, freq, time, dur, vol) {
@@ -187,8 +206,11 @@ function playLevelUp() {
     note(ctx,'sine',1047,t+0.84,0.8,0.3); note(ctx,'sine',1319,t+0.90,0.7,0.25); note(ctx,'sine',1568,t+0.96,0.6,0.2);
   });
 }
+function getMastered(){try{return new Set(JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]'));}catch{return new Set();}}
+function markMastered(idx){try{const m=JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]');if(!m.includes(idx)){m.push(idx);localStorage.setItem(QUIZ_KEY,JSON.stringify(m));}}catch{}}
+function pickSession(){const mastered=getMastered();const byLevel=[[],[],[]];ALL_QUESTIONS.forEach((q,i)=>byLevel[q.level-1].push(i));const session=[];byLevel.forEach(pool=>{const notDone=shuffle(pool.filter(i=>!mastered.has(i)));const done=shuffle(pool.filter(i=>mastered.has(i)));session.push(...[...notDone,...done].slice(0,5));});return session.map(i=>({...ALL_QUESTIONS[i],_idx:i}));}
 function init() {
-  current = 0; score = 0; dotResults = Array(15).fill(null);
+  current = 0; score = 0; dotResults = Array(15).fill(null); sessionQ = pickSession();
   if (!document.getElementById('visualCard')) {
     document.getElementById('gameScreen').innerHTML = `
       <a class="back-btn" href="../../">← Home</a>
@@ -211,7 +233,7 @@ function init() {
 function shuffle(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 function buildDots() {
   const c = document.getElementById('progressDots'); c.innerHTML = '';
-  QUESTIONS.forEach((q,i) => {
+  ALL_QUESTIONS.forEach((q,i) => {
     const cls = q.level===1?'easy-dot':q.level===2?'medium-dot':'hard-dot';
     const d = document.createElement('div');
     d.className = `dot ${cls}`+(i===0?' current':''); d.id=`dot-${i}`; c.appendChild(d);
@@ -223,7 +245,7 @@ function updateDot(idx, result) {
   const next = document.getElementById(`dot-${idx+1}`); if(next) next.classList.add('current');
 }
 function showQuestion() {
-  const q = QUESTIONS[current];
+  const q = sessionQ[current];
   const badge = document.getElementById('levelBadge');
   if(q.level===1){badge.className='level-badge easy';badge.textContent='⭐ Easy';}
   if(q.level===2){badge.className='level-badge medium';badge.textContent='⭐⭐ Medium';}
@@ -237,15 +259,15 @@ function showQuestion() {
   ['A','B','C'].forEach((letter,i) => {
     const btn=document.createElement('button'); btn.className='choice-btn'; btn.dataset.value=shuffled[i];
     btn.innerHTML=`<span class="choice-letter">${letter}</span>${shuffled[i]}`;
-    btn.onclick=()=>handleAnswer(shuffled[i],q.answer,btn,q.fact); choicesEl.appendChild(btn);
+    btn.onclick=()=>handleAnswer(shuffled[i],q.answer,btn,q.fact,q._idx); choicesEl.appendChild(btn);
   });
   document.getElementById('gameScreen').classList.remove('shake');
 }
-function handleAnswer(chosen, correct, btn, fact) {
+function handleAnswer(chosen,correct,btn,fact,qIdx) {
   document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
   const isCorrect = chosen===correct;
   if(isCorrect){
-    score++; btn.classList.add('correct'); dotResults[current]='correct'; updateDot(current,'correct');
+    score++; markMastered(qIdx); btn.classList.add('correct'); dotResults[current]='correct'; updateDot(current,'correct');
     document.getElementById('score').textContent=score; playCorrect(); spawnConfetti(35);
   } else {
     btn.classList.add('wrong'); dotResults[current]='wrong'; updateDot(current,'wrong');

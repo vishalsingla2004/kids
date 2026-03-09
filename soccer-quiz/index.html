@@ -337,7 +337,7 @@
 
 <script>
 // ── Questions ─────────────────────────────────────────────────────────────────
-const QUESTIONS = [
+const ALL_QUESTIONS = [
   // ── EASY ──────────────────────────────────────────────────────────────────
   {
     level: 1,
@@ -461,12 +461,32 @@ const QUESTIONS = [
     answer: 'Gonzalo Montiel',
     fact: '🇦🇷 Montiel\'s penalty sealed Argentina\'s 3rd World Cup title — ending a 36-year wait!'
   },
+  // EASY (additional 5)
+  { level:1, visual:{type:'emoji',emoji:'🟥',label:'Red Card'}, question:'What does a RED card mean in football?', options:['The player is sent off permanently','The player gets a warning','The player must leave for 10 minutes'], answer:'The player is sent off permanently', fact:'🟥 A red card = immediate dismissal for the rest of the match! A second yellow card also results in a red card.' },
+  { level:1, visual:{type:'emoji',emoji:'🗓️',label:'World Cup'}, question:'How often is the FIFA World Cup held?', options:['Every 4 years','Every 2 years','Every 5 years'], answer:'Every 4 years', fact:'🗓️ The World Cup has been held every 4 years since 1930 (except 1942 and 1946 due to World War II).' },
+  { level:1, visual:{type:'emoji',emoji:'👥',label:'Team'}, question:'How many players from each team are on the pitch during a match?', options:['11','10','12'], answer:'11', fact:'👥 11 per side = 22 players total on the pitch. If a team drops below 7 through red cards, the match is abandoned!' },
+  { level:1, visual:{type:'emoji',emoji:'🎩',label:'Hat-trick'}, question:'What is it called when a player scores 3 goals in a single match?', options:['Hat-trick','Triple','Treble'], answer:'Hat-trick', fact:'🎩 The term comes from cricket! In 1858, a bowler who took 3 wickets in a row was given a hat. Football borrowed the term!' },
+  { level:1, visual:{type:'emoji',emoji:'🔄',label:'Substitution'}, question:'How many substitutions is each team allowed in a modern professional football match?', options:['5','3','6'], answer:'5', fact:'🔄 FIFA permanently increased substitutions from 3 to 5 in 2022 to protect player welfare. Teams get 3 windows to make their changes!' },
+  // MEDIUM (additional 5)
+  { level:2, visual:{type:'flag',code:'fr',label:'France 2018'}, question:'Which country won the 2018 FIFA World Cup in Russia?', options:['France','Croatia','Belgium'], answer:'France', fact:'🇫🇷 France beat Croatia 4-2 in the final! Pogba, Mbappé and a Mandžukić own goal were the highlights!' },
+  { level:2, visual:{type:'emoji',emoji:'🥾',label:'Top Scorer'}, question:'Who is the all-time top scorer in FIFA World Cup history?', options:['Miroslav Klose','Ronaldo (Brazil)','Just Fontaine'], answer:'Miroslav Klose', fact:'⚽ Germany\'s Miroslav Klose scored 16 World Cup goals across 4 tournaments (2002–2014) — a record that still stands!' },
+  { level:2, visual:{type:'emoji',emoji:'🏅',label:'Ballon d\'Or 2022'}, question:'Who won the 2022 Ballon d\'Or award?', options:['Karim Benzema','Erling Haaland','Lionel Messi'], answer:'Karim Benzema', fact:'👑 Benzema won after a stunning Champions League season with Real Madrid, scoring 15 goals including hat-tricks vs PSG and Chelsea!' },
+  { level:2, visual:{type:'emoji',emoji:'🌍',label:'International Goals'}, question:'Which player has scored the most international goals in men\'s football history?', options:['Cristiano Ronaldo','Ali Daei','Lionel Messi'], answer:'Cristiano Ronaldo', fact:'🇵🇹 Ronaldo has scored 130+ goals for Portugal — breaking Ali Daei\'s long-standing record of 109!' },
+  { level:2, visual:{type:'emoji',emoji:'📅',label:'FIFA Founded'}, question:'In what year was FIFA (football\'s world governing body) founded?', options:['1904','1930','1896'], answer:'1904', fact:'📅 FIFA was founded in Paris on 21 May 1904 by representatives from Belgium, Denmark, France, Netherlands, Spain, Sweden and Switzerland!' },
+  // HARD (additional 5)
+  { level:3, visual:{type:'flag',code:'tr',label:'Turkey 2002'}, question:'Who scored the fastest goal in FIFA World Cup history (after just 11 seconds)?', options:['Hakan Şükür','Clint Dempsey','Bryan Robson'], answer:'Hakan Şükür', fact:'⚡ Turkey\'s Hakan Şükür scored 11 seconds into the 3rd-place match vs South Korea at the 2002 World Cup — an incredible record!' },
+  { level:3, visual:{type:'flag',code:'gb',label:'England 1966'}, question:'What year did England win their only FIFA World Cup?', options:['1966','1970','1958'], answer:'1966', fact:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England beat West Germany 4-2 at Wembley in 1966. The famous moment: "They think it\'s all over... it is now!" — Kenneth Wolstenholme.' },
+  { level:3, visual:{type:'emoji',emoji:'👟',label:'Premier League'}, question:'Who is the all-time top scorer in the English Premier League?', options:['Alan Shearer','Wayne Rooney','Andrew Cole'], answer:'Alan Shearer', fact:'👟 Alan Shearer scored 260 Premier League goals for Blackburn Rovers and Newcastle United — a record many think will never be broken!' },
+  { level:3, visual:{type:'flag',code:'gb',label:'England 2018'}, question:'Who won the Golden Boot (top scorer) at the 2018 FIFA World Cup?', options:['Harry Kane','Antoine Griezmann','Romelu Lukaku'], answer:'Harry Kane', fact:'🥾 Harry Kane scored 6 goals for England at Russia 2018 to win the Golden Boot — including a last-minute winner vs Tunisia!' },
+  { level:3, visual:{type:'emoji',emoji:'🏆',label:'2022 Final'}, question:'What was the score in the 2022 World Cup final after extra time?', options:['3-3 (Argentina won on penalties)','2-0 to Argentina','4-2 to Argentina'], answer:'3-3 (Argentina won on penalties)', fact:'🎭 One of the greatest finals ever — Mbappé scored a hat-trick to make it 3-3! Argentina won 4-2 on penalties to give Messi his World Cup!' },
 ];
+const QUIZ_KEY = 'kids_q_soccer';
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let current    = 0;
 let score      = 0;
 let dotResults = [];
+let sessionQ   = [];
 
 // ── Audio ─────────────────────────────────────────────────────────────────────
 let audioCtx = null;
@@ -556,15 +576,20 @@ function init() {
         <div class="progress-dots" id="progressDots"></div>
       </div>`;
   }
+  sessionQ = pickSession();
   buildDots();
   showQuestion();
 }
+
+function getMastered(){try{return new Set(JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]'));}catch{return new Set();}}
+function markMastered(idx){try{const m=JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]');if(!m.includes(idx)){m.push(idx);localStorage.setItem(QUIZ_KEY,JSON.stringify(m));}}catch{}}
+function pickSession(){const mastered=getMastered();const byLevel=[[],[],[]];ALL_QUESTIONS.forEach((q,i)=>byLevel[q.level-1].push(i));const session=[];byLevel.forEach(pool=>{const notDone=shuffle(pool.filter(i=>!mastered.has(i)));const done=shuffle(pool.filter(i=>mastered.has(i)));session.push(...[...notDone,...done].slice(0,5));});return session.map(i=>({...ALL_QUESTIONS[i],_idx:i}));}
 
 // ── Dots ──────────────────────────────────────────────────────────────────────
 function buildDots() {
   const c = document.getElementById('progressDots');
   c.innerHTML = '';
-  QUESTIONS.forEach((q, i) => {
+  sessionQ.forEach((q, i) => {
     const cls = q.level === 1 ? 'easy-dot' : q.level === 2 ? 'medium-dot' : 'hard-dot';
     const d = document.createElement('div');
     d.className = `dot ${cls}` + (i === 0 ? ' current' : '');
@@ -583,7 +608,7 @@ function updateDot(idx, result) {
 
 // ── Show Question ─────────────────────────────────────────────────────────────
 function showQuestion() {
-  const q = QUESTIONS[current];
+  const q = sessionQ[current];
   const badge = document.getElementById('levelBadge');
   if (q.level === 1) { badge.className='level-badge easy';   badge.textContent='⭐ Easy'; }
   if (q.level === 2) { badge.className='level-badge medium'; badge.textContent='⭐⭐ Medium'; }
@@ -622,7 +647,7 @@ function showQuestion() {
     btn.className = 'choice-btn';
     btn.dataset.value = shuffled[i];
     btn.innerHTML = `<span class="choice-letter">${letter}</span>${shuffled[i]}`;
-    btn.onclick = () => handleAnswer(shuffled[i], q.answer, btn, q.fact);
+    btn.onclick = () => handleAnswer(shuffled[i], q.answer, btn, q.fact, q._idx);
     choicesEl.appendChild(btn);
   });
 
@@ -638,12 +663,12 @@ function shuffle(arr) {
 }
 
 // ── Handle Answer ─────────────────────────────────────────────────────────────
-function handleAnswer(chosen, correct, btn, fact) {
+function handleAnswer(chosen, correct, btn, fact, qIdx) {
   document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
   const isCorrect = chosen === correct;
 
   if (isCorrect) {
-    score++;
+    score++; markMastered(qIdx);
     btn.classList.add('correct');
     dotResults[current] = 'correct';
     updateDot(current, 'correct');

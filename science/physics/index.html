@@ -118,28 +118,44 @@
   </div>
 </div>
 <script>
-const QUESTIONS = [
+const ALL_QUESTIONS = [
   // EASY
   { level:1, visual:'🌍', question:'What force pulls all objects towards the Earth?', options:['Gravity','Magnetism','Friction'], answer:'Gravity', fact:'🍎 Isaac Newton discovered gravity when he saw an apple fall from a tree. Gravity keeps you on the ground!' },
   { level:1, visual:'💡', question:'Which travels faster — light or sound?', options:['Light','Sound','They are the same speed'], answer:'Light', fact:'⚡ Light travels at 300,000 km per second! Sound is about 340 m/s — that\'s why you see lightning before you hear thunder!' },
   { level:1, visual:'🏃', question:'What type of energy does a MOVING object have?', options:['Kinetic energy','Potential energy','Solar energy'], answer:'Kinetic energy', fact:'🎳 A rolling bowling ball has kinetic energy. The faster it moves, the more kinetic energy it has!' },
   { level:1, visual:'🌡️', question:'What instrument is used to measure temperature?', options:['Thermometer','Barometer','Voltmeter'], answer:'Thermometer', fact:'🌡️ A barometer measures air pressure, a voltmeter measures voltage. A thermometer measures how hot or cold something is!' },
   { level:1, visual:'📐', question:'What simple machine is a ramp or slope?', options:['Inclined plane','Pulley','Lever'], answer:'Inclined plane', fact:'🛝 A slide at a playground is an inclined plane! It makes moving things up or down easier.' },
+  { level:1, visual:'🍎', question:'What force pulls objects towards the Earth?', options:['Gravity','Magnetism','Friction'], answer:'Gravity', fact:'🍎 Legend says Newton discovered gravity when an apple fell on his head. Gravity keeps the Moon in orbit and us on the ground!' },
+  { level:1, visual:'🔌', question:'What is the unit of electrical current?', options:['Ampere','Volt','Watt'], answer:'Ampere', fact:'🔌 Current (Amps) = flow of electric charge. A typical phone charger uses about 1–2 Amps. Named after André-Marie Ampère!' },
+  { level:1, visual:'🚗', question:'What type of energy does a moving object have?', options:['Kinetic energy','Potential energy','Chemical energy'], answer:'Kinetic energy', fact:'🚗 KE = ½mv². Double the speed → 4× the kinetic energy! That\'s why high-speed car crashes are so much more dangerous!' },
+  { level:1, visual:'🌈', question:'Which colour of light has the LONGEST wavelength in the visible spectrum?', options:['Red','Violet','Green'], answer:'Red', fact:'🌈 ROYGBIV — Red, Orange, Yellow, Green, Blue, Indigo, Violet. Red has the longest wavelength; violet the shortest. Beyond red = infrared!' },
+  { level:1, visual:'💨', question:'In which state of matter do particles move the fastest?', options:['Gas','Liquid','Solid'], answer:'Gas', fact:'💨 Gas particles move freely and rapidly in all directions. That\'s why gases fill their containers and spread out quickly!' },
   // MEDIUM
   { level:2, visual:'🌀', question:'What is the energy stored in a stretched rubber band called?', options:['Potential energy','Kinetic energy','Heat energy'], answer:'Potential energy', fact:'🏹 A stretched rubber band stores elastic potential energy — release it and that energy converts to kinetic energy!' },
   { level:2, visual:'🌈', question:'What happens when white light passes through a prism?', options:['It splits into rainbow colours','It turns black','It becomes brighter'], answer:'It splits into rainbow colours', fact:'🌈 White light is made of all colours of the rainbow. A prism separates them by bending each colour differently!' },
   { level:2, visual:'🔊', question:'What type of wave is sound?', options:['Longitudinal wave','Transverse wave','Electromagnetic wave'], answer:'Longitudinal wave', fact:'📢 Sound waves make particles vibrate back and forth in the same direction the wave travels. Light waves are transverse!' },
   { level:2, visual:'📚', question:'Newton\'s Third Law says every action has an equal and opposite ___?', options:['Reaction','Attraction','Direction'], answer:'Reaction', fact:'🚀 Rocket engines work using Newton\'s Third Law — gas shoots downward so the rocket goes upward!' },
   { level:2, visual:'⚡', question:'What is the unit of electrical resistance?', options:['Ohm','Watt','Volt'], answer:'Ohm', fact:'💡 Named after Georg Simon Ohm! Ohm\'s Law: Voltage = Current × Resistance. Very useful for circuits!' },
+  { level:2, visual:'📐', question:'What does Newton\'s Second Law state?', options:['Force = mass × acceleration','Force = mass × velocity','Force = mass / acceleration'], answer:'Force = mass × acceleration', fact:'📐 F = ma. Double the force on the same mass → double the acceleration. This is the foundation of classical mechanics!' },
+  { level:2, visual:'🥁', question:'In which medium does sound travel the FASTEST?', options:['Solid','Liquid','Gas'], answer:'Solid', fact:'🥁 Sound is a pressure wave. In solids, particles are tightly packed so they collide rapidly — sound travels ~5,100 m/s in steel vs ~340 m/s in air!' },
+  { level:2, visual:'💡', question:'What is the SI unit of electrical power?', options:['Watt','Joule','Newton'], answer:'Watt', fact:'💡 Power (W) = Voltage × Current. A 60W bulb uses 60 joules of energy every second. Named after James Watt, steam engine pioneer!' },
+  { level:2, visual:'🌡️', question:'What happens to the resistance of a metal conductor when temperature INCREASES?', options:['It increases','It decreases','It stays the same'], answer:'It increases', fact:'🌡️ Higher temperature → more collisions between electrons and ions → more resistance. This is why metal resistors are temperature-sensitive!' },
+  { level:2, visual:'🌊', question:'What type of wave REQUIRES a medium (like air or water) to travel?', options:['Mechanical wave','Electromagnetic wave','Radio wave'], answer:'Mechanical wave', fact:'🌊 Sound is a mechanical wave — it can\'t travel in a vacuum. Light is electromagnetic — it can travel through space at 300,000 km/s!' },
   // HARD
   { level:3, visual:'💡', question:'What is the approximate speed of light in a vacuum?', options:['300,000 km/s','3,000 km/s','30,000 km/s'], answer:'300,000 km/s', fact:'🌌 At the speed of light, you could travel around Earth 7.5 times in just ONE second!' },
   { level:3, visual:'📊', question:'What is the correct formula for calculating speed?', options:['Distance ÷ Time','Time ÷ Distance','Distance × Time'], answer:'Distance ÷ Time', fact:'🏎️ Speed = Distance ÷ Time. If you run 100m in 10 seconds, your speed is 10 m/s!' },
   { level:3, visual:'🪐', question:'Which planet in our solar system has the strongest gravitational pull?', options:['Jupiter','Saturn','Earth'], answer:'Jupiter', fact:'🪐 Jupiter is so massive that you would weigh 2.5 times more there than on Earth! It\'s the largest planet.' },
   { level:3, visual:'🔍', question:'What type of lens makes objects appear LARGER?', options:['Convex lens','Concave lens','Flat lens'], answer:'Convex lens', fact:'🔬 Magnifying glasses and camera lenses use convex lenses. Concave lenses make things look smaller!' },
   { level:3, visual:'🔋', question:'What device converts chemical energy into electrical energy?', options:['Battery','Motor','Generator'], answer:'Battery', fact:'🔋 A battery stores chemical energy. When you use it, a chemical reaction releases electrons that flow as electricity!' },
+  { level:3, visual:'⬆️', question:'What is the formula for gravitational potential energy?', options:['mgh','½mv²','mv'], answer:'mgh', fact:'⬆️ GPE = mass × gravity × height. Lift a 1 kg book 1 m → it gains 9.8 J of GPE. Drop it and that converts to kinetic energy!' },
+  { level:3, visual:'🔋', question:'In a PARALLEL circuit, what electrical quantity remains the SAME across all branches?', options:['Voltage','Current','Resistance'], answer:'Voltage', fact:'🔋 In parallel circuits, voltage is constant across all branches (like household wiring). In series circuits, current is constant!' },
+  { level:3, visual:'🥶', question:'What is absolute zero in degrees Celsius?', options:['-273°C','0°C','-100°C'], answer:'-273°C', fact:'🥶 At -273.15°C (0 Kelvin), all molecular motion theoretically stops. Scientists have come within billionths of a degree but never quite reached it!' },
+  { level:3, visual:'🌀', question:'What wave phenomenon causes waves to bend around obstacles or through openings?', options:['Diffraction','Refraction','Reflection'], answer:'Diffraction', fact:'🌀 Diffraction is why you can hear sound around a corner! Light also diffracts — CDs use this to split light into rainbow colours!' },
+  { level:3, visual:'🔬', question:'What principle states you cannot know both the exact position AND momentum of a particle simultaneously?', options:['Heisenberg Uncertainty Principle','Pauli Exclusion Principle','Archimedes Principle'], answer:'Heisenberg Uncertainty Principle', fact:'🔬 Werner Heisenberg (1927): measuring a particle\'s position disturbs its momentum. This isn\'t a measurement problem — it\'s fundamental to nature!' },
 ];
+const QUIZ_KEY = 'kids_q_physics';
 
-let current = 0, score = 0, dotResults = [];
+let current = 0, score = 0, dotResults = [], sessionQ = [];
 let audioCtx = null;
 function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
 function note(ctx, type, freq, time, dur, vol) {
@@ -187,8 +203,12 @@ function playLevelUp() {
     note(ctx,'sine',1047,t+0.84,0.8,0.3); note(ctx,'sine',1319,t+0.90,0.7,0.25); note(ctx,'sine',1568,t+0.96,0.6,0.2);
   });
 }
+function getMastered(){try{return new Set(JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]'));}catch{return new Set();}}
+function markMastered(idx){try{const m=JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]');if(!m.includes(idx)){m.push(idx);localStorage.setItem(QUIZ_KEY,JSON.stringify(m));}}catch{}}
+function pickSession(){const mastered=getMastered();const byLevel=[[],[],[]];ALL_QUESTIONS.forEach((q,i)=>byLevel[q.level-1].push(i));const session=[];byLevel.forEach(pool=>{const notDone=shuffle(pool.filter(i=>!mastered.has(i)));const done=shuffle(pool.filter(i=>mastered.has(i)));session.push(...[...notDone,...done].slice(0,5));});return session.map(i=>({...ALL_QUESTIONS[i],_idx:i}));}
 function init() {
   current = 0; score = 0; dotResults = Array(15).fill(null);
+  sessionQ = pickSession();
   if (!document.getElementById('visualCard')) {
     document.getElementById('gameScreen').innerHTML = `
       <a class="back-btn" href="../../">← Home</a>
@@ -211,7 +231,7 @@ function init() {
 function shuffle(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 function buildDots() {
   const c = document.getElementById('progressDots'); c.innerHTML = '';
-  QUESTIONS.forEach((q,i) => {
+  ALL_QUESTIONS.forEach((q,i) => {
     const cls = q.level===1?'easy-dot':q.level===2?'medium-dot':'hard-dot';
     const d = document.createElement('div');
     d.className = `dot ${cls}`+(i===0?' current':''); d.id=`dot-${i}`; c.appendChild(d);
@@ -223,7 +243,7 @@ function updateDot(idx, result) {
   const next = document.getElementById(`dot-${idx+1}`); if(next) next.classList.add('current');
 }
 function showQuestion() {
-  const q = QUESTIONS[current];
+  const q = sessionQ[current];
   const badge = document.getElementById('levelBadge');
   if(q.level===1){badge.className='level-badge easy';badge.textContent='⭐ Easy';}
   if(q.level===2){badge.className='level-badge medium';badge.textContent='⭐⭐ Medium';}
@@ -237,15 +257,15 @@ function showQuestion() {
   ['A','B','C'].forEach((letter,i) => {
     const btn=document.createElement('button'); btn.className='choice-btn'; btn.dataset.value=shuffled[i];
     btn.innerHTML=`<span class="choice-letter">${letter}</span>${shuffled[i]}`;
-    btn.onclick=()=>handleAnswer(shuffled[i],q.answer,btn,q.fact); choicesEl.appendChild(btn);
+    btn.onclick=()=>handleAnswer(shuffled[i],q.answer,btn,q.fact,q._idx); choicesEl.appendChild(btn);
   });
   document.getElementById('gameScreen').classList.remove('shake');
 }
-function handleAnswer(chosen, correct, btn, fact) {
+function handleAnswer(chosen, correct, btn, fact, qIdx) {
   document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
   const isCorrect = chosen===correct;
   if(isCorrect){
-    score++; btn.classList.add('correct'); dotResults[current]='correct'; updateDot(current,'correct');
+    score++; markMastered(qIdx); btn.classList.add('correct'); dotResults[current]='correct'; updateDot(current,'correct');
     document.getElementById('score').textContent=score; playCorrect(); spawnConfetti(35);
   } else {
     btn.classList.add('wrong'); dotResults[current]='wrong'; updateDot(current,'wrong');

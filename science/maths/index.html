@@ -118,28 +118,47 @@
   </div>
 </div>
 <script>
-const QUESTIONS = [
+const ALL_QUESTIONS = [
   // EASY
   { level:1, visual:'📊', question:'What is 25% of 200?', options:['50','25','75'], answer:'50', fact:'💡 25% means 25 out of 100. So 25% of 200 = 200 ÷ 4 = 50. Percentages are fractions in disguise!' },
   { level:1, visual:'📐', question:'What is the area of a rectangle that is 5 cm long and 4 cm wide?', options:['20 cm²','18 cm²','9 cm²'], answer:'20 cm²', fact:'📐 Area = Length × Width. So 5 × 4 = 20 cm². Area always uses square units like cm²!' },
   { level:1, visual:'🔵', question:'What is the approximate value of π (pi)?', options:['3.14','2.71','1.41'], answer:'3.14', fact:'🔵 Pi (π) is the ratio of a circle\'s circumference to its diameter. It goes on forever: 3.14159265...' },
   { level:1, visual:'🔢', question:'What is 3² (3 squared)?', options:['9','6','12'], answer:'9', fact:'✖️ 3² means 3 × 3 = 9. "Squared" means multiplying a number by itself!' },
   { level:1, visual:'➗', question:'What is the Lowest Common Multiple (LCM) of 4 and 6?', options:['12','8','24'], answer:'12', fact:'🔢 The LCM is the smallest number both 4 and 6 divide into evenly. 4×3=12 and 6×2=12!' },
+  // EASY (additional 5)
+  { level:1, visual:'💯', question:'What is 15% of 200?', options:['30','20','40'], answer:'30', fact:'💯 15% of 200 = 0.15 × 200 = 30. Tip: 10% = 20, half of that (5%) = 10, add them: 30!' },
+  { level:1, visual:'🔢', question:'What is the next prime number after 7?', options:['11','9','13'], answer:'11', fact:'🔢 9 = 3×3, 10 = 2×5 (not prime). 11 has no factors except 1 and 11 — it\'s prime! Prime numbers are the building blocks of all numbers!' },
+  { level:1, visual:'🐝', question:'How many sides does a hexagon have?', options:['6','7','5'], answer:'6', fact:'🐝 Hex = 6 in Greek. Honeycombs are hexagonal because it\'s the most efficient shape — hexagons tile perfectly with no wasted space!' },
+  { level:1, visual:'🎲', question:'What is 2 to the power of 3 (2³)?', options:['8','6','9'], answer:'8', fact:'🎲 2³ = 2 × 2 × 2 = 8. Powers show repeated multiplication — computers use powers of 2: 1 byte, 1 kilobyte (2¹⁰), 1 megabyte (2²⁰)!' },
+  { level:1, visual:'✖️', question:'What is the name for the answer when you MULTIPLY two numbers?', options:['Product','Sum','Quotient'], answer:'Product', fact:'✖️ Sum (add), Difference (subtract), Product (multiply), Quotient (divide). Knowing these names helps you read maths problems correctly!' },
   // MEDIUM
   { level:2, visual:'✏️', question:'If x + 7 = 15, what is the value of x?', options:['8','7','22'], answer:'8', fact:'🧮 To solve x + 7 = 15, subtract 7 from both sides: x = 15 - 7 = 8. Algebra is all about balance!' },
   { level:2, visual:'📐', question:'What is the perimeter of a square with a side length of 6 cm?', options:['24 cm','36 cm','12 cm'], answer:'24 cm', fact:'📐 A square has 4 equal sides. Perimeter = 4 × side = 4 × 6 = 24 cm. Add all sides!' },
   { level:2, visual:'📊', question:'What is 0.75 written as a fraction?', options:['3/4','1/4','2/3'], answer:'3/4', fact:'💡 0.75 = 75/100 = 3/4. Decimals and fractions are just different ways to write the same number!' },
   { level:2, visual:'🔢', question:'What is the Highest Common Factor (HCF) of 24 and 36?', options:['12','6','18'], answer:'12', fact:'🔢 Factors of 24: 1,2,3,4,6,8,12,24. Factors of 36: 1,2,3,4,6,9,12,18,36. Highest common one is 12!' },
   { level:2, visual:'📐', question:'What is the sum of ALL angles inside a triangle?', options:['180°','360°','90°'], answer:'180°', fact:'🔺 Every triangle, no matter its shape, always has angles that add up to exactly 180°. Always!' },
+  // MEDIUM (additional 5)
+  { level:2, visual:'📈', question:'If y = 3x + 2 and x = 4, what is y?', options:['14','12','16'], answer:'14', fact:'📈 y = 3(4) + 2 = 12 + 2 = 14. Substituting values into equations is the foundation of algebra — and all of science!' },
+  { level:2, visual:'⚖️', question:'What is the ratio 12:18 simplified to its lowest terms?', options:['2:3','3:4','4:6'], answer:'2:3', fact:'⚖️ Find the HCF of 12 and 18 = 6. Divide both: 12÷6 = 2, 18÷6 = 3. So 12:18 = 2:3!' },
+  { level:2, visual:'📐', question:'What is the median of: 3, 7, 9, 12, 15?', options:['9','7','10'], answer:'9', fact:'📐 Arrange in order (already done!), find the middle value. With 5 numbers, the 3rd one is the median. Mean = (3+7+9+12+15)÷5 = 9.2!' },
+  { level:2, visual:'🍕', question:'Express 0.625 as a fraction in simplest form', options:['5/8','6/8','3/5'], answer:'5/8', fact:'🍕 0.625 = 625/1000. Divide by 125: 5/8. Check: 5÷8 = 0.625 ✓. Knowing fraction-decimal-percentage conversions is super useful!' },
+  { level:2, visual:'🟦', question:'A square has a perimeter of 48 cm. What is its area?', options:['144 cm²','96 cm²','48 cm²'], answer:'144 cm²', fact:'🟦 Perimeter = 4 × side → side = 48÷4 = 12 cm. Area = 12² = 144 cm². Always check which formula uses which measurement!' },
   // HARD
   { level:3, visual:'📦', question:'What is the volume of a cube with a side length of 3 cm?', options:['27 cm³','9 cm³','18 cm³'], answer:'27 cm³', fact:'📦 Volume of a cube = side³ = 3 × 3 × 3 = 27 cm³. Volume always uses cubic units like cm³!' },
   { level:3, visual:'📐', question:'A triangle has angles of 60° and 80°. What is the third angle?', options:['40°','20°','60°'], answer:'40°', fact:'🔺 All angles in a triangle add to 180°. So: 180° - 60° - 80° = 40°. Simple subtraction!' },
   { level:3, visual:'📊', question:'What is 15% of 340?', options:['51','34','68'], answer:'51', fact:'💡 15% of 340 = 10% (34) + 5% (17) = 51. Breaking percentages into parts makes them easier!' },
   { level:3, visual:'✏️', question:'Simplify the expression: 4x + 3x − 2x', options:['5x','9x','7x'], answer:'5x', fact:'🧮 Collect like terms: 4x + 3x - 2x = (4+3-2)x = 5x. Always combine terms with the same letter!' },
   { level:3, visual:'🔢', question:'What is the square root of 144?', options:['12','14','11'], answer:'12', fact:'🔢 √144 = 12 because 12 × 12 = 144. Square roots are the reverse of squaring a number!' },
+  // HARD (additional 5)
+  { level:3, visual:'⭕', question:'A circle has a radius of 7 cm. What is its area? (π ≈ 3.14)', options:['153.86 cm²','43.96 cm²','49 cm²'], answer:'153.86 cm²', fact:'⭕ Area = πr² = 3.14 × 7² = 3.14 × 49 = 153.86 cm². Circumference = 2πr = 43.96 cm. Don\'t mix these up!' },
+  { level:3, visual:'📉', question:'What is the gradient of a line through the points (2, 3) and (6, 11)?', options:['2','3','4'], answer:'2', fact:'📉 Gradient = (y₂−y₁)/(x₂−x₁) = (11−3)/(6−2) = 8/4 = 2. The line rises 2 units for every 1 unit it moves right!' },
+  { level:3, visual:'📚', question:'In how many different ways can 4 different books be arranged on a shelf?', options:['24','12','16'], answer:'24', fact:'📚 4! (4 factorial) = 4 × 3 × 2 × 1 = 24 arrangements. Factorials grow fast: 10! = 3,628,800!' },
+  { level:3, visual:'🎰', question:'P(A) = 0.4, P(B) = 0.3, A and B are independent. What is P(A and B)?', options:['0.12','0.7','0.1'], answer:'0.12', fact:'🎰 For independent events: P(A∩B) = P(A) × P(B) = 0.4 × 0.3 = 0.12. "And" means multiply; "or" means add (then subtract overlap)!' },
+  { level:3, visual:'⬡', question:'What is the sum of interior angles of a hexagon?', options:['720°','540°','900°'], answer:'720°', fact:'⬡ Formula: (n−2) × 180°. For hexagon: (6−2) × 180° = 4 × 180° = 720°. Triangle = 180°, quadrilateral = 360°, pentagon = 540°!' },
 ];
+const QUIZ_KEY = 'kids_q_maths';
 
-let current = 0, score = 0, dotResults = [];
+let current = 0, score = 0, dotResults = [], sessionQ = [];
 let audioCtx = null;
 function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
 function note(ctx, type, freq, time, dur, vol) {
@@ -187,8 +206,11 @@ function playLevelUp() {
     note(ctx,'sine',1047,t+0.84,0.8,0.3); note(ctx,'sine',1319,t+0.90,0.7,0.25); note(ctx,'sine',1568,t+0.96,0.6,0.2);
   });
 }
+function getMastered(){try{return new Set(JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]'));}catch{return new Set();}}
+function markMastered(idx){try{const m=JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]');if(!m.includes(idx)){m.push(idx);localStorage.setItem(QUIZ_KEY,JSON.stringify(m));}}catch{}}
+function pickSession(){const mastered=getMastered();const byLevel=[[],[],[]];ALL_QUESTIONS.forEach((q,i)=>byLevel[q.level-1].push(i));const session=[];byLevel.forEach(pool=>{const notDone=shuffle(pool.filter(i=>!mastered.has(i)));const done=shuffle(pool.filter(i=>mastered.has(i)));session.push(...[...notDone,...done].slice(0,5));});return session.map(i=>({...ALL_QUESTIONS[i],_idx:i}));}
 function init() {
-  current = 0; score = 0; dotResults = Array(15).fill(null);
+  current = 0; score = 0; dotResults = Array(15).fill(null); sessionQ = pickSession();
   if (!document.getElementById('visualCard')) {
     document.getElementById('gameScreen').innerHTML = `
       <a class="back-btn" href="../../">← Home</a>
@@ -211,7 +233,7 @@ function init() {
 function shuffle(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 function buildDots() {
   const c = document.getElementById('progressDots'); c.innerHTML = '';
-  QUESTIONS.forEach((q,i) => {
+  sessionQ.forEach((q,i) => {
     const cls = q.level===1?'easy-dot':q.level===2?'medium-dot':'hard-dot';
     const d = document.createElement('div');
     d.className = `dot ${cls}`+(i===0?' current':''); d.id=`dot-${i}`; c.appendChild(d);
@@ -223,7 +245,7 @@ function updateDot(idx, result) {
   const next = document.getElementById(`dot-${idx+1}`); if(next) next.classList.add('current');
 }
 function showQuestion() {
-  const q = QUESTIONS[current];
+  const q = sessionQ[current];
   const badge = document.getElementById('levelBadge');
   if(q.level===1){badge.className='level-badge easy';badge.textContent='⭐ Easy';}
   if(q.level===2){badge.className='level-badge medium';badge.textContent='⭐⭐ Medium';}
@@ -237,15 +259,15 @@ function showQuestion() {
   ['A','B','C'].forEach((letter,i) => {
     const btn=document.createElement('button'); btn.className='choice-btn'; btn.dataset.value=shuffled[i];
     btn.innerHTML=`<span class="choice-letter">${letter}</span>${shuffled[i]}`;
-    btn.onclick=()=>handleAnswer(shuffled[i],q.answer,btn,q.fact); choicesEl.appendChild(btn);
+    btn.onclick=()=>handleAnswer(shuffled[i],q.answer,btn,q.fact,q._idx); choicesEl.appendChild(btn);
   });
   document.getElementById('gameScreen').classList.remove('shake');
 }
-function handleAnswer(chosen, correct, btn, fact) {
+function handleAnswer(chosen, correct, btn, fact, qIdx) {
   document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
   const isCorrect = chosen===correct;
   if(isCorrect){
-    score++; btn.classList.add('correct'); dotResults[current]='correct'; updateDot(current,'correct');
+    score++; markMastered(qIdx); btn.classList.add('correct'); dotResults[current]='correct'; updateDot(current,'correct');
     document.getElementById('score').textContent=score; playCorrect(); spawnConfetti(35);
   } else {
     btn.classList.add('wrong'); dotResults[current]='wrong'; updateDot(current,'wrong');

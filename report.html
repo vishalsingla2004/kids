@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parent Report — Kids Learning Hub</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700;900&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100dvh;
+    padding: 20px 16px 40px;
+    color: #fff;
+  }
+  header { text-align: center; margin-bottom: 28px; }
+  header h1 { font-family: 'Fredoka One', cursive; font-size: clamp(1.8rem, 6vw, 2.8rem); color: #fff; text-shadow: 0 4px 20px rgba(180,100,255,0.5); }
+  header p  { font-size: clamp(0.9rem, 3vw, 1.1rem); color: rgba(255,255,255,0.6); margin-top: 6px; }
+  .back-btn {
+    display: inline-block; margin-bottom: 20px;
+    font-family: 'Fredoka One', cursive; font-size: 1rem;
+    padding: 7px 18px; border-radius: 50px;
+    border: 2px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.1); color: #fff;
+    text-decoration: none;
+  }
+  /* Summary bar */
+  .summary-box {
+    max-width: 640px; margin: 0 auto 28px;
+    background: rgba(255,255,255,0.07);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 22px; padding: 18px 22px;
+    display: flex; gap: 20px; flex-wrap: wrap; justify-content: space-between;
+  }
+  .summary-stat { text-align: center; flex: 1; min-width: 80px; }
+  .summary-stat .num { font-family: 'Fredoka One', cursive; font-size: clamp(1.8rem, 6vw, 2.8rem); }
+  .summary-stat .lbl { font-size: 0.8rem; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  /* Subject cards */
+  .cards { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  .card {
+    background: rgba(255,255,255,0.06);
+    border: 2px solid rgba(255,255,255,0.13);
+    border-radius: 20px; padding: 16px 18px;
+    transition: transform 0.15s;
+  }
+  .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .card-icon { font-size: 2.2rem; line-height: 1; }
+  .card-title { flex: 1; }
+  .card-title h3 { font-family: 'Fredoka One', cursive; font-size: clamp(1.1rem, 4vw, 1.4rem); }
+  .card-title p  { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .card-pct {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    min-width: 56px; text-align: right;
+  }
+  /* Overall progress bar */
+  .bar-wrap { height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+  .bar-fill  { height: 100%; border-radius: 10px; transition: width 0.8s ease; }
+  /* Level breakdown */
+  .levels { display: flex; gap: 8px; }
+  .level-item { flex: 1; background: rgba(255,255,255,0.06); border-radius: 10px; padding: 6px 10px; text-align: center; }
+  .level-item .lv-lbl { font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
+  .level-item .lv-val { font-family: 'Fredoka One', cursive; font-size: 1.1rem; margin-top: 2px; }
+  .level-item .lv-bar-wrap { height: 5px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; margin-top: 5px; }
+  .level-item .lv-bar-fill { height: 100%; border-radius: 5px; transition: width 0.8s ease; }
+  /* Not started */
+  .not-started .bar-fill { background: rgba(255,255,255,0.15); }
+  .not-started .card-pct { color: rgba(255,255,255,0.3); }
+  /* Reset buttons */
+  .actions { max-width: 640px; margin: 28px auto 0; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .btn-reset-all {
+    font-family: 'Fredoka One', cursive; font-size: 1rem;
+    padding: 10px 24px; border-radius: 50px;
+    border: 2px solid rgba(231,76,60,0.5);
+    background: rgba(231,76,60,0.15); color: #e74c3c;
+    cursor: pointer;
+  }
+  .btn-reset-sub {
+    font-size: 0.75rem; padding: 4px 10px; border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5);
+    cursor: pointer; font-family: 'Nunito', sans-serif;
+    margin-top: 10px; float: right;
+  }
+  .btn-reset-sub:hover { color: #e74c3c; border-color: rgba(231,76,60,0.4); }
+  .focus-badge {
+    display: inline-block; font-size: 0.72rem; padding: 2px 9px;
+    border-radius: 50px; background: rgba(231,126,34,0.25);
+    border: 1px solid rgba(230,126,34,0.5); color: #e67e22;
+    margin-left: 8px; vertical-align: middle;
+  }
+  .star-badge {
+    display: inline-block; font-size: 0.72rem; padding: 2px 9px;
+    border-radius: 50px; background: rgba(241,196,15,0.2);
+    border: 1px solid rgba(241,196,15,0.4); color: #f1c40f;
+    margin-left: 8px; vertical-align: middle;
+  }
+  .section-label {
+    font-size: 0.8rem; color: rgba(255,255,255,0.35);
+    text-transform: uppercase; letter-spacing: 3px;
+    max-width: 640px; margin: 0 auto 10px; padding-left: 4px;
+  }
+  .tip-box {
+    max-width: 640px; margin: 0 auto 20px;
+    background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3);
+    border-radius: 14px; padding: 12px 16px;
+    font-size: 0.92rem; color: rgba(255,255,255,0.8); line-height: 1.4;
+  }
+  .tip-box strong { color: #38bdf8; }
+</style>
+</head>
+<body>
+
+<a class="back-btn" href="./">← Back to Hub</a>
+
+<header>
+  <h1>📊 Parent Report</h1>
+  <p>Progress summary across all learning areas</p>
+</header>
+
+<div id="tipBox"></div>
+<div class="summary-box" id="summaryBox"></div>
+
+<div class="section-label">📚 Science Subjects</div>
+<div class="cards" id="scienceCards"></div>
+
+<div class="section-label" style="margin-top:20px;">🎮 Other Quizzes</div>
+<div class="cards" id="otherCards"></div>
+
+<div class="actions">
+  <button class="btn-reset-all" onclick="resetAll()">🗑️ Reset All Progress</button>
+</div>
+
+<script>
+const SUBJECTS = [
+  // Science
+  { key:'kids_q_chemistry',  name:'Chemistry',              icon:'🧪', color:'#c471ed', total:30, easyN:10, medN:10, hardN:10, group:'science' },
+  { key:'kids_q_physics',    name:'Physics',                icon:'⚡', color:'#4facfe', total:30, easyN:10, medN:10, hardN:10, group:'science' },
+  { key:'kids_q_maths',      name:'Maths',                  icon:'📐', color:'#f39c12', total:30, easyN:10, medN:10, hardN:10, group:'science' },
+  { key:'kids_q_env',        name:'Environmental Science',  icon:'🌍', color:'#26c6da', total:30, easyN:10, medN:10, hardN:10, group:'science' },
+  { key:'kids_q_biology',    name:'Biology',                icon:'🔬', color:'#4caf50', total:30, easyN:10, medN:10, hardN:10, group:'science' },
+  { key:'kids_q_nsc',        name:'NSC Science Bowl',       icon:'🎓', color:'#38bdf8', total:30, easyN:10, medN:10, hardN:10, group:'other'   },
+  // Other
+  { key:'kids_q_soccer',     name:'Soccer Quiz',            icon:'⚽', color:'#2ecc71', total:30, easyN:10, medN:10, hardN:10, group:'other'   },
+];
+
+function getData(key) {
+  try { return new Set(JSON.parse(localStorage.getItem(key) || '[]')); }
+  catch { return new Set(); }
+}
+
+function pct(n, total) { return total > 0 ? Math.round(n / total * 100) : 0; }
+
+function makeBar(fill, color, height = '10px') {
+  return `<div class="bar-wrap" style="height:${height}"><div class="bar-fill" style="width:${fill}%;background:${color}"></div></div>`;
+}
+
+function makeCard(s) {
+  const mastered = getData(s.key);
+  const total = mastered.size;
+  const easyMastered  = [...mastered].filter(i => i < s.easyN).length;
+  const medMastered   = [...mastered].filter(i => i >= s.easyN && i < s.easyN + s.medN).length;
+  const hardMastered  = [...mastered].filter(i => i >= s.easyN + s.medN).length;
+  const p = pct(total, s.total);
+  const started = total > 0;
+
+  let badge = '';
+  if (!started) badge = '';
+  else if (p === 100) badge = '<span class="star-badge">⭐ Mastered!</span>';
+  else if (p < 40)    badge = '<span class="focus-badge">📌 Needs focus</span>';
+
+  return `
+  <div class="card ${started ? '' : 'not-started'}">
+    <button class="btn-reset-sub" onclick="resetSubject('${s.key}')">Reset</button>
+    <div class="card-header">
+      <div class="card-icon">${s.icon}</div>
+      <div class="card-title">
+        <h3>${s.name}${badge}</h3>
+        <p>${started ? `${total} of ${s.total} questions mastered` : 'Not started yet'}</p>
+      </div>
+      <div class="card-pct" style="color:${started ? s.color : 'rgba(255,255,255,0.2)'}">${p}%</div>
+    </div>
+    ${makeBar(p, s.color)}
+    <div class="levels">
+      <div class="level-item">
+        <div class="lv-lbl">⭐ Easy</div>
+        <div class="lv-val" style="color:#2ecc71">${easyMastered}/${s.easyN}</div>
+        <div class="lv-bar-wrap"><div class="lv-bar-fill" style="width:${pct(easyMastered,s.easyN)}%;background:#2ecc71"></div></div>
+      </div>
+      <div class="level-item">
+        <div class="lv-lbl">⭐⭐ Medium</div>
+        <div class="lv-val" style="color:#e67e22">${medMastered}/${s.medN}</div>
+        <div class="lv-bar-wrap"><div class="lv-bar-fill" style="width:${pct(medMastered,s.medN)}%;background:#e67e22"></div></div>
+      </div>
+      <div class="level-item">
+        <div class="lv-lbl">⭐⭐⭐ Hard</div>
+        <div class="lv-val" style="color:#e74c3c">${hardMastered}/${s.hardN}</div>
+        <div class="lv-bar-wrap"><div class="lv-bar-fill" style="width:${pct(hardMastered,s.hardN)}%;background:#e74c3c"></div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function render() {
+  const allMastered = SUBJECTS.reduce((sum, s) => sum + getData(s.key).size, 0);
+  const grandTotal  = SUBJECTS.reduce((sum, s) => sum + s.total, 0);
+  const started     = SUBJECTS.filter(s => getData(s.key).size > 0).length;
+  const mastered100 = SUBJECTS.filter(s => getData(s.key).size === s.total).length;
+  const overallPct  = pct(allMastered, grandTotal);
+
+  // Summary
+  document.getElementById('summaryBox').innerHTML = `
+    <div class="summary-stat"><div class="num" style="color:#f1c40f">${overallPct}%</div><div class="lbl">Overall</div></div>
+    <div class="summary-stat"><div class="num" style="color:#38bdf8">${allMastered}</div><div class="lbl">Questions Mastered</div></div>
+    <div class="summary-stat"><div class="num" style="color:#2ecc71">${started}</div><div class="lbl">Subjects Started</div></div>
+    <div class="summary-stat"><div class="num" style="color:#c471ed">${mastered100}</div><div class="lbl">Fully Mastered</div></div>
+  `;
+
+  // Tip
+  const weakSubjects = SUBJECTS.filter(s => { const m = getData(s.key).size; return m > 0 && m < s.total * 0.4; });
+  const notStarted   = SUBJECTS.filter(s => getData(s.key).size === 0);
+  let tip = '';
+  if (allMastered === 0) {
+    tip = `<div class="tip-box">👋 No quiz sessions yet! Open any subject on the <a href="./" style="color:#38bdf8">home page</a> to get started.</div>`;
+  } else if (weakSubjects.length > 0) {
+    tip = `<div class="tip-box">📌 <strong>Focus area:</strong> ${weakSubjects.map(s => s.icon + ' ' + s.name).join(', ')} — less than 40% mastered. Try a few more sessions!</div>`;
+  } else if (notStarted.length > 0) {
+    tip = `<div class="tip-box">🆕 <strong>Not tried yet:</strong> ${notStarted.map(s => s.icon + ' ' + s.name).join(', ')} — give them a go!</div>`;
+  } else if (mastered100 === SUBJECTS.length) {
+    tip = `<div class="tip-box">🏆 <strong>All subjects mastered!</strong> Outstanding work — every single question has been answered correctly at least once!</div>`;
+  } else {
+    tip = `<div class="tip-box">🌟 <strong>Great progress!</strong> Keep playing to master all ${grandTotal} questions across all subjects.</div>`;
+  }
+  document.getElementById('tipBox').innerHTML = tip;
+
+  // Cards
+  document.getElementById('scienceCards').innerHTML = SUBJECTS.filter(s=>s.group==='science').map(makeCard).join('');
+  document.getElementById('otherCards').innerHTML   = SUBJECTS.filter(s=>s.group==='other').map(makeCard).join('');
+}
+
+function resetSubject(key) {
+  const name = SUBJECTS.find(s => s.key === key)?.name || 'this subject';
+  if (confirm(`Reset all progress for ${name}? This cannot be undone.`)) {
+    localStorage.removeItem(key);
+    render();
+  }
+}
+
+function resetAll() {
+  if (confirm('Reset ALL progress for every subject? This cannot be undone.')) {
+    SUBJECTS.forEach(s => localStorage.removeItem(s.key));
+    render();
+  }
+}
+
+render();
+</script>
+</body>
+</html>

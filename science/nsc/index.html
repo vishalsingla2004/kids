@@ -119,7 +119,7 @@
 </div>
 <script>
 // Real questions from NSC Middle School Sample Sets (science.osti.gov)
-const QUESTIONS = [
+const ALL_QUESTIONS = [
   // EASY — Round 1, basic recall
   { level:1, visual:'🔬', question:'What organelle isolates a human cell\'s chromosomes from the cytoplasm?', options:['Nucleus','Mitochondria','Cell wall'], answer:'Nucleus', fact:'🧬 The nucleus is the "control centre" of the cell — it holds the DNA that makes you, you!' },
   { level:1, visual:'🌊', question:'The hydrologic cycle describes the continuous circulation of Earth\'s what?', options:['Water','Sediments','Rocks'], answer:'Water', fact:'💧 The hydrologic cycle moves water from oceans → clouds → rain → rivers → oceans, over and over!' },
@@ -138,9 +138,28 @@ const QUESTIONS = [
   { level:3, visual:'⚙️', question:'What most directly causes actual mechanical advantage to be less than ideal mechanical advantage?', options:['Friction','Basic machine design','How machines are combined'], answer:'Friction', fact:'🔧 No machine is 100% efficient because friction always converts some energy to heat. That\'s why machines need lubrication!' },
   { level:3, visual:'💎', question:'Which property of a mineral is often the LEAST reliable for identification?', options:['Color','Specific gravity','Cleavage'], answer:'Color', fact:'🌈 Many minerals come in dozens of colours due to trace impurities. Hardness and cleavage are far more reliable!' },
   { level:3, visual:'🦠', question:'What term do microbiologists use for a bacterium with a rod shape?', options:['Bacillus','Tubular','Trichome'], answer:'Bacillus', fact:'🔬 Bacteria have three basic shapes: coccus (round), bacillus (rod), and spirillum (spiral). E. coli is a bacillus!' },
+  // EASY (additional 5) — real NSC questions converted to MC
+  { level:1, visual:'🩸', question:'What is the primary oxygen-carrying protein found in red blood cells?', options:['Hemoglobin','Albumin','Globulin'], answer:'Hemoglobin', fact:'🩸 Hemoglobin contains iron atoms that bind to oxygen. Without enough iron, you can\'t carry enough oxygen — causing anaemia!' },
+  { level:1, visual:'📏', question:'What is the SI base unit for length?', options:['Meter','Kilogram','Second'], answer:'Meter', fact:'📏 The meter is defined as the distance light travels in 1/299,792,458 of a second. Every country uses the metric system except the USA!' },
+  { level:1, visual:'🪐', question:'Which gas giant planet is closest to the Sun?', options:['Jupiter','Saturn','Uranus'], answer:'Jupiter', fact:'🪐 Jupiter is the largest planet — 11 Earths could fit across it! It has 95 known moons, including Europa which may have a liquid ocean!' },
+  { level:1, visual:'🌿', question:'In what organelle of a plant cell does photosynthesis occur?', options:['Chloroplast','Mitochondria','Nucleus'], answer:'Chloroplast', fact:'🌿 Chloroplasts contain chlorophyll (green pigment). Scientists believe they were once free-living cyanobacteria absorbed by early plant cells!' },
+  { level:1, visual:'🌊', question:'What is the general name for the rising and falling of sea levels caused by the Moon and Sun?', options:['Tides','Currents','Surges'], answer:'Tides', fact:'🌊 The Moon\'s gravity pulls on Earth\'s oceans creating tidal bulges. Most coastlines get 2 high tides and 2 low tides every day!' },
+  // MEDIUM (additional 5) — real NSC questions
+  { level:2, visual:'❤️', question:'Most of the human heart is composed of which type of tissue?', options:['Muscle','Connective','Epithelial'], answer:'Muscle', fact:'❤️ The heart muscle (myocardium) beats 100,000 times a day without stopping — pumping about 5 litres of blood per minute!' },
+  { level:2, visual:'☁️', question:'Which type of cloud has the LEAST vertical development?', options:['Cirrus','Cumulonimbus','Nimbostratus'], answer:'Cirrus', fact:'☁️ Cirrus clouds are thin, wispy, and form high up (above 6 km). They\'re made of ice crystals and often signal changing weather ahead!' },
+  { level:2, visual:'⚛️', question:'What atomic particle neutralises the positive charge of protons in a neutral atom?', options:['Electrons','Neutrons','Positrons'], answer:'Electrons', fact:'⚛️ A neutral atom has equal protons (+) and electrons (-). Lose electrons → positive ion. Gain electrons → negative ion!' },
+  { level:2, visual:'🌬️', question:'What is the scientific name for the human windpipe?', options:['Trachea','Oesophagus','Bronchus'], answer:'Trachea', fact:'🌬️ The trachea is reinforced by C-shaped cartilage rings to keep it open. It splits into two bronchi — one leading to each lung!' },
+  { level:2, visual:'👂', question:'The organ of Corti is directly involved in which human sense?', options:['Hearing','Vision','Balance'], answer:'Hearing', fact:'👂 The organ of Corti sits inside the cochlea (inner ear). Its hair cells detect sound vibrations and send signals to the brain!' },
+  // HARD (additional 5) — real NSC questions
+  { level:3, visual:'🧲', question:'If you randomly picked an element from the Periodic Table, what state of matter would it most likely be at room temperature?', options:['Solid','Gas','Liquid'], answer:'Solid', fact:'🧲 About 84 of the 118 elements are solid at room temperature! Only 11 are gases and just 2 (mercury and bromine) are liquids!' },
+  { level:3, visual:'⚖️', question:'Which of these has the most inertia: 1 kg iron, 2 kg flour, 4 kg iron?', options:['4 kg iron','2 kg flour','1 kg iron'], answer:'4 kg iron', fact:'⚖️ Inertia depends ONLY on mass, not what the material is. 4 kg > 2 kg > 1 kg, so 4 kg iron wins. F = ma — more mass means more force needed to accelerate!' },
+  { level:3, visual:'🌬️', question:'What is the Polar Jet Stream?', options:['High-altitude wind marking the boundary between polar and warm air','Ocean current in the North Atlantic','Trade wind in the tropics'], answer:'High-altitude wind marking the boundary between polar and warm air', fact:'🌬️ The jet stream flows 9–12 km up at speeds up to 400 km/h! It steers weather systems across North America and Europe!' },
+  { level:3, visual:'🐾', question:'In the taxonomic name Homo sapiens, what rank does "sapiens" represent?', options:['Species','Genus','Family'], answer:'Species', fact:'🐾 "Homo" is the genus, "sapiens" is the species. Full classification: Kingdom Animalia → Phylum Chordata → Class Mammalia → Order Primates → Family Hominidae → Genus Homo → Species sapiens!' },
+  { level:3, visual:'🗺️', question:'Jeff walks 100 metres west, then 150 metres east. What is the magnitude of his displacement in metres?', options:['50','250','100'], answer:'50', fact:'🗺️ Displacement is the straight-line distance from start to finish. He ends 50 m east of his start. Distance travelled = 250 m, but displacement = 50 m!' },
 ];
+const QUIZ_KEY = 'kids_q_nsc';
 
-let current = 0, score = 0, dotResults = [];
+let current = 0, score = 0, dotResults = [], sessionQ = [];
 let audioCtx = null;
 function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
 function note(ctx, type, freq, time, dur, vol) {
@@ -188,8 +207,12 @@ function playLevelUp() {
     note(ctx,'sine',1047,t+0.84,0.8,0.3); note(ctx,'sine',1319,t+0.90,0.7,0.25); note(ctx,'sine',1568,t+0.96,0.6,0.2);
   });
 }
+function getMastered(){try{return new Set(JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]'));}catch{return new Set();}}
+function markMastered(idx){try{const m=JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]');if(!m.includes(idx)){m.push(idx);localStorage.setItem(QUIZ_KEY,JSON.stringify(m));}}catch{}}
+function pickSession(){const mastered=getMastered();const byLevel=[[],[],[]];ALL_QUESTIONS.forEach((q,i)=>byLevel[q.level-1].push(i));const session=[];byLevel.forEach(pool=>{const notDone=shuffle(pool.filter(i=>!mastered.has(i)));const done=shuffle(pool.filter(i=>mastered.has(i)));session.push(...[...notDone,...done].slice(0,5));});return session.map(i=>({...ALL_QUESTIONS[i],_idx:i}));}
 function init() {
   current = 0; score = 0; dotResults = Array(15).fill(null);
+  sessionQ = pickSession();
   if (!document.getElementById('visualCard')) {
     document.getElementById('gameScreen').innerHTML = `
       <a class="back-btn" href="../../">← Home</a>
@@ -212,7 +235,7 @@ function init() {
 function shuffle(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 function buildDots() {
   const c = document.getElementById('progressDots'); c.innerHTML = '';
-  QUESTIONS.forEach((q,i) => {
+  ALL_QUESTIONS.forEach((q,i) => {
     const cls = q.level===1?'easy-dot':q.level===2?'medium-dot':'hard-dot';
     const d = document.createElement('div');
     d.className = `dot ${cls}`+(i===0?' current':''); d.id=`dot-${i}`; c.appendChild(d);
@@ -224,7 +247,7 @@ function updateDot(idx, result) {
   const next = document.getElementById(`dot-${idx+1}`); if(next) next.classList.add('current');
 }
 function showQuestion() {
-  const q = QUESTIONS[current];
+  const q = sessionQ[current];
   const badge = document.getElementById('levelBadge');
   if(q.level===1){badge.className='level-badge easy';badge.textContent='⭐ Easy';}
   if(q.level===2){badge.className='level-badge medium';badge.textContent='⭐⭐ Medium';}
@@ -238,15 +261,15 @@ function showQuestion() {
   ['A','B','C'].forEach((letter,i) => {
     const btn=document.createElement('button'); btn.className='choice-btn'; btn.dataset.value=shuffled[i];
     btn.innerHTML=`<span class="choice-letter">${letter}</span>${shuffled[i]}`;
-    btn.onclick=()=>handleAnswer(shuffled[i],q.answer,btn,q.fact); choicesEl.appendChild(btn);
+    btn.onclick=()=>handleAnswer(shuffled[i],q.answer,btn,q.fact,q._idx); choicesEl.appendChild(btn);
   });
   document.getElementById('gameScreen').classList.remove('shake');
 }
-function handleAnswer(chosen, correct, btn, fact) {
+function handleAnswer(chosen, correct, btn, fact, qIdx) {
   document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
   const isCorrect = chosen===correct;
   if(isCorrect){
-    score++; btn.classList.add('correct'); dotResults[current]='correct'; updateDot(current,'correct');
+    score++; markMastered(qIdx); btn.classList.add('correct'); dotResults[current]='correct'; updateDot(current,'correct');
     document.getElementById('score').textContent=score; playCorrect(); spawnConfetti(35);
   } else {
     btn.classList.add('wrong'); dotResults[current]='wrong'; updateDot(current,'wrong');
