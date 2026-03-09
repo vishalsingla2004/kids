@@ -747,7 +747,7 @@ function init() {
 function shuffle(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 function buildDots() {
   const c = document.getElementById('progressDots'); c.innerHTML = '';
-  ALL_QUESTIONS.forEach((q,i) => {
+  sessionQ.forEach((q,i) => {
     const cls = q.level===1?'easy-dot':q.level===2?'medium-dot':'hard-dot';
     const d = document.createElement('div');
     d.className = `dot ${cls}`+(i===0?' current':''); d.id=`dot-${i}`; c.appendChild(d);
