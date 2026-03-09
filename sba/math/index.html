@@ -79,12 +79,6 @@
   .confetti-piece { position:fixed; border-radius:2px; animation:confettiFall linear forwards; pointer-events:none; z-index:300; }
   @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
   @keyframes slideUp { from{opacity:1;transform:translateY(0) scale(1)} to{opacity:0;transform:translateY(-40px) scale(0.85)} }
-  .scratch-toggle { font-family:'Fredoka One',cursive; font-size:0.82rem; padding:5px 14px; border-radius:50px; border:1.5px solid rgba(96,165,250,0.35); background:rgba(96,165,250,0.08); color:rgba(255,255,255,0.55); cursor:pointer; -webkit-tap-highlight-color:transparent; transition:all 0.2s; }
-  .scratch-toggle.open { background:rgba(96,165,250,0.18); color:rgba(255,255,255,0.85); border-color:rgba(96,165,250,0.6); }
-  .scratch-pad { display:none; width:100%; max-width:460px; }
-  .scratch-pad.open { display:block; }
-  .scratch-area { width:100%; height:90px; background:rgba(0,0,0,0.35); border:1.5px solid rgba(96,165,250,0.25); border-radius:12px; color:#fff; font-family:'Courier New',monospace; font-size:1rem; padding:9px 12px; resize:none; outline:none; caret-color:#60a5fa; }
-  .scratch-area::placeholder { color:rgba(255,255,255,0.22); }
 </style>
 </head>
 <body>
@@ -107,9 +101,7 @@
   </div>
   <div class="bottom">
     <div class="choices" id="choices"></div>
-    <button class="scratch-toggle" id="scratchToggle" onclick="toggleScratch()">📝 Scratch Pad</button>
-    <div class="scratch-pad" id="scratchPad"><textarea class="scratch-area" id="scratchArea" placeholder="rough work here..."></textarea></div>
-    <div class="progress-dots" id="progressDots"></div>
+<div class="progress-dots" id="progressDots"></div>
   </div>
 </div>
 <div class="feedback-overlay" id="feedbackOverlay">
@@ -829,19 +821,7 @@ function showFeedback(isCorrect, fact) {
     overlay.addEventListener('click',dismissFeedback,{once:true});
   }
 }
-function toggleScratch(){
-  const pad=document.getElementById('scratchPad'), btn=document.getElementById('scratchToggle');
-  pad.classList.toggle('open'); btn.classList.toggle('open');
-  btn.textContent=pad.classList.contains('open')?'🙈 Hide Scratch Pad':'📝 Scratch Pad';
-  if(pad.classList.contains('open'))document.getElementById('scratchArea').focus();
-}
-function clearScratch(){
-  const sa=document.getElementById('scratchArea');if(sa)sa.value='';
-  const pad=document.getElementById('scratchPad'),btn=document.getElementById('scratchToggle');
-  if(pad){pad.classList.remove('open');btn.classList.remove('open');btn.textContent='📝 Scratch Pad';}
-}
 function advanceQuestion(){
-  clearScratch();
   const prev=current; current++;
   if(prev===4){showLevelUp('medium');return;}
   if(prev===9){showLevelUp('hard');return;}
