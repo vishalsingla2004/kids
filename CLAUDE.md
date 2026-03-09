@@ -122,12 +122,29 @@ Each quiz sets `--c1` (dark bg), `--c2` (mid bg), `--acc` (accent color):
 
 **`index.html`** — links to all quizzes; shows live `⭐ N points` from `kids_points` via inline `<script>` in header. Sections: 🎮 Games, 🔬 6th Grade Science, 🏆 Competition Prep, 📝 5th Grade SBA Practice, 📐 Math Mastery Topics.
 
-**`report.html`** — parent-only view. Shows mastery stats per subject + total points + dollar value (10 pts = $1.00, shown only here, not in kid-facing UI). `SUBJECTS` array drives all cards; update it when adding quizzes.
+The hub script uses `applyHubState()` called on both initial load and `pageshow` (handles browser back-forward cache):
+```js
+function applyHubState() {
+  // update points display
+  document.querySelectorAll('[data-tile]').forEach(c => c.style.display = '');  // reset all first
+  const hidden = JSON.parse(localStorage.getItem('kids_hidden_tiles') || '[]');
+  hidden.forEach(id => { const c = document.querySelector('[data-tile="'+id+'"]'); if(c) c.style.display='none'; });
+}
+applyHubState();
+window.addEventListener('pageshow', applyHubState);  // fires on bfcache restore too
+```
+Every card `<a>` has a `data-tile="<id>"` attribute. IDs: `princess`, `soccer`, `sba-math`, `sba-ela`, `sba-science`, `area-2d`, `circles`, `volume-3d`, `chemistry`, `physics`, `maths`, `environmental`, `biology`, `nsc`.
+
+**`report.html`** — parent-only view. Contains:
+- Mastery stats per subject (`SUBJECTS` array drives cards)
+- Points box: total `⭐` + dollar value (10 pts = $1.00) — dollar amount shown here only, never in kid UI
+- **Manage Tiles** panel: toggle switches to hide/show each hub card. State stored in `kids_hidden_tiles` (JSON array of hidden tile IDs). `initToggles()` reads current state on load.
 
 ## Adding a New Quiz
 
 1. Create `<grade>/<subject>/index.html` — copy nearest existing quiz, change `QUIZ_KEY`, title, theme colors, `ALL_QUESTIONS`, and back-button depth.
-2. Add a card in `index.html` hub with correct `href`.
-3. Add entry to `SUBJECTS` array in `report.html` with correct `total`, `easyN`, `medN`, `hardN`, `group`.
-4. Add entry to `files` list in `gen_dump.py`.
-5. `buildDots()` must use `sessionQ` — verify before committing.
+2. Add a card in `index.html` hub with `data-tile="<new-id>"` attribute and correct `href`.
+3. Add `<new-id>` to the `ALL_TILES` array in `report.html` and add a `.tile-row` toggle in the Manage Tiles HTML.
+4. Add entry to `SUBJECTS` array in `report.html` with correct `total`, `easyN`, `medN`, `hardN`, `group`.
+5. Add entry to `files` list in `gen_dump.py`.
+6. Verify `buildDots()` uses `sessionQ` not `ALL_QUESTIONS`.
