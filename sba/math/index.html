@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>5th Grade SBA Math</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+  :root { --c1:#0a1628; --c2:#1a3a6b; --acc:#60a5fa; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Fredoka One',cursive; background:linear-gradient(160deg,var(--c1) 0%,var(--c2) 50%,var(--c1) 100%); min-height:100dvh; overflow:hidden; position:relative; }
+  .bg-deco { position:fixed; font-size:2rem; opacity:0.07; pointer-events:none; animation:floatDeco ease-in-out infinite; }
+  @keyframes floatDeco { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-22px) rotate(15deg)} }
+  .back-btn { position:fixed; top:10px; left:10px; z-index:50; font-family:'Fredoka One',cursive; font-size:0.9rem; padding:5px 12px; border-radius:50px; border:2px solid rgba(255,255,255,0.25); background:rgba(255,255,255,0.1); color:#fff; cursor:pointer; text-decoration:none; -webkit-tap-highlight-color:transparent; }
+  .screen { width:100vw; height:100dvh; display:flex; flex-direction:column; align-items:center; padding:10px 14px 8px; position:relative; z-index:10; }
+  .screen.shake { animation:shakeScreen 0.5s ease; }
+  @keyframes shakeScreen { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-10px) rotate(-1deg)} 30%{transform:translateX(10px) rotate(1deg)} 45%{transform:translateX(-7px)} 60%{transform:translateX(7px)} 75%{transform:translateX(-3px)} }
+  .top { width:100%; flex-shrink:0; text-align:center; padding-top:28px; }
+  .title { font-size:clamp(1.5rem,6vw,2.4rem); color:var(--acc); text-shadow:0 3px 10px rgba(0,0,0,0.5); }
+  .top-row { display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:8px; }
+  .level-badge { padding:4px 14px; border-radius:50px; font-size:clamp(0.8rem,3vw,1rem); border:2px solid; }
+  .level-badge.easy   { background:rgba(46,204,113,0.2);  color:#2ecc71; border-color:#2ecc71; }
+  .level-badge.medium { background:rgba(230,126,34,0.2);  color:#e67e22; border-color:#e67e22; }
+  .level-badge.hard   { background:rgba(231,76,60,0.2);   color:#e74c3c; border-color:#e74c3c; }
+  .score-pill { background:rgba(255,255,255,0.1); border:2px solid rgba(255,255,255,0.25); border-radius:50px; padding:4px 14px; color:#fff; font-size:clamp(0.85rem,3vw,1.1rem); }
+  .progress-bar-wrap { width:100%; height:7px; background:rgba(255,255,255,0.1); border-radius:10px; margin-top:7px; overflow:hidden; }
+  .progress-bar-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--acc),#fff); transition:width 0.5s ease; }
+  .middle { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; min-height:0; padding:6px 0; gap:10px; }
+  .visual-card { background:rgba(0,0,0,0.3); backdrop-filter:blur(8px); border:2px solid rgba(255,255,255,0.15); border-radius:22px; padding:14px 22px; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 28px rgba(0,0,0,0.4); min-width:100px; }
+  .visual-emoji { font-size:clamp(3.5rem,14vw,6rem); line-height:1; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+  .question-text { font-size:clamp(1.05rem,4.2vw,1.6rem); color:#fff; text-align:center; text-shadow:0 2px 8px rgba(0,0,0,0.5); line-height:1.35; padding:0 6px; max-width:480px; }
+  .bottom { flex-shrink:0; width:100%; display:flex; flex-direction:column; align-items:center; gap:9px; padding-bottom:6px; }
+  .choices { display:flex; flex-direction:column; gap:9px; width:100%; max-width:460px; }
+  .choice-btn { font-family:'Fredoka One',cursive; font-size:clamp(1rem,3.8vw,1.4rem); padding:clamp(10px,2.5vw,16px) 16px; border-radius:14px; border:2px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.09); backdrop-filter:blur(8px); color:#fff; cursor:pointer; text-align:left; transition:background 0.15s; box-shadow:0 4px 12px rgba(0,0,0,0.3); -webkit-tap-highlight-color:transparent; display:flex; align-items:center; gap:10px; }
+  .choice-btn:active { transform:scale(0.97); }
+  .choice-letter { width:30px; height:30px; border-radius:50%; flex-shrink:0; background:rgba(255,255,255,0.12); border:2px solid var(--acc); color:var(--acc); display:flex; align-items:center; justify-content:center; font-size:0.9rem; }
+  .choice-btn.correct { background:rgba(46,204,113,0.35)!important; border-color:#2ecc71!important; animation:correctPop 0.5s ease; }
+  .choice-btn.wrong   { background:rgba(231,76,60,0.3)!important; border-color:#e74c3c!important; opacity:0.65; }
+  @keyframes correctPop { 0%{transform:scale(1)} 40%{transform:scale(1.04)} 100%{transform:scale(1)} }
+  .choice-btn:disabled { cursor:not-allowed; }
+  .progress-dots { display:flex; gap:5px; justify-content:center; flex-wrap:wrap; max-width:280px; }
+  .dot { width:12px; height:12px; border-radius:50%; background:rgba(255,255,255,0.18); border:2px solid rgba(255,255,255,0.3); transition:all 0.3s; }
+  .dot.easy-dot   { border-color:rgba(46,204,113,0.6); }
+  .dot.medium-dot { border-color:rgba(230,126,34,0.6); }
+  .dot.hard-dot   { border-color:rgba(231,76,60,0.6); }
+  .dot.answered.correct-dot { background:#2ecc71; border-color:#2ecc71; box-shadow:0 0 7px #2ecc71; }
+  .dot.answered.wrong-dot   { background:#e74c3c; border-color:#e74c3c; box-shadow:0 0 7px #e74c3c; }
+  .dot.current { background:#fff; border-color:#fff; box-shadow:0 0 10px #fff; transform:scale(1.3); }
+  .feedback-overlay { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; pointer-events:none; opacity:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(4px); transition:opacity 0.3s; }
+  .feedback-overlay.show { opacity:1; }
+  .feedback-overlay.dismiss { opacity:0; }
+  .feedback-overlay.clickable { pointer-events: all; cursor: pointer; }
+  .tap-hint { font-size: clamp(0.8rem,2.5vw,1rem); color: rgba(255,255,255,0.55); margin-top: 14px; animation: tapPulse 1.4s ease-in-out infinite; }
+  @keyframes tapPulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+  .feedback-box { border:3px solid; border-radius:28px; background:rgba(15,15,25,0.95); padding:clamp(18px,5vw,30px) clamp(22px,6vw,44px); text-align:center; max-width:86vw; width:360px; box-shadow:0 20px 60px rgba(0,0,0,0.6); animation:feedbackPop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  .feedback-box.correct-box { border-color:#2ecc71; }
+  .feedback-box.wrong-box   { border-color:#e74c3c; }
+  @keyframes feedbackPop { from{transform:scale(0.4) rotate(-8deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
+  .feedback-emoji { font-size:clamp(3rem,13vw,5.5rem); display:block; animation:spinBounce 0.6s ease; line-height:1.1; }
+  @keyframes spinBounce { 0%{transform:rotate(-15deg) scale(0.5)} 60%{transform:rotate(8deg) scale(1.15)} 100%{transform:rotate(0) scale(1)} }
+  .feedback-title { font-size:clamp(1.4rem,5.5vw,2.1rem); font-weight:900; margin-top:8px; }
+  .feedback-title.correct-text { color:#2ecc71; }
+  .feedback-title.wrong-text   { color:#e74c3c; }
+  .feedback-fact  { font-size:clamp(0.85rem,3vw,1.1rem); color:rgba(255,255,255,0.85); margin-top:8px; line-height:1.4; }
+  .timer-ring { margin:12px auto 0; width:40px; height:40px; display:block; }
+  .timer-ring svg { transform:rotate(-90deg); }
+  .timer-ring circle.track    { fill:none; stroke:rgba(255,255,255,0.12); stroke-width:4; }
+  .timer-ring circle.progress { fill:none; stroke-width:4; stroke-linecap:round; }
+  .correct-ring circle.progress { stroke:#2ecc71; }
+  .wrong-ring   circle.progress { stroke:#e74c3c; }
+  .levelup-overlay { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:200; background:rgba(0,0,0,0.88); backdrop-filter:blur(8px); opacity:0; pointer-events:none; transition:opacity 0.4s; }
+  .levelup-overlay.show { opacity:1; pointer-events:all; }
+  .levelup-box { text-align:center; animation:feedbackPop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+  .levelup-icon  { font-size:clamp(4rem,16vw,7rem); }
+  .levelup-title { font-size:clamp(2rem,8vw,3.5rem); color:var(--acc); text-shadow:0 0 30px var(--acc); margin-top:10px; }
+  .levelup-sub   { font-size:clamp(1rem,4vw,1.5rem); color:rgba(255,255,255,0.8); margin-top:8px; }
+  .levelup-btn { font-family:'Fredoka One',cursive; font-size:clamp(1.2rem,5vw,1.6rem); padding:13px 38px; border-radius:50px; border:3px solid rgba(255,255,255,0.35); background:var(--acc); color:#fff; cursor:pointer; margin-top:18px; box-shadow:0 8px 24px rgba(0,0,0,0.4); animation:pulseBtn 1.5s ease-in-out infinite; -webkit-tap-highlight-color:transparent; }
+  .action-btn { font-family:'Fredoka One',cursive; font-size:clamp(1.2rem,5vw,1.6rem); padding:13px 38px; border-radius:50px; border:3px solid rgba(255,255,255,0.35); background:var(--acc); color:#fff; cursor:pointer; margin-top:16px; box-shadow:0 8px 24px rgba(0,0,0,0.4); animation:pulseBtn 1.5s ease-in-out infinite; -webkit-tap-highlight-color:transparent; }
+  @keyframes pulseBtn { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+  .confetti-piece { position:fixed; border-radius:2px; animation:confettiFall linear forwards; pointer-events:none; z-index:300; }
+  @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+  @keyframes slideUp { from{opacity:1;transform:translateY(0) scale(1)} to{opacity:0;transform:translateY(-40px) scale(0.85)} }
+  .scratch-toggle { font-family:'Fredoka One',cursive; font-size:0.82rem; padding:5px 14px; border-radius:50px; border:1.5px solid rgba(96,165,250,0.35); background:rgba(96,165,250,0.08); color:rgba(255,255,255,0.55); cursor:pointer; -webkit-tap-highlight-color:transparent; transition:all 0.2s; }
+  .scratch-toggle.open { background:rgba(96,165,250,0.18); color:rgba(255,255,255,0.85); border-color:rgba(96,165,250,0.6); }
+  .scratch-pad { display:none; width:100%; max-width:460px; }
+  .scratch-pad.open { display:block; }
+  .scratch-area { width:100%; height:90px; background:rgba(0,0,0,0.35); border:1.5px solid rgba(96,165,250,0.25); border-radius:12px; color:#fff; font-family:'Courier New',monospace; font-size:1rem; padding:9px 12px; resize:none; outline:none; caret-color:#60a5fa; }
+  .scratch-area::placeholder { color:rgba(255,255,255,0.22); }
+</style>
+</head>
+<body>
+<div class="bg-deco" style="top:8%;left:5%;animation-duration:6s;animation-delay:0s;">📐</div>
+<div class="bg-deco" style="top:15%;right:8%;animation-duration:7s;animation-delay:1s;">🔢</div>
+<div class="bg-deco" style="top:45%;left:3%;animation-duration:8s;animation-delay:2s;">➗</div>
+<div class="bg-deco" style="top:60%;right:5%;animation-duration:5.5s;animation-delay:0.5s;">📏</div>
+<div class="bg-deco" style="top:78%;left:12%;animation-duration:7.5s;animation-delay:1.5s;">🧮</div>
+<div class="bg-deco" style="top:30%;right:15%;animation-duration:6.5s;animation-delay:3s;">💯</div>
+<a class="back-btn" href="../../">← Home</a>
+<div class="screen" id="gameScreen">
+  <div class="top">
+    <div class="title">📐 5th Grade SBA Math</div>
+    <div class="top-row"><div class="level-badge easy" id="levelBadge">⭐ Easy</div><div class="score-pill">🎯 <strong id="score">0</strong> / 15</div></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+  <div class="middle" id="middle">
+    <div class="visual-card" id="visualCard"></div>
+    <div class="question-text" id="questionText"></div>
+  </div>
+  <div class="bottom">
+    <div class="choices" id="choices"></div>
+    <button class="scratch-toggle" id="scratchToggle" onclick="toggleScratch()">📝 Scratch Pad</button>
+    <div class="scratch-pad" id="scratchPad"><textarea class="scratch-area" id="scratchArea" placeholder="rough work here..."></textarea></div>
+    <div class="progress-dots" id="progressDots"></div>
+  </div>
+</div>
+<div class="feedback-overlay" id="feedbackOverlay">
+  <div class="feedback-box" id="feedbackBox">
+    <span class="feedback-emoji" id="feedbackEmoji"></span>
+    <div class="feedback-title" id="feedbackTitle"></div>
+    <div class="feedback-fact"  id="feedbackFact"></div>
+    <div class="tap-hint" id="tapHint" style="display:none">👆 Tap to continue</div>
+    <div class="timer-ring" id="timerRing"><svg width="40" height="40" viewBox="0 0 40 40"><circle class="track" cx="20" cy="20" r="16"/><circle class="progress" cx="20" cy="20" r="16" id="timerArc" stroke-dasharray="100.5" stroke-dashoffset="0"/></svg></div>
+  </div>
+</div>
+<div class="levelup-overlay" id="levelupOverlay">
+  <div class="levelup-box">
+    <div class="levelup-icon" id="levelupIcon"></div>
+    <div class="levelup-title" id="levelupTitle"></div>
+    <div class="levelup-sub" id="levelupSub"></div>
+    <button class="levelup-btn" onclick="dismissLevelUp()">Let's Go! 🚀</button>
+  </div>
+</div>
+<script>
+const ALL_QUESTIONS = [
+  // ── LEVEL 1 (easy) ── basic operations, simple fractions, basic geometry ──
+  { level:1, visual:'➕', question:'3/4 + 1/4 = ?', options:['1','1/2','2/4'], answer:'1', fact:'Fractions with the same denominator add their numerators. 3+1=4, so 4/4 = 1 whole!' },
+  { level:1, visual:'✖️', question:'5 × 4 = ?', options:['20','15','25'], answer:'20', fact:'5 groups of 4 equals 20. Multiplication is just fast repeated addition!' },
+  { level:1, visual:'🔢', question:'0.5 + 0.25 = ?', options:['0.75','0.70','1.00'], answer:'0.75', fact:'0.5 is the same as 50 cents and 0.25 is 25 cents — together they make 75 cents = 0.75!' },
+  { level:1, visual:'📏', question:'Round 4.68 to the nearest tenth', options:['4.7','4.6','5.0'], answer:'4.7', fact:'The digit in the hundredths place is 8, which is ≥5, so we round the tenths digit up from 6 to 7.' },
+  { level:1, visual:'➗', question:'48 ÷ 6 = ?', options:['8','7','9'], answer:'8', fact:'48 ÷ 6 = 8 because 6 × 8 = 48. Division is the inverse (opposite) of multiplication!' },
+  { level:1, visual:'➖', question:'12.5 - 7.3 = ?', options:['5.2','5.3','4.8'], answer:'5.2', fact:'Line up the decimal points: 12.5 − 7.3 = 5.2. Always subtract digit by digit from right to left!' },
+  { level:1, visual:'💯', question:'What is 10² (10 squared)?', options:['100','20','1000'], answer:'100', fact:'10² means 10 × 10 = 100. The exponent tells you how many times to multiply the base by itself!' },
+  { level:1, visual:'🔷', question:'4 × (3 + 2) = ?', options:['20','14','24'], answer:'20', fact:'Order of operations: parentheses first! 3+2=5, then 4×5=20. Remember PEMDAS!' },
+  { level:1, visual:'📐', question:'1/2 × 1/4 = ?', options:['1/8','1/6','2/6'], answer:'1/8', fact:'To multiply fractions, multiply numerators and denominators: 1×1=1 and 2×4=8, so 1/8!' },
+  { level:1, visual:'🧮', question:'6 + 7 × 2 = ?', options:['20','26','18'], answer:'20', fact:'Multiply before you add! 7×2=14, then 6+14=20. This is the order of operations rule.' },
+  { level:1, visual:'➗', question:'What is 7/7?', options:['1','0','7'], answer:'1', fact:'Any number divided by itself equals 1. Seven sevenths is one whole!' },
+  { level:1, visual:'🔢', question:'25 ÷ 5 = ?', options:['5','4','6'], answer:'5', fact:'25 ÷ 5 = 5 because 5 × 5 = 25. Perfect squares are useful to memorize!' },
+  { level:1, visual:'➕', question:'3 + 5 × 0 = ?', options:['3','0','8'], answer:'3', fact:'Multiply first: 5×0=0. Then add: 3+0=3. Multiplying by zero always gives zero!' },
+  { level:1, visual:'➕', question:'1/3 + 1/3 = ?', options:['2/3','2/6','1/6'], answer:'2/3', fact:'With the same denominator, just add the numerators: 1+1=2, keeping the denominator 3, so 2/3!' },
+  { level:1, visual:'➖', question:'100 - 37 = ?', options:['63','67','73'], answer:'63', fact:'100 − 37: borrow from the tens. 10−7=3 in the ones place, then 9−3=6 in the tens place = 63!' },
+  { level:1, visual:'✖️', question:'4.0 × 10 = ?', options:['40','4.0','400'], answer:'40', fact:'Multiplying by 10 moves the decimal one place to the right: 4.0 becomes 40.0 = 40!' },
+  { level:1, visual:'💯', question:'Write 50% as a decimal', options:['0.5','5.0','0.05'], answer:'0.5', fact:'Percent means "per hundred." 50% = 50/100 = 0.5. Divide the percentage by 100 to get a decimal!' },
+  { level:1, visual:'🔢', question:'3 × 3 × 3 = ?', options:['27','9','18'], answer:'27', fact:'3³ = 3 × 3 × 3 = 27. This is 3 cubed! A cube with side 3 has volume of 27 cubic units.' },
+  { level:1, visual:'📐', question:'What is 2/4 simplified?', options:['1/2','1/4','2/2'], answer:'1/2', fact:'Divide both numerator and denominator by their GCF (2): 2÷2=1 and 4÷2=2, giving 1/2!' },
+  { level:1, visual:'🔷', question:'The perimeter of a square with side 5 = ?', options:['20','10','25'], answer:'20', fact:'A square has 4 equal sides. Perimeter = 4 × side = 4 × 5 = 20 units!' },
+  { level:1, visual:'🧮', question:'What is 8 × 7?', options:['56','54','63'], answer:'56', fact:'8 × 7 = 56. A helpful trick: 8 × 7 = (8 × 5) + (8 × 2) = 40 + 16 = 56!' },
+  { level:1, visual:'➗', question:'72 ÷ 9 = ?', options:['8','7','9'], answer:'8', fact:'72 ÷ 9 = 8 because 9 × 8 = 72. Knowing your times tables makes division quick!' },
+  // ── LEVEL 2 (medium) ── fractions/decimals, area/volume, multi-step ──
+  { level:2, visual:'➖', question:'2 3/4 - 1 1/4 = ?', options:['1 1/2','1 2/4','2 1/4'], answer:'1 1/2', fact:'Subtract the whole numbers: 2-1=1. Subtract the fractions: 3/4-1/4=2/4=1/2. So 1 1/2!' },
+  { level:2, visual:'🔷', question:'A rectangle 6.5 cm × 4 cm — what is the area?', options:['26 cm²','21 cm²','20 cm²'], answer:'26 cm²', fact:'Area of a rectangle = length × width = 6.5 × 4 = 26 cm². Area is always in square units!' },
+  { level:2, visual:'➗', question:'3/4 ÷ 1/4 = ?', options:['3','1/3','4/3'], answer:'3', fact:'To divide fractions, multiply by the reciprocal: 3/4 × 4/1 = 12/4 = 3. Keep-Change-Flip!' },
+  { level:2, visual:'✖️', question:'2/5 of 20 = ?', options:['8','10','6'], answer:'8', fact:'"Of" means multiply. 2/5 × 20 = 40/5 = 8. You can also do 20 ÷ 5 = 4, then 4 × 2 = 8!' },
+  { level:2, visual:'📐', question:'Volume of a box: 3 × 4 × 5 = ?', options:['60 cubic units','35 cubic units','48 cubic units'], answer:'60 cubic units', fact:'Volume = length × width × height = 3 × 4 × 5 = 60. Volume is measured in cubic units!' },
+  { level:2, visual:'🔢', question:'0.3 × 0.4 = ?', options:['0.12','1.2','0.012'], answer:'0.12', fact:'Multiply as whole numbers: 3×4=12. Then count decimal places (2 total), so 0.12!' },
+  { level:2, visual:'➗', question:'1,256 ÷ 4 = ?', options:['314','312','316'], answer:'314', fact:'Divide step by step: 12÷4=3, 5÷4=1 remainder 1, then 16÷4=4. So 314!' },
+  { level:2, visual:'📏', question:'Which is greater: 2/3 or 3/5?', options:['2/3','3/5','They are equal'], answer:'2/3', fact:'Find a common denominator (15): 2/3=10/15 and 3/5=9/15. Since 10>9, 2/3 is greater!' },
+  { level:2, visual:'➕', question:'2/3 + 1/6 = ?', options:['5/6','3/9','1/2'], answer:'5/6', fact:'Find a common denominator (6): 2/3=4/6. Then 4/6+1/6=5/6!' },
+  { level:2, visual:'✖️', question:'5 × 3/5 = ?', options:['3','5/3','15/5'], answer:'3', fact:'Multiply: 5 × 3/5 = 15/5 = 3. The fives cancel out! Whole numbers × fractions: just multiply the numerator.' },
+  { level:2, visual:'➗', question:'12.8 ÷ 4 = ?', options:['3.2','3.4','2.8'], answer:'3.2', fact:'12.8 ÷ 4: think of it as 12 ÷ 4 = 3 and 0.8 ÷ 4 = 0.2, so 3 + 0.2 = 3.2!' },
+  { level:2, visual:'🔷', question:'Area of a triangle with base 8 and height 5 = ?', options:['20','40','13'], answer:'20', fact:'Area of triangle = (base × height) ÷ 2 = (8 × 5) ÷ 2 = 40 ÷ 2 = 20 square units!' },
+  { level:2, visual:'💯', question:'4.5 × 10² = ?', options:['450','45','4500'], answer:'450', fact:'10² = 100. So 4.5 × 100 = 450. Multiply by 10² means move the decimal 2 places right!' },
+  { level:2, visual:'🧮', question:'LCM of 4 and 6 = ?', options:['12','24','6'], answer:'12', fact:'List multiples: 4→4,8,12 and 6→6,12. The least common multiple is 12. Used for adding fractions!' },
+  { level:2, visual:'📏', question:'25% of 80 = ?', options:['20','25','40'], answer:'20', fact:'25% = 1/4. So 80 ÷ 4 = 20. Or: 0.25 × 80 = 20. A quarter of 80 is 20!' },
+  { level:2, visual:'➖', question:'7/8 - 3/8 = ?', options:['1/2','4/8','3/4'], answer:'1/2', fact:'Same denominators: subtract numerators. 7−3=4, so 4/8. Simplified: 4/8 = 1/2!' },
+  { level:2, visual:'💯', question:'150% of 60 = ?', options:['90','60','120'], answer:'90', fact:'150% = 1.5. So 1.5 × 60 = 90. 150% of something is 1½ times that amount!' },
+  { level:2, visual:'🔢', question:'Next in sequence: 2, 5, 8, 11, ...?', options:['14','13','15'], answer:'14', fact:'The pattern adds 3 each time: 2+3=5, 5+3=8, 8+3=11, 11+3=14. This is an arithmetic sequence!' },
+  { level:2, visual:'📐', question:'What is 3/8 as a decimal?', options:['0.375','0.38','0.3'], answer:'0.375', fact:'Divide 3 ÷ 8: 3.000 ÷ 8 = 0.375. The fraction 3/8 equals exactly 0.375!' },
+  { level:2, visual:'🧮', question:'GCF of 12 and 18 = ?', options:['6','3','12'], answer:'6', fact:'Factors of 12: 1,2,3,4,6,12. Factors of 18: 1,2,3,6,9,18. Greatest Common Factor = 6!' },
+  { level:2, visual:'➕', question:'4 2/3 + 2 1/3 = ?', options:['7','6 3/3','6 1/3'], answer:'7', fact:'Add whole numbers: 4+2=6. Add fractions: 2/3+1/3=3/3=1. So 6+1=7!' },
+  { level:2, visual:'➗', question:'3/4 ÷ 3 = ?', options:['1/4','9/4','3/12'], answer:'1/4', fact:'Dividing a fraction by a whole number: 3/4 ÷ 3 = 3/4 × 1/3 = 3/12 = 1/4!' },
+  // ── LEVEL 3 (hard) ── algebraic thinking, coordinate plane, complex fractions ──
+  { level:3, visual:'🔢', question:'If 3n + 4 = 19, what is n?', options:['5','6','4'], answer:'5', fact:'Solve step by step: subtract 4 from both sides → 3n=15, then divide by 3 → n=5. Always undo operations in reverse order!' },
+  { level:3, visual:'📐', question:'A cube with side 4 cm — what is the volume?', options:['64 cm³','12 cm³','48 cm³'], answer:'64 cm³', fact:'Volume of cube = side³ = 4 × 4 × 4 = 64 cm³. All sides of a cube are equal!' },
+  { level:3, visual:'🔷', question:'Which shows the distributive property? 3×(4+2) = ?', options:['3×4 + 3×2','3+4 × 3+2','3×4×2'], answer:'3×4 + 3×2', fact:'The distributive property: a×(b+c) = a×b + a×c. So 3×(4+2) = 3×4 + 3×2 = 12+6 = 18!' },
+  { level:3, visual:'🧮', question:'The coordinate point (3,4): which is the y-coordinate?', options:['4','3','7'], answer:'4', fact:'In (x,y), the first number is x (horizontal) and the second is y (vertical). So y=4!' },
+  { level:3, visual:'✖️', question:'2 1/2 cups × 3 batches = ?', options:['7 1/2 cups','6 cups','8 cups'], answer:'7 1/2 cups', fact:'Convert: 2 1/2 = 5/2. Then 5/2 × 3 = 15/2 = 7 1/2 cups. Mixed numbers: convert, multiply, convert back!' },
+  { level:3, visual:'💯', question:'5³ = ?', options:['125','25','15'], answer:'125', fact:'5³ = 5 × 5 × 5 = 25 × 5 = 125. The exponent 3 tells you to multiply 5 by itself 3 times!' },
+  { level:3, visual:'📏', question:'Which is greatest: 3/4, 7/8, or 5/6?', options:['7/8','3/4','5/6'], answer:'7/8', fact:'Convert to decimals: 3/4=0.75, 7/8=0.875, 5/6≈0.833. So 7/8 is the greatest!' },
+  { level:3, visual:'🔢', question:'Write 4.5 × 10⁻¹ in standard form', options:['0.45','45','0.045'], answer:'0.45', fact:'10⁻¹ = 1/10 = 0.1. So 4.5 × 0.1 = 0.45. Negative exponents move the decimal left!' },
+  { level:3, visual:'💰', question:'She earns $8/hour and works 4.5 hours. How much?', options:['$36','$32','$40'], answer:'$36', fact:'$8 × 4.5 = $8 × 4 + $8 × 0.5 = $32 + $4 = $36. Break up decimals to multiply easier!' },
+  { level:3, visual:'➗', question:'4/5 ÷ 2 = ?', options:['2/5','8/5','4/10'], answer:'2/5', fact:'Dividing a fraction by 2: 4/5 ÷ 2 = 4/5 × 1/2 = 4/10 = 2/5. Use Keep-Change-Flip!' },
+  { level:3, visual:'🔢', question:'Input 3→9, 5→15, 7→21. What is the rule?', options:['Multiply by 3','Add 6','Square the number'], answer:'Multiply by 3', fact:'3×3=9, 5×3=15, 7×3=21. The rule is multiply by 3. Patterns help us understand functions in algebra!' },
+  { level:3, visual:'📐', question:'What is the missing number? □/6 = 4/24', options:['1','4','6'], answer:'1', fact:'Simplify 4/24: divide both by 4 → 1/6. So the missing number is 1. Equivalent fractions are equal!' },
+  { level:3, visual:'🔷', question:'Point A is at (2,3) and B at (5,3). Distance?', options:['3 units','5 units','8 units'], answer:'3 units', fact:'Same y-coordinate means horizontal distance: just subtract x-values. 5−2=3 units!' },
+  { level:3, visual:'🧮', question:'2³ × 6 = ?', options:['48','16','24'], answer:'48', fact:'Calculate exponent first: 2³=8. Then 8×6=48. Always evaluate exponents before multiplying!' },
+  { level:3, visual:'💯', question:'(4 + 6) × (8 - 3) = ?', options:['50','38','70'], answer:'50', fact:'Parentheses first: (4+6)=10 and (8−3)=5. Then 10×5=50. PEMDAS: parentheses always first!' },
+  { level:3, visual:'✖️', question:'7/8 × 4/7 = ?', options:['1/2','4/8','28/56'], answer:'1/2', fact:'Multiply numerators: 7×4=28. Multiply denominators: 8×7=56. Then simplify: 28/56=1/2!' },
+  { level:3, visual:'➗', question:'3.6 ÷ 0.4 = ?', options:['9','0.9','36'], answer:'9', fact:'Multiply both by 10 to remove decimals: 36 ÷ 4 = 9. Dividing by 0.4 is the same as dividing by 4 and multiplying by 10!' },
+  { level:3, visual:'📏', question:'Pattern: 2, 3.5, 5, 6.5, ... next?', options:['8','7.5','8.5'], answer:'8', fact:'Each term increases by 1.5: 2+1.5=3.5, 3.5+1.5=5, 5+1.5=6.5, 6.5+1.5=8!' },
+  { level:3, visual:'🔢', question:'4² + 3² = ?', options:['25','14','49'], answer:'25', fact:'4²=16 and 3²=9. 16+9=25. This is a famous Pythagorean triple: 3-4-5 right triangle!' },
+  { level:3, visual:'🧮', question:'100 - 4 × 5 + 3 = ?', options:['83','485','97'], answer:'83', fact:'Order of operations: 4×5=20 first. Then left to right: 100−20=80, then 80+3=83!' },
+  { level:3, visual:'📐', question:'A rectangle has area 48 cm² and width 6 cm. What is the length?', options:['8 cm','9 cm','7 cm'], answer:'8 cm', fact:'Area = length × width. So length = area ÷ width = 48 ÷ 6 = 8 cm!' },
+  { level:3, visual:'💯', question:'What is 20% of 150?', options:['30','25','35'], answer:'30', fact:'20% = 0.20. So 0.20 × 150 = 30. Or: 10% of 150 = 15, so 20% = 15 × 2 = 30!' },
+
+  // ── LEVEL 1 additions ──
+  { level:1, visual:'✖️', question:'9 × 8 = ?', options:['72','63','81'], answer:'72', fact:'9×8=72. A trick: 9×8, think (10×8)−8=80−8=72!' },
+  { level:1, visual:'➗', question:'144 ÷ 12 = ?', options:['12','11','13'], answer:'12', fact:'12 is both the dividend\'s square root and quotient — 12×12=144!' },
+  { level:1, visual:'🔢', question:'What is 3/5 as a decimal?', options:['0.6','0.3','0.5'], answer:'0.6', fact:'Divide top by bottom: 3÷5=0.6. Fractions and decimals are just two ways to write the same number!' },
+  { level:1, visual:'💯', question:'5² = ?', options:['25','10','15'], answer:'25', fact:'5²=5×5=25. Any number times itself is called a perfect square!' },
+  { level:1, visual:'📐', question:'What is the area of a square with side 7?', options:['49','28','14'], answer:'49', fact:'Area = side × side = 7×7 = 49 square units!' },
+  { level:1, visual:'🔢', question:'Round 7.34 to the nearest whole number', options:['7','8','73'], answer:'7', fact:'7.34 — the digit after the decimal is 3 (less than 5), so round down to 7!' },
+  { level:1, visual:'➖', question:'1000 − 456 = ?', options:['544','454','644'], answer:'544', fact:'1000−456: borrow across — 1000−400=600, 600−56=544!' },
+  { level:1, visual:'✖️', question:'What is 3 × 4 × 5?', options:['60','24','20'], answer:'60', fact:'Multiply left to right: 3×4=12, then 12×5=60. Multiplication is associative — any order gives the same answer!' },
+  { level:1, visual:'➗', question:'72 ÷ 8 = ?', options:['9','8','6'], answer:'9', fact:'9×8=72, so 72÷8=9. Division and multiplication are inverse operations!' },
+  { level:1, visual:'🔢', question:'Write 0.75 as a fraction', options:['3/4','7/5','1/4'], answer:'3/4', fact:'0.75 = 75/100 = 3/4 (divide by 25). Three quarters!' },
+  { level:1, visual:'✖️', question:'60 × 70 = ?', options:['4200','420','4000'], answer:'4200', fact:'6×7=42, then add two zeros from the 60 and 70 → 4200!' },
+  { level:1, visual:'⚖️', question:'Which is larger: 2/3 or 5/8?', options:['2/3','5/8','They are equal'], answer:'2/3', fact:'Convert to same denominator: 2/3=16/24, 5/8=15/24. So 2/3 > 5/8!' },
+  { level:1, visual:'➕', question:'15 + 15 + 15 + 15 = ?', options:['60','45','50'], answer:'60', fact:'Adding 15 four times is the same as 15×4=60. Repeated addition is multiplication!' },
+  { level:1, visual:'💯', question:'What is 20% of 50?', options:['10','20','5'], answer:'10', fact:'20% means 20/100=1/5. One fifth of 50 is 10!' },
+  { level:1, visual:'✖️', question:'4 × 25 = ?', options:['100','80','125'], answer:'100', fact:'4 × 25 = 100 because 25 + 25 + 25 + 25 = 100. Four quarters make a dollar!' },
+  { level:1, visual:'🔢', question:'3/4 of 24 = ?', options:['18','12','8'], answer:'18', fact:'First find 1/4 of 24=6, then multiply by 3: 6×3=18!' },
+  { level:1, visual:'📏', question:'What is the perimeter of a rectangle 8 cm long and 3 cm wide?', options:['22 cm','24 cm','11 cm'], answer:'22 cm', fact:'Perimeter = 2×(length+width) = 2×(8+3) = 2×11 = 22 cm!' },
+  { level:1, visual:'✖️', question:'7 × 0 = ?', options:['0','7','70'], answer:'0', fact:'Any number multiplied by 0 equals 0. Multiplying by 0 always gives 0!' },
+  { level:1, visual:'➕', question:'What is 1/4 + 2/4?', options:['3/4','3/8','1/2'], answer:'3/4', fact:'Same denominator: just add numerators. 1+2=3, so 3/4!' },
+  { level:1, visual:'🕐', question:'How many minutes in 2 hours?', options:['120','60','100'], answer:'120', fact:'1 hour = 60 minutes. 2 hours = 2×60 = 120 minutes!' },
+  { level:1, visual:'✖️', question:'33 × 3 = ?', options:['99','93','96'], answer:'99', fact:'33×3: 30×3=90, 3×3=9, add them: 90+9=99!' },
+  { level:1, visual:'🔢', question:'Which fraction equals 0.5?', options:['1/2','2/5','5/2'], answer:'1/2', fact:'0.5 = 5/10 = 1/2. One half is the same as 0.5!' },
+  { level:1, visual:'➗', question:'18 ÷ 3 = ?', options:['6','9','3'], answer:'6', fact:'18÷3=6 because 3×6=18. Think of it as sharing 18 equally among 3!' },
+  { level:1, visual:'💯', question:'What is 40% of 20?', options:['8','4','10'], answer:'8', fact:'40% = 40/100 = 2/5. Two fifths of 20 = (20÷5)×2 = 4×2 = 8!' },
+  { level:1, visual:'➕', question:'1/3 + 1/3 + 1/3 = ?', options:['1','3/9','2/3'], answer:'1', fact:'Three thirds make a whole! 1/3 + 1/3 + 1/3 = 3/3 = 1. Like three slices making a whole pizza!' },
+  { level:1, visual:'✖️', question:'What is 5 × 12?', options:['60','55','72'], answer:'60', fact:'5×12=60. Think of it as a clock — 5 groups of 12 minutes = 60 minutes = 1 hour!' },
+  { level:1, visual:'📐', question:'The perimeter of an equilateral triangle with side 9 = ?', options:['27','18','81'], answer:'27', fact:'All 3 sides equal, so perimeter = 3 × 9 = 27 units!' },
+  { level:1, visual:'➕', question:'250 + 375 = ?', options:['625','600','525'], answer:'625', fact:'250+375: add hundreds (200+300=500), then tens and ones (50+75=125), sum = 625!' },
+  { level:1, visual:'✖️', question:'What is 7 × 7?', options:['49','42','56'], answer:'49', fact:'7² = 49. A 7×7 grid has 49 squares — like a chessboard minus one row and column!' },
+  { level:1, visual:'🔷', question:'How many sides does a hexagon have?', options:['6','5','8'], answer:'6', fact:'Hex means 6 in Greek! A honeycomb is made of hexagons — nature\'s most efficient shape!' },
+
+  // ── LEVEL 2 additions ──
+  { level:2, visual:'➗', question:'4.8 ÷ 1.2 = ?', options:['4','3.6','6'], answer:'4', fact:'Multiply both by 10: 48÷12=4. Moving the decimal point keeps the ratio the same!' },
+  { level:2, visual:'➖', question:'What is 5/6 - 1/3?', options:['1/2','2/3','1/6'], answer:'1/2', fact:'Convert 1/3 to 2/6. Then 5/6 - 2/6 = 3/6 = 1/2!' },
+  { level:2, visual:'🔷', question:'A cylinder has radius 3 and height 10. Volume ≈ π×r²×h = ?', options:['about 283 cubic units','about 94 cubic units','about 30 cubic units'], answer:'about 283 cubic units', fact:'V=π×3²×10=π×9×10≈3.14×90≈283 cubic units. Pi makes circles round and volumes big!' },
+  { level:2, visual:'✖️', question:'3/4 × 2/3 = ?', options:['1/2','6/7','5/12'], answer:'1/2', fact:'Multiply tops: 3×2=6. Multiply bottoms: 4×3=12. 6/12 = 1/2. You can also cross-cancel first!' },
+  { level:2, visual:'💯', question:'What is 25% of 200?', options:['50','25','100'], answer:'50', fact:'25% = 1/4. One quarter of 200 is 50. Like $50 off a $200 item!' },
+  { level:2, visual:'🧮', question:'Order of operations: 2 + 3 × 4 - 1 = ?', options:['13','19','11'], answer:'13', fact:'PEMDAS: multiply first: 3×4=12. Then left to right: 2+12-1=13!' },
+  { level:2, visual:'🔢', question:'A bag has 24 marbles: 8 red, 10 blue, 6 green. What fraction are red?', options:['1/3','1/4','8/10'], answer:'1/3', fact:'8 out of 24 = 8/24 = 1/3. Always simplify fractions by dividing by the GCF (8)!' },
+  { level:2, visual:'💯', question:'What is 7/10 as a percentage?', options:['70%','7%','0.7%'], answer:'70%', fact:'Multiply by 100: 7/10 × 100 = 70%. Per-cent means "per hundred"!' },
+  { level:2, visual:'✖️', question:'56 × 25 = ?', options:['1400','1350','1450'], answer:'1400', fact:'56×25 = 56×100÷4 = 5600÷4 = 1400. Clever! Multiply by 100 then halve, halve again!' },
+  { level:2, visual:'📏', question:'A garden is 12.5 m × 8 m. How much fencing for the perimeter?', options:['41 m','100 m','20.5 m'], answer:'41 m', fact:'Perimeter = 2×(12.5+8) = 2×20.5 = 41 m. Don\'t forget both pairs of sides!' },
+  { level:2, visual:'💯', question:'Which is 3/8 expressed as a percent?', options:['37.5%','38%','30%'], answer:'37.5%', fact:'3÷8=0.375, then ×100=37.5%. Some fractions give decimals — that\'s perfectly fine!' },
+  { level:2, visual:'✖️', question:'1.5 × 1.5 = ?', options:['2.25','2.5','3'], answer:'2.25', fact:'Think of it as (1+0.5)²=1+1+0.25=2.25, or just 15×15÷100=225÷100=2.25!' },
+  { level:2, visual:'🔢', question:'If n ÷ 6 = 7, then n = ?', options:['42','13','36'], answer:'42', fact:'Multiply both sides by 6: n = 7×6 = 42. Use the inverse operation to solve for n!' },
+  { level:2, visual:'📐', question:'What is the area of a triangle with base 10 and height 6?', options:['30','60','15'], answer:'30', fact:'Area = ½ × base × height = ½ × 10 × 6 = 30 square units. A triangle is half a rectangle!' },
+  { level:2, visual:'➕', question:'4/5 + 3/10 = ?', options:['11/10','7/15','7/10'], answer:'11/10', fact:'Convert 4/5 to 8/10. Then 8/10+3/10=11/10 = 1 1/10. Answer is an improper fraction!' },
+  { level:2, visual:'💯', question:'What is 60% of 45?', options:['27','30','24'], answer:'27', fact:'60% = 6/10 = 3/5. One fifth of 45=9. Three fifths=9×3=27!' },
+  { level:2, visual:'✖️', question:'3.2 × 4.5 = ?', options:['14.4','12.8','16.2'], answer:'14.4', fact:'32×45=1440, then move decimal 2 places left: 14.40. Multiply as whole numbers, then fix decimal!' },
+  { level:2, visual:'🚗', question:'A car travels 60 km/h for 2.5 hours. Distance = ?', options:['150 km','120 km','62.5 km'], answer:'150 km', fact:'Distance = speed × time = 60 × 2.5 = 150 km. D=S×T is a key formula!' },
+  { level:2, visual:'🔢', question:'What is the missing factor? 7 × □ = 84', options:['12','11','13'], answer:'12', fact:'84÷7=12. Division helps you find missing factors!' },
+  { level:2, visual:'➗', question:'5/6 ÷ 5/12 = ?', options:['2','1/2','25/72'], answer:'2', fact:'Dividing fractions: flip and multiply! 5/6 × 12/5 = 60/30 = 2. Keep-Change-Flip!' },
+
+  // ── LEVEL 3 additions ──
+  { level:3, visual:'🧮', question:'Evaluate: (2³ + 4) ÷ (6 - 2) = ?', options:['3','4','12'], answer:'3', fact:'Inside brackets first: 2³=8, so (8+4)÷(6-2)=12÷4=3. PEMDAS saves the day!' },
+  { level:3, visual:'📐', question:'A square has area 81 cm². What is its perimeter?', options:['36 cm','18 cm','9 cm'], answer:'36 cm', fact:'Side = √81 = 9 cm. Perimeter = 4×9 = 36 cm. Square roots undo squaring!' },
+  { level:3, visual:'🔢', question:'Write 0.004 in scientific notation', options:['4×10⁻³','4×10³','0.4×10⁻²'], answer:'4×10⁻³', fact:'Move decimal 3 places right to get 4, so exponent is −3. Scientific notation handles tiny numbers neatly!' },
+  { level:3, visual:'📐', question:'Two hikers: one walks 3 km north, one 4 km east from same point. How far apart?', options:['5 km','7 km','6 km'], answer:'5 km', fact:'Pythagorean theorem! 3²+4²=9+16=25=5². The 3-4-5 right triangle is nature\'s favorite!' },
+  { level:3, visual:'🧩', question:'Simplify: 3x + 5 - x + 2 = ?', options:['2x+7','4x+7','2x+3'], answer:'2x+7', fact:'Collect like terms: (3x-x)=2x, (5+2)=7. So 2x+7. Algebra tidying!' },
+  { level:3, visual:'🔢', question:'A recipe uses 2/3 cup of sugar. Tripling it gives...', options:['2 cups','2/9 cup','6/3 cups'], answer:'2 cups', fact:'2/3 × 3 = 6/3 = 2 cups. Scaling recipes is real-world fraction multiplication!' },
+  { level:3, visual:'💯', question:'If 40% of a number is 28, what is the number?', options:['70','56','112'], answer:'70', fact:'28 ÷ 0.4 = 70. Or: 40%=2/5, so if 2/5 of n=28, then n=28×5/2=70!' },
+  { level:3, visual:'🔷', question:'Point A(1,2) reflected over the y-axis becomes', options:['(−1,2)','(1,−2)','(−1,−2)'], answer:'(−1,2)', fact:'Reflecting over the y-axis flips the x-coordinate: (1,2) → (−1,2). The y stays the same!' },
+  { level:3, visual:'📊', question:'What is the median of: 3, 7, 5, 9, 1?', options:['5','7','3'], answer:'5', fact:'Sort first: 1,3,5,7,9. The middle value is 5. Median = middle number!' },
+  { level:3, visual:'🔢', question:'2/3 of 3/4 of 60 = ?', options:['30','20','45'], answer:'30', fact:'Work inside out: 3/4 of 60=45. Then 2/3 of 45=30. Chain fractions step by step!' },
+  { level:3, visual:'💰', question:'A store reduces a $80 item by 15%. Sale price?', options:['$68','$72','$12'], answer:'$68', fact:'15% of 80=12. 80-12=68. Discount problems: find the reduction then subtract!' },
+  { level:3, visual:'🔢', question:'n² - n = 20. Find n.', options:['5','4','10'], answer:'5', fact:'5²-5=25-5=20 ✓. Try values: if n=5, 25-5=20. You can also factor: n(n-1)=20, n=5!' },
+  { level:3, visual:'📊', question:'The mean of 4, 8, 6, 10, 12 = ?', options:['8','9','10'], answer:'8', fact:'Sum=4+8+6+10+12=40. Mean=40÷5=8. Mean = sum ÷ count of numbers!' },
+  { level:3, visual:'🔢', question:'Which ordered pair lies on the line y = 2x + 1?', options:['(3,7)','(2,6)','(0,2)'], answer:'(3,7)', fact:'Substitute x=3: y=2(3)+1=7. So (3,7) ✓. Plug in the x, get the y!' },
+  { level:3, visual:'🚂', question:'A train travels 270 km in 3 hours. Speed in km/h?', options:['90 km/h','810 km/h','9 km/h'], answer:'90 km/h', fact:'Speed = Distance÷Time = 270÷3 = 90 km/h. Speed, Distance, Time are linked by S=D/T!' },
+  { level:3, visual:'💯', question:'What is 10% of 10% of 1000?', options:['10','100','1'], answer:'10', fact:'10% of 1000=100. 10% of 100=10. Percentages of percentages — compound thinking!' },
+  { level:3, visual:'🧩', question:'Simplify: 4(x + 3) - 2x', options:['2x+12','2x+3','6x+12'], answer:'2x+12', fact:'Distribute first: 4x+12-2x. Then combine: 2x+12. FOIL starts with distributing!' },
+  { level:3, visual:'🧮', question:'GCF of 36 and 48 = ?', options:['12','6','24'], answer:'12', fact:'36=2²×3². 48=2⁴×3. GCF = 2²×3 = 12. Greatest Common Factor is the biggest shared factor!' },
+  { level:3, visual:'🔷', question:'The sum of angles in a pentagon = ?', options:['540°','360°','720°'], answer:'540°', fact:'Any polygon: (n-2)×180°. Pentagon has n=5: (5-2)×180=3×180=540°!' },
+  { level:3, visual:'📐', question:'A hexagon has 6 equal sides of length 4.5 cm. Perimeter = ?', options:['27 cm','24 cm','30 cm'], answer:'27 cm', fact:'Perimeter = 6 × 4.5 = 27 cm. Regular polygons: multiply side length by number of sides!' },
+
+  // ── LEVEL 1 extra additions (to reach 70+) ──
+  { level:1, visual:'➕', question:'45 + 36 = ?', options:['81','71','91'], answer:'81', fact:'45+36: 40+30=70, 5+6=11, 70+11=81. Break numbers apart to add easily!' },
+  { level:1, visual:'➖', question:'9.0 - 3.5 = ?', options:['5.5','5.0','6.5'], answer:'5.5', fact:'9.0 - 3.5: think 9 - 3 = 6, then subtract the 0.5: 6 - 0.5 = 5.5!' },
+  { level:1, visual:'✖️', question:'11 × 11 = ?', options:['121','111','131'], answer:'121', fact:'11×11=121. A pattern: 11×11=121, 11×12=132, 11×13=143 — the digits go up by 11!' },
+  { level:1, visual:'➗', question:'56 ÷ 7 = ?', options:['8','6','9'], answer:'8', fact:'56÷7=8 because 7×8=56. Learning times tables makes division a breeze!' },
+  { level:1, visual:'🔢', question:'Which fraction is equivalent to 4/8?', options:['1/2','1/4','2/8'], answer:'1/2', fact:'4/8 — divide top and bottom by 4: 4÷4=1, 8÷4=2. So 4/8 = 1/2!' },
+  { level:1, visual:'📏', question:'How many centimeters in 1.5 meters?', options:['150','15','1500'], answer:'150', fact:'1 meter = 100 cm. So 1.5 meters = 1.5 × 100 = 150 cm. Kilo = 1000, centi = 1/100!' },
+  { level:1, visual:'➕', question:'0.1 + 0.2 = ?', options:['0.3','0.12','1.2'], answer:'0.3', fact:'0.1 + 0.2 = 0.3. Align the decimal points and add: 1 tenth + 2 tenths = 3 tenths!' },
+  { level:1, visual:'🔷', question:'A triangle has sides 5, 5, and 5. What type is it?', options:['Equilateral','Isosceles','Scalene'], answer:'Equilateral', fact:'All 3 sides equal → equilateral! Equilateral comes from Latin meaning "equal sides"!' },
+  { level:1, visual:'💯', question:'What is 75% as a fraction in simplest form?', options:['3/4','7/5','75/10'], answer:'3/4', fact:'75% = 75/100. Divide both by 25: 75÷25=3, 100÷25=4. So 75% = 3/4!' },
+  { level:1, visual:'✖️', question:'6 × 9 = ?', options:['54','45','63'], answer:'54', fact:'6×9=54. A trick: 6×9 = 6×10 - 6 = 60 - 6 = 54. Subtract one group to make it easier!' },
+  { level:1, visual:'➗', question:'90 ÷ 10 = ?', options:['9','19','90'], answer:'9', fact:'Dividing by 10 moves the decimal one place left: 90. → 9.0 = 9. Quick and easy!' },
+  { level:1, visual:'🔢', question:'What is the value of 6² - 6?', options:['30','42','12'], answer:'30', fact:'6²=36. Then 36-6=30. Evaluate the exponent first, then subtract!' },
+  { level:1, visual:'➕', question:'1/2 + 1/4 = ?', options:['3/4','2/6','1/4'], answer:'3/4', fact:'Convert 1/2 to 2/4. Then 2/4 + 1/4 = 3/4. Finding a common denominator is the key!' },
+  { level:1, visual:'📐', question:'Area of a rectangle 9 cm × 4 cm = ?', options:['36 cm²','26 cm²','13 cm²'], answer:'36 cm²', fact:'Area = length × width = 9 × 4 = 36 cm². Always label area in square units!' },
+  { level:1, visual:'🔢', question:'What number is halfway between 10 and 20?', options:['15','12','18'], answer:'15', fact:'Halfway = (10+20)÷2 = 30÷2 = 15. Finding the midpoint means finding the average of the two numbers!' },
+  { level:1, visual:'➕', question:'999 + 1 = ?', options:['1000','998','1001'], answer:'1000', fact:'999 + 1 = 1000. Adding 1 to any 9-digit number causes a carry all the way through!' },
+  { level:1, visual:'✖️', question:'7 × 8 = ?', options:['56','48','63'], answer:'56', fact:'7×8=56. Remember: 5,6,7,8 — 56 = 7×8! This rhyme helps many students remember it!' },
+  { level:1, visual:'🔢', question:'Which is smallest: 1/2, 1/3, or 1/4?', options:['1/4','1/2','1/3'], answer:'1/4', fact:'Larger denominator = smaller piece. 1/4 is the smallest — 4 pieces share one whole!' },
+  { level:1, visual:'➖', question:'200 - 88 = ?', options:['112','122','102'], answer:'112', fact:'200-88: think 200-90=110, then +2=112. Or 88+12=100, 100+100=200, so difference is 112!' },
+  { level:1, visual:'🧮', question:'What is 2/3 of 9?', options:['6','3','4'], answer:'6', fact:'2/3 of 9: first 9÷3=3 (one third), then ×2=6. Finding fractions of a number is division then multiplication!' },
+  { level:1, visual:'📏', question:'How many grams in 2 kilograms?', options:['2000','200','20'], answer:'2000', fact:'Kilo means 1000. 1 kg = 1000 g. So 2 kg = 2 × 1000 = 2000 g!' },
+  { level:1, visual:'🔷', question:'A right angle measures how many degrees?', options:['90°','180°','45°'], answer:'90°', fact:'A right angle is exactly 90°. It looks like the corner of a square and is marked with a small square symbol!' },
+  { level:1, visual:'➕', question:'14 + 28 + 6 = ?', options:['48','38','58'], answer:'48', fact:'Look for pairs that make 10: 14+6=20, then 20+28=48. Regrouping makes addition faster!' },
+  { level:1, visual:'✖️', question:'12 × 5 = ?', options:['60','55','65'], answer:'60', fact:'12×5=60. Half of 12×10=120, so 12×5=60. Multiplying by 5 is the same as multiplying by 10 then halving!' },
+  { level:1, visual:'🔢', question:'3/8 + 1/8 = ?', options:['4/8','4/16','2/8'], answer:'4/8', fact:'Same denominator: add numerators. 3+1=4, so 4/8. (Which also simplifies to 1/2!)' },
+  { level:1, visual:'📐', question:'What is the perimeter of a regular hexagon with side 3?', options:['18','12','24'], answer:'18', fact:'Perimeter = 6 sides × 3 = 18. Hexagon has 6 equal sides in a regular hexagon!' },
+  { level:1, visual:'🧮', question:'What is 1000 ÷ 10 ÷ 10?', options:['10','100','1000'], answer:'10', fact:'1000÷10=100, then 100÷10=10. Dividing by 10 twice is the same as dividing by 100!' },
+  { level:1, visual:'➕', question:'2.5 + 2.5 + 2.5 + 2.5 = ?', options:['10','8','12'], answer:'10', fact:'2.5 four times = 2.5×4=10. Adding the same number multiple times is multiplication!' },
+  { level:1, visual:'💯', question:'What is 5% of 100?', options:['5','50','0.5'], answer:'5', fact:'5% of 100 = 5/100 × 100 = 5. Percent means per hundred, so 5% of 100 is simply 5!' },
+
+  // ── LEVEL 2 extra additions (to reach 70+) ──
+  { level:2, visual:'➕', question:'3 1/2 + 4 3/4 = ?', options:['8 1/4','7 5/6','8 3/4'], answer:'8 1/4', fact:'Whole numbers: 3+4=7. Fractions: 1/2+3/4=2/4+3/4=5/4=1 1/4. Total: 7+1 1/4=8 1/4!' },
+  { level:2, visual:'✖️', question:'3/5 × 5/9 = ?', options:['1/3','8/14','15/45'], answer:'1/3', fact:'Multiply tops: 3×5=15. Multiply bottoms: 5×9=45. 15/45 = 1/3. Cross-cancel: 3/9=1/3!' },
+  { level:2, visual:'🔢', question:'What is 2⁴?', options:['16','8','32'], answer:'16', fact:'2⁴ = 2×2×2×2 = 4×4 = 16. Doubling four times: 2→4→8→16!' },
+  { level:2, visual:'📐', question:'Surface area of a cube with side 3 cm = ?', options:['54 cm²','27 cm²','18 cm²'], answer:'54 cm²', fact:'A cube has 6 faces, each 3×3=9 cm². Total = 6×9 = 54 cm². SA = 6×side²!' },
+  { level:2, visual:'💯', question:'What is 12.5% as a fraction?', options:['1/8','1/4','1/12'], answer:'1/8', fact:'12.5% = 12.5/100 = 125/1000 = 1/8. Or think: 100%÷8 = 12.5%, so 12.5%=1/8!' },
+  { level:2, visual:'🔢', question:'What is the LCM of 6 and 9?', options:['18','54','3'], answer:'18', fact:'Multiples of 6: 6,12,18... Multiples of 9: 9,18... LCM = 18. Used for adding unlike fractions!' },
+  { level:2, visual:'➗', question:'2.4 ÷ 0.6 = ?', options:['4','0.4','24'], answer:'4', fact:'Multiply both by 10: 24÷6=4. Eliminating decimals from the divisor simplifies the calculation!' },
+  { level:2, visual:'📏', question:'A rope is 7.2 m long. Cut into 6 equal pieces. Each piece = ?', options:['1.2 m','0.12 m','12 m'], answer:'1.2 m', fact:'7.2 ÷ 6 = 1.2 m. Think 72÷6=12, then shift decimal: 1.2!' },
+  { level:2, visual:'🔷', question:'Circumference of a circle with diameter 10 ≈ ? (use π≈3.14)', options:['31.4','15.7','62.8'], answer:'31.4', fact:'C = π × d = 3.14 × 10 = 31.4. Circumference = pi times diameter. Pi ≈ 3.14!' },
+  { level:2, visual:'🧩', question:'What is the next term: 1, 4, 9, 16, 25, ?', options:['36','30','49'], answer:'36', fact:'These are perfect squares! 1²=1, 2²=4, 3²=9, 4²=16, 5²=25, 6²=36!' },
+  { level:2, visual:'➖', question:'5 - 1 3/4 = ?', options:['3 1/4','4 1/4','3 3/4'], answer:'3 1/4', fact:'5 - 1 3/4: borrow from 5 → 4 4/4 - 1 3/4 = 3 1/4. Regroup the whole number!' },
+  { level:2, visual:'✖️', question:'0.5 × 0.5 = ?', options:['0.25','0.5','2.5'], answer:'0.25', fact:'5×5=25, two decimal places total: 0.25. Half of a half is a quarter!' },
+  { level:2, visual:'💯', question:'A shirt costs $24 and is 25% off. Sale price = ?', options:['$18','$6','$20'], answer:'$18', fact:'25% off = pay 75%. 75% of $24 = 0.75×24 = $18. Or: $24÷4=$6 off, $24-$6=$18!' },
+  { level:2, visual:'🔢', question:'What is the GCF of 24 and 36?', options:['12','6','24'], answer:'12', fact:'Factors of 24: 1,2,3,4,6,8,12,24. Factors of 36: 1,2,3,4,6,9,12,18,36. GCF=12!' },
+  { level:2, visual:'📐', question:'A rectangular prism: 5×3×2. Volume = ?', options:['30 cubic units','25 cubic units','16 cubic units'], answer:'30 cubic units', fact:'Volume = length × width × height = 5 × 3 × 2 = 30 cubic units!' },
+  { level:2, visual:'➕', question:'1/4 + 1/3 = ?', options:['7/12','2/7','2/12'], answer:'7/12', fact:'LCD of 4 and 3 is 12. 1/4=3/12, 1/3=4/12. Add: 3/12+4/12=7/12!' },
+  { level:2, visual:'🔢', question:'Round 6.785 to the nearest hundredth', options:['6.79','6.78','6.8'], answer:'6.79', fact:'Look at the thousandths digit: 5 ≥ 5, so round up the hundredths digit: 8 → 9. Answer: 6.79!' },
+  { level:2, visual:'✖️', question:'12 × 15 = ?', options:['180','150','170'], answer:'180', fact:'12×15 = 12×10 + 12×5 = 120 + 60 = 180. Break one factor up to make multiplication easier!' },
+  { level:2, visual:'⚖️', question:'Which is greater: 0.6 or 5/9?', options:['0.6','5/9','They are equal'], answer:'0.6', fact:'5÷9≈0.556. Since 0.600 > 0.556, 0.6 is greater than 5/9!' },
+  { level:2, visual:'🧮', question:'If x + 15 = 40, then x = ?', options:['25','55','30'], answer:'25', fact:'Subtract 15 from both sides: x = 40 - 15 = 25. Always do the same operation to both sides!' },
+  { level:2, visual:'📏', question:'A room is 4.5 m × 3 m. Area = ?', options:['13.5 m²','7.5 m²','15 m²'], answer:'13.5 m²', fact:'Area = 4.5 × 3 = 13.5 m². Multiply 45×3=135, shift decimal: 13.5!' },
+  { level:2, visual:'🔢', question:'What is 2/3 ÷ 4?', options:['1/6','8/3','2/12'], answer:'1/6', fact:'2/3 ÷ 4 = 2/3 × 1/4 = 2/12 = 1/6. Keep-Change-Flip: flip the 4 to get 1/4!' },
+  { level:2, visual:'💯', question:'Increase 50 by 20%. New value = ?', options:['60','70','10'], answer:'60', fact:'20% of 50 = 10. Add it: 50+10=60. Or 120% of 50 = 1.2×50=60. Same result!' },
+  { level:2, visual:'🔷', question:'A circle has radius 7. Area ≈ π×r² ≈ ? (π≈3.14)', options:['153.86','43.96','21.98'], answer:'153.86', fact:'A = π×r² = 3.14×7² = 3.14×49 ≈ 153.86. Radius squared then times pi!' },
+  { level:2, visual:'🧩', question:'Which expression equals 2(x + 4)?', options:['2x+8','2x+4','x+8'], answer:'2x+8', fact:'Distribute: 2×x=2x, 2×4=8. So 2(x+4)=2x+8. The distributive property!' },
+  { level:2, visual:'➕', question:'What is 0.001 + 0.009?', options:['0.01','0.1','0.0019'], answer:'0.01', fact:'1 thousandth + 9 thousandths = 10 thousandths = 1 hundredth = 0.01!' },
+  { level:2, visual:'✖️', question:'Multiply: 2.5 × 4.4 = ?', options:['11','10.9','11.5'], answer:'11', fact:'25×44=1100, two decimal places: 11.00 = 11. Whole number answer from two decimals!' },
+  { level:2, visual:'📏', question:'Convert 5/4 to a mixed number', options:['1 1/4','4/5','2 1/4'], answer:'1 1/4', fact:'5÷4=1 remainder 1. So 5/4 = 1 1/4. Divide to get the whole part, remainder becomes the fraction!' },
+  { level:2, visual:'🔢', question:'What is the value of 3³?', options:['27','9','18'], answer:'27', fact:'3³ = 3×3×3 = 9×3 = 27. Three cubed! A cube with side 3 has volume 27!' },
+
+  // ── LEVEL 3 extra additions (to reach 70+) ──
+  { level:3, visual:'🧩', question:'Factor: x² + 5x + 6', options:['(x+2)(x+3)','(x+1)(x+6)','(x+2)(x+4)'], answer:'(x+2)(x+3)', fact:'Find two numbers that multiply to 6 and add to 5: 2×3=6, 2+3=5. So (x+2)(x+3)!' },
+  { level:3, visual:'📊', question:'The mode of: 3, 5, 5, 7, 9, 5, 3 is?', options:['5','3','7'], answer:'5', fact:'Mode = most frequent value. 5 appears 3 times, 3 appears 2 times. Mode = 5!' },
+  { level:3, visual:'🔢', question:'Solve: 2x - 3 = 11', options:['7','4','8'], answer:'7', fact:'Add 3 to both sides: 2x=14. Divide by 2: x=7. Check: 2(7)-3=14-3=11 ✓!' },
+  { level:3, visual:'📐', question:'A right triangle has legs 5 and 12. Hypotenuse = ?', options:['13','17','7'], answer:'13', fact:'a²+b²=c². 5²+12²=25+144=169. √169=13. The 5-12-13 is a Pythagorean triple!' },
+  { level:3, visual:'💯', question:'What is 15% tip on a $40 meal?', options:['$6','$4','$8'], answer:'$6', fact:'15% of 40: 10% = $4, 5% = $2. Total tip = $4+$2 = $6. Split percentages to calculate tips!' },
+  { level:3, visual:'🔢', question:'LCM of 8 and 12 = ?', options:['24','48','96'], answer:'24', fact:'Multiples of 8: 8,16,24... Multiples of 12: 12,24... LCM = 24. Needed to add unlike fractions!' },
+  { level:3, visual:'🧮', question:'Evaluate: 3² + 4² = ?', options:['25','49','14'], answer:'25', fact:'3²=9, 4²=16, 9+16=25. This equals 5² — the Pythagorean triple 3-4-5 in action!' },
+  { level:3, visual:'📊', question:'Range of: 4, 17, 8, 3, 12 = ?', options:['14','13','17'], answer:'14', fact:'Range = highest − lowest = 17 − 3 = 14. Range tells you how spread out the data is!' },
+  { level:3, visual:'🔷', question:'Interior angle sum of a quadrilateral = ?', options:['360°','180°','540°'], answer:'360°', fact:'(n-2)×180° with n=4: (4-2)×180=2×180=360°. A square\'s four 90° angles total 360°!' },
+  { level:3, visual:'🔢', question:'Write 3.6 × 10² in standard form', options:['360','36','3600'], answer:'360', fact:'10²=100. 3.6×100=360. Move decimal right by 2: 3.6 → 360!' },
+  { level:3, visual:'🧩', question:'Which expression has the same value as 5² - 3²?', options:['(5+3)(5-3)','5²+3²','(5-3)²'], answer:'(5+3)(5-3)', fact:'Difference of squares: a²-b² = (a+b)(a-b). So 5²-3² = (5+3)(5-3) = 8×2 = 16!' },
+  { level:3, visual:'📐', question:'A cone has radius 3 and height 4. Slant height = ?', options:['5','7','6'], answer:'5', fact:'Slant height = √(r²+h²) = √(9+16) = √25 = 5. Another 3-4-5 right triangle!' },
+  { level:3, visual:'💯', question:'A population grows from 200 to 250. Percent increase = ?', options:['25%','50%','20%'], answer:'25%', fact:'Increase = 50. % increase = 50/200 × 100 = 25%. Percent change = change/original × 100!' },
+  { level:3, visual:'🔢', question:'Simplify: 18/24 to lowest terms', options:['3/4','9/12','6/8'], answer:'3/4', fact:'GCF of 18 and 24 is 6. 18÷6=3, 24÷6=4. So 18/24 = 3/4!' },
+  { level:3, visual:'🧮', question:'Solve: 5(x - 2) = 15', options:['5','7','3'], answer:'5', fact:'Divide both sides by 5: x-2=3. Add 2: x=5. Check: 5(5-2)=5(3)=15 ✓!' },
+  { level:3, visual:'📊', question:'Mean of 12, 15, 9, 14, 10 = ?', options:['12','11','13'], answer:'12', fact:'Sum = 12+15+9+14+10 = 60. Mean = 60÷5 = 12. Balance point of the data set!' },
+  { level:3, visual:'🔷', question:'Volume of a pyramid with base area 12 and height 5 = ?', options:['20','60','30'], answer:'20', fact:'V = (1/3) × base area × height = (1/3)×12×5 = 60/3 = 20 cubic units!' },
+  { level:3, visual:'🔢', question:'If y = 3x - 2 and x = 4, what is y?', options:['10','14','6'], answer:'10', fact:'Substitute x=4: y = 3(4)-2 = 12-2 = 10. Function notation: plug in x, compute y!' },
+  { level:3, visual:'📐', question:'Translate point (2, -3) up 5 units. New coordinates?', options:['(2,2)','(7,-3)','(2,-8)'], answer:'(2,2)', fact:'Moving up adds to the y-coordinate: -3+5=2. x stays the same: (2, 2)!' },
+  { level:3, visual:'💯', question:'A number increased by 30% is 91. Original number = ?', options:['70','61','65'], answer:'70', fact:'130% of n = 91. So n = 91÷1.3 = 70. Or: if 130%=91, then 10%=7, so 100%=70!' },
+  { level:3, visual:'🧩', question:'Which is equivalent to (3x)² ?', options:['9x²','6x²','3x²'], answer:'9x²', fact:'(3x)² = 3²×x² = 9x². Both the coefficient AND the variable get squared!' },
+  { level:3, visual:'🔢', question:'What is the probability of rolling a 3 on a fair die?', options:['1/6','1/3','3/6'], answer:'1/6', fact:'A die has 6 faces. Only 1 shows a 3. Probability = favorable÷total = 1/6!' },
+  { level:3, visual:'📊', question:'Median of: 2, 8, 5, 11, 4, 9 = ?', options:['6.5','6','7'], answer:'6.5', fact:'Sort: 2,4,5,8,9,11. Even count — average the two middle values: (5+8)÷2=13÷2=6.5!' },
+  { level:3, visual:'🔷', question:'Angles in a triangle: two are 55° and 75°. Third = ?', options:['50°','60°','45°'], answer:'50°', fact:'All angles in a triangle add to 180°. 55+75=130. 180-130=50°!' },
+  { level:3, visual:'🧮', question:'Evaluate: 2(3+4)² - 5 = ?', options:['93','37','45'], answer:'93', fact:'Brackets first: (3+4)=7. Exponent: 7²=49. Multiply: 2×49=98. Subtract: 98-5=93!' },
+  { level:3, visual:'📐', question:'A circle has area 50.24 cm². Radius ≈ ? (π≈3.14)', options:['4 cm','5 cm','8 cm'], answer:'4 cm', fact:'A = π×r². 50.24 = 3.14×r². r² = 16. r = 4 cm. Divide area by pi, then square root!' },
+  { level:3, visual:'🔢', question:'Write the ratio 15:25 in simplest form', options:['3:5','5:3','1:2'], answer:'3:5', fact:'GCF of 15 and 25 is 5. 15÷5=3, 25÷5=5. Ratio 15:25 = 3:5!' },
+  { level:3, visual:'💯', question:'Simple interest: $500 at 4% per year for 3 years = ?', options:['$60','$500','$560'], answer:'$60', fact:'I = P×r×t = 500×0.04×3 = $60. Principal × rate × time gives the interest earned!' },
+  { level:3, visual:'🔷', question:'Scale: 1 cm = 5 km. On map it is 3.5 cm. Actual distance = ?', options:['17.5 km','8.5 km','35 km'], answer:'17.5 km', fact:'Actual = map × scale factor = 3.5 × 5 = 17.5 km. Maps use scale to shrink real distances!' },
+
+  // ── 🇷🇺 RUSSIAN / OLYMPIAD 6th Grade Advanced ──────────────────────────────
+  { level:3, visual:'🧮', question:'🇷🇺 A number gives remainder 3 when divided by 7, and remainder 1 when divided by 4. Smallest such positive number?', options:['17','10','24'], answer:'17', fact:'Try: 7+3=10 (10÷4=2 r2 ✗), 14+3=17 (17÷4=4 r1 ✓). 17 works! This is the Chinese Remainder Theorem idea!' },
+  { level:3, visual:'🔢', question:'🇷🇺 How many two-digit numbers are divisible by both 3 and 4?', options:['8','7','9'], answer:'8', fact:'Must be divisible by LCM(3,4)=12. Two-digit multiples of 12: 12,24,36,48,60,72,84,96 — exactly 8!' },
+  { level:3, visual:'🚂', question:'🇷🇺 A 100 m train passes a pole in 10 s. How long to pass a 300 m bridge?', options:['40 s','30 s','50 s'], answer:'40 s', fact:'Speed = 100÷10 = 10 m/s. Train must travel 100+300=400 m. Time = 400÷10 = 40 s!' },
+  { level:3, visual:'👦', question:'🇷🇺 Vasya is 3× older than Masha. In 10 years he will be twice her age. Vasya\'s age now?', options:['30','20','15'], answer:'30', fact:'Let M = Masha. V=3M. In 10 yrs: 3M+10=2(M+10) → M=10. Vasya = 30!' },
+  { level:3, visual:'📐', question:'🇷🇺 Rectangle perimeter = 36 cm, length = twice width. Area = ?', options:['72 cm²','36 cm²','48 cm²'], answer:'72 cm²', fact:'Width=w, length=2w. 2(w+2w)=36 → w=6, length=12. Area = 72 cm²!' },
+  { level:3, visual:'🧮', question:'🇷🇺 Sum of all integers from 1 to 100 = ?', options:['5050','5000','4950'], answer:'5050', fact:'Gauss\'s trick! Pair: (1+100)+(2+99)+...=101×50=5050. Formula: n(n+1)/2!' },
+  { level:3, visual:'🔢', question:'🇷🇺 How many prime numbers are between 20 and 40?', options:['4','5','3'], answer:'4', fact:'Primes 20–40: 23, 29, 31, 37. Four primes. A prime has exactly two factors: 1 and itself!' },
+  { level:3, visual:'👷', question:'🇷🇺 5 workers build a wall in 12 days. How long for 10 workers?', options:['6 days','8 days','24 days'], answer:'6 days', fact:'Inverse proportion: 5×12 = 10×d → d=6 days. Double the workers, half the time!' },
+  { level:3, visual:'🚰', question:'🇷🇺 Pipe A fills a tank in 3 h, Pipe B in 6 h. Both open together: time to fill?', options:['2 h','4 h','1.5 h'], answer:'2 h', fact:'Per hour: A=1/3, B=1/6. Together=1/2 per hour. Full in 2 hours!' },
+  { level:3, visual:'📐', question:'🇷🇺 Right triangle legs = 5 and 12. Hypotenuse = ?', options:['13','17','10'], answer:'13', fact:'5²+12²=25+144=169=13². Classic Pythagorean triple 5-12-13!' },
+  { level:3, visual:'🔢', question:'🇷🇺 1+2+4+8+16+32+64 = ?', options:['127','128','64'], answer:'127', fact:'Geometric series: sum = 2⁷−1 = 127. Each power of 2 is one less than the next!' },
+  { level:3, visual:'🧮', question:'🇷🇺 Merchant buys for 80, sells for 100. Profit percentage?', options:['25%','20%','80%'], answer:'25%', fact:'Profit=20. Profit% = (20÷80)×100 = 25%. Calculated on cost, not selling price!' },
+  { level:3, visual:'💡', question:'🇷🇺 30 students: 18 like math, 14 like science, 5 like neither. How many like both?', options:['7','12','9'], answer:'7', fact:'Like ≥1 = 30−5=25. Both = 18+14−25 = 7. Inclusion-exclusion principle!' },
+  { level:3, visual:'🌀', question:'🇷🇺 Fibonacci: 1,1,2,3,5,8,13,... next number?', options:['21','16','18'], answer:'21', fact:'Each term = sum of previous two: 8+13=21. Found in flower petals and the golden ratio!' },
+  { level:3, visual:'🚴', question:'🇷🇺 Two cyclists 150 km apart ride toward each other at 30 and 20 km/h. Meet after?', options:['3 h','5 h','7.5 h'], answer:'3 h', fact:'Combined speed = 50 km/h. Time = 150÷50 = 3 h. Moving toward each other? Add the speeds!' },
+  { level:3, visual:'🔢', question:'🇷🇺 LCM of two numbers is 60, GCF is 4. One number is 12. Other = ?', options:['20','15','30'], answer:'20', fact:'a×b = LCM×GCF. 12×b = 240 → b=20!' },
+  { level:3, visual:'🐌', question:'🇷🇺 Snail climbs 3 m up a 10 m pole each day, slides 1 m each night. Days to reach top?', options:['5 days','4 days','10 days'], answer:'5 days', fact:'Net daily = 2 m. After 4 days = 8 m. Day 5 morning: +3 m = 11 m ≥ 10 m. Reaches top day 5!' },
+  { level:3, visual:'🧩', question:'🇷🇺 a+b=10 and a×b=21. Find a²+b².', options:['58','100','79'], answer:'58', fact:'(a+b)²=a²+2ab+b² → a²+b² = 100−2×21 = 58. Algebraic identities are powerful shortcuts!' },
+  { level:3, visual:'🔢', question:'🇷🇺 Average of 5 numbers is 12. Remove the number 8. New average?', options:['13','12.5','14'], answer:'13', fact:'Total=60. Remove 8: 52. New avg = 52÷4 = 13. Always convert averages to sums first!' },
+  { level:3, visual:'💯', question:'🇷🇺 Number increases 20%, then decreases 20%. Net change?', options:['4% decrease','No change','4% increase'], answer:'4% decrease', fact:'100→+20%→120→−20% of 120=24→96. Net = −4%! Percent base changes each time!' },
+  { level:3, visual:'📐', question:'🇷🇺 Triangle angles in ratio 1:2:3. Largest angle?', options:['90°','60°','120°'], answer:'90°', fact:'x+2x+3x=180 → x=30°. Angles: 30°,60°,90° — it\'s a right triangle!' },
+  { level:3, visual:'💡', question:'🇷🇺 How many rectangles (including squares) are in a 3×3 grid?', options:['36','9','18'], answer:'36', fact:'Choose 2 of 4 horizontal lines: C(4,2)=6. Choose 2 of 4 vertical: C(4,2)=6. Total=6×6=36!' },
+  { level:3, visual:'🔢', question:'🇷🇺 Units digit of 7⁴⁰ = ?', options:['1','7','9'], answer:'1', fact:'Powers of 7 cycle units: 7,9,3,1,7,9,3,1... Period=4. 40÷4=10 r0 → last in cycle = 1!' },
+  { level:3, visual:'📐', question:'🇷🇺 Rhombus diagonals = 6 cm and 8 cm. Area = ?', options:['24 cm²','48 cm²','14 cm²'], answer:'24 cm²', fact:'Area = (d₁×d₂)÷2 = (6×8)÷2 = 24 cm². Diagonals of a rhombus bisect each other at right angles!' },
+  { level:3, visual:'🧮', question:'🇷🇺 6! ÷ 4! = ? (n! = 1×2×3×...×n)', options:['30','720','24'], answer:'30', fact:'Shortcut: 6!/4! = 5×6 = 30. Most factors cancel out — no need to compute 720÷24!' },
+  { level:3, visual:'🔢', question:'🇷🇺 Sequence: 3, 6, 11, 18, 27, ... Next term?', options:['38','36','40'], answer:'38', fact:'Differences: +3,+5,+7,+9... (odd numbers). Next difference = +11. 27+11=38. Second-difference pattern!' },
+
+  // ── NEW LEVEL 1 questions ──────────────────────────────────────────────────
+  { level:1, visual:'✖️', question:'8 × 6 = ?', options:['48','42','54'], answer:'48', fact:'8×6=48. Think: 8×6 = 8×5 + 8×1 = 40 + 8 = 48. Breaking it up makes it easier!' },
+  { level:1, visual:'✖️', question:'9 × 6 = ?', options:['54','63','48'], answer:'54', fact:'9×6=54. Trick: 9×6 = 10×6 − 6 = 60 − 6 = 54. Subtract one group!' },
+  { level:1, visual:'✖️', question:'7 × 6 = ?', options:['42','48','36'], answer:'42', fact:'7×6=42. Remember: 7×6 lives between 6×6=36 and 8×6=48!' },
+  { level:1, visual:'✖️', question:'12 × 8 = ?', options:['96','88','104'], answer:'96', fact:'12×8 = 10×8 + 2×8 = 80 + 16 = 96. Splitting by place value makes it manageable!' },
+  { level:1, visual:'✖️', question:'11 × 9 = ?', options:['99','89','109'], answer:'99', fact:'11×9 = 11×10 − 11 = 110 − 11 = 99. One away from 100!' },
+  { level:1, visual:'✖️', question:'12 × 12 = ?', options:['144','124','132'], answer:'144', fact:'12²=144. A dozen dozens! An egg carton holds 12, so 12 cartons hold 144 eggs.' },
+  { level:1, visual:'✖️', question:'9 × 9 = ?', options:['81','72','90'], answer:'81', fact:'9×9=81. The digits of multiples of 9 always sum to 9: 8+1=9!' },
+  { level:1, visual:'✖️', question:'6 × 11 = ?', options:['66','76','56'], answer:'66', fact:'6×11=66. Multiplying by 11 up to 9×11: just repeat the digit — 6×11=66!' },
+  { level:1, visual:'✖️', question:'8 × 12 = ?', options:['96','84','108'], answer:'96', fact:'8×12 = 8×10 + 8×2 = 80 + 16 = 96. Same as 12×8!' },
+  { level:1, visual:'➗', question:'63 ÷ 9 = ?', options:['7','8','6'], answer:'7', fact:'63÷9=7 because 9×7=63. Knowing your 9s table makes this instant!' },
+  { level:1, visual:'➗', question:'84 ÷ 12 = ?', options:['7','8','6'], answer:'7', fact:'84÷12=7 because 12×7=84. Division undoes multiplication!' },
+  { level:1, visual:'➗', question:'132 ÷ 11 = ?', options:['12','13','11'], answer:'12', fact:'132÷11=12. Check: 11×12=132. Large division? Just think backwards from multiplication!' },
+  { level:1, visual:'➗', question:'121 ÷ 11 = ?', options:['11','12','10'], answer:'11', fact:'121÷11=11 because 11×11=121. 121 is a perfect square!' },
+  { level:1, visual:'➗', question:'108 ÷ 9 = ?', options:['12','11','10'], answer:'12', fact:'108÷9=12. Check: 9×12=108. The digits of 108: 1+0+8=9, so it\'s divisible by 9!' },
+  { level:1, visual:'➗', question:'96 ÷ 8 = ?', options:['12','11','13'], answer:'12', fact:'96÷8=12. Halve twice: 96÷2=48, 48÷2=24, 24÷2=12. That\'s 8=2³!' },
+  { level:1, visual:'➕', question:'5/8 + 2/8 = ?', options:['7/8','7/16','3/4'], answer:'7/8', fact:'Same denominator — just add numerators: 5+2=7, keeping the 8. Answer: 7/8!' },
+  { level:1, visual:'➖', question:'7/10 − 3/10 = ?', options:['4/10','4/20','1/2'], answer:'4/10', fact:'7/10 − 3/10 = 4/10. Same denominator: subtract numerators. 4/10 simplifies to 2/5!' },
+  { level:1, visual:'➕', question:'2/5 + 2/5 = ?', options:['4/5','4/10','1'], answer:'4/5', fact:'2/5 + 2/5: add numerators, keep denominator → 4/5. Almost a whole pie!' },
+  { level:1, visual:'➖', question:'5/6 − 2/6 = ?', options:['1/2','3/12','2/3'], answer:'1/2', fact:'5/6 − 2/6 = 3/6 = 1/2. Same denominator, subtract numerators, then simplify!' },
+  { level:1, visual:'🔢', question:'0.25 + 0.25 = ?', options:['0.50','0.025','2.5'], answer:'0.50', fact:'Two quarters make a half dollar! 0.25 + 0.25 = 0.50 = 1/2.' },
+  { level:1, visual:'🔢', question:'1.8 + 1.2 = ?', options:['3.0','2.10','3.10'], answer:'3.0', fact:'8 tenths + 2 tenths = 10 tenths = 1. Carry over: 1+1+1=3. Answer: 3.0!' },
+  { level:1, visual:'🔢', question:'Round 3.45 to the nearest tenth', options:['3.5','3.4','3.0'], answer:'3.5', fact:'The hundredths digit is 5 ≥ 5, so round the tenths digit up: 4 → 5. Answer: 3.5!' },
+  { level:1, visual:'🔢', question:'Round 8.73 to the nearest whole number', options:['9','8','87'], answer:'9', fact:'8.73 — the tenths digit is 7 ≥ 5, so round up: 8 → 9!' },
+  { level:1, visual:'💯', question:'What is 25% of 40?', options:['10','8','15'], answer:'10', fact:'25% = 1/4. One quarter of 40 = 40÷4 = 10. Like $10 off a $40 item!' },
+  { level:1, visual:'💯', question:'What is 50% of 90?', options:['45','50','40'], answer:'45', fact:'50% = half. Half of 90 = 90÷2 = 45. Fifty percent always means divide by 2!' },
+  { level:1, visual:'💯', question:'What is 10% of 350?', options:['35','3.5','350'], answer:'35', fact:'10% of any number: just move the decimal one place left. 350. → 35.0 = 35!' },
+  { level:1, visual:'💯', question:'What is 75% as a decimal?', options:['0.75','7.5','0.075'], answer:'0.75', fact:'Percent ÷ 100 = decimal. 75 ÷ 100 = 0.75. Three quarters equals 0.75!' },
+  { level:1, visual:'📐', question:'Area of a square with side 10 = ?', options:['100','40','1000'], answer:'100', fact:'Area = side² = 10×10 = 100 sq units. A 10×10 grid has 100 tiny squares!' },
+  { level:1, visual:'📐', question:'Perimeter of a rectangle 12 cm long and 5 cm wide = ?', options:['34 cm','60 cm','17 cm'], answer:'34 cm', fact:'P = 2×(l+w) = 2×(12+5) = 2×17 = 34 cm. Add all four sides!' },
+  { level:1, visual:'📐', question:'Area of a rectangle 11 cm × 3 cm = ?', options:['33 cm²','28 cm²','14 cm²'], answer:'33 cm²', fact:'Area = l×w = 11×3 = 33 cm². Always write area in square units!' },
+  { level:1, visual:'🕐', question:'A movie starts at 2:15 PM and lasts 1 hour 45 minutes. It ends at:', options:['4:00 PM','3:45 PM','3:00 PM'], answer:'4:00 PM', fact:'2:15 + 1:45 = 2:15 + 1:00 + 0:45 = 3:15 + 0:45 = 4:00 PM!' },
+  { level:1, visual:'🕐', question:'How many seconds in 3 minutes?', options:['180','60','300'], answer:'180', fact:'1 minute = 60 seconds. 3 minutes = 3×60 = 180 seconds!' },
+  { level:1, visual:'💰', question:'You have $5.00 and spend $2.75. Change = ?', options:['$2.25','$3.25','$1.75'], answer:'$2.25', fact:'$5.00 − $2.75: think $5.00 − $2.00 = $3.00, then − $0.75 = $2.25!' },
+  { level:1, visual:'💰', question:'3 pencils cost $0.90. Cost of one pencil = ?', options:['$0.30','$0.90','$0.03'], answer:'$0.30', fact:'$0.90 ÷ 3 = $0.30. Unit price means cost per single item!' },
+  { level:1, visual:'📏', question:'How many meters in 3.5 kilometers?', options:['3500','350','35000'], answer:'3500', fact:'1 km = 1000 m. 3.5 km = 3.5 × 1000 = 3500 m. Kilo means 1000!' },
+  { level:1, visual:'📏', question:'How many milliliters in 2.5 liters?', options:['2500','250','25000'], answer:'2500', fact:'1 L = 1000 mL. 2.5 L = 2.5 × 1000 = 2500 mL. Milli means 1/1000!' },
+  { level:1, visual:'📏', question:'500 cm = ? meters', options:['5','50','0.5'], answer:'5', fact:'100 cm = 1 m. 500 cm ÷ 100 = 5 m. Moving from cm to m means dividing by 100!' },
+  { level:1, visual:'📏', question:'3000 g = ? kilograms', options:['3','30','0.3'], answer:'3', fact:'1 kg = 1000 g. 3000 ÷ 1000 = 3 kg. Kilo = 1000 always!' },
+  { level:1, visual:'🔢', question:'What is 4² (4 squared)?', options:['16','8','12'], answer:'16', fact:'4² = 4×4 = 16. A 4×4 tile floor has 16 tiles!' },
+  { level:1, visual:'🔢', question:'What is 6² (6 squared)?', options:['36','12','30'], answer:'36', fact:'6² = 6×6 = 36. A standard dice game board is often 6×6!' },
+  { level:1, visual:'🔢', question:'What is 9² (9 squared)?', options:['81','18','72'], answer:'81', fact:'9² = 9×9 = 81. A Sudoku grid is 9×9 = 81 cells!' },
+  { level:1, visual:'🔢', question:'What is 12² (12 squared)?', options:['144','24','124'], answer:'144', fact:'12² = 144. This is also called a gross — 12 dozens!' },
+  { level:1, visual:'🔢', question:'Is 17 prime or composite?', options:['Prime','Composite','Neither'], answer:'Prime', fact:'17 has exactly two factors: 1 and 17. That makes it prime! Primes are divisible only by 1 and themselves.' },
+  { level:1, visual:'🔢', question:'Is 24 prime or composite?', options:['Composite','Prime','Neither'], answer:'Composite', fact:'24 has factors: 1,2,3,4,6,8,12,24. More than 2 factors = composite!' },
+  { level:1, visual:'🔢', question:'List the factors of 12', options:['1,2,3,4,6,12','1,2,4,12','1,3,4,6,12'], answer:'1,2,3,4,6,12', fact:'Factors of 12: pairs that multiply to 12 → (1,12),(2,6),(3,4). All six: 1,2,3,4,6,12!' },
+  { level:1, visual:'🔢', question:'What are the first 3 multiples of 7?', options:['7,14,21','7,14,28','7,12,21'], answer:'7,14,21', fact:'Multiples of 7: 7×1=7, 7×2=14, 7×3=21. Multiples are what you get multiplying by counting numbers!' },
+  { level:1, visual:'🔢', question:'What number is in the tens place in 4,867?', options:['6','8','4'], answer:'6', fact:'Place values right-to-left: ones=7, tens=6, hundreds=8, thousands=4. The tens digit is 6!' },
+  { level:1, visual:'🔢', question:'What is the value of the 5 in 3,521?', options:['500','5','50'], answer:'500', fact:'In 3,521, the 5 is in the hundreds place. Its value is 5×100 = 500!' },
+  { level:1, visual:'🔷', question:'A point is at (0,0). What is its name?', options:['The origin','The x-axis','The y-axis'], answer:'The origin', fact:'(0,0) is the origin — where the x-axis and y-axis meet on a coordinate plane!' },
+  { level:1, visual:'🔷', question:'A coordinate point (4,2): which is the x-value?', options:['4','2','6'], answer:'4', fact:'In (x,y), the first number is the x-value (horizontal). So x=4, y=2!' },
+  { level:1, visual:'🔷', question:'An isosceles triangle has how many equal sides?', options:['2','3','1'], answer:'2', fact:'Isosceles = exactly 2 equal sides. The word comes from Greek meaning "equal legs"!' },
+  { level:1, visual:'📊', question:'A bar graph shows: Mon=5, Tue=8, Wed=3. Total books read = ?', options:['16','13','18'], answer:'16', fact:'Add all bars: 5+8+3=16. Reading graphs means extracting the values and calculating!' },
+  { level:1, visual:'📊', question:'Numbers: 4, 7, 2, 9, 3. What is the largest?', options:['9','7','4'], answer:'9', fact:'Comparing numbers: scan for the biggest. 9 is greater than all others in the list!' },
+  { level:1, visual:'🔢', question:'Pattern: 5, 10, 15, 20, ... next = ?', options:['25','22','30'], answer:'25', fact:'Count by 5s! Each term adds 5: 20+5=25. This is the 5 times table!' },
+  { level:1, visual:'🔢', question:'Pattern: 3, 6, 12, 24, ... next = ?', options:['48','36','30'], answer:'48', fact:'Each term doubles! ×2 pattern: 24×2=48. This is a geometric sequence!' },
+  { level:1, visual:'🔢', question:'Pattern: 100, 90, 80, 70, ... next = ?', options:['60','65','50'], answer:'60', fact:'Subtract 10 each time: 70−10=60. A decreasing arithmetic sequence!' },
+  { level:1, visual:'⚖️', question:'Which is greater: 3/5 or 7/10?', options:['7/10','3/5','They are equal'], answer:'7/10', fact:'Convert 3/5 = 6/10. Since 7>6, we get 7/10 > 6/10 = 3/5. Common denominator helps!' },
+  { level:1, visual:'⚖️', question:'Which is greater: 1/4 or 1/3?', options:['1/3','1/4','They are equal'], answer:'1/3', fact:'Larger denominator = smaller piece. 1/3 means 3 equal pieces; 1/4 means 4. So 1/3 > 1/4!' },
+  { level:1, visual:'🔢', question:'Write 1/4 as a decimal', options:['0.25','0.4','0.14'], answer:'0.25', fact:'1÷4=0.25. One quarter equals twenty-five cents — that\'s why a quarter is $0.25!' },
+  { level:1, visual:'🔢', question:'Write 1/5 as a decimal', options:['0.2','0.5','0.15'], answer:'0.2', fact:'1÷5=0.2. Think: 2 nickels = $0.10 = 1/5 of $0.50... or simply 10÷5=2, so 1/5=0.2!' },
+  { level:1, visual:'🔢', question:'Write 2/5 as a decimal', options:['0.4','0.2','0.25'], answer:'0.4', fact:'2÷5=0.4. Two fifths = 4 tenths. Multiply top and bottom by 2: 2/5 = 4/10 = 0.4!' },
+  { level:1, visual:'💯', question:'What percent is 3 out of 10?', options:['30%','3%','13%'], answer:'30%', fact:'3 out of 10 = 3/10 = 0.3 = 30%. Multiply the fraction by 100 to get the percent!' },
+  { level:1, visual:'💯', question:'What percent is 1 out of 4?', options:['25%','14%','40%'], answer:'25%', fact:'1/4 = 0.25 = 25%. One quarter is always 25%!' },
+  { level:1, visual:'➗', question:'45 ÷ 5 = ?', options:['9','8','7'], answer:'9', fact:'45÷5=9 because 5×9=45. Dividing by 5 is like halving and moving the decimal!' },
+  { level:1, visual:'➗', question:'60 ÷ 12 = ?', options:['5','6','4'], answer:'5', fact:'60÷12=5 because 12×5=60. Think: 60 minutes in an hour; 12 five-minute chunks!' },
+  { level:1, visual:'➗', question:'110 ÷ 11 = ?', options:['10','11','9'], answer:'10', fact:'110÷11=10 because 11×10=110. Dividing by 11 is easy when the number is a multiple of 11!' },
+  { level:1, visual:'✖️', question:'9 × 12 = ?', options:['108','98','118'], answer:'108', fact:'9×12 = 10×12 − 12 = 120 − 12 = 108. Subtract one group of 12!' },
+  { level:1, visual:'✖️', question:'8 × 8 = ?', options:['64','72','56'], answer:'64', fact:'8² = 64. Eight eights are 64. I got 64 — eight times eight!' },
+  { level:1, visual:'✖️', question:'7 × 12 = ?', options:['84','74','96'], answer:'84', fact:'7×12 = 7×10 + 7×2 = 70+14 = 84. Double 7×6=42: 42×2=84!' },
+  { level:1, visual:'✖️', question:'6 × 6 = ?', options:['36','30','42'], answer:'36', fact:'6² = 36. Six sixes are 36 — half of 72, which is 6×12!' },
+  { level:1, visual:'🔢', question:'Which number is a multiple of both 4 and 6?', options:['12','8','18'], answer:'12', fact:'Multiples of 4: 4,8,12... Multiples of 6: 6,12... First common one is 12 = LCM(4,6)!' },
+  { level:1, visual:'🔢', question:'What is the GCF of 8 and 12?', options:['4','2','8'], answer:'4', fact:'Factors of 8: 1,2,4,8. Factors of 12: 1,2,3,4,6,12. GCF = 4. The biggest one they share!' },
+  { level:1, visual:'📏', question:'A table is 150 cm long. How long in meters?', options:['1.5 m','15 m','0.15 m'], answer:'1.5 m', fact:'150 cm ÷ 100 = 1.5 m. There are 100 centimeters in every meter!' },
+  { level:1, visual:'📏', question:'0.5 kg = ? grams', options:['500','50','5000'], answer:'500', fact:'1 kg = 1000 g. 0.5 × 1000 = 500 g. Half a kilogram is 500 grams!' },
+  { level:1, visual:'🔷', question:'How many right angles does a rectangle have?', options:['4','2','0'], answer:'4', fact:'A rectangle has 4 corners, each a perfect 90° right angle. 4×90°=360° total!' },
+  { level:1, visual:'🔷', question:'A regular pentagon has how many sides?', options:['5','6','4'], answer:'5', fact:'Penta means 5 in Greek! A pentagon has 5 equal sides and 5 equal angles.' },
+  { level:1, visual:'🔷', question:'What is 180° − 65°?', options:['115°','125°','75°'], answer:'115°', fact:'Supplementary angles add to 180°. If one is 65°, the other is 180−65=115°!' },
+  { level:1, visual:'📊', question:'Data set: 3, 7, 7, 9, 4. What is the mode?', options:['7','4','9'], answer:'7', fact:'Mode = most frequent value. 7 appears twice; all others appear once. Mode = 7!' },
+  { level:1, visual:'📊', question:'A pictograph shows ☀️☀️☀️ = 3 sunny days each. 4 sun symbols = ? days', options:['12','4','6'], answer:'12', fact:'Each symbol = 3 days. 4 symbols × 3 = 12 days. Pictographs use symbols to represent quantities!' },
+  { level:1, visual:'💰', question:'6 apples cost $1.80. Cost per apple = ?', options:['$0.30','$0.60','$1.20'], answer:'$0.30', fact:'$1.80 ÷ 6 = $0.30. Unit price = total cost ÷ number of items!' },
+  { level:1, visual:'💰', question:'4 notebooks cost $6.00. Two notebooks cost = ?', options:['$3.00','$1.50','$2.00'], answer:'$3.00', fact:'One notebook = $6÷4 = $1.50. Two notebooks = 2×$1.50 = $3.00. Unit rate first, then scale!' },
+  { level:1, visual:'🔢', question:'Which decimal is between 0.4 and 0.5?', options:['0.45','0.54','0.04'], answer:'0.45', fact:'0.4=40 hundredths, 0.5=50 hundredths. 45 hundredths = 0.45 fits between them!' },
+  { level:1, visual:'🔢', question:'Is 36 prime or composite?', options:['Composite','Prime','Neither'], answer:'Composite', fact:'36 has many factors: 1,2,3,4,6,9,12,18,36. Lots of factor pairs = composite!' },
+  { level:1, visual:'🔢', question:'What are the prime factors of 12?', options:['2 and 3','2,3,4','2,6'], answer:'2 and 3', fact:'12 = 2 × 2 × 3. The prime factors are 2 and 3. Prime factorization breaks a number to its prime parts!' },
+  { level:1, visual:'📐', question:'What is the area of a right triangle with legs 6 and 8?', options:['24','48','28'], answer:'24', fact:'Area = ½ × base × height = ½ × 6 × 8 = 24 sq units. A right triangle is half a rectangle!' },
+  { level:1, visual:'🔢', question:'Which fraction is equivalent to 6/9?', options:['2/3','3/4','1/3'], answer:'2/3', fact:'GCF of 6 and 9 is 3. 6÷3=2, 9÷3=3. So 6/9 = 2/3!' },
+  { level:1, visual:'🔢', question:'Order from least to greatest: 0.3, 1/4, 2/5', options:['1/4, 0.3, 2/5','0.3, 1/4, 2/5','2/5, 0.3, 1/4'], answer:'1/4, 0.3, 2/5', fact:'Convert to decimals: 1/4=0.25, 0.3, 2/5=0.4. Order: 0.25 < 0.30 < 0.40!' },
+  { level:1, visual:'🕐', question:'School starts at 8:30 AM and ends at 3:15 PM. How long is the school day?', options:['6 h 45 min','7 h 15 min','6 h 15 min'], answer:'6 h 45 min', fact:'8:30 to 3:15: from 8:30 to 3:30 = 7 hours, then back 15 min = 6 h 45 min!' },
+  { level:1, visual:'✖️', question:'4 × 4 × 4 = ?', options:['64','48','16'], answer:'64', fact:'4³ = 4×4×4 = 16×4 = 64. Four cubed! A 4×4×4 cube has 64 small unit cubes inside.' },
+
+  // ── NEW LEVEL 2 questions ──────────────────────────────────────────────────
+  { level:2, visual:'➕', question:'5/6 + 1/4 = ?', options:['13/12','6/10','5/24'], answer:'13/12', fact:'LCD of 6 and 4 is 12. 5/6=10/12, 1/4=3/12. Sum=13/12 = 1 1/12. Improper fraction is fine!' },
+  { level:2, visual:'➖', question:'3 1/3 − 1 5/6 = ?', options:['1 1/2','1 1/3','2 1/6'], answer:'1 1/2', fact:'LCD=6: 3 2/6 − 1 5/6. Borrow: 2 8/6 − 1 5/6 = 1 3/6 = 1 1/2!' },
+  { level:2, visual:'✖️', question:'1 2/3 × 2 1/2 = ?', options:['4 1/6','3 1/6','5'], answer:'4 1/6', fact:'Convert: 5/3 × 5/2 = 25/6 = 4 1/6. Always convert mixed numbers before multiplying!' },
+  { level:2, visual:'➗', question:'2 1/4 ÷ 3/4 = ?', options:['3','4 1/2','2 2/3'], answer:'3', fact:'9/4 ÷ 3/4 = 9/4 × 4/3 = 36/12 = 3. Keep-Change-Flip, then simplify!' },
+  { level:2, visual:'➗', question:'What is 5 ÷ 1/3?', options:['15','5/3','1 2/3'], answer:'15', fact:'5 ÷ 1/3 = 5 × 3 = 15. Dividing by a unit fraction multiplies by its denominator!' },
+  { level:2, visual:'✖️', question:'0.7 × 0.7 = ?', options:['0.49','0.14','4.9'], answer:'0.49', fact:'7×7=49, two decimal places total → 0.49. Seven tenths squared!' },
+  { level:2, visual:'✖️', question:'1.2 × 3 = ?', options:['3.6','36','0.36'], answer:'3.6', fact:'12×3=36, one decimal place → 3.6. Easy: just multiply then shift the decimal!' },
+  { level:2, visual:'➗', question:'8.4 ÷ 7 = ?', options:['1.2','0.84','12'], answer:'1.2', fact:'84÷7=12, one decimal place → 1.2. Ignore the decimal, divide, then replace it!' },
+  { level:2, visual:'➗', question:'6.3 ÷ 0.9 = ?', options:['7','0.7','63'], answer:'7', fact:'Multiply both by 10: 63÷9=7. Eliminating the decimal makes long division easier!' },
+  { level:2, visual:'💯', question:'What is 30% of 120?', options:['36','30','40'], answer:'36', fact:'30% = 3/10. One tenth of 120=12. Three tenths = 12×3=36!' },
+  { level:2, visual:'💯', question:'What is 15% of 80?', options:['12','8','16'], answer:'12', fact:'15% = 10%+5%. 10% of 80=8, 5% of 80=4. Total = 8+4=12!' },
+  { level:2, visual:'💯', question:'Write 0.625 as a percent', options:['62.5%','6.25%','625%'], answer:'62.5%', fact:'Multiply by 100: 0.625×100=62.5%. Decimal to percent: always multiply by 100!' },
+  { level:2, visual:'💯', question:'Write 3/5 as a percent', options:['60%','30%','15%'], answer:'60%', fact:'3/5=0.6, then ×100=60%. Or 3/5 × 100 = 300/5 = 60%!' },
+  { level:2, visual:'💯', question:'A $60 jacket is 20% off. Sale price = ?', options:['$48','$12','$50'], answer:'$48', fact:'20% of $60=$12 off. $60−$12=$48. Or pay 80%: 0.80×60=$48!' },
+  { level:2, visual:'💯', question:'Tax of 8% on a $25 item = ?', options:['$2.00','$1.25','$3.00'], answer:'$2.00', fact:'8% of 25 = 0.08×25 = $2.00. Tax is a percent of the purchase price!' },
+  { level:2, visual:'🔷', question:'Area of a triangle with base 14 and height 9 = ?', options:['63','126','23'], answer:'63', fact:'A = ½×b×h = ½×14×9 = 7×9 = 63 sq units. Half the area of a 14×9 rectangle!' },
+  { level:2, visual:'🔷', question:'Area of a parallelogram with base 8 and height 5 = ?', options:['40','20','13'], answer:'40', fact:'A = base × height = 8×5 = 40. A parallelogram has the same area formula as a rectangle!' },
+  { level:2, visual:'🔷', question:'Area of a trapezoid with bases 6 and 10, height 4 = ?', options:['32','24','40'], answer:'32', fact:'A = ½×(b₁+b₂)×h = ½×(6+10)×4 = ½×16×4 = 32 sq units!' },
+  { level:2, visual:'📐', question:'Volume of a rectangular prism: 4×6×3 = ?', options:['72 cubic units','48 cubic units','36 cubic units'], answer:'72 cubic units', fact:'V = l×w×h = 4×6×3 = 72. Volume fills 3D space — always in cubic units!' },
+  { level:2, visual:'📐', question:'A box is 5 cm × 5 cm × 5 cm. Volume = ?', options:['125 cm³','75 cm³','25 cm³'], answer:'125 cm³', fact:'V = 5³ = 125 cm³. A cube with side 5! All sides equal in a cube.' },
+  { level:2, visual:'📐', question:'Surface area of a rectangular prism 2×3×4 = ?', options:['52 cm²','24 cm²','28 cm²'], answer:'52 cm²', fact:'SA = 2(lw+lh+wh) = 2(6+8+12) = 2×26 = 52. Six faces, three pairs of rectangles!' },
+  { level:2, visual:'🔢', question:'Unit rate: 240 miles in 4 hours. Miles per hour = ?', options:['60 mph','80 mph','48 mph'], answer:'60 mph', fact:'Rate = 240÷4 = 60 mph. Unit rate always means "per one"!' },
+  { level:2, visual:'🔢', question:'Unit rate: 15 books in 3 weeks. Books per week = ?', options:['5','3','45'], answer:'5', fact:'15÷3=5 books per week. Divide total by the number of units to find the rate!' },
+  { level:2, visual:'🔢', question:'If 3 notebooks cost $4.50, how much for 7 notebooks?', options:['$10.50','$7.50','$13.50'], answer:'$10.50', fact:'Unit price: $4.50÷3=$1.50 each. 7×$1.50=$10.50. Find the unit rate, then scale up!' },
+  { level:2, visual:'🔢', question:'Ratio of 12 boys to 8 girls in simplest form = ?', options:['3:2','6:4','12:8'], answer:'3:2', fact:'GCF of 12 and 8 is 4. 12÷4=3, 8÷4=2. Ratio = 3:2. Simplify ratios like fractions!' },
+  { level:2, visual:'🔢', question:'If the ratio of cats to dogs is 2:5 and there are 10 cats, how many dogs?', options:['25','20','50'], answer:'25', fact:'Scale factor: 10÷2=5. So dogs = 5×5 = 25. Multiply both parts of the ratio by the scale factor!' },
+  { level:2, visual:'🔢', question:'Convert 7/4 to a mixed number', options:['1 3/4','2 1/4','3/4'], answer:'1 3/4', fact:'7÷4=1 remainder 3. So 7/4 = 1 3/4. The remainder becomes the new numerator!' },
+  { level:2, visual:'🔢', question:'Convert 3 2/5 to an improper fraction', options:['17/5','32/5','11/5'], answer:'17/5', fact:'3×5+2=17, keep denominator 5: 17/5. Multiply whole by denominator, add numerator!' },
+  { level:2, visual:'🔢', question:'What integer is the opposite of −7?', options:['7','−7','1/7'], answer:'7', fact:'Opposite integers are the same distance from 0 but on opposite sides. −7 and 7 are opposites!' },
+  { level:2, visual:'🔢', question:'−4 + 9 = ?', options:['5','−5','13'], answer:'5', fact:'Moving right on the number line: start at −4, move 9 right → land on 5!' },
+  { level:2, visual:'🔢', question:'−8 − (−3) = ?', options:['−5','−11','5'], answer:'−5', fact:'Subtracting a negative = adding a positive. −8 − (−3) = −8 + 3 = −5!' },
+  { level:2, visual:'🔢', question:'3 × (−4) = ?', options:['−12','12','−7'], answer:'−12', fact:'Positive × negative = negative. 3 × 4 = 12, so 3 × (−4) = −12!' },
+  { level:2, visual:'🔢', question:'−20 ÷ (−5) = ?', options:['4','−4','−15'], answer:'4', fact:'Negative ÷ negative = positive. 20÷5=4, and both signs are negative, so answer = +4!' },
+  { level:2, visual:'📊', question:'Data: 5,8,8,9,10. What is the mean?', options:['8','8.5','9'], answer:'8', fact:'Sum = 5+8+8+9+10=40. Mean = 40÷5=8. Mean = sum divided by count!' },
+  { level:2, visual:'📊', question:'Data: 3,5,7,9,11. What is the median?', options:['7','6','9'], answer:'7', fact:'Already sorted: 3,5,7,9,11. Middle value = 7. Median is the exact center value!' },
+  { level:2, visual:'📊', question:'Data: 2,4,4,6,8,10. What is the mode?', options:['4','6','2'], answer:'4', fact:'4 appears twice; all others appear once. Mode = most frequent = 4!' },
+  { level:2, visual:'📊', question:'Data: 4,9,15,2,8. What is the range?', options:['13','4','6'], answer:'13', fact:'Range = max − min = 15 − 2 = 13. Range measures how spread out the data is!' },
+  { level:2, visual:'🔢', question:'Probability: a bag has 3 red and 7 blue marbles. P(red) = ?', options:['3/10','3/7','7/10'], answer:'3/10', fact:'P(red) = favorable outcomes ÷ total = 3 ÷ (3+7) = 3/10. Count total possible outcomes!' },
+  { level:2, visual:'🔢', question:'If P(event) = 1/4, what is P(not event)?', options:['3/4','1/4','1'], answer:'3/4', fact:'Complementary events: P(not A) = 1 − P(A) = 1 − 1/4 = 3/4. All probabilities sum to 1!' },
+  { level:2, visual:'🔢', question:'Solve for x: 3x = 36', options:['12','9','33'], answer:'12', fact:'Divide both sides by 3: x = 36÷3 = 12. Division undoes multiplication!' },
+  { level:2, visual:'🔢', question:'Solve for n: n + 12 = 30', options:['18','42','12'], answer:'18', fact:'Subtract 12 from both sides: n = 30−12 = 18. Use the inverse operation!' },
+  { level:2, visual:'🔢', question:'Solve for y: y − 9 = 14', options:['23','5','6'], answer:'23', fact:'Add 9 to both sides: y = 14+9 = 23. Check: 23−9=14 ✓!' },
+  { level:2, visual:'🔢', question:'Evaluate 4n − 3 when n = 5', options:['17','23','12'], answer:'17', fact:'Substitute n=5: 4(5)−3 = 20−3 = 17. Replace the variable with the given value!' },
+  { level:2, visual:'🔢', question:'What is the next term: 1, 4, 9, 16, 25, 36, ?', options:['49','40','64'], answer:'49', fact:'Perfect squares: 7²=49. The sequence is 1², 2², 3², 4², 5², 6², 7²...' },
+  { level:2, visual:'📏', question:'A map scale is 1 inch = 20 miles. 4.5 inches = ? miles', options:['90','45','22.5'], answer:'90', fact:'4.5 inches × 20 miles/inch = 90 miles. Map scale multiplication!' },
+  { level:2, visual:'📏', question:'Convert 1.25 hours to hours and minutes', options:['1 h 15 min','1 h 25 min','1 h 5 min'], answer:'1 h 15 min', fact:'0.25 hours × 60 min/hour = 15 minutes. So 1.25 h = 1 hour 15 minutes!' },
+  { level:2, visual:'💯', question:'Convert 7/20 to a decimal and percent', options:['0.35 and 35%','0.7 and 7%','0.35 and 3.5%'], answer:'0.35 and 35%', fact:'7÷20=0.35. 0.35×100=35%. Three conversions: fraction → decimal → percent!' },
+  { level:2, visual:'💯', question:'A class of 30 students: 18 passed. What percent passed?', options:['60%','18%','30%'], answer:'60%', fact:'18/30 = 0.6 = 60%. Divide part by total, then multiply by 100!' },
+  { level:2, visual:'🔢', question:'Write 4.7 × 10³ in standard form', options:['4700','47000','470'], answer:'4700', fact:'10³=1000. 4.7×1000=4700. Move the decimal right by 3 places!' },
+  { level:2, visual:'🔢', question:'Write 36,000 in scientific notation', options:['3.6×10⁴','36×10³','3.6×10³'], answer:'3.6×10⁴', fact:'Move decimal 4 places left: 36000 → 3.6. Exponent = number of places moved = 4!' },
+  { level:2, visual:'🔷', question:'Circumference of circle with radius 5 (use π≈3.14) = ?', options:['31.4','15.7','78.5'], answer:'31.4', fact:'C = 2πr = 2×3.14×5 = 31.4. Circumference = pi times diameter = pi times 2r!' },
+  { level:2, visual:'🔷', question:'Area of circle with radius 4 (use π≈3.14) = ?', options:['50.24','25.12','12.56'], answer:'50.24', fact:'A = π×r² = 3.14×16 = 50.24. Area uses radius squared!' },
+  { level:2, visual:'🔢', question:'Equivalent ratio: 3:4 = ?:20', options:['15','12','16'], answer:'15', fact:'Scale factor: 20÷4=5. So 3×5=15. The ratio 3:4 = 15:20!' },
+  { level:2, visual:'🔢', question:'Which proportion is correct for 2:5 = x:35?', options:['x=14','x=10','x=7'], answer:'x=14', fact:'Scale factor: 35÷5=7. So x=2×7=14. Or cross multiply: 5x=70, x=14!' },
+  { level:2, visual:'📊', question:'Mean of 6,10,8,14,12 = ?', options:['10','8','12'], answer:'10', fact:'Sum = 6+10+8+14+12=50. Mean = 50÷5=10. Mean is the balancing point of the data!' },
+  { level:2, visual:'📏', question:'A recipe needs 3/4 cup sugar for 12 cookies. For 36 cookies you need:', options:['2 1/4 cups','1 1/2 cups','3 cups'], answer:'2 1/4 cups', fact:'36÷12=3 times the recipe. 3/4 × 3 = 9/4 = 2 1/4 cups. Scale the recipe up!' },
+  { level:2, visual:'🔢', question:'If 5 is 25% of a number, what is the number?', options:['20','25','15'], answer:'20', fact:'25% × n = 5. So n = 5 ÷ 0.25 = 20. Or: 25% = 1/4, so n = 4×5 = 20!' },
+  { level:2, visual:'🔢', question:'A store sells 3 items for $7.50. Cost of 5 items = ?', options:['$12.50','$10.00','$15.00'], answer:'$12.50', fact:'Unit price: $7.50÷3=$2.50 each. 5×$2.50=$12.50. Find unit rate, multiply by new quantity!' },
+
+  // ── MORE LEVEL 2 questions ────────────────────────────────────────────────
+  { level:2, visual:'➕', question:'1/6 + 5/8 = ?', options:['19/24','6/14','2/3'], answer:'19/24', fact:'LCD of 6 and 8 is 24. 1/6=4/24, 5/8=15/24. Sum=19/24!' },
+  { level:2, visual:'➖', question:'7/8 − 1/4 = ?', options:['5/8','6/4','3/8'], answer:'5/8', fact:'Convert 1/4 to 2/8. Then 7/8−2/8=5/8. Same denominator, subtract numerators!' },
+  { level:2, visual:'✖️', question:'4/9 × 3/8 = ?', options:['1/6','12/72','7/17'], answer:'1/6', fact:'Multiply: 4×3=12, 9×8=72. 12/72 = 1/6 (divide by 12). Cross-cancel first: 4/8 × 3/9 = 1/2 × 1/3 = 1/6!' },
+  { level:2, visual:'➗', question:'7/10 ÷ 7/5 = ?', options:['1/2','7/50','2'], answer:'1/2', fact:'7/10 × 5/7 = 35/70 = 1/2. The 7s cancel, leaving 5/10 = 1/2!' },
+  { level:2, visual:'✖️', question:'2 3/4 × 2 = ?', options:['5 1/2','4 3/4','6'], answer:'5 1/2', fact:'2 3/4 = 11/4. 11/4 × 2 = 22/4 = 11/2 = 5 1/2. Convert, multiply, convert back!' },
+  { level:2, visual:'➖', question:'6 1/5 − 2 3/5 = ?', options:['3 3/5','4 2/5','3 2/5'], answer:'3 3/5', fact:'Borrow: 5 6/5 − 2 3/5 = 3 3/5. Rename 6 1/5 as 5 + 5/5 + 1/5 = 5 6/5!' },
+  { level:2, visual:'🔢', question:'Evaluate 2x² when x=3', options:['18','12','36'], answer:'18', fact:'Exponent first: 3²=9. Then multiply: 2×9=18. Exponents before multiplication!' },
+  { level:2, visual:'🔢', question:'Evaluate 5 + 2n when n=7', options:['19','70','12'], answer:'19', fact:'Substitute: 5+2(7)=5+14=19. Multiply before adding (order of operations)!' },
+  { level:2, visual:'🔢', question:'Solve: n/5 = 8', options:['40','3','13'], answer:'40', fact:'Multiply both sides by 5: n=8×5=40. Inverse of dividing is multiplying!' },
+  { level:2, visual:'🔢', question:'Solve: 4n − 2 = 18', options:['5','4','8'], answer:'5', fact:'Add 2: 4n=20. Divide by 4: n=5. Check: 4(5)−2=18 ✓!' },
+  { level:2, visual:'💯', question:'Write 5/8 as a decimal and percent', options:['0.625 and 62.5%','0.58 and 58%','0.625 and 6.25%'], answer:'0.625 and 62.5%', fact:'5÷8=0.625. 0.625×100=62.5%. Three-step conversion: fraction → divide → multiply by 100!' },
+  { level:2, visual:'💯', question:'40% of what number equals 32?', options:['80','128','40'], answer:'80', fact:'40%×n=32. n=32÷0.4=80. Or: 40/100×n=32, n=32×100/40=80!' },
+  { level:2, visual:'💯', question:'A number is decreased by 30% to get 56. Original number = ?', options:['80','86','70'], answer:'80', fact:'70% of n=56. n=56÷0.7=80. You kept 70%, so divide by 0.70!' },
+  { level:2, visual:'📊', question:'Mean of 7, 14, 21, 28, 35 = ?', options:['21','20','25'], answer:'21', fact:'Sum=7+14+21+28+35=105. Mean=105÷5=21. The middle term of an arithmetic sequence is the mean!' },
+  { level:2, visual:'📊', question:'Median of 6, 3, 9, 1, 7, 5 = ?', options:['5.5','6','5'], answer:'5.5', fact:'Sort: 1,3,5,6,7,9. Even count: average middle two (5+6)÷2=5.5!' },
+  { level:2, visual:'📊', question:'A bag has 4 red, 3 blue, 3 green. P(blue or green) = ?', options:['3/5','3/10','6/10'], answer:'3/5', fact:'P(blue or green) = (3+3)/10 = 6/10 = 3/5. Add favorable outcomes, then simplify!' },
+  { level:2, visual:'📐', question:'Perimeter of a triangle with sides 7.5, 8.5, and 9 cm = ?', options:['25 cm','24 cm','26 cm'], answer:'25 cm', fact:'Add all three sides: 7.5+8.5+9=25 cm. Perimeter = sum of all sides!' },
+  { level:2, visual:'📐', question:'Area of a parallelogram with base 12 and height 7 = ?', options:['84','42','19'], answer:'84', fact:'A = base × height = 12×7=84 sq units. The height is perpendicular to the base!' },
+  { level:2, visual:'📐', question:'A trapezoid has parallel bases 9 and 15, height 6. Area = ?', options:['72','54','90'], answer:'72', fact:'A = ½(b₁+b₂)h = ½(9+15)×6 = ½×24×6 = 72 sq units!' },
+  { level:2, visual:'🔷', question:'How many faces does a rectangular prism have?', options:['6','8','4'], answer:'6', fact:'A rectangular prism (box) has 6 rectangular faces: top, bottom, front, back, left, right!' },
+  { level:2, visual:'🔷', question:'How many edges does a cube have?', options:['12','8','6'], answer:'12', fact:'A cube has 12 edges: 4 on top, 4 on bottom, 4 vertical ones connecting them!' },
+  { level:2, visual:'📏', question:'Convert 2.5 km to meters and centimeters', options:['2500 m / 250,000 cm','250 m / 25,000 cm','25 m / 2500 cm'], answer:'2500 m / 250,000 cm', fact:'2.5 km × 1000=2500 m. 2500 m × 100=250,000 cm. Each step multiplies by 1000 or 100!' },
+  { level:2, visual:'📏', question:'A speed of 90 km/h for 30 minutes. Distance = ?', options:['45 km','90 km','30 km'], answer:'45 km', fact:'30 min = 0.5 h. D=S×T=90×0.5=45 km. Always convert time to hours when using km/h!' },
+  { level:2, visual:'🔢', question:'A bag of 5 kg rice costs $7.50. Cost per kilogram = ?', options:['$1.50','$0.75','$2.50'], answer:'$1.50', fact:'$7.50÷5=$1.50 per kg. Unit rate = total cost ÷ number of units!' },
+  { level:2, visual:'🔢', question:'In a scale drawing, 2 cm = 3 m. A wall 12 m long is ? cm on the drawing', options:['8 cm','18 cm','6 cm'], answer:'8 cm', fact:'Scale: 2 cm per 3 m. 12 m ÷ 3 = 4 groups. 4 × 2 cm = 8 cm on drawing!' },
+  { level:2, visual:'🔢', question:'If 4 workers take 6 days, how long for 8 workers (same total work)?', options:['3 days','12 days','2 days'], answer:'3 days', fact:'Inverse proportion: 4×6=8×d. d=24÷8=3 days. Double workers, half the time!' },
+  { level:2, visual:'🔢', question:'Evaluate: 3a − 2b when a=4 and b=3', options:['6','7','18'], answer:'6', fact:'Substitute: 3(4)−2(3)=12−6=6. Replace each variable with its value, then calculate!' },
+  { level:2, visual:'🔢', question:'Write an expression: 5 more than twice a number x', options:['2x+5','5x+2','2+5x'], answer:'2x+5', fact:'"Twice a number" = 2x. "5 more than" = +5. So the expression is 2x+5!' },
+  { level:2, visual:'🔢', question:'Which value of x makes 4x > 20 true?', options:['6','5','4'], answer:'6', fact:'4×6=24>20 ✓. 4×5=20 is NOT greater than 20. 4×4=16<20. Only x=6 works!' },
+  { level:2, visual:'🔢', question:'Sequence: 3, 7, 15, 31, ... next term?', options:['63','47','51'], answer:'63', fact:'Differences: +4,+8,+16... (doubling). Next difference = +32. 31+32=63. The differences double!' },
+  { level:2, visual:'🔢', question:'What is the LCM of 8, 12, and 6?', options:['24','48','12'], answer:'24', fact:'LCM(8,12)=24. Does 6 divide 24? 24÷6=4. Yes! LCM(8,12,6)=24!' },
+  { level:2, visual:'🔢', question:'The GCF of 30, 45, and 60 = ?', options:['15','5','30'], answer:'15', fact:'30=2×3×5, 45=3²×5, 60=2²×3×5. Common prime factors: 3×5=15. GCF=15!' },
+  { level:2, visual:'💰', question:'A worker earns $12.50/h for 8 hours and $18.75/h overtime for 3 hours. Total = ?', options:['$156.25','$100','$162.50'], answer:'$156.25', fact:'Regular: $12.50×8=$100. Overtime: $18.75×3=$56.25. Total: $100+$56.25=$156.25!' },
+  { level:2, visual:'💰', question:'Best buy: 6 cans for $4.50 or 8 cans for $5.60?', options:['8 cans for $5.60','6 cans for $4.50','Same price'], answer:'8 cans for $5.60', fact:'6 cans: $4.50÷6=$0.75 each. 8 cans: $5.60÷8=$0.70 each. Lower unit price wins!' },
+  { level:2, visual:'📏', question:'Convert 4 pounds 8 ounces to ounces (1 lb = 16 oz)', options:['72 oz','48 oz','80 oz'], answer:'72 oz', fact:'4 lbs × 16 = 64 oz. Plus 8 oz = 72 oz total. Multiply whole units, add remaining!' },
+  { level:2, visual:'🔢', question:'Integers: place −3, −7, 2, 5, −1 in order from least to greatest', options:['−7,−3,−1,2,5','−1,−3,−7,2,5','5,2,−1,−3,−7'], answer:'−7,−3,−1,2,5', fact:'On the number line: negatives go left (more negative = further left = smaller). −7<−3<−1<2<5!' },
+  { level:2, visual:'🔢', question:'|−6| − |−2| = ?', options:['4','8','−4'], answer:'4', fact:'|−6|=6 and |−2|=2. Then 6−2=4. Absolute value first, then subtract!' },
+  { level:2, visual:'📊', question:'A spinner has 5 equal sections. P(landing on section 3) = ?', options:['1/5','3/5','5/3'], answer:'1/5', fact:'5 equal sections: each has probability 1/5. Equal likely outcomes divide 1 equally!' },
+
+  // ── NEW LEVEL 3 questions ──────────────────────────────────────────────────
+  { level:3, visual:'🔢', question:'Solve: 4x − 7 = 2x + 5', options:['6','3','12'], answer:'6', fact:'4x−2x=5+7 → 2x=12 → x=6. Move variables to one side, numbers to the other!' },
+  { level:3, visual:'🔢', question:'Solve: 3(2x − 1) = 21', options:['4','7','3'], answer:'4', fact:'Divide by 3: 2x−1=7. Add 1: 2x=8. Divide by 2: x=4. Undo each operation!' },
+  { level:3, visual:'🔢', question:'Solve: x/4 + 3 = 7', options:['16','4','28'], answer:'16', fact:'Subtract 3: x/4=4. Multiply by 4: x=16. Check: 16/4+3=4+3=7 ✓!' },
+  { level:3, visual:'🔢', question:'Solve: 2x + 5 = 3x − 4', options:['9','1','5'], answer:'9', fact:'5+4=3x−2x → 9=x. Collect x terms: move 2x to the right side. x=9!' },
+  { level:3, visual:'🔢', question:'Solve: 7 − 2x = 1', options:['3','4','6'], answer:'3', fact:'7−1=2x → 6=2x → x=3. Check: 7−2(3)=7−6=1 ✓!' },
+  { level:3, visual:'💯', question:'A price increased from $50 to $65. Percent increase = ?', options:['30%','15%','13%'], answer:'30%', fact:'Increase = $15. %increase = 15/50 × 100 = 30%. Change ÷ original × 100!' },
+  { level:3, visual:'💯', question:'A price dropped from $80 to $60. Percent decrease = ?', options:['25%','20%','33%'], answer:'25%', fact:'Decrease = $20. %decrease = 20/80 × 100 = 25%. Always use the original value as denominator!' },
+  { level:3, visual:'💯', question:'Compound interest: $1000 at 5% annually for 2 years (compounded) = ?', options:['$1102.50','$1100','$1050'], answer:'$1102.50', fact:'Year 1: $1000×1.05=$1050. Year 2: $1050×1.05=$1102.50. Compounding earns interest on interest!' },
+  { level:3, visual:'💰', question:'Simple interest: $800 at 3% for 5 years. Interest earned = ?', options:['$120','$80','$240'], answer:'$120', fact:'I = P×r×t = 800×0.03×5 = $120. Simple interest: multiply principal, rate, and time!' },
+  { level:3, visual:'📐', question:'A right triangle has legs 8 and 15. Hypotenuse = ?', options:['17','18','23'], answer:'17', fact:'8²+15²=64+225=289=17². The 8-15-17 is a Pythagorean triple!' },
+  { level:3, visual:'📐', question:'A right triangle has hypotenuse 10 and one leg 6. Other leg = ?', options:['8','7','9'], answer:'8', fact:'a²+b²=c². b²=10²−6²=100−36=64. b=8. The 6-8-10 triple (a scaled 3-4-5)!' },
+  { level:3, visual:'📐', question:'Is a triangle with sides 9, 12, 15 a right triangle?', options:['Yes','No','Cannot tell'], answer:'Yes', fact:'Check: 9²+12²=81+144=225=15². Pythagorean theorem holds! It\'s a scaled 3-4-5 triangle (×3).' },
+  { level:3, visual:'🔷', question:'Find the circumference of a circle with radius 7 (π≈3.14)', options:['43.96','21.98','153.86'], answer:'43.96', fact:'C=2πr=2×3.14×7=43.96. Circumference = diameter × pi = 14×3.14 = 43.96!' },
+  { level:3, visual:'🔷', question:'A circle has circumference 62.8. Radius = ? (π≈3.14)', options:['10','20','5'], answer:'10', fact:'C=2πr → r=C÷(2π)=62.8÷6.28=10. Divide by 2π to find radius from circumference!' },
+  { level:3, visual:'🔷', question:'Surface area of a cube with side 5 cm = ?', options:['150 cm²','125 cm³','50 cm²'], answer:'150 cm²', fact:'SA = 6×side² = 6×25 = 150 cm². Six identical square faces!' },
+  { level:3, visual:'📐', question:'Volume of a cylinder: radius 3, height 8 (π≈3.14) = ?', options:['226.08','75.36','150.72'], answer:'226.08', fact:'V=π×r²×h=3.14×9×8=226.08. Cylinder = circle base × height!' },
+  { level:3, visual:'📐', question:'Volume of a cone: radius 3, height 7 (π≈3.14) ≈ ?', options:['65.94','197.82','21.98'], answer:'65.94', fact:'V=⅓×π×r²×h=⅓×3.14×9×7=⅓×197.82=65.94. A cone is 1/3 of a cylinder!' },
+  { level:3, visual:'📐', question:'Volume of a square pyramid with base side 4 and height 6 = ?', options:['32','96','64'], answer:'32', fact:'V=⅓×base area×height=⅓×16×6=32 cubic units. Pyramid = 1/3 of a prism!' },
+  { level:3, visual:'🔷', question:'Interior angle sum of a hexagon = ?', options:['720°','540°','1080°'], answer:'720°', fact:'(n−2)×180° with n=6: (6−2)×180=4×180=720°. Each interior angle of a regular hexagon = 120°!' },
+  { level:3, visual:'🔷', question:'Interior angle sum of an octagon = ?', options:['1080°','720°','540°'], answer:'1080°', fact:'(n−2)×180° with n=8: (8−2)×180=6×180=1080°. Octagons in stop signs have 8 sides!' },
+  { level:3, visual:'🔷', question:'Each interior angle of a regular pentagon = ?', options:['108°','120°','72°'], answer:'108°', fact:'Sum = (5−2)×180=540°. Each angle = 540÷5=108°. Pentagon corners are obtuse!' },
+  { level:3, visual:'🔢', question:'Point (−3,4) reflected over the x-axis becomes:', options:['(−3,−4)','(3,4)','(3,−4)'], answer:'(−3,−4)', fact:'Reflecting over x-axis flips the y-coordinate: y → −y. x stays the same. (−3,4)→(−3,−4)!' },
+  { level:3, visual:'🔢', question:'Point (2,5) translated 3 right and 4 down becomes:', options:['(5,1)','(−1,9)','(5,9)'], answer:'(5,1)', fact:'Right +3 to x: 2+3=5. Down −4 to y: 5−4=1. New point: (5,1)!' },
+  { level:3, visual:'🔢', question:'Point (4,−2) rotated 180° about the origin becomes:', options:['(−4,2)','(2,−4)','(−4,−2)'], answer:'(−4,2)', fact:'180° rotation: (x,y) → (−x,−y). (4,−2) → (−4,2). Both coordinates flip sign!' },
+  { level:3, visual:'📊', question:'Box plot: min=2, Q1=5, median=9, Q3=14, max=20. IQR = ?', options:['9','18','11'], answer:'9', fact:'IQR = Q3 − Q1 = 14 − 5 = 9. Interquartile range shows the middle 50% spread!' },
+  { level:3, visual:'📊', question:'Which measure is most affected by an outlier?', options:['Mean','Median','Mode'], answer:'Mean', fact:'The mean uses all values, so a very large or small outlier pulls it significantly. Median and mode resist outliers!' },
+  { level:3, visual:'📊', question:'Data: 1,2,2,3,4,20. The outlier is 20. Removing it changes the mean from 5.3 to:', options:['2.4','3.0','4.0'], answer:'2.4', fact:'Without 20: sum=1+2+2+3+4=12. Mean=12÷5=2.4. Outliers drastically shift the mean!' },
+  { level:3, visual:'📊', question:'P(A and B) if P(A)=1/2 and P(B)=1/3 (independent events) = ?', options:['1/6','5/6','2/5'], answer:'1/6', fact:'For independent events: P(A and B) = P(A) × P(B) = 1/2 × 1/3 = 1/6. Multiply independent probabilities!' },
+  { level:3, visual:'📊', question:'P(A or B) if P(A)=0.4, P(B)=0.3, they are mutually exclusive = ?', options:['0.7','0.12','0.1'], answer:'0.7', fact:'Mutually exclusive (can\'t both happen): P(A or B)=P(A)+P(B)=0.4+0.3=0.7!' },
+  { level:3, visual:'🔢', question:'Flip a coin twice. P(both heads) = ?', options:['1/4','1/2','2/4'], answer:'1/4', fact:'Each flip: P(H)=1/2. Both heads: 1/2 × 1/2 = 1/4. Compound probability multiplies!' },
+  { level:3, visual:'🔢', question:'Roll a die twice. P(both show 6) = ?', options:['1/36','1/6','2/6'], answer:'1/36', fact:'P(6) on each roll = 1/6. P(6 and 6) = 1/6 × 1/6 = 1/36. Independent events multiply!' },
+  { level:3, visual:'🔢', question:'A function: f(x) = 2x − 4. Find f(7)', options:['10','18','6'], answer:'10', fact:'f(7) = 2(7)−4 = 14−4 = 10. Substitute the input into the function rule!' },
+  { level:3, visual:'🔢', question:'A function table: x→1,2,3,4 and y→3,6,9,12. Rule = ?', options:['y = 3x','y = x+2','y = x²+2'], answer:'y = 3x', fact:'Each y is 3 times the x: 1×3=3, 2×3=6, 3×3=9, 4×3=12. Function rule: y=3x!' },
+  { level:3, visual:'🔢', question:'Function: input 2→5, 4→9, 6→13, 8→17. Rule = ?', options:['y = 2x+1','y = 3x−1','y = x+3'], answer:'y = 2x+1', fact:'Check: 2×2+1=5 ✓, 2×4+1=9 ✓. The pattern: multiply input by 2 then add 1!' },
+  { level:3, visual:'📊', question:'A proportion: 4 is to 10 as 6 is to ?', options:['15','12','20'], answer:'15', fact:'Cross multiply: 4×?=10×6=60. ?=60÷4=15. Or scale: 6÷4=1.5, so 10×1.5=15!' },
+  { level:3, visual:'🔢', question:'Scientific notation: 0.00035 = ?', options:['3.5×10⁻⁴','3.5×10⁴','35×10⁻⁵'], answer:'3.5×10⁻⁴', fact:'Move decimal 4 places right to get 3.5: exponent = −4. Small numbers get negative exponents!' },
+  { level:3, visual:'🔢', question:'Scientific notation: 5.2×10⁻³ in standard form = ?', options:['0.0052','5200','0.52'], answer:'0.0052', fact:'10⁻³=0.001. 5.2×0.001=0.0052. Negative exponent: move decimal left!' },
+  { level:3, visual:'🔢', question:'(2.0×10³) × (3.0×10²) = ?', options:['6.0×10⁵','6.0×10⁶','5.0×10⁵'], answer:'6.0×10⁵', fact:'Multiply coefficients: 2×3=6. Add exponents: 3+2=5. Result: 6.0×10⁵!' },
+  { level:3, visual:'🔢', question:'Prime factorization of 60 = ?', options:['2²×3×5','2×3×5×2','4×15'], answer:'2²×3×5', fact:'60=2×30=2×2×15=2×2×3×5=2²×3×5. Factor trees help find prime factorization!' },
+  { level:3, visual:'🔢', question:'Prime factorization of 84 = ?', options:['2²×3×7','2×42','4×21'], answer:'2²×3×7', fact:'84=2×42=2×2×21=2×2×3×7=2²×3×7. Always break into prime factors only!' },
+  { level:3, visual:'🔢', question:'What is 2⁻¹ (negative exponent)?', options:['1/2','−2','2'], answer:'1/2', fact:'Negative exponent means reciprocal! 2⁻¹=1/2¹=1/2. a⁻ⁿ = 1/aⁿ!' },
+  { level:3, visual:'🔢', question:'What is 3⁻² ?', options:['1/9','−9','−6'], answer:'1/9', fact:'3⁻²=1/3²=1/9. Negative exponent: flip to denominator and use positive exponent!' },
+  { level:3, visual:'🧩', question:'Simplify: 6x − 3 + 2x + 8', options:['8x+5','8x−5','4x+5'], answer:'8x+5', fact:'Combine like terms: 6x+2x=8x, and −3+8=+5. Result: 8x+5!' },
+  { level:3, visual:'🧩', question:'Expand: 5(2x − 3)', options:['10x−15','7x−8','10x−3'], answer:'10x−15', fact:'Distribute 5 to each term: 5×2x=10x and 5×(−3)=−15. Result: 10x−15!' },
+  { level:3, visual:'🧩', question:'Simplify: 2(x+4) + 3(x−1)', options:['5x+5','5x+11','2x+8'], answer:'5x+5', fact:'Expand: 2x+8+3x−3. Combine: 5x+5. Distribute both brackets first!' },
+  { level:3, visual:'🔢', question:'Is the point (3,7) on the line y=2x+1?', options:['Yes','No','Cannot tell'], answer:'Yes', fact:'Substitute: y=2(3)+1=7. Yes, (3,7) satisfies the equation! Points on a line make the equation true.' },
+  { level:3, visual:'🔢', question:'Is the point (2,4) on the line y=3x−2?', options:['Yes','No','Cannot tell'], answer:'Yes', fact:'Substitute x=2: y=3(2)−2=6−2=4. Yes! (2,4) satisfies the equation y=3x−2 ✓' },
+  { level:3, visual:'🔢', question:'Which ordered pair is a solution to y = x − 4?', options:['(7,3)','(4,4)','(0,4)'], answer:'(7,3)', fact:'Check (7,3): y=7−4=3 ✓. For (4,4): 4−4=0≠4. For (0,4): 0−4=−4≠4. Only (7,3) works!' },
+  { level:3, visual:'🔢', question:'The slope of a line passing through (0,0) and (4,8) = ?', options:['2','4','8'], answer:'2', fact:'Slope = rise/run = (8−0)/(4−0) = 8/4 = 2. For every 1 unit right, go 2 units up!' },
+  { level:3, visual:'🔢', question:'Slope of a line through (1,3) and (4,9) = ?', options:['2','3','6'], answer:'2', fact:'Slope = (9−3)/(4−1) = 6/3 = 2. Rise over run: change in y divided by change in x!' },
+  { level:3, visual:'💯', question:'A test score went from 60 to 75. Percent increase = ?', options:['25%','15%','20%'], answer:'25%', fact:'Increase=15. %increase=15/60×100=25%. Improvement measured as percent of the original!' },
+  { level:3, visual:'💯', question:'After a 40% discount, an item costs $48. Original price = ?', options:['$80','$67','$120'], answer:'$80', fact:'After 40% off, you pay 60%. 0.60×n=48. n=48÷0.6=$80. Divide by the remaining percent!' },
+  { level:3, visual:'💰', question:'Compound interest: $500 at 10% per year for 2 years = ?', options:['$605','$600','$550'], answer:'$605', fact:'Y1: 500×1.1=550. Y2: 550×1.1=605. Compounding applies each year on the new total!' },
+  { level:3, visual:'🔢', question:'Percent error: estimate 50 kg, actual 45 kg. Percent error = ?', options:['11.1%','10%','5%'], answer:'11.1%', fact:'Error=5, %error=(5÷45)×100≈11.1%. Always divide by the actual (accepted) value!' },
+  { level:3, visual:'📊', question:'Dot plot: values 2,2,3,4,4,4,5. The median = ?', options:['4','3','5'], answer:'4', fact:'7 values sorted: 2,2,3,4,4,4,5. Middle (4th) value = 4. Median of 7 values is the 4th!' },
+  { level:3, visual:'📊', question:'Data: 10,12,14,16,18. Add 5 to each value. New mean = ?', options:['19','14','25'], answer:'19', fact:'Old mean=14. Adding 5 to every value shifts mean by 5: 14+5=19. New values: 15,17,19,21,23. Mean=95÷5=19!' },
+  { level:3, visual:'🔢', question:'Solve the system: x+y=10 and x−y=2. What is x?', options:['6','4','8'], answer:'6', fact:'Add the equations: 2x=12, x=6. Then y=10−6=4. Adding equations eliminates y!' },
+  { level:3, visual:'🔢', question:'Solve the system: 2x+y=11 and x+y=7. What is x?', options:['4','3','7'], answer:'4', fact:'Subtract equation 2 from 1: x=4. Then y=7−4=3. Subtracting equations eliminates y!' },
+  { level:3, visual:'🔢', question:'In a 2:3 ratio of blue to red, and there are 30 total marbles, how many are blue?', options:['12','18','15'], answer:'12', fact:'Parts: 2+3=5 parts total. Each part = 30÷5=6. Blue = 2×6=12. Red = 3×6=18!' },
+  { level:3, visual:'🔢', question:'Unit conversion: 3.5 miles to feet (1 mile = 5280 ft) = ?', options:['18,480 ft','15,840 ft','1848 ft'], answer:'18,480 ft', fact:'3.5 × 5280 = 18,480 ft. Multiply by the conversion factor!' },
+  { level:3, visual:'🔢', question:'Unit rate: A car travels 390 miles on 13 gallons. Miles per gallon = ?', options:['30 mpg','26 mpg','40 mpg'], answer:'30 mpg', fact:'390÷13=30. Divide total distance by total fuel to find fuel efficiency!' },
+  { level:3, visual:'🔢', question:'Proportional relationship: y/x = 4 for all values. If x=7, y = ?', options:['28','11','47'], answer:'28', fact:'y=4x. When x=7: y=4×7=28. Proportional relationships always pass through the origin!' },
+  { level:3, visual:'🧩', question:'Which graph shows a proportional relationship?', options:['A line through (0,0)','A horizontal line','A line not through origin'], answer:'A line through (0,0)', fact:'Proportional: y=kx always passes through the origin (0,0). The y-intercept must be zero!' },
+  { level:3, visual:'🔢', question:'What is 5! (5 factorial)?', options:['120','25','60'], answer:'120', fact:'5! = 5×4×3×2×1 = 120. Factorials count the ways to arrange items — used in probability!' },
+  { level:3, visual:'🔢', question:'How many ways can 4 students line up? (4! = ?)', options:['24','16','12'], answer:'24', fact:'4! = 4×3×2×1 = 24 different arrangements. Factorial counts all possible orderings!' },
+  { level:3, visual:'🔢', question:'Absolute value: |−15| = ?', options:['15','−15','0'], answer:'15', fact:'Absolute value = distance from 0. |−15|=15 because −15 is 15 units from zero!' },
+  { level:3, visual:'🔢', question:'Simplify: |−8| + |5| = ?', options:['13','3','−3'], answer:'13', fact:'|−8|=8 and |5|=5. Sum = 8+5=13. Absolute value removes the negative sign!' },
+  { level:3, visual:'🔢', question:'The GCF of 48 and 72 = ?', options:['24','12','8'], answer:'24', fact:'48=2⁴×3 and 72=2³×3². GCF = 2³×3=24. Greatest common factor uses minimum powers!' },
+  { level:3, visual:'🔢', question:'The LCM of 10 and 15 = ?', options:['30','150','5'], answer:'30', fact:'10=2×5, 15=3×5. LCM=2×3×5=30. LCM uses maximum powers of all prime factors!' },
+  { level:3, visual:'📐', question:'A ladder 13 m long leans against a wall. Base is 5 m from wall. Height on wall = ?', options:['12 m','8 m','10 m'], answer:'12 m', fact:'a²+b²=c². h²+5²=13². h²=169−25=144. h=12 m. Pythagorean theorem in real life!' },
+  { level:3, visual:'📐', question:'A square plot has diagonal 10 m. Side length = ? (√50 ≈ 7.07)', options:['≈7.07 m','5 m','≈8.66 m'], answer:'≈7.07 m', fact:'Diagonal of square = side×√2. Side = 10÷√2 = 10÷1.414 ≈ 7.07 m!' },
+  { level:3, visual:'🔢', question:'Convert 0.0000067 to scientific notation', options:['6.7×10⁻⁶','6.7×10⁶','0.67×10⁻⁵'], answer:'6.7×10⁻⁶', fact:'Move decimal 6 places right to get 6.7: exponent = −6. Tiny numbers use large negative exponents!' },
+  { level:3, visual:'🔢', question:'(4.5×10⁴) ÷ (1.5×10²) = ?', options:['3.0×10²','3.0×10⁶','6.0×10²'], answer:'3.0×10²', fact:'Divide coefficients: 4.5÷1.5=3. Subtract exponents: 4−2=2. Result: 3.0×10²=300!' },
+  { level:3, visual:'🔢', question:'What is the next term in the geometric sequence: 2, 6, 18, 54, ?', options:['162','108','72'], answer:'162', fact:'Each term multiplies by 3: 54×3=162. Geometric sequences multiply by a constant ratio!' },
+  { level:3, visual:'🔢', question:'Arithmetic sequence: first term 7, common difference 5. 10th term = ?', options:['52','50','57'], answer:'52', fact:'Formula: aₙ=a₁+(n−1)d = 7+(10−1)×5 = 7+45=52. The 10th term of the sequence!' },
+];
+const QUIZ_KEY = 'kids_q_sba_math';
+
+let current = 0, score = 0, dotResults = [], sessionQ = [];
+let audioCtx = null;
+function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+function note(ctx, type, freq, time, dur, vol) {
+  const osc = ctx.createOscillator(), gn = ctx.createGain();
+  osc.connect(gn); gn.connect(ctx.destination);
+  osc.type = type; osc.frequency.value = freq;
+  gn.gain.setValueAtTime(0.001, time);
+  gn.gain.linearRampToValueAtTime(vol, time + 0.015);
+  gn.gain.exponentialRampToValueAtTime(0.001, time + dur);
+  osc.start(time); osc.stop(time + dur + 0.06);
+}
+function playCorrect() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    [1047,1319,1568,2093,1568,1319].forEach((f,i) => note(ctx,'triangle',f,t+i*0.07,0.14,0.5));
+    [[523,0.52,0.14],[659,0.66,0.14],[784,0.80,0.14],[1047,0.94,0.5]].forEach(([f,d,dur]) => {
+      note(ctx,'triangle',f,t+d,dur,0.55); note(ctx,'sine',f*2,t+d,dur*0.5,0.14);
+    });
+  });
+}
+function playWrong() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    [[400,260,0.00],[340,220,0.28],[280,160,0.56]].forEach(([f1,f2,delay]) => {
+      const osc=ctx.createOscillator(), gn=ctx.createGain();
+      osc.connect(gn); gn.connect(ctx.destination); osc.type='sawtooth';
+      osc.frequency.setValueAtTime(f1,t+delay); osc.frequency.exponentialRampToValueAtTime(f2,t+delay+0.22);
+      gn.gain.setValueAtTime(0.001,t+delay); gn.gain.linearRampToValueAtTime(0.3,t+delay+0.02); gn.gain.exponentialRampToValueAtTime(0.001,t+delay+0.25);
+      osc.start(t+delay); osc.stop(t+delay+0.3);
+    });
+    const osc=ctx.createOscillator(), gn=ctx.createGain();
+    osc.connect(gn); gn.connect(ctx.destination); osc.type='sine';
+    osc.frequency.setValueAtTime(380,t+0.92); osc.frequency.exponentialRampToValueAtTime(55,t+1.4);
+    gn.gain.setValueAtTime(0.001,t+0.92); gn.gain.linearRampToValueAtTime(0.55,t+0.93); gn.gain.exponentialRampToValueAtTime(0.001,t+1.45);
+    osc.start(t+0.92); osc.stop(t+1.5);
+  });
+}
+function playLevelUp() {
+  const ctx = getCtx();
+  ctx.resume().then(() => {
+    const t = ctx.currentTime;
+    [[262,0],[330,0.12],[392,0.24],[523,0.36],[659,0.52],[784,0.68],[1047,0.84]].forEach(([f,d]) => note(ctx,'triangle',f,t+d,0.25,0.45));
+    note(ctx,'sine',1047,t+0.84,0.8,0.3); note(ctx,'sine',1319,t+0.90,0.7,0.25); note(ctx,'sine',1568,t+0.96,0.6,0.2);
+  });
+}
+function getMastered(){try{return new Set(JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]'));}catch{return new Set();}}
+function markMastered(idx){try{const m=JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]');if(!m.includes(idx)){m.push(idx);localStorage.setItem(QUIZ_KEY,JSON.stringify(m));}}catch{}}
+function pickSession(){const mastered=getMastered();const byLevel=[[],[],[]];ALL_QUESTIONS.forEach((q,i)=>byLevel[q.level-1].push(i));const session=[];byLevel.forEach(pool=>{const notDone=shuffle(pool.filter(i=>!mastered.has(i)));const done=shuffle(pool.filter(i=>mastered.has(i)));session.push(...[...notDone,...done].slice(0,5));});return session.map(i=>({...ALL_QUESTIONS[i],_idx:i}));}
+function init() {
+  current = 0; score = 0; dotResults = Array(15).fill(null); sessionQ = pickSession();
+  if (!document.getElementById('visualCard')) {
+    document.getElementById('gameScreen').innerHTML = `
+      <a class="back-btn" href="../../">← Home</a>
+      <div class="top">
+        <div class="title">📐 5th Grade SBA Math</div>
+        <div class="top-row"><div class="level-badge easy" id="levelBadge">⭐ Easy</div><div class="score-pill">🎯 <strong id="score">0</strong> / 15</div></div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+      <div class="middle" id="middle">
+        <div class="visual-card" id="visualCard"></div>
+        <div class="question-text" id="questionText"></div>
+      </div>
+      <div class="bottom">
+        <div class="choices" id="choices"></div>
+        <div class="progress-dots" id="progressDots"></div>
+      </div>`;
+  }
+  buildDots(); showQuestion();
+}
+function shuffle(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function buildDots() {
+  const c = document.getElementById('progressDots'); c.innerHTML = '';
+  ALL_QUESTIONS.forEach((q,i) => {
+    const cls = q.level===1?'easy-dot':q.level===2?'medium-dot':'hard-dot';
+    const d = document.createElement('div');
+    d.className = `dot ${cls}`+(i===0?' current':''); d.id=`dot-${i}`; c.appendChild(d);
+  });
+}
+function updateDot(idx, result) {
+  const d = document.getElementById(`dot-${idx}`); if(!d) return;
+  d.classList.remove('current'); d.classList.add('answered', result==='correct'?'correct-dot':'wrong-dot');
+  const next = document.getElementById(`dot-${idx+1}`); if(next) next.classList.add('current');
+}
+function showQuestion() {
+  const q = sessionQ[current];
+  const badge = document.getElementById('levelBadge');
+  if(q.level===1){badge.className='level-badge easy';badge.textContent='⭐ Easy';}
+  if(q.level===2){badge.className='level-badge medium';badge.textContent='⭐⭐ Medium';}
+  if(q.level===3){badge.className='level-badge hard';badge.textContent='⭐⭐⭐ Hard';}
+  document.getElementById('progressFill').style.width=(current/15*100)+'%';
+  document.getElementById('score').textContent=score;
+  document.getElementById('visualCard').innerHTML=`<span class="visual-emoji">${q.visual}</span>`;
+  document.getElementById('questionText').textContent=q.question;
+  const shuffled=shuffle([...q.options]);
+  const choicesEl=document.getElementById('choices'); choicesEl.innerHTML='';
+  ['A','B','C'].forEach((letter,i) => {
+    const btn=document.createElement('button'); btn.className='choice-btn'; btn.dataset.value=shuffled[i];
+    btn.innerHTML=`<span class="choice-letter">${letter}</span>${shuffled[i]}`;
+    btn.onclick=()=>handleAnswer(shuffled[i],q.answer,btn,q.fact,q._idx); choicesEl.appendChild(btn);
+  });
+  document.getElementById('gameScreen').classList.remove('shake');
+}
+function handleAnswer(chosen,correct,btn,fact,qIdx) {
+  document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+  const isCorrect = chosen===correct;
+  if(isCorrect){
+    score++; markMastered(qIdx); btn.classList.add('correct'); dotResults[current]='correct'; updateDot(current,'correct');
+    document.getElementById('score').textContent=score; playCorrect(); spawnConfetti(35);
+  } else {
+    btn.classList.add('wrong'); dotResults[current]='wrong'; updateDot(current,'wrong');
+    document.querySelectorAll('.choice-btn').forEach(b=>{if(b.dataset.value===correct)b.classList.add('correct');});
+    document.getElementById('gameScreen').classList.add('shake'); playWrong();
+  }
+  setTimeout(()=>showFeedback(isCorrect,fact),300);
+}
+let feedbackTimer=null, feedbackRafId=null;
+function dismissFeedback(){
+  cancelAnimationFrame(feedbackRafId); clearTimeout(feedbackTimer);
+  const overlay=document.getElementById('feedbackOverlay');
+  const b=document.getElementById('feedbackBox'); b.style.animation='slideUp 0.35s ease forwards';
+  overlay.classList.add('dismiss'); overlay.classList.remove('clickable');
+  setTimeout(()=>{overlay.classList.remove('show','dismiss');b.style.animation='';advanceQuestion();},370);
+}
+function showFeedback(isCorrect, fact) {
+  clearTimeout(feedbackTimer); cancelAnimationFrame(feedbackRafId);
+  const overlay=document.getElementById('feedbackOverlay'), box=document.getElementById('feedbackBox');
+  const arc=document.getElementById('timerArc'), ring=document.getElementById('timerRing');
+  const tapHint=document.getElementById('tapHint');
+  const CIRC=100.5;
+  if(isCorrect){
+    const msgs=[['🎉✨','CORRECT!'],['🌟💡','BRILLIANT!'],['🏆⭐','GENIUS!'],['🔥💫','AMAZING!'],['👑✅','PERFECT!']];
+    const [em,title]=msgs[Math.floor(Math.random()*msgs.length)];
+    document.getElementById('feedbackEmoji').textContent=em;
+    document.getElementById('feedbackTitle').textContent=title;
+    document.getElementById('feedbackTitle').className='feedback-title correct-text';
+    box.className='feedback-box correct-box'; ring.className='timer-ring correct-ring';
+    ring.style.display=''; tapHint.style.display='none';
+  } else {
+    const msgs=[['😬❌','Not quite...'],['🤔💭','Wrong one!'],['😅🔄','Keep going!']];
+    const [em,title]=msgs[Math.floor(Math.random()*msgs.length)];
+    document.getElementById('feedbackEmoji').textContent=em;
+    document.getElementById('feedbackTitle').textContent=title;
+    document.getElementById('feedbackTitle').className='feedback-title wrong-text';
+    box.className='feedback-box wrong-box'; ring.className='timer-ring wrong-ring';
+    ring.style.display='none'; tapHint.style.display='';
+  }
+  document.getElementById('feedbackFact').textContent=fact;
+  arc.style.strokeDashoffset='0'; overlay.classList.remove('dismiss'); overlay.classList.add('show');
+  if(isCorrect){
+    const duration=1200; const startTime=performance.now();
+    function tickRing(now){const frac=Math.min((now-startTime)/duration,1);arc.style.strokeDashoffset=(CIRC*frac).toFixed(2);if(frac<1)feedbackRafId=requestAnimationFrame(tickRing);}
+    feedbackRafId=requestAnimationFrame(tickRing);
+    feedbackTimer=setTimeout(dismissFeedback,duration);
+  } else {
+    overlay.classList.add('clickable');
+    overlay.addEventListener('click',dismissFeedback,{once:true});
+  }
+}
+function toggleScratch(){
+  const pad=document.getElementById('scratchPad'), btn=document.getElementById('scratchToggle');
+  pad.classList.toggle('open'); btn.classList.toggle('open');
+  btn.textContent=pad.classList.contains('open')?'🙈 Hide Scratch Pad':'📝 Scratch Pad';
+  if(pad.classList.contains('open'))document.getElementById('scratchArea').focus();
+}
+function clearScratch(){
+  const sa=document.getElementById('scratchArea');if(sa)sa.value='';
+  const pad=document.getElementById('scratchPad'),btn=document.getElementById('scratchToggle');
+  if(pad){pad.classList.remove('open');btn.classList.remove('open');btn.textContent='📝 Scratch Pad';}
+}
+function advanceQuestion(){
+  clearScratch();
+  const prev=current; current++;
+  if(prev===4){showLevelUp('medium');return;}
+  if(prev===9){showLevelUp('hard');return;}
+  if(current>=15){showEndScreen();return;}
+  showQuestion();
+}
+function showLevelUp(level){
+  const overlay=document.getElementById('levelupOverlay');
+  if(level==='medium'){document.getElementById('levelupIcon').textContent='⭐⭐';document.getElementById('levelupTitle').textContent='LEVEL UP!';document.getElementById('levelupSub').textContent='🔥 Medium — getting trickier!';}
+  else{document.getElementById('levelupIcon').textContent='⭐⭐⭐';document.getElementById('levelupTitle').textContent='EXPERT MODE!';document.getElementById('levelupSub').textContent='🧠 Hard — only the best know these!';}
+  overlay.classList.add('show'); playLevelUp(); spawnConfetti(60);
+}
+function dismissLevelUp(){document.getElementById('levelupOverlay').classList.remove('show');showQuestion();}
+function showEndScreen(){
+  const screen=document.getElementById('gameScreen');
+  let rank,icon,msg,color;
+  if(score>=13){rank='GENIUS';icon='🏆🧠⭐';msg='Outstanding! You\'re a true math scholar!';color='#f1c40f';}
+  else if(score>=10){rank='EXPERT';icon='🌟💡🎯';msg='Excellent math knowledge!';color='#2ecc71';}
+  else if(score>=7){rank='LEARNER';icon='👍📚😊';msg='Good effort! Keep practicing!';color='#e67e22';}
+  else{rank='BEGINNER';icon='💪📖🌱';msg='Great start! Practice makes perfect!';color='#e74c3c';}
+  const e=dotResults.slice(0,5).filter(r=>r==='correct').length;
+  const m=dotResults.slice(5,10).filter(r=>r==='correct').length;
+  const h=dotResults.slice(10,15).filter(r=>r==='correct').length;
+  screen.innerHTML=`
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;padding:20px;text-align:center;">
+      <div style="font-size:clamp(2.8rem,11vw,5.5rem);">${icon}</div>
+      <div style="font-size:clamp(1.8rem,7vw,3rem);color:${color};text-shadow:0 0 20px ${color}55;">${rank}</div>
+      <div style="font-size:clamp(0.95rem,3.5vw,1.3rem);color:rgba(255,255,255,0.82);max-width:340px;">${msg}</div>
+      <div style="font-size:clamp(1.4rem,5.5vw,2rem);color:var(--acc);">🎯 ${score} / 15</div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <div style="background:rgba(46,204,113,0.18);border:2px solid #2ecc71;border-radius:12px;padding:8px 12px;"><div style="color:#2ecc71;font-size:0.85rem;">⭐ Easy</div><div style="color:#fff;font-size:1.4rem;">${e}/5</div></div>
+        <div style="background:rgba(230,126,34,0.18);border:2px solid #e67e22;border-radius:12px;padding:8px 12px;"><div style="color:#e67e22;font-size:0.85rem;">⭐⭐ Medium</div><div style="color:#fff;font-size:1.4rem;">${m}/5</div></div>
+        <div style="background:rgba(231,76,60,0.18);border:2px solid #e74c3c;border-radius:12px;padding:8px 12px;"><div style="color:#e74c3c;font-size:0.85rem;">⭐⭐⭐ Hard</div><div style="color:#fff;font-size:1.4rem;">${h}/5</div></div>
+      </div>
+      <div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;max-width:280px;">
+        ${dotResults.map((r,i)=>`<span style="font-size:1.3rem;">${r==='correct'?(i<5?'⭐':i<10?'🌟':'💎'):'❌'}</span>`).join('')}
+      </div>
+      <button class="action-btn" onclick="init()">🔄 Play Again!</button>
+      <a href="../../" style="color:rgba(255,255,255,0.5);font-size:1rem;margin-top:4px;">← Back to Hub</a>
+    </div>`;
+  spawnConfetti(score>=10?90:40);
+}
+const CONFETTI_COLORS=['#f1c40f','#2ecc71','#e74c3c','#fff','#3498db','#9b59b6','#e67e22','#1abc9c'];
+function spawnConfetti(count=35){
+  for(let i=0;i<count;i++){setTimeout(()=>{
+    const el=document.createElement('div'); el.className='confetti-piece';
+    el.style.left=Math.random()*100+'vw'; el.style.top='-20px';
+    el.style.background=CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)];
+    el.style.width=(6+Math.random()*10)+'px'; el.style.height=(6+Math.random()*10)+'px';
+    el.style.borderRadius=Math.random()>0.5?'50%':'2px';
+    const dur=1.5+Math.random()*2; el.style.animationDuration=dur+'s'; el.style.animationDelay=Math.random()*0.4+'s';
+    document.body.appendChild(el); setTimeout(()=>el.remove(),(dur+0.6)*1000);
+  },i*20);}
+}
+init();
+</script>
+</body>
+</html>

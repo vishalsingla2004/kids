@@ -258,6 +258,9 @@
   }
   .feedback-overlay.show    { opacity: 1; }
   .feedback-overlay.dismiss { opacity: 0; }
+  .feedback-overlay.clickable { pointer-events: all; cursor: pointer; }
+  .tap-hint { font-size: clamp(0.8rem,2.5vw,1rem); color: rgba(255,255,255,0.55); margin-top: 14px; animation: tapPulse 1.4s ease-in-out infinite; }
+  @keyframes tapPulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
 
   .feedback-box {
     background: linear-gradient(160deg, #fff9fe, #ffeaf7);
@@ -391,6 +394,7 @@
     <span class="feedback-emoji" id="feedbackEmoji"></span>
     <div class="feedback-text" id="feedbackText"></div>
     <div class="feedback-sub"  id="feedbackSub"></div>
+    <div class="tap-hint" id="tapHint" style="display:none">👆 Tap to continue</div>
     <div class="timer-ring" id="timerRing">
       <svg width="44" height="44" viewBox="0 0 44 44">
         <circle class="track"    cx="22" cy="22" r="18"/>
@@ -551,10 +555,17 @@ function handleAnswer(chosen, correct, btn) {
   }
 }
 
-// ── Feedback (auto-dismiss) ───────────────────────────────────────────────────
+// ── Feedback ──────────────────────────────────────────────────────────────────
 let feedbackTimer = null;
 let feedbackRafId = null;
-const DISPLAY_MS  = { correct: 1800, wrong: 2200 };
+
+function dismissFeedback() {
+  cancelAnimationFrame(feedbackRafId); clearTimeout(feedbackTimer);
+  const overlay = document.getElementById('feedbackOverlay');
+  const box = document.getElementById('feedbackBox'); box.style.animation = 'slideUp 0.35s ease forwards';
+  overlay.classList.add('dismiss'); overlay.classList.remove('clickable');
+  setTimeout(() => { overlay.classList.remove('show', 'dismiss'); box.style.animation = ''; advanceQuestion(); }, 370);
+}
 
 function showFeedback(isCorrect) {
   clearTimeout(feedbackTimer);
@@ -566,8 +577,8 @@ function showFeedback(isCorrect) {
   const subEl   = document.getElementById('feedbackSub');
   const ring    = document.getElementById('timerRing');
   const arc     = document.getElementById('timerArc');
+  const tapHint = document.getElementById('tapHint');
   const CIRC    = 113;
-  const duration = isCorrect ? DISPLAY_MS.correct : DISPLAY_MS.wrong;
 
   const msgs = isCorrect
     ? CORRECT_MSGS[Math.floor(Math.random() * CORRECT_MSGS.length)]
@@ -583,25 +594,22 @@ function showFeedback(isCorrect) {
   overlay.classList.remove('dismiss');
   overlay.classList.add('show');
 
-  const startTime = performance.now();
-  function tickRing(now) {
-    const fraction = Math.min((now - startTime) / duration, 1);
-    arc.style.strokeDashoffset = (CIRC * fraction).toFixed(2);
-    if (fraction < 1) feedbackRafId = requestAnimationFrame(tickRing);
+  if (isCorrect) {
+    ring.style.display = ''; tapHint.style.display = 'none';
+    const duration = 1800;
+    const startTime = performance.now();
+    function tickRing(now) {
+      const fraction = Math.min((now - startTime) / duration, 1);
+      arc.style.strokeDashoffset = (CIRC * fraction).toFixed(2);
+      if (fraction < 1) feedbackRafId = requestAnimationFrame(tickRing);
+    }
+    feedbackRafId = requestAnimationFrame(tickRing);
+    feedbackTimer = setTimeout(dismissFeedback, duration);
+  } else {
+    ring.style.display = 'none'; tapHint.style.display = '';
+    overlay.classList.add('clickable');
+    overlay.addEventListener('click', dismissFeedback, { once: true });
   }
-  feedbackRafId = requestAnimationFrame(tickRing);
-
-  feedbackTimer = setTimeout(() => {
-    cancelAnimationFrame(feedbackRafId);
-    const box = document.getElementById('feedbackBox');
-    box.style.animation = 'slideUp 0.35s ease forwards';
-    overlay.classList.add('dismiss');
-    setTimeout(() => {
-      overlay.classList.remove('show', 'dismiss');
-      box.style.animation = '';
-      advanceQuestion();
-    }, 370);
-  }, duration);
 }
 
 function advanceQuestion() {
