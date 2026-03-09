@@ -22,6 +22,7 @@
   .level-badge.medium { background:rgba(230,126,34,0.2);  color:#e67e22; border-color:#e67e22; }
   .level-badge.hard   { background:rgba(231,76,60,0.2);   color:#e74c3c; border-color:#e74c3c; }
   .score-pill { background:rgba(255,255,255,0.1); border:2px solid rgba(255,255,255,0.25); border-radius:50px; padding:4px 14px; color:#fff; font-size:clamp(0.85rem,3vw,1.1rem); }
+  .pts-pill { background:rgba(255,215,0,0.15); border:2px solid rgba(255,215,0,0.45); border-radius:50px; padding:4px 12px; color:#ffd700; font-size:clamp(0.85rem,3vw,1.1rem); font-weight:700; white-space:nowrap; }
   .progress-bar-wrap { width:100%; height:7px; background:rgba(255,255,255,0.1); border-radius:10px; margin-top:7px; overflow:hidden; }
   .progress-bar-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--acc),#fff); transition:width 0.5s ease; }
   .middle { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; min-height:0; padding:6px 0; gap:10px; }
@@ -98,7 +99,7 @@
 <div class="screen" id="gameScreen">
   <div class="top">
     <div class="title">📚 5th Grade SBA ELA</div>
-    <div class="top-row"><div class="level-badge easy" id="levelBadge">⭐ Easy</div><div class="score-pill">🎯 <strong id="score">0</strong> / 15</div></div>
+    <div class="top-row"><div class="level-badge easy" id="levelBadge">⭐ Easy</div><div class="score-pill">🎯 <strong id="score">0</strong> / 15</div><div class="pts-pill" id="ptsDisplay">⭐ 0</div></div>
     <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
   </div>
   <div class="middle" id="middle">
@@ -649,6 +650,10 @@ const ALL_QUESTIONS = [
 ];
 
 const QUIZ_KEY = 'kids_q_sba_ela';
+const POINTS_KEY='kids_points';
+function getPoints(){return parseInt(localStorage.getItem(POINTS_KEY)||'0');}
+function addPoints(n){localStorage.setItem(POINTS_KEY,getPoints()+n);}
+function updatePtsDisplay(){const el=document.getElementById('ptsDisplay');if(el)el.textContent='⭐ '+getPoints();}
 
 let current = 0, score = 0, dotResults = [], sessionQ = [];
 let audioCtx = null;
@@ -708,7 +713,7 @@ function init() {
       <a class="back-btn" href="../../">← Home</a>
       <div class="top">
         <div class="title">📚 5th Grade SBA ELA</div>
-        <div class="top-row"><div class="level-badge easy" id="levelBadge">⭐ Easy</div><div class="score-pill">🎯 <strong id="score">0</strong> / 15</div></div>
+        <div class="top-row"><div class="level-badge easy" id="levelBadge">⭐ Easy</div><div class="score-pill">🎯 <strong id="score">0</strong> / 15</div><div class="pts-pill" id="ptsDisplay">⭐ 0</div></div>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
       </div>
       <div class="middle" id="middle">
@@ -720,7 +725,7 @@ function init() {
         <div class="progress-dots" id="progressDots"></div>
       </div>`;
   }
-  buildDots(); showQuestion();
+  buildDots(); showQuestion(); updatePtsDisplay();
 }
 function shuffle(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 function buildDots() {
@@ -840,12 +845,24 @@ function showEndScreen(){
   const e=dotResults.slice(0,5).filter(r=>r==='correct').length;
   const m=dotResults.slice(5,10).filter(r=>r==='correct').length;
   const h=dotResults.slice(10,15).filter(r=>r==='correct').length;
+  let pointsHtml='';
+  if(score===15){
+    addPoints(10);
+    pointsHtml=`<div style="background:linear-gradient(135deg,rgba(255,215,0,0.25),rgba(255,165,0,0.25));border:2px solid #ffd700;border-radius:16px;padding:12px 24px;animation:correctPop 0.5s ease;">
+      <div style="font-size:1.6rem;">🎉⭐🎉</div>
+      <div style="color:#ffd700;font-size:1.15rem;font-weight:700;margin-top:2px;">PERFECT! +10 Points!</div>
+      <div style="color:rgba(255,255,255,0.85);font-size:0.95rem;margin-top:3px;">Total: ⭐ ${getPoints()} points</div>
+    </div>`;
+  } else {
+    pointsHtml=`<div style="color:rgba(255,215,0,0.7);font-size:0.95rem;">⭐ ${getPoints()} points total</div>`;
+  }
   screen.innerHTML=`
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;padding:20px;text-align:center;">
       <div style="font-size:clamp(2.8rem,11vw,5.5rem);">${icon}</div>
       <div style="font-size:clamp(1.8rem,7vw,3rem);color:${color};text-shadow:0 0 20px ${color}55;">${rank}</div>
       <div style="font-size:clamp(0.95rem,3.5vw,1.3rem);color:rgba(255,255,255,0.82);max-width:340px;">${msg}</div>
       <div style="font-size:clamp(1.4rem,5.5vw,2rem);color:var(--acc);">🎯 ${score} / 15</div>
+      ${pointsHtml}
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
         <div style="background:rgba(46,204,113,0.18);border:2px solid #2ecc71;border-radius:12px;padding:8px 12px;"><div style="color:#2ecc71;font-size:0.85rem;">⭐ Easy</div><div style="color:#fff;font-size:1.4rem;">${e}/5</div></div>
         <div style="background:rgba(230,126,34,0.18);border:2px solid #e67e22;border-radius:12px;padding:8px 12px;"><div style="color:#e67e22;font-size:0.85rem;">⭐⭐ Medium</div><div style="color:#fff;font-size:1.4rem;">${m}/5</div></div>

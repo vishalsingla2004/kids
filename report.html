@@ -121,6 +121,7 @@
 
 <div id="tipBox"></div>
 <div class="summary-box" id="summaryBox"></div>
+<div class="summary-box" id="pointsBox" style="margin-top:12px;border-color:rgba(255,215,0,0.35);background:rgba(255,215,0,0.06);"></div>
 
 <div class="section-label">📝 5th Grade SBA Practice</div>
 <div class="cards" id="sbaCards"></div>
@@ -216,12 +217,23 @@ function render() {
   const mastered100 = SUBJECTS.filter(s => getData(s.key).size === s.total).length;
   const overallPct  = pct(allMastered, grandTotal);
 
+  // Points
+  const totalPts = parseInt(localStorage.getItem('kids_points')||'0');
+  const dollars  = (totalPts / 10).toFixed(2);
+
   // Summary
   document.getElementById('summaryBox').innerHTML = `
     <div class="summary-stat"><div class="num" style="color:#f1c40f">${overallPct}%</div><div class="lbl">Overall</div></div>
     <div class="summary-stat"><div class="num" style="color:#38bdf8">${allMastered}</div><div class="lbl">Questions Mastered</div></div>
     <div class="summary-stat"><div class="num" style="color:#2ecc71">${started}</div><div class="lbl">Subjects Started</div></div>
     <div class="summary-stat"><div class="num" style="color:#c471ed">${mastered100}</div><div class="lbl">Fully Mastered</div></div>
+  `;
+  document.getElementById('pointsBox').innerHTML = `
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center;">
+      <div class="summary-stat"><div class="num" style="color:#ffd700">⭐ ${totalPts}</div><div class="lbl">Points Earned</div></div>
+      <div class="summary-stat"><div class="num" style="color:#4ade80">$${dollars}</div><div class="lbl">Reward Value</div></div>
+      <div style="font-size:0.8rem;color:rgba(255,255,255,0.4);max-width:220px;text-align:center;">10 pts = $1.00 &nbsp;·&nbsp; Perfect 15/15 game earns 10 pts</div>
+    </div>
   `;
 
   // Tip
