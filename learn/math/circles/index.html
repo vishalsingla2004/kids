@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⭕ Circles — Learn</title>
+<style>
+  :root {
+    --c1: #0a1628;
+    --c2: #1a3a6b;
+    --acc: #60a5fa;
+    --green: #4ade80;
+    --orange: #fb923c;
+    --red: #f87171;
+    --yellow: #fbbf24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--c1);
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+
+  /* ── Sticky header ── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #0d1f3c;
+    border-bottom: 2px solid var(--acc);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  }
+
+  header .back-link {
+    color: var(--acc);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--acc);
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+  header .back-link:hover { background: rgba(96,165,250,0.15); }
+
+  header h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+
+  .pts-pill {
+    background: rgba(96,165,250,0.18);
+    border: 1px solid var(--acc);
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--acc);
+    min-width: 64px;
+    text-align: center;
+  }
+
+  /* ── Main content ── */
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 2rem 1rem 3rem;
+  }
+
+  .page-intro {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+  .page-intro h2 {
+    font-size: 2rem;
+    color: var(--acc);
+    margin-bottom: 0.5rem;
+  }
+  .page-intro p {
+    color: #94a3b8;
+    font-size: 1rem;
+  }
+
+  /* ── Section headers ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 2.5rem 0 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid;
+  }
+  .section-header.easy  { border-color: var(--green); }
+  .section-header.medium { border-color: var(--yellow); }
+  .section-header.hard  { border-color: var(--red); }
+
+  .section-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+  .section-header.easy  h2 { color: var(--green); }
+  .section-header.medium h2 { color: var(--yellow); }
+  .section-header.hard  h2 { color: var(--red); }
+
+  .level-badge {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .easy  .level-badge { background: rgba(74,222,128,0.18); color: var(--green); }
+  .medium .level-badge { background: rgba(251,191,36,0.18); color: var(--yellow); }
+  .hard  .level-badge { background: rgba(248,113,113,0.18); color: var(--red); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--c2);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--acc);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .card-title .num {
+    background: var(--acc);
+    color: var(--c1);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* SVG wrapper */
+  .svg-wrap {
+    background: #091220;
+    border-radius: 10px;
+    padding: 0.5rem;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .svg-wrap svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Formula box */
+  .formula-box {
+    background: #07101f;
+    border: 2px solid var(--acc);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    text-align: center;
+  }
+  .formula-box .formula {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--acc);
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.04em;
+    line-height: 1.6;
+  }
+  .formula-box .formula-sub {
+    font-size: 0.88rem;
+    color: #94a3b8;
+    margin-top: 0.3rem;
+  }
+
+  /* Example box */
+  .example-box {
+    background: #0d2218;
+    border-left: 4px solid var(--green);
+    border-radius: 0 10px 10px 0;
+    padding: 0.85rem 1rem;
+  }
+  .example-box .ex-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4rem;
+  }
+  .example-box .ex-text {
+    font-family: 'Courier New', monospace;
+    font-size: 0.92rem;
+    color: #d1fae5;
+    line-height: 1.7;
+  }
+
+  /* Explanation text */
+  .explanation {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+  .explanation strong { color: #fff; }
+  .explanation .highlight { color: var(--acc); font-weight: 600; }
+  .explanation .warn { color: var(--yellow); font-weight: 600; }
+
+  /* Key terms list */
+  .key-terms {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .key-terms li {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.93rem;
+    color: #cbd5e1;
+  }
+  .key-terms li .term {
+    color: var(--acc);
+    font-weight: 700;
+    min-width: 130px;
+  }
+
+  /* Two-column formula display */
+  .formula-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .formula-pair .fp-box {
+    background: #07101f;
+    border-radius: 10px;
+    padding: 0.75rem;
+    text-align: center;
+    border-top: 3px solid;
+  }
+  .formula-pair .fp-box.blue { border-color: var(--acc); }
+  .formula-pair .fp-box.orange { border-color: var(--orange); }
+  .fp-box .fp-formula {
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+  }
+  .fp-box.blue .fp-formula { color: var(--acc); }
+  .fp-box.orange .fp-formula { color: var(--orange); }
+  .fp-box .fp-label {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 0.3rem;
+  }
+
+  /* Step list */
+  .steps {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .steps li {
+    display: flex;
+    gap: 0.6rem;
+    font-size: 0.93rem;
+    color: #cbd5e1;
+    align-items: flex-start;
+  }
+  .steps li .step-num {
+    background: var(--acc);
+    color: var(--c1);
+    border-radius: 50%;
+    min-width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    margin-top: 0.1rem;
+  }
+
+  /* Memory trick box */
+  .trick-box {
+    background: rgba(251,191,36,0.1);
+    border: 1px solid var(--yellow);
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+  }
+  .trick-box .trick-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--yellow);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.35rem;
+  }
+  .trick-box .trick-text {
+    font-size: 0.93rem;
+    color: #fef3c7;
+    line-height: 1.5;
+  }
+
+  /* Responsive */
+  @media (max-width: 520px) {
+    header h1 { font-size: 1.05rem; }
+    .formula-pair { grid-template-columns: 1fr; }
+    main { padding: 1.5rem 0.75rem 2.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="../../">← Learn Hub</a>
+  <h1>⭕ Circles</h1>
+  <div class="pts-pill" id="ptsDisplay">⭐ 0</div>
+</header>
+
+<main>
+  <div class="page-intro">
+    <h2>⭕ Circles</h2>
+    <p>Master circles step by step — from basic parts all the way to sectors, arcs, and composite shapes.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       EASY SECTION
+  ══════════════════════════════════════════ -->
+  <div class="section-header easy">
+    <span style="font-size:1.4rem">🟢</span>
+    <h2>Easy Concepts</h2>
+    <span class="level-badge easy">Level 1</span>
+  </div>
+
+  <!-- EASY 1: Parts of a Circle -->
+  <div class="card">
+    <div class="card-title"><span class="num">1</span>Parts of a Circle</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg" style="width:260px">
+          <!-- circle -->
+          <circle cx="100" cy="80" r="60" fill="#0f2340" stroke="#60a5fa" stroke-width="2.5"/>
+          <!-- center dot -->
+          <circle cx="100" cy="80" r="4" fill="#fbbf24"/>
+          <!-- radius line -->
+          <line x1="100" y1="80" x2="160" y2="80" stroke="#4ade80" stroke-width="2" stroke-dasharray="4,3"/>
+          <!-- diameter line -->
+          <line x1="40" y1="80" x2="160" y2="80" stroke="#f87171" stroke-width="2" opacity="0.55"/>
+          <!-- circumference arc highlight -->
+          <circle cx="100" cy="80" r="60" fill="none" stroke="#fb923c" stroke-width="3" stroke-dasharray="12,8" stroke-linecap="round"/>
+          <!-- labels -->
+          <text x="127" y="75" fill="#4ade80" font-size="12" font-family="Segoe UI,sans-serif" font-weight="600">r</text>
+          <text x="95" y="96" fill="#fbbf24" font-size="11" font-family="Segoe UI,sans-serif">center</text>
+          <text x="60" y="72" fill="#f87171" font-size="11" font-family="Segoe UI,sans-serif">d</text>
+          <!-- circumference label -->
+          <text x="168" y="56" fill="#fb923c" font-size="11" font-family="Segoe UI,sans-serif" font-weight="600">C</text>
+          <line x1="163" y1="55" x2="157" y2="40" stroke="#fb923c" stroke-width="1"/>
+          <circle cx="100" cy="20" r="0"/>
+          <!-- legend panel -->
+          <rect x="188" y="20" width="65" height="118" rx="6" fill="#0a1e3a" stroke="#1a3a6b" stroke-width="1"/>
+          <circle cx="198" cy="37" r="3" fill="#fbbf24"/>
+          <text x="207" y="41" fill="#fbbf24" font-size="10" font-family="Segoe UI,sans-serif">Center</text>
+          <line x1="192" y1="57" x2="205" y2="57" stroke="#4ade80" stroke-width="2" stroke-dasharray="3,2"/>
+          <text x="210" y="61" fill="#4ade80" font-size="10" font-family="Segoe UI,sans-serif">Radius</text>
+          <line x1="192" y1="77" x2="205" y2="77" stroke="#f87171" stroke-width="2"/>
+          <text x="210" y="81" fill="#f87171" font-size="10" font-family="Segoe UI,sans-serif">Diameter</text>
+          <line x1="192" y1="97" x2="205" y2="97" stroke="#fb923c" stroke-width="2" stroke-dasharray="3,2"/>
+          <text x="210" y="101" fill="#fb923c" font-size="10" font-family="Segoe UI,sans-serif">Circumf.</text>
+        </svg>
+      </div>
+      <ul class="key-terms">
+        <li><span class="term">Center (•)</span><span>The middle point of the circle — every point on the circle is the same distance from it.</span></li>
+        <li><span class="term">Radius (r)</span><span>Distance from the center to any point on the circle's edge.</span></li>
+        <li><span class="term">Diameter (d)</span><span>Distance all the way across the circle through the center. <strong>d = 2r</strong></span></li>
+        <li><span class="term">Circumference (C)</span><span>The total distance all the way around the circle (its perimeter).</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- EASY 2: Circumference formula -->
+  <div class="card">
+    <div class="card-title"><span class="num">2</span>Circumference Formula</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 260 130" xmlns="http://www.w3.org/2000/svg" style="width:260px">
+          <!-- circle on left -->
+          <circle cx="55" cy="65" r="45" fill="#0f2340" stroke="#60a5fa" stroke-width="2"/>
+          <circle cx="55" cy="65" r="3" fill="#60a5fa"/>
+          <!-- radius label -->
+          <line x1="55" y1="65" x2="100" y2="65" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <text x="74" y="61" fill="#4ade80" font-size="10" font-family="Segoe UI,sans-serif">r</text>
+          <!-- arrow unwrap -->
+          <text x="110" y="69" fill="#94a3b8" font-size="20" font-family="Segoe UI,sans-serif">→</text>
+          <!-- straight line representing C -->
+          <line x1="132" y1="75" x2="255" y2="75" stroke="#fb923c" stroke-width="4" stroke-linecap="round"/>
+          <!-- tick marks -->
+          <line x1="132" y1="68" x2="132" y2="82" stroke="#fb923c" stroke-width="2"/>
+          <line x1="255" y1="68" x2="255" y2="82" stroke="#fb923c" stroke-width="2"/>
+          <!-- C label -->
+          <text x="183" y="68" fill="#fb923c" font-size="13" font-family="Segoe UI,sans-serif" font-weight="700">C = circumference</text>
+          <!-- pi symbol -->
+          <text x="140" y="100" fill="#60a5fa" font-size="11" font-family="Segoe UI,sans-serif">C = π × d  =  2 × π × r</text>
+          <!-- circle arc decoration -->
+          <circle cx="55" cy="65" r="45" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-dasharray="8,6"/>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula">C = π × d &nbsp;=&nbsp; 2 × π × r</div>
+        <div class="formula-sub">π ≈ 3.14159 &nbsp;|&nbsp; use π ≈ 3.14 for most problems</div>
+      </div>
+      <div class="explanation">
+        The circumference is like "unrolling" the circle into a straight line. That line's length equals <span class="highlight">π times the diameter</span>. Since d = 2r, both forms mean the same thing.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        <div class="ex-text">
+          d = 10 cm<br>
+          C = π × d<br>
+          C = 3.14 × 10<br>
+          C = <strong>31.4 cm</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EASY 3: Area of a circle -->
+  <div class="card">
+    <div class="card-title"><span class="num">3</span>Area of a Circle</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 240 140" xmlns="http://www.w3.org/2000/svg" style="width:240px">
+          <!-- filled circle showing area -->
+          <circle cx="120" cy="70" r="58" fill="#1a2f50" stroke="#60a5fa" stroke-width="2"/>
+          <!-- shaded interior pattern -->
+          <circle cx="120" cy="70" r="58" fill="url(#grid)" opacity="0.3"/>
+          <defs>
+            <pattern id="grid" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#60a5fa" stroke-width="0.4"/>
+            </pattern>
+          </defs>
+          <!-- radius arrow -->
+          <line x1="120" y1="70" x2="178" y2="70" stroke="#fb923c" stroke-width="2.5" marker-end="url(#arr)"/>
+          <defs>
+            <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#fb923c"/>
+            </marker>
+          </defs>
+          <circle cx="120" cy="70" r="3.5" fill="#fbbf24"/>
+          <!-- r label -->
+          <text x="144" y="65" fill="#fb923c" font-size="13" font-family="Segoe UI,sans-serif" font-weight="700">r</text>
+          <!-- Area label in center -->
+          <text x="120" y="74" fill="#e2e8f0" font-size="13" font-family="Segoe UI,sans-serif" font-weight="600" text-anchor="middle">Area = π·r²</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula">Area = π × r²</div>
+        <div class="formula-sub">r² means r × r &nbsp;|&nbsp; always use the <strong>radius</strong>, not diameter</div>
+      </div>
+      <div class="explanation">
+        The area tells us how much flat space is inside the circle. We square the radius (multiply it by itself), then multiply by π.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        <div class="ex-text">
+          r = 5 cm<br>
+          Area = π × r²<br>
+          Area = 3.14 × 5²<br>
+          Area = 3.14 × 25<br>
+          Area = <strong>78.5 cm²</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EASY 4: Diameter vs Radius -->
+  <div class="card">
+    <div class="card-title"><span class="num">4</span>Diameter vs Radius</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 250 140" xmlns="http://www.w3.org/2000/svg" style="width:250px">
+          <!-- circle -->
+          <circle cx="125" cy="70" r="55" fill="#0f2340" stroke="#60a5fa" stroke-width="2"/>
+          <!-- diameter -->
+          <line x1="70" y1="70" x2="180" y2="70" stroke="#f87171" stroke-width="2.5"/>
+          <line x1="70" y1="63" x2="70" y2="77" stroke="#f87171" stroke-width="2"/>
+          <line x1="180" y1="63" x2="180" y2="77" stroke="#f87171" stroke-width="2"/>
+          <!-- radius -->
+          <line x1="125" y1="70" x2="125" y2="15" stroke="#4ade80" stroke-width="2.5" stroke-dasharray="4,3"/>
+          <line x1="119" y1="15" x2="131" y2="15" stroke="#4ade80" stroke-width="2"/>
+          <!-- center -->
+          <circle cx="125" cy="70" r="4" fill="#fbbf24"/>
+          <!-- labels -->
+          <text x="125" y="95" fill="#f87171" font-size="12" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">d = 12 cm</text>
+          <text x="135" y="45" fill="#4ade80" font-size="12" font-family="Segoe UI,sans-serif" font-weight="700">r = 6 cm</text>
+          <!-- annotations right -->
+          <text x="192" y="50" fill="#94a3b8" font-size="10" font-family="Segoe UI,sans-serif">d = 2r</text>
+          <text x="192" y="65" fill="#94a3b8" font-size="10" font-family="Segoe UI,sans-serif">r = d ÷ 2</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula">d = 2r &nbsp;&nbsp;&nbsp; r = d ÷ 2</div>
+      </div>
+      <div class="explanation">
+        <span class="warn">⚠ Common mistake:</span> When a problem gives you the diameter, you must divide by 2 to get the radius <em>before</em> using the area formula. The area formula needs r, not d!
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example — given diameter</div>
+        <div class="ex-text">
+          d = 12 cm  →  r = 12 ÷ 2 = 6 cm<br>
+          Area = π × r²<br>
+          Area = 3.14 × 6²<br>
+          Area = 3.14 × 36<br>
+          Area = <strong>113.04 cm²</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EASY 5: Estimating with π -->
+  <div class="card">
+    <div class="card-title"><span class="num">5</span>Estimating with π</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 260 90" xmlns="http://www.w3.org/2000/svg" style="width:260px">
+          <!-- number line -->
+          <line x1="20" y1="50" x2="240" y2="50" stroke="#475569" stroke-width="2"/>
+          <!-- tick 3 -->
+          <line x1="50" y1="43" x2="50" y2="57" stroke="#94a3b8" stroke-width="2"/>
+          <text x="50" y="72" fill="#94a3b8" font-size="13" font-family="Segoe UI,sans-serif" text-anchor="middle">3</text>
+          <!-- tick 3.5 -->
+          <line x1="130" y1="46" x2="130" y2="54" stroke="#475569" stroke-width="1.5"/>
+          <text x="130" y="72" fill="#475569" font-size="11" font-family="Segoe UI,sans-serif" text-anchor="middle">3.5</text>
+          <!-- tick 4 -->
+          <line x1="210" y1="43" x2="210" y2="57" stroke="#94a3b8" stroke-width="2"/>
+          <text x="210" y="72" fill="#94a3b8" font-size="13" font-family="Segoe UI,sans-serif" text-anchor="middle">4</text>
+          <!-- pi marker -->
+          <line x1="105" y1="35" x2="105" y2="57" stroke="#fb923c" stroke-width="2.5"/>
+          <text x="105" y="28" fill="#fb923c" font-size="16" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">π</text>
+          <!-- 3.14 label -->
+          <text x="105" y="85" fill="#fb923c" font-size="10" font-family="Segoe UI,sans-serif" text-anchor="middle">≈ 3.14159…</text>
+          <!-- arrow left showing "closer to 3" -->
+          <text x="50" y="22" fill="#4ade80" font-size="9" font-family="Segoe UI,sans-serif" text-anchor="middle">closer to 3</text>
+          <line x1="50" y1="23" x2="95" y2="34" stroke="#4ade80" stroke-width="1" stroke-dasharray="2,2"/>
+          <!-- never ends label -->
+          <text x="210" y="22" fill="#60a5fa" font-size="9" font-family="Segoe UI,sans-serif" text-anchor="middle">never ends!</text>
+          <line x1="210" y1="23" x2="115" y2="34" stroke="#60a5fa" stroke-width="1" stroke-dasharray="2,2"/>
+        </svg>
+      </div>
+      <div class="explanation">
+        π (pi) is a special number that goes on forever without repeating. For most 5th-grade problems:
+        <br><br>
+        • Use <span class="highlight">π ≈ 3.14</span> for standard calculations<br>
+        • Use <span class="highlight">π ≈ 3.14159</span> when you need more precision<br>
+        • Write <span class="highlight">the symbol π</span> to give an exact answer (e.g., "50π cm²")<br>
+        • Remember: π is slightly more than 3 and slightly less than 3.2
+      </div>
+      <div class="trick-box">
+        <div class="trick-label">Quick Check</div>
+        <div class="trick-text">If a circle has r = 10, its area ≈ 3.14 × 100 = 314 cm². The answer should always be in the <strong>hundreds</strong> range for r = 10. Use this to sanity-check your work!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EASY 6: Using the formulas -->
+  <div class="card">
+    <div class="card-title"><span class="num">6</span>Using the Formulas — Quick Reference</div>
+    <div class="card-body">
+      <div class="formula-pair">
+        <div class="fp-box blue">
+          <div class="fp-formula">C = π × d</div>
+          <div class="fp-label">Circumference</div>
+        </div>
+        <div class="fp-box orange">
+          <div class="fp-formula">A = π × r²</div>
+          <div class="fp-label">Area</div>
+        </div>
+      </div>
+      <div class="trick-box">
+        <div class="trick-label">Memory Tricks</div>
+        <div class="trick-text">
+          🥧 <strong>"Cherry Pies Delicious"</strong> → C = π × d<br>
+          🍎 <strong>"Apple Pies Are Round"</strong> → A = π × r²
+        </div>
+      </div>
+      <ul class="key-terms">
+        <li><span class="term">C needs d or r</span><span>Use d directly (C = πd), or double r first (C = 2πr)</span></li>
+        <li><span class="term">A always needs r</span><span>If given d, divide by 2 first → then square it</span></li>
+        <li><span class="term">Units</span><span>Circumference → cm (linear). Area → cm² (squared).</span></li>
+      </ul>
+      <div class="example-box">
+        <div class="ex-label">Side-by-side: circle with r = 7 cm</div>
+        <div class="ex-text">
+          C = 2 × 3.14 × 7 = <strong>43.96 cm</strong><br>
+          A = 3.14 × 7² = 3.14 × 49 = <strong>153.86 cm²</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       MEDIUM SECTION
+  ══════════════════════════════════════════ -->
+  <div class="section-header medium">
+    <span style="font-size:1.4rem">🟡</span>
+    <h2>Medium Concepts</h2>
+    <span class="level-badge medium">Level 2</span>
+  </div>
+
+  <!-- MEDIUM 1: Finding radius from area -->
+  <div class="card">
+    <div class="card-title"><span class="num">1</span>Finding Radius from Area</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 240 140" xmlns="http://www.w3.org/2000/svg" style="width:240px">
+          <!-- circle -->
+          <circle cx="120" cy="70" r="55" fill="#1a2238" stroke="#fbbf24" stroke-width="2"/>
+          <!-- question marks inside -->
+          <text x="120" y="60" fill="#fbbf24" font-size="22" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">A = 78.5</text>
+          <text x="120" y="85" fill="#94a3b8" font-size="13" font-family="Segoe UI,sans-serif" text-anchor="middle">r = ?</text>
+          <!-- radius arrow (dashed, unknown) -->
+          <line x1="120" y1="70" x2="175" y2="70" stroke="#4ade80" stroke-width="2" stroke-dasharray="4,3"/>
+          <text x="144" y="65" fill="#4ade80" font-size="12" font-family="Segoe UI,sans-serif">r</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula">r = √(A ÷ π)</div>
+        <div class="formula-sub">Rearranged from A = πr²  →  r² = A ÷ π  →  r = √(A ÷ π)</div>
+      </div>
+      <ul class="steps">
+        <li><span class="step-num">1</span>Divide area by π (÷ 3.14)</li>
+        <li><span class="step-num">2</span>Take the square root of the result</li>
+        <li><span class="step-num">3</span>That is your radius!</li>
+      </ul>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        <div class="ex-text">
+          A = 78.5 cm²<br>
+          r² = 78.5 ÷ 3.14 = 25<br>
+          r  = √25<br>
+          r  = <strong>5 cm</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEDIUM 2: Finding diameter from circumference -->
+  <div class="card">
+    <div class="card-title"><span class="num">2</span>Finding Diameter from Circumference</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 250 130" xmlns="http://www.w3.org/2000/svg" style="width:250px">
+          <!-- straight line = C -->
+          <line x1="20" y1="55" x2="200" y2="55" stroke="#fb923c" stroke-width="4" stroke-linecap="round"/>
+          <line x1="20" y1="47" x2="20" y2="63" stroke="#fb923c" stroke-width="2"/>
+          <line x1="200" y1="47" x2="200" y2="63" stroke="#fb923c" stroke-width="2"/>
+          <text x="105" y="48" fill="#fb923c" font-size="12" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">C = 62.8 m</text>
+          <!-- arrow -->
+          <text x="218" y="58" fill="#94a3b8" font-size="18" font-family="Segoe UI,sans-serif">→</text>
+          <!-- circle -->
+          <circle cx="240" cy="55" r="0"/>
+          <!-- rolled-up circle -->
+          <text x="105" y="80" fill="#94a3b8" font-size="10" font-family="Segoe UI,sans-serif" text-anchor="middle">÷ π  →  diameter</text>
+          <!-- circle result -->
+          <circle cx="200" cy="55" r="0"/>
+          <!-- formula -->
+          <text x="20" y="105" fill="#60a5fa" font-size="11" font-family="Segoe UI,sans-serif">d = C ÷ π &nbsp;&nbsp;&nbsp; r = d ÷ 2</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula">d = C ÷ π &nbsp;&nbsp;&nbsp; r = d ÷ 2</div>
+        <div class="formula-sub">Both come from rearranging C = πd</div>
+      </div>
+      <ul class="steps">
+        <li><span class="step-num">1</span>Divide circumference by π (÷ 3.14)</li>
+        <li><span class="step-num">2</span>Result is the diameter</li>
+        <li><span class="step-num">3</span>Halve it if you need the radius</li>
+      </ul>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        <div class="ex-text">
+          C = 62.8 m<br>
+          d = 62.8 ÷ 3.14 = <strong>20 m</strong><br>
+          r = 20 ÷ 2   = <strong>10 m</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEDIUM 3: Semicircle -->
+  <div class="card">
+    <div class="card-title"><span class="num">3</span>Semicircle — Area &amp; Perimeter</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 250 140" xmlns="http://www.w3.org/2000/svg" style="width:250px">
+          <!-- semicircle (top half) -->
+          <path d="M 35 90 A 90 90 0 0 1 215 90 Z" fill="#1a2f50" stroke="#60a5fa" stroke-width="2"/>
+          <!-- diameter base line labeled -->
+          <line x1="35" y1="90" x2="215" y2="90" stroke="#f87171" stroke-width="2.5"/>
+          <!-- radius line -->
+          <line x1="125" y1="90" x2="125" y2="0" stroke="#4ade80" stroke-width="2" stroke-dasharray="5,3"/>
+          <!-- center dot -->
+          <circle cx="125" cy="90" r="4" fill="#fbbf24"/>
+          <!-- arc label -->
+          <text x="125" y="55" fill="#60a5fa" font-size="11" font-family="Segoe UI,sans-serif" text-anchor="middle">curved part = πr</text>
+          <!-- labels -->
+          <text x="125" y="112" fill="#f87171" font-size="11" font-family="Segoe UI,sans-serif" text-anchor="middle">diameter = 2r</text>
+          <text x="137" y="50" fill="#4ade80" font-size="11" font-family="Segoe UI,sans-serif">r</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula">Area = πr² ÷ 2</div>
+        <div class="formula-sub">Perimeter = πr + 2r &nbsp;(curved arc + straight diameter)</div>
+      </div>
+      <div class="explanation">
+        A semicircle is exactly half a circle. Its area is half the full circle area. Its perimeter has two parts: the curved arc (half the circumference = πr) plus the flat diameter (2r).
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example — r = 7 cm</div>
+        <div class="ex-text">
+          Area = 3.14 × 7² ÷ 2<br>
+               = 3.14 × 49 ÷ 2<br>
+               = 153.86 ÷ 2<br>
+               = <strong>76.93 cm²</strong><br><br>
+          Perimeter = πr + 2r<br>
+                    = 3.14 × 7 + 14<br>
+                    = 21.98 + 14<br>
+                    = <strong>35.98 cm</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEDIUM 4: Quarter circle -->
+  <div class="card">
+    <div class="card-title"><span class="num">4</span>Quarter Circle</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style="width:200px">
+          <!-- quarter circle (bottom-right quadrant) -->
+          <path d="M 40 130 L 40 30 A 100 100 0 0 1 140 130 Z" fill="#1a2f50" stroke="#60a5fa" stroke-width="2"/>
+          <!-- right angle marker -->
+          <rect x="40" y="116" width="14" height="14" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+          <!-- radius labels -->
+          <line x1="40" y1="130" x2="40" y2="30" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <line x1="40" y1="130" x2="140" y2="130" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="22" y="83" fill="#4ade80" font-size="12" font-family="Segoe UI,sans-serif">r</text>
+          <text x="85" y="148" fill="#4ade80" font-size="12" font-family="Segoe UI,sans-serif">r</text>
+          <!-- arc label -->
+          <text x="110" y="60" fill="#fb923c" font-size="10" font-family="Segoe UI,sans-serif">arc = πr/2</text>
+          <!-- center dot -->
+          <circle cx="40" cy="130" r="4" fill="#fbbf24"/>
+          <!-- 90° label -->
+          <text x="155" y="90" fill="#94a3b8" font-size="10" font-family="Segoe UI,sans-serif">¼ of</text>
+          <text x="155" y="103" fill="#94a3b8" font-size="10" font-family="Segoe UI,sans-serif">circle</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula">Area = πr² ÷ 4</div>
+        <div class="formula-sub">Arc length = πr ÷ 2 &nbsp;|&nbsp; Perimeter = πr/2 + 2r</div>
+      </div>
+      <div class="explanation">
+        A quarter circle is one-fourth of a full circle. Divide full-circle area and circumference by 4 to get the quarter-circle equivalents. The perimeter includes the arc plus the two straight radii.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example — r = 8 cm</div>
+        <div class="ex-text">
+          Area = 3.14 × 8² ÷ 4<br>
+               = 3.14 × 64 ÷ 4<br>
+               = 200.96 ÷ 4<br>
+               = <strong>50.24 cm²</strong><br><br>
+          Arc  = 3.14 × 8 ÷ 2 = <strong>12.56 cm</strong><br>
+          Perim = 12.56 + 8 + 8 = <strong>28.56 cm</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEDIUM 5: Annulus -->
+  <div class="card">
+    <div class="card-title"><span class="num">5</span>Annulus (Ring Shape)</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style="width:200px">
+          <!-- outer circle filled -->
+          <circle cx="100" cy="80" r="72" fill="#1e3a5f" stroke="#60a5fa" stroke-width="2"/>
+          <!-- inner circle cuts a hole -->
+          <circle cx="100" cy="80" r="42" fill="#0a1628" stroke="#f87171" stroke-width="2"/>
+          <!-- outer radius arrow -->
+          <line x1="100" y1="80" x2="172" y2="80" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <text x="128" y="74" fill="#60a5fa" font-size="11" font-family="Segoe UI,sans-serif" font-weight="700">R</text>
+          <!-- inner radius arrow -->
+          <line x1="100" y1="80" x2="100" y2="38" stroke="#f87171" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <text x="104" y="60" fill="#f87171" font-size="11" font-family="Segoe UI,sans-serif" font-weight="700">r</text>
+          <!-- center dot -->
+          <circle cx="100" cy="80" r="3.5" fill="#fbbf24"/>
+          <!-- shaded ring label -->
+          <text x="148" y="52" fill="#e2e8f0" font-size="10" font-family="Segoe UI,sans-serif">shaded</text>
+          <text x="148" y="64" fill="#e2e8f0" font-size="10" font-family="Segoe UI,sans-serif">ring area</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula">Area = π(R² − r²)</div>
+        <div class="formula-sub">R = outer radius &nbsp;|&nbsp; r = inner radius</div>
+      </div>
+      <div class="explanation">
+        An annulus is a ring — a big circle with a hole cut from the center. Its area is the outer circle's area <strong>minus</strong> the inner circle's area.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example — R = 10, r = 6</div>
+        <div class="ex-text">
+          Area = π(R² − r²)<br>
+               = 3.14 × (100 − 36)<br>
+               = 3.14 × 64<br>
+               = <strong>200.96 cm²</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEDIUM 6: Real-world applications -->
+  <div class="card">
+    <div class="card-title"><span class="num">6</span>Real-World Applications</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 260 120" xmlns="http://www.w3.org/2000/svg" style="width:260px">
+          <!-- Pizza circle -->
+          <circle cx="45" cy="60" r="35" fill="#3a1a05" stroke="#fb923c" stroke-width="2"/>
+          <line x1="45" y1="60" x2="45" y2="25" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="45" y1="60" x2="71" y2="83" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="45" y1="60" x2="19" y2="83" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="45" y="108" fill="#fb923c" font-size="9" font-family="Segoe UI,sans-serif" text-anchor="middle">🍕 Pizza r=15</text>
+          <!-- Wheel circle -->
+          <circle cx="135" cy="60" r="35" fill="#1a1a2e" stroke="#60a5fa" stroke-width="2"/>
+          <circle cx="135" cy="60" r="12" fill="#0a1628" stroke="#4ade80" stroke-width="1.5"/>
+          <line x1="135" y1="25" x2="135" y2="95" stroke="#475569" stroke-width="1.5"/>
+          <line x1="100" y1="60" x2="170" y2="60" stroke="#475569" stroke-width="1.5"/>
+          <text x="135" y="108" fill="#60a5fa" font-size="9" font-family="Segoe UI,sans-serif" text-anchor="middle">🛞 Wheel d=70</text>
+          <!-- Pool circle -->
+          <circle cx="220" cy="60" r="32" fill="#0d2a40" stroke="#26c6da" stroke-width="2"/>
+          <circle cx="220" cy="60" r="3" fill="#fbbf24"/>
+          <line x1="220" y1="60" x2="252" y2="60" stroke="#26c6da" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <text x="220" y="108" fill="#26c6da" font-size="9" font-family="Segoe UI,sans-serif" text-anchor="middle">🏊 Pool r=8</text>
+        </svg>
+      </div>
+      <div class="explanation">
+        Circles appear everywhere in real life. The key is to identify what you're given (r or d?) and what the question asks for (area or circumference?).
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Three Quick Examples</div>
+        <div class="ex-text">
+          🍕 Pizza (r=15 cm):<br>
+          &nbsp;&nbsp;Area = 3.14 × 225 = <strong>706.5 cm²</strong><br><br>
+          🛞 Wheel (d=70 cm) — distance per rotation:<br>
+          &nbsp;&nbsp;C = 3.14 × 70 = <strong>219.8 cm per rotation</strong><br><br>
+          🏊 Pool (r=8 m) — tiling the floor:<br>
+          &nbsp;&nbsp;Area = 3.14 × 64 = <strong>200.96 m²</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       HARD SECTION
+  ══════════════════════════════════════════ -->
+  <div class="section-header hard">
+    <span style="font-size:1.4rem">🔴</span>
+    <h2>Hard Concepts</h2>
+    <span class="level-badge hard">Level 3</span>
+  </div>
+
+  <!-- HARD 1: Sector area -->
+  <div class="card">
+    <div class="card-title"><span class="num">1</span>Sector Area (Pie Slice)</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 230 150" xmlns="http://www.w3.org/2000/svg" style="width:230px">
+          <!-- full circle faint -->
+          <circle cx="95" cy="95" r="75" fill="#0f1e35" stroke="#334155" stroke-width="1.5" stroke-dasharray="5,4"/>
+          <!-- sector fill (90°, top-right quadrant) -->
+          <path d="M 95 95 L 95 20 A 75 75 0 0 1 170 95 Z" fill="#1e3a5f" stroke="#60a5fa" stroke-width="2"/>
+          <!-- angle arc -->
+          <path d="M 95 75 A 20 20 0 0 1 115 95" fill="none" stroke="#fbbf24" stroke-width="2"/>
+          <text x="108" y="82" fill="#fbbf24" font-size="11" font-family="Segoe UI,sans-serif" font-weight="700">θ</text>
+          <!-- radius labels -->
+          <line x1="95" y1="95" x2="95" y2="20" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <line x1="95" y1="95" x2="170" y2="95" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <text x="78" y="60" fill="#4ade80" font-size="11" font-family="Segoe UI,sans-serif">r</text>
+          <text x="128" y="110" fill="#4ade80" font-size="11" font-family="Segoe UI,sans-serif">r</text>
+          <!-- center dot -->
+          <circle cx="95" cy="95" r="3.5" fill="#fbbf24"/>
+          <!-- formula -->
+          <text x="185" y="60" fill="#60a5fa" font-size="10" font-family="Segoe UI,sans-serif" text-anchor="middle">θ</text>
+          <text x="185" y="73" fill="#94a3b8" font-size="10" font-family="Segoe UI,sans-serif" text-anchor="middle">— × πr²</text>
+          <text x="185" y="86" fill="#94a3b8" font-size="10" font-family="Segoe UI,sans-serif" text-anchor="middle">360</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula">Area = (θ ÷ 360) × π × r²</div>
+        <div class="formula-sub">θ = angle of the sector in degrees</div>
+      </div>
+      <div class="explanation">
+        A sector is a "pie slice" of a circle. The fraction <span class="highlight">θ/360</span> tells you what fraction of the whole circle you have. Multiply that fraction by the full circle's area.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example — θ = 90°, r = 6 cm</div>
+        <div class="ex-text">
+          Fraction = 90 ÷ 360 = ¼<br>
+          Full area = 3.14 × 6² = 3.14 × 36 = 113.04<br>
+          Sector area = ¼ × 113.04<br>
+                      = <strong>28.26 cm²</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HARD 2: Arc length -->
+  <div class="card">
+    <div class="card-title"><span class="num">2</span>Arc Length</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg" style="width:240px">
+          <!-- full circle faint -->
+          <circle cx="95" cy="85" r="65" fill="#0f1e35" stroke="#334155" stroke-width="1.5" stroke-dasharray="5,5"/>
+          <!-- arc highlight (120°, top portion) -->
+          <path d="M 95 20 A 65 65 0 0 1 151.3 117.5" fill="none" stroke="#fb923c" stroke-width="4" stroke-linecap="round"/>
+          <!-- radii lines -->
+          <line x1="95" y1="85" x2="95" y2="20" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <line x1="95" y1="85" x2="151.3" y2="117.5" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <!-- angle arc -->
+          <path d="M 95 65 A 20 20 0 0 1 112.3 96.2" fill="none" stroke="#fbbf24" stroke-width="2"/>
+          <text x="115" y="72" fill="#fbbf24" font-size="11" font-family="Segoe UI,sans-serif" font-weight="700">120°</text>
+          <!-- r label -->
+          <text x="75" y="55" fill="#60a5fa" font-size="11" font-family="Segoe UI,sans-serif">r</text>
+          <!-- center dot -->
+          <circle cx="95" cy="85" r="3.5" fill="#fbbf24"/>
+          <!-- arc label -->
+          <text x="165" y="60" fill="#fb923c" font-size="10" font-family="Segoe UI,sans-serif">Arc</text>
+          <text x="162" y="73" fill="#fb923c" font-size="10" font-family="Segoe UI,sans-serif">length</text>
+          <line x1="162" y1="65" x2="148" y2="70" stroke="#fb923c" stroke-width="1" stroke-dasharray="2,2"/>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula">Arc length = (θ ÷ 360) × 2πr</div>
+        <div class="formula-sub">Same fraction idea — but applied to the full circumference</div>
+      </div>
+      <div class="explanation">
+        The arc length is the distance along the curved edge of a sector. It is the same fraction (θ/360) of the full circumference (2πr).
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example — θ = 120°, r = 9 cm</div>
+        <div class="ex-text">
+          Fraction = 120 ÷ 360 = ⅓<br>
+          Full circumference = 2 × 3.14 × 9 = 56.52 cm<br>
+          Arc length = ⅓ × 56.52<br>
+                     = <strong>18.84 cm</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HARD 3: Perimeter of a sector -->
+  <div class="card">
+    <div class="card-title"><span class="num">3</span>Perimeter of a Sector</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" style="width:220px">
+          <!-- sector shape (90°) -->
+          <path d="M 80 105 L 80 35 A 70 70 0 0 1 150 105 Z" fill="#1a2f50" stroke="#60a5fa" stroke-width="2"/>
+          <!-- arc highlighted orange -->
+          <path d="M 80 35 A 70 70 0 0 1 150 105" fill="none" stroke="#fb923c" stroke-width="3" stroke-linecap="round"/>
+          <!-- two radii highlighted green -->
+          <line x1="80" y1="105" x2="80" y2="35" stroke="#4ade80" stroke-width="2.5"/>
+          <line x1="80" y1="105" x2="150" y2="105" stroke="#4ade80" stroke-width="2.5"/>
+          <!-- right angle marker -->
+          <rect x="80" y="91" width="14" height="14" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+          <!-- labels -->
+          <text x="63" y="73" fill="#4ade80" font-size="11" font-family="Segoe UI,sans-serif">r</text>
+          <text x="110" y="120" fill="#4ade80" font-size="11" font-family="Segoe UI,sans-serif">r</text>
+          <text x="128" y="57" fill="#fb923c" font-size="10" font-family="Segoe UI,sans-serif">arc</text>
+          <!-- center dot -->
+          <circle cx="80" cy="105" r="3.5" fill="#fbbf24"/>
+          <!-- perimeter label -->
+          <text x="165" y="70" fill="#e2e8f0" font-size="10" font-family="Segoe UI,sans-serif">Perimeter =</text>
+          <text x="165" y="83" fill="#fb923c" font-size="10" font-family="Segoe UI,sans-serif">arc</text>
+          <text x="180" y="83" fill="#e2e8f0" font-size="10" font-family="Segoe UI,sans-serif"> +</text>
+          <text x="165" y="96" fill="#4ade80" font-size="10" font-family="Segoe UI,sans-serif">2r</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula">Perimeter = arc length + 2r</div>
+        <div class="formula-sub">Arc length = (θ/360) × 2πr &nbsp;— add the two straight radii</div>
+      </div>
+      <div class="explanation">
+        The boundary of a sector has three parts: the curved arc and the two straight radii. Add all three to get the perimeter.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example — θ = 90°, r = 6 cm</div>
+        <div class="ex-text">
+          Arc = (90/360) × 2 × 3.14 × 6<br>
+              = ¼ × 37.68<br>
+              = 9.42 cm<br><br>
+          Perimeter = arc + 2r<br>
+                    = 9.42 + 12<br>
+                    = <strong>21.42 cm</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HARD 4: Composite shapes -->
+  <div class="card">
+    <div class="card-title"><span class="num">4</span>Composite Shapes with Circles</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 220 160" xmlns="http://www.w3.org/2000/svg" style="width:220px">
+          <!-- rectangle body -->
+          <rect x="50" y="80" width="120" height="60" fill="#1a2f50" stroke="#60a5fa" stroke-width="2"/>
+          <!-- semicircle on top -->
+          <path d="M 50 80 A 60 60 0 0 1 170 80 Z" fill="#22406a" stroke="#fb923c" stroke-width="2"/>
+          <!-- dimension labels -->
+          <text x="110" y="115" fill="#e2e8f0" font-size="11" font-family="Segoe UI,sans-serif" text-anchor="middle">10 cm</text>
+          <text x="32" y="115" fill="#e2e8f0" font-size="11" font-family="Segoe UI,sans-serif" text-anchor="middle">6 cm</text>
+          <!-- r label for semicircle -->
+          <line x1="110" y1="80" x2="110" y2="30" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <text x="115" y="58" fill="#4ade80" font-size="11" font-family="Segoe UI,sans-serif">r=5</text>
+          <!-- width arrow -->
+          <line x1="50" y1="150" x2="170" y2="150" stroke="#94a3b8" stroke-width="1" marker-start="url(#al)" marker-end="url(#ar)"/>
+          <defs>
+            <marker id="al" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto">
+              <path d="M6,0 L0,3 L6,6 z" fill="#94a3b8"/>
+            </marker>
+            <marker id="ar" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 z" fill="#94a3b8"/>
+            </marker>
+          </defs>
+          <!-- height arrow -->
+          <line x1="185" y1="80" x2="185" y2="140" stroke="#94a3b8" stroke-width="1"/>
+          <text x="192" y="115" fill="#94a3b8" font-size="10" font-family="Segoe UI,sans-serif">6</text>
+          <!-- labels for parts -->
+          <text x="110" y="125" fill="#60a5fa" font-size="9" font-family="Segoe UI,sans-serif" text-anchor="middle">Rectangle</text>
+          <text x="110" y="55" fill="#fb923c" font-size="9" font-family="Segoe UI,sans-serif" text-anchor="middle">Semicircle</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula">Total Area = rectangle + semicircle</div>
+        <div class="formula-sub">= (l × w) + (πr² ÷ 2)</div>
+      </div>
+      <div class="explanation">
+        For "stadium" shapes (rectangle + semicircle on top), split into familiar parts. Calculate each part's area separately then add them together.
+        <br><br>
+        For the <strong>perimeter</strong>: two lengths + two semicircles = two lengths + one full circle's circumference.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example — 10×6 rect + semicircle r = 5</div>
+        <div class="ex-text">
+          Rectangle area = 10 × 6 = 60 cm²<br>
+          Semicircle area = 3.14 × 5² ÷ 2<br>
+                          = 3.14 × 25 ÷ 2<br>
+                          = 39.25 cm²<br>
+          Total area = 60 + 39.25 = <strong>99.25 cm²</strong><br><br>
+          Perimeter: 2 sides (6+6) + base (10) + arc (πr=15.7)<br>
+                   = 12 + 10 + 15.7 = <strong>37.7 cm</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HARD 5: Area between shapes -->
+  <div class="card">
+    <div class="card-title"><span class="num">5</span>Area Between Shapes</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 220 160" xmlns="http://www.w3.org/2000/svg" style="width:220px">
+          <!-- square -->
+          <rect x="35" y="30" width="100" height="100" fill="#1e3a5f" stroke="#60a5fa" stroke-width="2"/>
+          <!-- inscribed circle cuts out center (show shaded corners) -->
+          <rect x="35" y="30" width="100" height="100" fill="none"/>
+          <!-- circle inscribed -->
+          <circle cx="85" cy="80" r="50" fill="#0a1628" stroke="#f87171" stroke-width="2"/>
+          <!-- shaded corners (4 corner triangles shown conceptually) -->
+          <!-- we'll fill square then put circle on top -->
+          <rect x="35" y="30" width="100" height="100" fill="#1e3a5f"/>
+          <circle cx="85" cy="80" r="50" fill="#0a1628"/>
+          <!-- re-draw borders -->
+          <rect x="35" y="30" width="100" height="100" fill="none" stroke="#60a5fa" stroke-width="2"/>
+          <circle cx="85" cy="80" r="50" fill="none" stroke="#f87171" stroke-width="2"/>
+          <!-- dimension: square side -->
+          <text x="85" y="148" fill="#60a5fa" font-size="10" font-family="Segoe UI,sans-serif" text-anchor="middle">10 cm</text>
+          <!-- radius label -->
+          <line x1="85" y1="80" x2="135" y2="80" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <text x="107" y="75" fill="#fbbf24" font-size="10" font-family="Segoe UI,sans-serif">r=5</text>
+          <!-- center dot -->
+          <circle cx="85" cy="80" r="3" fill="#fbbf24"/>
+          <!-- shaded label -->
+          <text x="165" y="55" fill="#4ade80" font-size="10" font-family="Segoe UI,sans-serif">Shaded</text>
+          <text x="165" y="67" fill="#4ade80" font-size="10" font-family="Segoe UI,sans-serif">= square</text>
+          <text x="165" y="79" fill="#4ade80" font-size="10" font-family="Segoe UI,sans-serif">− circle</text>
+          <text x="38" y="50" fill="#1e3a5f" font-size="8"/>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula">Shaded area = A<sub>outer</sub> − A<sub>inner</sub></div>
+        <div class="formula-sub">Subtract the inner shape from the outer shape</div>
+      </div>
+      <div class="explanation">
+        When a circle sits inside another shape (or vice versa), the shaded region is always <span class="highlight">outer − inner</span>. Use this strategy for any "hole" or "gap" problem.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example — 10×10 square, inscribed circle r = 5</div>
+        <div class="ex-text">
+          Square area = 10 × 10 = 100 cm²<br>
+          Circle area = 3.14 × 5² = 3.14 × 25 = 78.5 cm²<br>
+          Shaded area = 100 − 78.5<br>
+                      = <strong>21.5 cm²</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HARD 6: Challenging problems -->
+  <div class="card">
+    <div class="card-title"><span class="num">6</span>Challenging Multi-Step Problems</div>
+    <div class="card-body">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 250 150" xmlns="http://www.w3.org/2000/svg" style="width:250px">
+          <!-- outer circle (track outer edge) -->
+          <circle cx="125" cy="75" r="65" fill="#1a3050" stroke="#60a5fa" stroke-width="2"/>
+          <!-- inner circle (inner edge, cuts out center field) -->
+          <circle cx="125" cy="75" r="50" fill="#0a1628" stroke="#4ade80" stroke-width="2"/>
+          <!-- track shaded ring shown by re-layering -->
+          <circle cx="125" cy="75" r="65" fill="#1a3050"/>
+          <circle cx="125" cy="75" r="50" fill="#0a1628"/>
+          <!-- borders -->
+          <circle cx="125" cy="75" r="65" fill="none" stroke="#60a5fa" stroke-width="2"/>
+          <circle cx="125" cy="75" r="50" fill="none" stroke="#4ade80" stroke-width="2"/>
+          <!-- R arrow -->
+          <line x1="125" y1="75" x2="190" y2="75" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <text x="153" y="70" fill="#60a5fa" font-size="10" font-family="Segoe UI,sans-serif" font-weight="700">R=56</text>
+          <!-- r arrow (going up) -->
+          <line x1="125" y1="75" x2="125" y2="25" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <text x="128" y="50" fill="#4ade80" font-size="10" font-family="Segoe UI,sans-serif" font-weight="700">r=50</text>
+          <!-- center dot -->
+          <circle cx="125" cy="75" r="3" fill="#fbbf24"/>
+          <!-- walker dot on inner edge -->
+          <circle cx="125" cy="25" r="5" fill="#fb923c"/>
+          <text x="135" y="23" fill="#fb923c" font-size="9" font-family="Segoe UI,sans-serif">walker</text>
+          <!-- label -->
+          <text x="36" y="90" fill="#e2e8f0" font-size="9" font-family="Segoe UI,sans-serif">Track</text>
+          <text x="24" y="102" fill="#94a3b8" font-size="8" font-family="Segoe UI,sans-serif">(shaded ring)</text>
+        </svg>
+      </div>
+      <div class="explanation">
+        <strong>Problem:</strong> A circular track has an inner radius of 50 m and an outer radius of 56 m.
+        <br>(a) Find the area of the track.
+        <br>(b) Find the distance walked in 3 laps on the inner edge.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Full Step-by-Step Solution</div>
+        <div class="ex-text">
+          (a) Track area = π(R² − r²)<br>
+              = 3.14 × (56² − 50²)<br>
+              = 3.14 × (3136 − 2500)<br>
+              = 3.14 × 636<br>
+              = <strong>1997.04 m²</strong><br><br>
+          (b) Inner circumference (r=50):<br>
+              C = 2 × 3.14 × 50<br>
+              C = 314 m per lap<br>
+              3 laps = 3 × 314<br>
+                     = <strong>942 m</strong>
+        </div>
+      </div>
+      <div class="trick-box">
+        <div class="trick-label">Strategy for Multi-Step Problems</div>
+        <div class="trick-text">
+          1. Read carefully — identify all given values.<br>
+          2. Label R (outer) vs r (inner) if there's a ring.<br>
+          3. Solve each part separately — don't rush.<br>
+          4. Check units: areas → m², distances → m.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const el = document.getElementById('ptsDisplay');
+  if (el) el.textContent = '⭐ ' + (parseInt(localStorage.getItem('kids_points') || '0'));
+</script>
+
+</body>
+</html>

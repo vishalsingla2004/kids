@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📦 Volume of 3D Shapes — Learn</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+
+  :root {
+    --c1: #0a1628;
+    --c2: #1a3a6b;
+    --acc: #60a5fa;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    background: linear-gradient(160deg, var(--c1) 0%, var(--c2) 60%, var(--c1) 100%);
+    background-attachment: fixed;
+    min-height: 100dvh;
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  /* ── Sticky Header ── */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,22,40,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(96,165,250,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    gap: 12px;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.88rem;
+    padding: 5px 13px;
+    border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.07);
+    white-space: nowrap;
+    transition: color 0.15s, background 0.15s;
+  }
+  .back-link:hover { color: #fff; background: rgba(255,255,255,0.14); }
+
+  .header-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1rem, 4vw, 1.5rem);
+    color: var(--acc);
+    text-shadow: 0 2px 10px rgba(96,165,250,0.4);
+    text-align: center;
+    flex: 1;
+  }
+
+  .pts-pill {
+    background: rgba(255,215,0,0.12);
+    border: 2px solid rgba(255,215,0,0.4);
+    border-radius: 50px;
+    padding: 4px 13px;
+    color: #ffd700;
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+
+  /* ── Page Layout ── */
+  .page-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 28px 16px 60px;
+  }
+
+  /* ── Section Headings ── */
+  .section-heading {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.2rem, 4vw, 1.7rem);
+    margin: 40px 0 18px;
+    padding: 10px 20px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-easy   { background: rgba(46,204,113,0.15); color: #2ecc71; border: 2px solid rgba(46,204,113,0.35); }
+  .section-medium { background: rgba(230,126,34,0.15); color: #e67e22; border: 2px solid rgba(230,126,34,0.35); }
+  .section-hard   { background: rgba(231,76,60,0.15);  color: #e74c3c; border: 2px solid rgba(231,76,60,0.35); }
+
+  /* ── Cards Grid ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  @media (min-width: 620px) {
+    .cards-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ── Concept Card ── */
+  .concept-card {
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(96,165,250,0.2);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 6px 28px rgba(0,0,0,0.35);
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .concept-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 40px rgba(96,165,250,0.18);
+  }
+
+  .card-title-bar {
+    background: rgba(96,165,250,0.12);
+    border-bottom: 1px solid rgba(96,165,250,0.2);
+    padding: 12px 16px;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1rem, 3.5vw, 1.2rem);
+    color: var(--acc);
+  }
+
+  .card-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* ── SVG Diagram ── */
+  .diagram-wrap {
+    background: rgba(0,0,0,0.35);
+    border-radius: 12px;
+    border: 1px solid rgba(96,165,250,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    overflow: hidden;
+  }
+  .diagram-wrap svg {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    display: block;
+  }
+
+  /* ── Formula Box ── */
+  .formula-box {
+    background: rgba(10,22,40,0.8);
+    border: 2px solid var(--acc);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(0.95rem, 3vw, 1.15rem);
+    color: #fff;
+    text-align: center;
+    line-height: 1.5;
+  }
+  .formula-box .formula-label {
+    font-size: 0.78rem;
+    color: var(--acc);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    font-family: 'Nunito', sans-serif;
+  }
+  .formula-highlight {
+    color: var(--acc);
+    font-size: 1.15em;
+  }
+
+  /* ── Explanation ── */
+  .explanation {
+    font-size: clamp(0.85rem, 2.8vw, 0.97rem);
+    color: rgba(255,255,255,0.82);
+    line-height: 1.6;
+  }
+  .explanation strong {
+    color: #fff;
+  }
+
+  /* ── Example Box ── */
+  .example-box {
+    background: rgba(46,204,113,0.07);
+    border-left: 3px solid #2ecc71;
+    border-radius: 0 10px 10px 0;
+    padding: 10px 14px;
+    font-size: clamp(0.82rem, 2.6vw, 0.93rem);
+    color: rgba(255,255,255,0.85);
+    line-height: 1.6;
+  }
+  .example-box .ex-label {
+    font-family: 'Fredoka One', cursive;
+    color: #2ecc71;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 5px;
+  }
+  .example-box strong {
+    color: #4ade80;
+  }
+
+  /* ── Key Facts list ── */
+  .key-facts {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .key-facts li {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: clamp(0.82rem, 2.6vw, 0.93rem);
+    color: rgba(255,255,255,0.82);
+    line-height: 1.5;
+  }
+  .key-facts li::before {
+    content: '▸';
+    color: var(--acc);
+    flex-shrink: 0;
+  }
+
+  /* ── Note chip ── */
+  .note-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(96,165,250,0.12);
+    border: 1px solid rgba(96,165,250,0.3);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+    color: rgba(255,255,255,0.8);
+    line-height: 1.45;
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    margin-top: 56px;
+    color: rgba(255,255,255,0.2);
+    font-size: 0.78rem;
+    font-family: 'Nunito', sans-serif;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ HEADER ═══════════════════════════════════ -->
+<header class="site-header">
+  <a class="back-link" href="../../">← Learn Hub</a>
+  <span class="header-title">📦 Volume of 3D Shapes</span>
+  <span class="pts-pill" id="ptsDisplay">⭐ 0</span>
+</header>
+
+<div class="page-wrap">
+
+<!-- ═══════════════════════════════════ EASY ═══════════════════════════════════ -->
+<div class="section-heading section-easy">🟢 Easy</div>
+<div class="cards-grid">
+
+  <!-- Card E1: What is Volume? -->
+  <div class="concept-card">
+    <div class="card-title-bar">1. What is Volume?</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 260 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 2×3×2 box of unit cubes, isometric style -->
+          <!-- Back face -->
+          <rect x="40" y="30" width="120" height="80" fill="#0d2040" stroke="#60a5fa" stroke-width="1.2" opacity="0.5"/>
+          <!-- Grid of unit cubes: 3 cols × 2 rows on front face -->
+          <!-- Row 1 -->
+          <rect x="40" y="70" width="40" height="40" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1"/>
+          <rect x="80" y="70" width="40" height="40" fill="#1e4275" stroke="#60a5fa" stroke-width="1"/>
+          <rect x="120" y="70" width="40" height="40" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1"/>
+          <!-- Row 2 -->
+          <rect x="40" y="30" width="40" height="40" fill="#1e4275" stroke="#60a5fa" stroke-width="1"/>
+          <rect x="80" y="30" width="40" height="40" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1"/>
+          <rect x="120" y="30" width="40" height="40" fill="#1e4275" stroke="#60a5fa" stroke-width="1"/>
+          <!-- Numbers in cubes -->
+          <text x="60"  y="96"  text-anchor="middle" fill="#60a5fa" font-size="13" font-family="Fredoka One,cursive">1</text>
+          <text x="100" y="96"  text-anchor="middle" fill="#60a5fa" font-size="13" font-family="Fredoka One,cursive">2</text>
+          <text x="140" y="96"  text-anchor="middle" fill="#60a5fa" font-size="13" font-family="Fredoka One,cursive">3</text>
+          <text x="60"  y="56"  text-anchor="middle" fill="#60a5fa" font-size="13" font-family="Fredoka One,cursive">4</text>
+          <text x="100" y="56"  text-anchor="middle" fill="#60a5fa" font-size="13" font-family="Fredoka One,cursive">5</text>
+          <text x="140" y="56"  text-anchor="middle" fill="#60a5fa" font-size="13" font-family="Fredoka One,cursive">6</text>
+          <!-- Depth indicator on right side -->
+          <rect x="160" y="30" width="20" height="40" fill="#1a3060" stroke="#60a5fa" stroke-width="1" opacity="0.85"/>
+          <rect x="160" y="70" width="20" height="40" fill="#162850" stroke="#60a5fa" stroke-width="1" opacity="0.85"/>
+          <!-- ×2 depth label -->
+          <text x="195" y="55"  fill="#93c5fd" font-size="11" font-family="Nunito,sans-serif" font-weight="700">×2 deep</text>
+          <line x1="188" y1="50" x2="182" y2="50" stroke="#93c5fd" stroke-width="1"/>
+          <!-- Dims label -->
+          <text x="80"  y="128" text-anchor="middle" fill="#fff" font-size="11" font-family="Nunito,sans-serif" font-weight="700">2 × 3 × 2 = 12 cubes</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Definition</div>
+        <span class="formula-highlight">Volume</span> = amount of 3D space a shape takes up
+      </div>
+      <div class="explanation">
+        Volume measures how much <strong>space is inside</strong> a 3D object.
+        We count unit cubes — each cube is 1 cm³ (one cubic centimetre).
+      </div>
+      <ul class="key-facts">
+        <li>Units: cm³, m³, mm³ (always <strong>cubed</strong>)</li>
+        <li>1 litre = 1,000 cm³</li>
+        <li>1 m³ = 1,000,000 cm³</li>
+      </ul>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        A box that is <strong>2 wide × 3 long × 2 tall</strong> holds
+        2 × 3 × 2 = <strong>12 unit cubes → Volume = 12 cm³</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card E2: Cube -->
+  <div class="concept-card">
+    <div class="card-title-bar">2. Cube</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 260 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Isometric cube -->
+          <!-- Front face -->
+          <polygon points="80,50 170,50 170,130 80,130" fill="#122848" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Top face -->
+          <polygon points="80,50 130,20 220,20 170,50" fill="#1a3a6b" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Right face -->
+          <polygon points="170,50 220,20 220,100 170,130" fill="#0f2038" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Side dimension arrows -->
+          <!-- s on front bottom -->
+          <line x1="80" y1="140" x2="170" y2="140" stroke="#60a5fa" stroke-width="1.5" marker-start="url(#arr)" marker-end="url(#arr)"/>
+          <text x="125" y="153" text-anchor="middle" fill="#60a5fa" font-size="13" font-family="Fredoka One,cursive">s</text>
+          <!-- s on right side -->
+          <line x1="226" y1="20" x2="226" y2="100" stroke="#60a5fa" stroke-width="1.5"/>
+          <text x="237" y="65" text-anchor="middle" fill="#60a5fa" font-size="13" font-family="Fredoka One,cursive">s</text>
+          <!-- s on top edge -->
+          <line x1="130" y1="14" x2="220" y2="14" stroke="#60a5fa" stroke-width="1.5"/>
+          <text x="175" y="11" text-anchor="middle" fill="#60a5fa" font-size="11" font-family="Fredoka One,cursive">s</text>
+          <defs>
+            <marker id="arr" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto">
+              <path d="M0,0 L8,3 L0,6 Z" fill="#60a5fa"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Formula</div>
+        <span class="formula-highlight">V = s³ = s × s × s</span>
+      </div>
+      <div class="explanation">
+        A cube has <strong>all sides equal</strong>. Multiply the side length by itself three times.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        Side s = <strong>4 cm</strong><br>
+        V = 4 × 4 × 4 = 4³ = <strong>64 cm³</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card E3: Rectangular Prism -->
+  <div class="concept-card">
+    <div class="card-title-bar">3. Rectangular Prism (Cuboid)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 270 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Isometric cuboid l=5, w=3, h=2 (wider than tall) -->
+          <!-- Front face -->
+          <polygon points="40,60 180,60 180,130 40,130" fill="#122848" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Top face -->
+          <polygon points="40,60 80,35 220,35 180,60" fill="#1a3a6b" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Right face -->
+          <polygon points="180,60 220,35 220,105 180,130" fill="#0f2038" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Labels -->
+          <!-- length (bottom) -->
+          <line x1="40" y1="142" x2="180" y2="142" stroke="#60a5fa" stroke-width="1.5"/>
+          <text x="110" y="155" text-anchor="middle" fill="#60a5fa" font-size="12" font-family="Fredoka One,cursive">length (l)</text>
+          <!-- height (right side front) -->
+          <line x1="188" y1="60" x2="188" y2="130" stroke="#4ade80" stroke-width="1.5"/>
+          <text x="208" y="100" text-anchor="middle" fill="#4ade80" font-size="12" font-family="Fredoka One,cursive">h</text>
+          <!-- width (top-right diagonal) -->
+          <line x1="180" y1="53" x2="220" y2="28" stroke="#fbbf24" stroke-width="1.5"/>
+          <text x="213" y="22" text-anchor="middle" fill="#fbbf24" font-size="12" font-family="Fredoka One,cursive">w</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Formula</div>
+        <span class="formula-highlight">V = length × width × height</span>
+      </div>
+      <div class="explanation">
+        A <strong>rectangular prism</strong> (also called a cuboid) is like a box — all faces are rectangles.
+        Multiply all three dimensions together.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        l = 5 cm, w = 3 cm, h = 2 cm<br>
+        V = 5 × 3 × 2 = <strong>30 cm³</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card E4: Cylinder -->
+  <div class="concept-card">
+    <div class="card-title-bar">4. Cylinder</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 260 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Cylinder body -->
+          <rect x="75" y="40" width="110" height="85" fill="#122848" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Top ellipse -->
+          <ellipse cx="130" cy="40" rx="55" ry="16" fill="#1a3a6b" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Bottom ellipse -->
+          <ellipse cx="130" cy="125" rx="55" ry="16" fill="#0f2038" stroke="#60a5fa" stroke-width="1.5"/>
+          <!-- Radius arrow (top) -->
+          <line x1="130" y1="40" x2="185" y2="40" stroke="#60a5fa" stroke-width="1.8"/>
+          <text x="160" y="35" text-anchor="middle" fill="#60a5fa" font-size="13" font-family="Fredoka One,cursive">r</text>
+          <!-- Height arrow (right side) -->
+          <line x1="196" y1="40" x2="196" y2="125" stroke="#4ade80" stroke-width="1.8"/>
+          <line x1="190" y1="40" x2="202" y2="40" stroke="#4ade80" stroke-width="1.5"/>
+          <line x1="190" y1="125" x2="202" y2="125" stroke="#4ade80" stroke-width="1.5"/>
+          <text x="215" y="88" text-anchor="middle" fill="#4ade80" font-size="13" font-family="Fredoka One,cursive">h</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Formula</div>
+        <span class="formula-highlight">V = π × r² × h</span>
+      </div>
+      <div class="explanation">
+        The base is a <strong>circle</strong> (area = πr²). Multiply by the height to get the volume.
+        Use π ≈ 3.14 unless told otherwise.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        r = 3 cm, h = 10 cm<br>
+        V = 3.14 × 3² × 10 = 3.14 × 9 × 10 = <strong>282.6 cm³</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card E5: Units of Volume -->
+  <div class="concept-card">
+    <div class="card-title-bar">5. Units of Volume</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 270 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Small unit cube 1 cm³ -->
+          <polygon points="30,80 65,80 65,115 30,115" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1.8"/>
+          <polygon points="30,80 47,65 82,65 65,80" fill="#1e4a8a" stroke="#60a5fa" stroke-width="1.8"/>
+          <polygon points="65,80 82,65 82,100 65,115" fill="#0f2a50" stroke="#60a5fa" stroke-width="1.8"/>
+          <text x="56" y="100" text-anchor="middle" fill="#fff" font-size="9" font-family="Fredoka One,cursive">1 cm³</text>
+          <!-- Large cube 1 m³ (drawn smaller for scale indication) -->
+          <polygon points="120,40 195,40 195,115 120,115" fill="#0e2240" stroke="#93c5fd" stroke-width="1.8"/>
+          <polygon points="120,40 147,18 222,18 195,40" fill="#1a3a6b" stroke="#93c5fd" stroke-width="1.8"/>
+          <polygon points="195,40 222,18 222,93 195,115" fill="#0a1830" stroke="#93c5fd" stroke-width="1.8"/>
+          <text x="157" y="82" text-anchor="middle" fill="#93c5fd" font-size="10" font-family="Fredoka One,cursive">1 m³</text>
+          <!-- Scale label -->
+          <text x="56" y="135" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="Nunito,sans-serif" font-weight="700">tiny</text>
+          <text x="165" y="135" text-anchor="middle" fill="#93c5fd" font-size="9" font-family="Nunito,sans-serif" font-weight="700">1,000,000× bigger!</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Conversions</div>
+        1 m³ = <span class="formula-highlight">1,000,000</span> cm³<br>
+        1 litre = <span class="formula-highlight">1,000</span> cm³<br>
+        1 m³ = <span class="formula-highlight">1,000</span> litres
+      </div>
+      <ul class="key-facts">
+        <li>Volume units are always <strong>cubed</strong> (³)</li>
+        <li>1 cm³ = 1 millilitre (mL)</li>
+        <li>1,000 mL = 1 litre (L)</li>
+        <li>1,000 L = 1 m³</li>
+      </ul>
+      <div class="example-box">
+        <div class="ex-label">Quick Check</div>
+        A fish tank of volume 20,000 cm³ holds <strong>20 litres</strong> of water.
+      </div>
+    </div>
+  </div>
+
+  <!-- Card E6: Comparing Volumes -->
+  <div class="concept-card">
+    <div class="card-title-bar">6. Comparing Volumes</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 270 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Box A: tall and narrow -->
+          <polygon points="30,35 65,35 65,130 30,130" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1.8"/>
+          <polygon points="30,35 45,22 80,22 65,35" fill="#1e4a8a" stroke="#60a5fa" stroke-width="1.8"/>
+          <polygon points="65,35 80,22 80,117 65,130" fill="#0f2a50" stroke="#60a5fa" stroke-width="1.8"/>
+          <text x="55" y="90" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="Nunito,sans-serif" font-weight="700">2×2×8</text>
+          <text x="55" y="143" text-anchor="middle" fill="#4ade80" font-size="10" font-family="Fredoka One,cursive">= 32 cm³</text>
+          <!-- Box B: flat and wide -->
+          <polygon points="130,80 220,80 220,120 130,120" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1.8"/>
+          <polygon points="130,80 148,65 238,65 220,80" fill="#1e4a8a" stroke="#60a5fa" stroke-width="1.8"/>
+          <polygon points="220,80 238,65 238,105 220,120" fill="#0f2a50" stroke="#60a5fa" stroke-width="1.8"/>
+          <text x="185" y="97" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="Nunito,sans-serif" font-weight="700">4×4×2</text>
+          <text x="185" y="143" text-anchor="middle" fill="#4ade80" font-size="10" font-family="Fredoka One,cursive">= 32 cm³</text>
+          <!-- = sign -->
+          <text x="115" y="110" text-anchor="middle" fill="#fbbf24" font-size="18" font-family="Fredoka One,cursive">=</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Key Idea</div>
+        Different shapes can have the <span class="formula-highlight">same volume</span>
+      </div>
+      <div class="explanation">
+        A tall thin box and a short wide box can hold exactly the same amount.
+        <strong>More surface area does NOT mean more volume.</strong>
+      </div>
+      <ul class="key-facts">
+        <li>2×2×8 = 32 cm³ (tall &amp; narrow)</li>
+        <li>4×4×2 = 32 cm³ (flat &amp; wide)</li>
+        <li>Always calculate — don't assume by looks!</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- end easy cards-grid -->
+
+<!-- ═══════════════════════════════════ MEDIUM ═══════════════════════════════════ -->
+<div class="section-heading section-medium">🟡 Medium</div>
+<div class="cards-grid">
+
+  <!-- Card M1: Triangular Prism -->
+  <div class="concept-card">
+    <div class="card-title-bar">1. Triangular Prism</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 270 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Triangular prism: triangle face on left, length going right -->
+          <!-- Back triangle -->
+          <polygon points="160,20 220,110 100,110" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1.5" opacity="0.6"/>
+          <!-- Front triangle -->
+          <polygon points="50,30 110,120 -10,120" fill="#1e4a8a" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Oops, let's redo with correct coords -->
+          <!-- Front face triangle -->
+          <polygon points="60,25 120,115 0,115" fill="none" stroke="none"/>
+
+          <!-- Clean version -->
+          <!-- Front triangular face -->
+          <polygon points="65,22 125,118 5,118" fill="#1e4a8a" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Top edge (length L) -->
+          <line x1="65" y1="22" x2="175" y2="22" stroke="#60a5fa" stroke-width="1.8"/>
+          <!-- Bottom-right edge (length L) -->
+          <line x1="125" y1="118" x2="235" y2="118" stroke="#60a5fa" stroke-width="1.8"/>
+          <!-- Connecting lines -->
+          <line x1="175" y1="22" x2="235" y2="118" stroke="#60a5fa" stroke-width="1.8"/>
+          <!-- Back triangular face (right) -->
+          <polygon points="175,22 235,118 115,118" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1.5" opacity="0.55"/>
+
+          <!-- Labels -->
+          <!-- b = base of triangle -->
+          <line x1="5"  y1="128" x2="125" y2="128" stroke="#fbbf24" stroke-width="1.5"/>
+          <text x="65"  y="142" text-anchor="middle" fill="#fbbf24" font-size="12" font-family="Fredoka One,cursive">b</text>
+          <!-- h_t = triangle height -->
+          <line x1="-3" y1="22" x2="-3" y2="118" stroke="#4ade80" stroke-width="1.5"/>
+          <text x="-13" y="73" text-anchor="middle" fill="#4ade80" font-size="12" font-family="Fredoka One,cursive" transform="rotate(-90,-13,73)">h</text>
+          <text x="10"  y="73" text-anchor="start"  fill="#4ade80" font-size="11" font-family="Fredoka One,cursive">h</text>
+          <!-- L = length -->
+          <text x="200" y="18" text-anchor="middle" fill="#c084fc" font-size="12" font-family="Fredoka One,cursive">L</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Formula</div>
+        <span class="formula-highlight">V = ½ × b × h × L</span><br>
+        <span style="font-size:0.8em;color:rgba(255,255,255,0.6)">(b = base, h = triangle height, L = length)</span>
+      </div>
+      <div class="explanation">
+        First find the area of the triangular face (½ × base × height),
+        then <strong>multiply by the length</strong> of the prism.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        b = 4, h = 3, L = 10<br>
+        V = ½ × 4 × 3 × 10 = <strong>60 cm³</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card M2: Cone -->
+  <div class="concept-card">
+    <div class="card-title-bar">2. Cone</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 260 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Cone -->
+          <!-- Body -->
+          <polygon points="130,15 60,125 200,125" fill="#122848" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Base ellipse -->
+          <ellipse cx="130" cy="125" rx="70" ry="16" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1.8"/>
+          <!-- Dashed centre line (height) -->
+          <line x1="130" y1="15" x2="130" y2="125" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="5,4"/>
+          <!-- Height label -->
+          <text x="143" y="72" fill="#4ade80" font-size="13" font-family="Fredoka One,cursive">h</text>
+          <!-- Radius line -->
+          <line x1="130" y1="125" x2="200" y2="125" stroke="#60a5fa" stroke-width="1.8"/>
+          <text x="168" y="118" text-anchor="middle" fill="#60a5fa" font-size="13" font-family="Fredoka One,cursive">r</text>
+          <!-- "1/3 cylinder" note -->
+          <text x="130" y="148" text-anchor="middle" fill="#fbbf24" font-size="10" font-family="Nunito,sans-serif" font-weight="700">⅓ of a cylinder!</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Formula</div>
+        <span class="formula-highlight">V = ⅓ × π × r² × h</span>
+      </div>
+      <div class="explanation">
+        A cone is exactly <strong>one-third</strong> of a cylinder with the same base and height.
+        Always remember the ⅓!
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        r = 3, h = 7<br>
+        V = ⅓ × 3.14 × 9 × 7 = ⅓ × 197.82 = <strong>65.94 cm³</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card M3: Square Pyramid -->
+  <div class="concept-card">
+    <div class="card-title-bar">3. Pyramid (Square Base)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 260 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Square pyramid -->
+          <!-- Base square (isometric-ish) -->
+          <polygon points="50,125 130,108 210,125 130,142" fill="#0f2038" stroke="#60a5fa" stroke-width="1.8"/>
+          <!-- Four triangular faces; front-left -->
+          <polygon points="50,125 130,108 130,28"  fill="#1a3a6b" stroke="#60a5fa" stroke-width="1.8"/>
+          <!-- front-right -->
+          <polygon points="130,108 210,125 130,28" fill="#122848" stroke="#60a5fa" stroke-width="1.8"/>
+          <!-- back (dashed) -->
+          <line x1="130" y1="28" x2="50"  y2="125" stroke="#60a5fa" stroke-width="1" stroke-dasharray="5,4" opacity="0.5"/>
+          <line x1="130" y1="28" x2="210" y2="125" stroke="#60a5fa" stroke-width="1" stroke-dasharray="5,4" opacity="0.5"/>
+          <!-- Height dashed line -->
+          <line x1="130" y1="28" x2="130" y2="125" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="5,4"/>
+          <text x="140" y="85" fill="#4ade80" font-size="13" font-family="Fredoka One,cursive">h</text>
+          <!-- Base side label -->
+          <text x="85"  y="142" text-anchor="middle" fill="#fbbf24" font-size="12" font-family="Fredoka One,cursive">s</text>
+          <text x="175" y="142" text-anchor="middle" fill="#fbbf24" font-size="12" font-family="Fredoka One,cursive">s</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Formula</div>
+        <span class="formula-highlight">V = ⅓ × s² × h</span><br>
+        <span style="font-size:0.8em;color:rgba(255,255,255,0.6)">(⅓ × base area × height)</span>
+      </div>
+      <div class="explanation">
+        Like the cone, a pyramid is <strong>one-third</strong> of the prism with the same base and height.
+        Base area of a square = s².
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        s = 6, h = 10<br>
+        V = ⅓ × 36 × 10 = ⅓ × 360 = <strong>120 cm³</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card M4: Sphere -->
+  <div class="concept-card">
+    <div class="card-title-bar">4. Sphere</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 260 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Sphere glow -->
+          <circle cx="130" cy="77" r="55" fill="url(#sphereGrad)" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Equator ellipse (dashed) -->
+          <ellipse cx="130" cy="77" rx="55" ry="16" fill="none" stroke="#60a5fa" stroke-width="1.2" stroke-dasharray="5,4"/>
+          <!-- Radius line -->
+          <line x1="130" y1="77" x2="185" y2="77" stroke="#fbbf24" stroke-width="2"/>
+          <circle cx="130" cy="77" r="3" fill="#fbbf24"/>
+          <text x="160" y="70" text-anchor="middle" fill="#fbbf24" font-size="13" font-family="Fredoka One,cursive">r</text>
+          <defs>
+            <radialGradient id="sphereGrad" cx="40%" cy="35%">
+              <stop offset="0%"  stop-color="#2a5aaa"/>
+              <stop offset="100%" stop-color="#060f25"/>
+            </radialGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Formula</div>
+        <span class="formula-highlight">V = (4/3) × π × r³</span>
+      </div>
+      <div class="explanation">
+        A sphere is a perfect ball. Every point on the surface is the same distance (radius r) from the centre.
+        Cube the radius, multiply by π and 4/3.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        r = 3<br>
+        V = (4/3) × 3.14 × 27 = 4/3 × 84.78 = <strong>113.04 cm³</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card M5: Volume vs Surface Area -->
+  <div class="concept-card">
+    <div class="card-title-bar">5. Volume vs Surface Area</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 270 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Closed box -->
+          <polygon points="20,65 80,65 80,130 20,130"  fill="#1a3a6b" stroke="#60a5fa" stroke-width="1.8"/>
+          <polygon points="20,65 38,50  98,50  80,65"  fill="#1e4a8a" stroke="#60a5fa" stroke-width="1.8"/>
+          <polygon points="80,65 98,50  98,115 80,130" fill="#0f2a50" stroke="#60a5fa" stroke-width="1.8"/>
+          <text x="55" y="148" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="Fredoka One,cursive">closed box</text>
+          <text x="55" y="160" text-anchor="middle" fill="#4ade80" font-size="9" font-family="Nunito,sans-serif" font-weight="700">SA = 6s²</text>
+          <!-- Open box (no lid) -->
+          <polygon points="155,75 215,75 215,130 155,130" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1.8"/>
+          <polygon points="155,75 173,60 233,60 215,75" fill="none"     stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="5,4"/>
+          <polygon points="215,75 233,60 233,115 215,130" fill="#0f2a50" stroke="#60a5fa" stroke-width="1.8"/>
+          <text x="192" y="148" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="Fredoka One,cursive">open box</text>
+          <text x="192" y="160" text-anchor="middle" fill="#fbbf24" font-size="9" font-family="Nunito,sans-serif" font-weight="700">SA = 5s²</text>
+          <!-- Arrow between them -->
+          <text x="130" y="105" text-anchor="middle" fill="#fff" font-size="14" font-family="Fredoka One,cursive">≠</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Key Distinction</div>
+        <span class="formula-highlight">Volume</span> = inside space<br>
+        <span class="formula-highlight">Surface Area</span> = total outside area
+      </div>
+      <div class="explanation">
+        These measure <strong>different things</strong>! Volume uses units³ (cm³),
+        surface area uses units² (cm²). Don't mix up the formulas.
+      </div>
+      <ul class="key-facts">
+        <li>Volume: how much it holds</li>
+        <li>Surface area: how much wrapping paper you need</li>
+        <li>A bigger surface area does NOT mean bigger volume</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Card M6: Liquid Volume -->
+  <div class="concept-card">
+    <div class="card-title-bar">6. Liquid Volume</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 270 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Fish tank -->
+          <!-- Outer box -->
+          <polygon points="30,45 170,45 170,130 30,130" fill="#0a1628" stroke="#60a5fa" stroke-width="2"/>
+          <polygon points="30,45 52,28 192,28 170,45" fill="#0d1f40" stroke="#60a5fa" stroke-width="2"/>
+          <polygon points="170,45 192,28 192,113 170,130" fill="#081525" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Water fill -->
+          <polygon points="31,80 169,80 169,129 31,129" fill="rgba(96,165,250,0.22)"/>
+          <line x1="31" y1="80" x2="169" y2="80" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="6,3"/>
+          <!-- Dims -->
+          <text x="100" y="110" text-anchor="middle" fill="#93c5fd" font-size="10" font-family="Nunito,sans-serif" font-weight="700">40 × 20 × 25 cm</text>
+          <!-- Labels -->
+          <text x="215" y="82" fill="#4ade80" font-size="10" font-family="Nunito,sans-serif" font-weight="700">= 20 L</text>
+          <line x1="205" y1="78" x2="172" y2="78" stroke="#4ade80" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Key Fact</div>
+        <span class="formula-highlight">1 cm³ = 1 mL</span><br>
+        <span class="formula-highlight">1,000 cm³ = 1 litre</span>
+      </div>
+      <div class="explanation">
+        Containers hold liquids. Volume in cm³ directly converts to mL.
+        This is very useful for fish tanks, bottles and measuring jugs!
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        Fish tank: 40 cm × 20 cm × 25 cm<br>
+        V = 40 × 20 × 25 = 20,000 cm³<br>
+        = 20,000 mL = <strong>20 litres</strong>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end medium cards-grid -->
+
+<!-- ═══════════════════════════════════ HARD ═══════════════════════════════════ -->
+<div class="section-heading section-hard">🔴 Hard</div>
+<div class="cards-grid">
+
+  <!-- Card H1: Composite 3D shapes -->
+  <div class="concept-card">
+    <div class="card-title-bar">1. Composite 3D Shapes</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 270 165" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Cuboid base: 10×5×3 -->
+          <polygon points="30,105 180,105 180,140 30,140" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1.8"/>
+          <polygon points="30,105  50,90  200,90  180,105" fill="#1e4a8a" stroke="#60a5fa" stroke-width="1.8"/>
+          <polygon points="180,105 200,90  200,125  180,140" fill="#0f2a50" stroke="#60a5fa" stroke-width="1.8"/>
+          <text x="108" y="122" text-anchor="middle" fill="#93c5fd" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Cuboid 10×5×3</text>
+          <!-- Cylinder on top -->
+          <rect x="95" y="55" width="50" height="47" fill="#122848" stroke="#60a5fa" stroke-width="1.8"/>
+          <ellipse cx="120" cy="55" rx="25" ry="8" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1.8"/>
+          <ellipse cx="120" cy="102" rx="25" ry="8" fill="#0f2038" stroke="#60a5fa" stroke-width="1.2" opacity="0.5"/>
+          <text x="148" y="78" fill="#c084fc" font-size="10" font-family="Nunito,sans-serif" font-weight="700">r=2, h=4</text>
+          <!-- V labels -->
+          <text x="30"  y="157" fill="#60a5fa" font-size="9" font-family="Nunito,sans-serif" font-weight="700">V₁=150 cm³</text>
+          <text x="155" y="48"  fill="#c084fc" font-size="9" font-family="Nunito,sans-serif" font-weight="700">V₂≈50.24</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Method</div>
+        <span class="formula-highlight">Total V = V₁ + V₂</span><br>
+        (add volumes of each part)
+      </div>
+      <div class="explanation">
+        Break a complex shape into <strong>simpler parts</strong> you know how to calculate.
+        Find each volume separately, then add them.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        Cuboid: 10×5×3 = <strong>150 cm³</strong><br>
+        Cylinder: π×2²×4 = 3.14×4×4 ≈ <strong>50.24 cm³</strong><br>
+        Total = 150 + 50.24 = <strong>200.24 cm³</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card H2: Hollow Shapes -->
+  <div class="concept-card">
+    <div class="card-title-bar">2. Hollow Shapes</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 270 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Pipe cross-section (annulus / ring) -->
+          <!-- Outer circle -->
+          <circle cx="100" cy="80" r="58" fill="#1a3a6b" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Inner hole -->
+          <circle cx="100" cy="80" r="35" fill="#0a1628" stroke="#60a5fa" stroke-width="2"/>
+          <!-- R label -->
+          <line x1="100" y1="80" x2="158" y2="80" stroke="#fbbf24" stroke-width="2"/>
+          <text x="133" y="74" text-anchor="middle" fill="#fbbf24" font-size="13" font-family="Fredoka One,cursive">R</text>
+          <!-- r label -->
+          <line x1="100" y1="80" x2="100" y2="45" stroke="#4ade80" stroke-width="2"/>
+          <text x="110" y="60" fill="#4ade80" font-size="13" font-family="Fredoka One,cursive">r</text>
+          <!-- Shaded ring label -->
+          <text x="100" y="152" text-anchor="middle" fill="#93c5fd" font-size="10" font-family="Nunito,sans-serif" font-weight="700">cross-section of a pipe</text>
+          <!-- Side note -->
+          <text x="195" y="60" fill="#fff" font-size="10" font-family="Nunito,sans-serif" font-weight="700">R = outer</text>
+          <text x="195" y="75" fill="#fff" font-size="10" font-family="Nunito,sans-serif" font-weight="700">r = inner</text>
+          <text x="195" y="95" fill="#fbbf24" font-size="10" font-family="Nunito,sans-serif" font-weight="700">R=5, r=3</text>
+          <text x="195" y="110" fill="#fbbf24" font-size="10" font-family="Nunito,sans-serif" font-weight="700">h=20</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Hollow Cylinder Formula</div>
+        <span class="formula-highlight">V = π(R² − r²) × h</span>
+      </div>
+      <div class="explanation">
+        For a hollow shape, <strong>subtract</strong> the volume of the hole from the total volume.
+        For a pipe: outer cylinder minus inner cylinder.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        Outer R = 5, inner r = 3, h = 20<br>
+        V = π × (25 − 9) × 20 = 3.14 × 16 × 20 = <strong>1,004.8 cm³</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card H3: Rate Problems -->
+  <div class="concept-card">
+    <div class="card-title-bar">3. Rate Problems</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 270 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Tank outline -->
+          <rect x="30" y="30" width="160" height="110" rx="6" fill="#0a1628" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Water level partially filled -->
+          <rect x="31" y="80" width="158" height="59" rx="0" fill="rgba(96,165,250,0.18)"/>
+          <line x1="31" y1="80" x2="189" y2="80" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="6,3"/>
+          <!-- Tap/pipe on top right -->
+          <rect x="170" y="15" width="8" height="20" fill="#60a5fa" rx="2"/>
+          <line x1="174" y1="35" x2="174" y2="42" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Dim labels -->
+          <text x="110" y="55" text-anchor="middle" fill="#93c5fd" font-size="11" font-family="Nunito,sans-serif" font-weight="700">2m × 1.5m × 1m</text>
+          <text x="110" y="110" text-anchor="middle" fill="#4ade80" font-size="10" font-family="Nunito,sans-serif" font-weight="700">30 L/min</text>
+          <!-- Clock icon -->
+          <circle cx="228" cy="75" r="22" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+          <line x1="228" y1="75" x2="228" y2="58" stroke="#fbbf24" stroke-width="2"/>
+          <line x1="228" y1="75" x2="240" y2="75" stroke="#fbbf24" stroke-width="2"/>
+          <text x="228" y="108" text-anchor="middle" fill="#fbbf24" font-size="9" font-family="Nunito,sans-serif" font-weight="700">100 min</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Rate Formula</div>
+        <span class="formula-highlight">Time = Volume ÷ Rate</span>
+      </div>
+      <div class="explanation">
+        First find the total volume. Convert to the same units as the flow rate.
+        Then divide volume by flow rate to get time.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        Tank: 2 m × 1.5 m × 1 m = <strong>3 m³</strong><br>
+        Convert: 3 m³ = <strong>3,000 litres</strong><br>
+        Fill rate: 30 L/min<br>
+        Time = 3,000 ÷ 30 = <strong>100 minutes</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card H4: Scaling Volumes -->
+  <div class="concept-card">
+    <div class="card-title-bar">4. Scaling Volumes</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 270 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Small cube 1×1×1 -->
+          <polygon points="30,90 60,90 60,120 30,120" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1.8"/>
+          <polygon points="30,90 44,76  74,76  60,90"  fill="#1e4a8a" stroke="#60a5fa" stroke-width="1.8"/>
+          <polygon points="60,90 74,76  74,106 60,120" fill="#0f2a50" stroke="#60a5fa" stroke-width="1.8"/>
+          <text x="52"  y="134" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="Fredoka One,cursive">1³=1</text>
+
+          <!-- Large cube 2×2×2 -->
+          <polygon points="120,65 185,65 185,130 120,130" fill="#1a3a6b" stroke="#fbbf24" stroke-width="2"/>
+          <polygon points="120,65 148,40  213,40  185,65"  fill="#1e4a8a" stroke="#fbbf24" stroke-width="2"/>
+          <polygon points="185,65 213,40  213,105 185,130" fill="#0f2a50" stroke="#fbbf24" stroke-width="2"/>
+          <text x="155" y="148" text-anchor="middle" fill="#fbbf24" font-size="10" font-family="Fredoka One,cursive">2³=8</text>
+
+          <!-- Scale factor arrow -->
+          <text x="100" y="98" text-anchor="middle" fill="#4ade80" font-size="13" font-family="Fredoka One,cursive">×2</text>
+          <line x1="68" y1="100" x2="88" y2="100" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arrG)"/>
+          <defs>
+            <marker id="arrG" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <path d="M0,0 L8,3 L0,6 Z" fill="#4ade80"/>
+            </marker>
+          </defs>
+          <text x="235" y="88"  fill="#4ade80" font-size="10" font-family="Nunito,sans-serif" font-weight="700">dims ×2</text>
+          <text x="235" y="103" fill="#fbbf24" font-size="10" font-family="Nunito,sans-serif" font-weight="700">vol ×8</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Scale Rule</div>
+        Scale factor k → Volume scales by <span class="formula-highlight">k³</span>
+      </div>
+      <div class="explanation">
+        Doubling all dimensions (k=2) multiplies volume by 2³ = <strong>8</strong>, not 2!
+        Tripling dimensions multiplies volume by 27.
+      </div>
+      <ul class="key-facts">
+        <li>k = 2 → volume × 8</li>
+        <li>k = 3 → volume × 27</li>
+        <li>k = 0.5 → volume × 0.125 (halved dims → ⅛ volume)</li>
+      </ul>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        A box has V = 24 cm³. If all sides double,<br>
+        new V = 24 × 2³ = 24 × 8 = <strong>192 cm³</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card H5: Cross-Section Method -->
+  <div class="concept-card">
+    <div class="card-title-bar">5. Cross-Section Method</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 270 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Prism with cross-section shown -->
+          <!-- Main prism body (L-shape cross-section for interest) -->
+          <!-- Front face (irregular) -->
+          <polygon points="30,120 30,50 80,50 80,80 110,80 110,120" fill="#1e4a8a" stroke="#60a5fa" stroke-width="1.8"/>
+          <!-- Back face (same shape, offset) -->
+          <polygon points="80,95 80,25 130,25 130,55 160,55 160,95" fill="#1a3a6b" stroke="#60a5fa" stroke-width="1.5" opacity="0.7"/>
+          <!-- Connecting edges -->
+          <line x1="30"  y1="50"  x2="80"  y2="25" stroke="#60a5fa" stroke-width="1.5"/>
+          <line x1="80"  y1="50"  x2="130" y2="25" stroke="#60a5fa" stroke-width="1.5"/>
+          <line x1="110" y1="80"  x2="160" y2="55" stroke="#60a5fa" stroke-width="1.5"/>
+          <line x1="30"  y1="120" x2="80"  y2="95" stroke="#60a5fa" stroke-width="1.5"/>
+          <line x1="110" y1="120" x2="160" y2="95" stroke="#60a5fa" stroke-width="1.5"/>
+          <!-- Cross-section highlight -->
+          <polygon points="30,120 30,50 80,50 80,80 110,80 110,120" fill="rgba(96,165,250,0.25)" stroke="#60a5fa" stroke-width="2.5"/>
+          <text x="60" y="100" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="Fredoka One,cursive">A</text>
+          <!-- Length arrow -->
+          <line x1="30" y1="133" x2="80" y2="133" stroke="#4ade80" stroke-width="1.5"/>
+          <text x="55" y="148" text-anchor="middle" fill="#4ade80" font-size="12" font-family="Fredoka One,cursive">L</text>
+          <text x="195" y="70" fill="#fff" font-size="9" font-family="Nunito,sans-serif" font-weight="700">Works for</text>
+          <text x="195" y="83" fill="#fff" font-size="9" font-family="Nunito,sans-serif" font-weight="700">ANY prism</text>
+          <text x="195" y="96" fill="#fff" font-size="9" font-family="Nunito,sans-serif" font-weight="700">or cylinder!</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Universal Prism Formula</div>
+        <span class="formula-highlight">V = Cross-section Area × Length</span>
+      </div>
+      <div class="explanation">
+        Any shape that has the <strong>same cross-section all the way through</strong> is a prism.
+        Find the area of the cross-section face, then multiply by the length.
+        This works for L-shapes, T-shapes, any profile!
+      </div>
+      <ul class="key-facts">
+        <li>Cuboid: cross-section = rectangle</li>
+        <li>Cylinder: cross-section = circle</li>
+        <li>Triangular prism: cross-section = triangle</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Card H6: Problem Solving (Swimming Pool) -->
+  <div class="concept-card">
+    <div class="card-title-bar">6. Multi-Step Problem Solving</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 270 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Swimming pool trapezoidal cross-section side view -->
+          <!-- Water/pool shape (trapezoid) -->
+          <polygon points="20,35 250,35 250,120 20,120" fill="#0a1628" stroke="none"/>
+          <!-- Sloped bottom -->
+          <polygon points="20,80 250,110 250,120 20,120" fill="rgba(96,165,250,0.18)" stroke="none"/>
+          <polygon points="20,80 250,110" fill="none" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Pool walls -->
+          <line x1="20"  y1="35"  x2="20"  y2="120" stroke="#60a5fa" stroke-width="2"/>
+          <line x1="250" y1="35"  x2="250" y2="120" stroke="#60a5fa" stroke-width="2"/>
+          <line x1="20"  y1="120" x2="250" y2="120" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Water surface -->
+          <line x1="20"  y1="35"  x2="250" y2="35"  stroke="#93c5fd" stroke-width="1.5" stroke-dasharray="6,3"/>
+          <!-- Depth labels -->
+          <line x1="10"  y1="35"  x2="10"  y2="80"  stroke="#4ade80" stroke-width="1.5"/>
+          <text x="-2" y="62" fill="#4ade80" font-size="10" font-family="Fredoka One,cursive" transform="rotate(-90,-2,62)">1.5m</text>
+          <text x="1"  y="62" fill="#4ade80" font-size="9" font-family="Nunito,sans-serif" font-weight="700">1.5m</text>
+          <line x1="260" y1="35"  x2="260" y2="110" stroke="#fbbf24" stroke-width="1.5"/>
+          <text x="263" y="78" fill="#fbbf24" font-size="9" font-family="Nunito,sans-serif" font-weight="700">2.5m</text>
+          <!-- Length label -->
+          <text x="135" y="133" text-anchor="middle" fill="#93c5fd" font-size="10" font-family="Nunito,sans-serif" font-weight="700">25 m long</text>
+          <!-- Width label -->
+          <text x="135" y="26"  text-anchor="middle" fill="#fff" font-size="10" font-family="Nunito,sans-serif" font-weight="700">10 m wide</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Trapezoid Cross-section</div>
+        Area = <span class="formula-highlight">½(a + b) × h</span>
+      </div>
+      <div class="explanation">
+        The pool has a <strong>trapezoidal</strong> cross-section. Find the cross-section area,
+        then multiply by width to get volume.
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example — Swimming Pool</div>
+        Shallow depth: 1.5 m, deep end: 2.5 m, length: 25 m, width: 10 m<br>
+        Cross-section area = ½ × (1.5 + 2.5) × 25 = ½ × 4 × 25 = <strong>50 m²</strong><br>
+        Volume = 50 × 10 = <strong>500 m³</strong>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end hard cards-grid -->
+
+<footer>📦 Volume of 3D Shapes — 5th Grade · Kids Learning Hub</footer>
+
+</div><!-- end page-wrap -->
+
+<script>
+  const el = document.getElementById('ptsDisplay');
+  if(el) el.textContent = '⭐ ' + (parseInt(localStorage.getItem('kids_points')||'0'));
+</script>
+</body>
+</html>

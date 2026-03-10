@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦠 Biology — Learn</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --c1: #001a0d;
+    --c2: #004d28;
+    --acc: #4caf50;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    background: var(--c1);
+    background-image:
+      radial-gradient(ellipse at 15% 10%, rgba(76,175,80,0.15) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 85%, rgba(0,77,40,0.35) 0%, transparent 55%);
+    color: #fff;
+    min-height: 100dvh;
+    padding-bottom: 60px;
+    overflow-x: hidden;
+  }
+
+  .site-header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(0,26,13,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(76,175,80,0.18);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 18px;
+    gap: 12px;
+  }
+  .site-header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.2rem, 5vw, 1.7rem);
+    color: #fff;
+    text-shadow: 0 0 20px rgba(76,175,80,0.7);
+    flex: 1;
+    text-align: center;
+  }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: rgba(255,255,255,0.55); text-decoration: none;
+    font-size: 0.85rem; padding: 5px 12px; border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    white-space: nowrap;
+    transition: color 0.15s, background 0.15s;
+  }
+  .back-link:hover { color: #fff; background: rgba(255,255,255,0.12); }
+  .pts-pill {
+    display: inline-block;
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.95rem; padding: 5px 14px; border-radius: 50px;
+    border: 2px solid rgba(255,215,0,0.4);
+    background: rgba(255,215,0,0.1);
+    color: #ffd700;
+    white-space: nowrap;
+  }
+
+  .page { max-width: 860px; margin: 0 auto; padding: 28px 16px; }
+
+  .section-label {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.1rem, 4vw, 1.4rem);
+    margin: 36px 0 16px;
+    display: flex; align-items: center; gap: 10px;
+    color: #fff;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1; height: 2px;
+    background: linear-gradient(to right, rgba(76,175,80,0.5), transparent);
+    border-radius: 2px;
+  }
+
+  .concept-card {
+    background: var(--c2);
+    border-radius: 16px;
+    border-left: 4px solid var(--acc);
+    padding: 20px 20px 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  }
+  .concept-card h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1rem, 3.5vw, 1.25rem);
+    color: var(--acc);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .svg-box {
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    border: 1px solid rgba(76,175,80,0.2);
+    overflow: hidden;
+    margin-bottom: 14px;
+    display: flex; justify-content: center;
+  }
+  .svg-box svg { display: block; max-width: 100%; height: auto; }
+
+  .formula-box {
+    background: rgba(0,0,0,0.45);
+    border: 2px solid var(--acc);
+    border-radius: 10px;
+    padding: 10px 16px;
+    text-align: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(0.9rem, 3vw, 1.05rem);
+    color: #fff;
+    margin: 10px 0;
+  }
+
+  .key-box {
+    background: rgba(76,175,80,0.08);
+    border-left: 3px solid var(--acc);
+    border-radius: 0 8px 8px 0;
+    padding: 9px 14px;
+    margin: 8px 0;
+    font-size: clamp(0.82rem, 2.8vw, 0.95rem);
+    color: rgba(255,255,255,0.88);
+    line-height: 1.55;
+  }
+  .key-box strong { color: var(--acc); }
+
+  .info-list {
+    list-style: none;
+    padding: 0; margin: 8px 0;
+    font-size: clamp(0.82rem, 2.8vw, 0.95rem);
+    color: rgba(255,255,255,0.85);
+    line-height: 1.65;
+  }
+  .info-list li { padding-left: 1.3em; position: relative; }
+  .info-list li::before { content: '▸'; position: absolute; left: 0; color: var(--acc); }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 10px 0;
+  }
+  .col-box {
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    padding: 10px 12px;
+    border-top: 2px solid var(--acc);
+    font-size: clamp(0.78rem, 2.5vw, 0.9rem);
+    line-height: 1.55;
+  }
+  .col-box .col-title {
+    font-family: 'Fredoka One', cursive;
+    color: var(--acc);
+    margin-bottom: 6px;
+    font-size: clamp(0.88rem, 3vw, 1rem);
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="back-link" href="../">← Back</a>
+  <h1>🦠 Biology</h1>
+  <div class="pts-pill" id="ptsDisplay">⭐ 0</div>
+</header>
+
+<div class="page">
+
+<!-- ═══════════ EASY ═══════════ -->
+<div class="section-label">🟢 Easy</div>
+
+<!-- EASY 1: Cell structure -->
+<div class="concept-card">
+  <h2>🔬 Cell Structure</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 440 175" width="440" height="175" xmlns="http://www.w3.org/2000/svg">
+      <!-- Animal cell -->
+      <text x="100" y="14" text-anchor="middle" fill="#4caf50" font-size="11" font-family="Nunito,sans-serif" font-weight="700">Animal Cell</text>
+      <ellipse cx="100" cy="92" rx="78" ry="68" fill="rgba(76,175,80,0.08)" stroke="#4caf50" stroke-width="2"/>
+      <!-- Nucleus -->
+      <ellipse cx="90" cy="85" rx="26" ry="22" fill="rgba(76,175,80,0.25)" stroke="#4caf50" stroke-width="1.8"/>
+      <text x="90" y="89" text-anchor="middle" fill="#fff" font-size="9" font-family="Nunito,sans-serif">Nucleus</text>
+      <!-- Mitochondria -->
+      <ellipse cx="148" cy="72" rx="16" ry="9" fill="rgba(255,200,80,0.3)" stroke="#ffd700" stroke-width="1.5"/>
+      <text x="148" y="90" text-anchor="middle" fill="#ffd700" font-size="8" font-family="Nunito,sans-serif">Mito.</text>
+      <!-- Cytoplasm label -->
+      <text x="55" y="130" fill="rgba(255,255,255,0.45)" font-size="8" font-family="Nunito,sans-serif">Cytoplasm</text>
+      <!-- Membrane label -->
+      <text x="22" y="90" fill="rgba(76,175,80,0.7)" font-size="8" font-family="Nunito,sans-serif" transform="rotate(-30 22 90)">Membrane</text>
+
+      <!-- Plant cell -->
+      <text x="320" y="14" text-anchor="middle" fill="#4caf50" font-size="11" font-family="Nunito,sans-serif" font-weight="700">Plant Cell</text>
+      <!-- Cell wall (outer rect) -->
+      <rect x="245" y="22" width="150" height="145" rx="6" fill="rgba(76,175,80,0.06)" stroke="rgba(76,175,80,0.5)" stroke-width="3"/>
+      <!-- Cell membrane inside -->
+      <rect x="250" y="27" width="140" height="135" rx="4" fill="rgba(76,175,80,0.06)" stroke="#4caf50" stroke-width="1.5"/>
+      <!-- Large vacuole -->
+      <ellipse cx="320" cy="105" rx="38" ry="30" fill="rgba(96,165,250,0.18)" stroke="#60a5fa" stroke-width="1.5"/>
+      <text x="320" y="108" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="Nunito,sans-serif">Vacuole</text>
+      <!-- Nucleus -->
+      <ellipse cx="285" cy="55" rx="22" ry="18" fill="rgba(76,175,80,0.3)" stroke="#4caf50" stroke-width="1.5"/>
+      <text x="285" y="59" text-anchor="middle" fill="#fff" font-size="9" font-family="Nunito,sans-serif">Nucleus</text>
+      <!-- Chloroplasts -->
+      <ellipse cx="355" cy="48" rx="12" ry="7" fill="rgba(100,220,80,0.4)" stroke="#80ff50" stroke-width="1.2"/>
+      <ellipse cx="375" cy="65" rx="12" ry="7" fill="rgba(100,220,80,0.4)" stroke="#80ff50" stroke-width="1.2"/>
+      <text x="370" y="42" fill="rgba(150,255,100,0.7)" font-size="8" font-family="Nunito,sans-serif">Chloro-</text>
+      <text x="370" y="52" fill="rgba(150,255,100,0.7)" font-size="8" font-family="Nunito,sans-serif">plasts</text>
+      <!-- Cell wall label -->
+      <text x="248" y="175" fill="rgba(76,175,80,0.6)" font-size="8" font-family="Nunito,sans-serif">Cell wall (rigid)</text>
+    </svg>
+  </div>
+  <div class="two-col">
+    <div class="col-box">
+      <div class="col-title">Both Cells Have</div>
+      Nucleus (control centre, contains DNA) · Cell membrane (controls entry/exit) · Cytoplasm (jelly-like fluid where reactions happen) · Mitochondria (make energy via respiration)
+    </div>
+    <div class="col-box">
+      <div class="col-title">Plant Cells Also Have</div>
+      Cell wall (rigid, made of cellulose — gives shape) · Chloroplasts (contain chlorophyll, site of photosynthesis) · Large permanent vacuole (stores water, keeps cell firm/turgid)
+    </div>
+  </div>
+</div>
+
+<!-- EASY 2: Photosynthesis -->
+<div class="concept-card">
+  <h2>🌿 Photosynthesis</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 400 150" width="400" height="150" xmlns="http://www.w3.org/2000/svg">
+      <!-- Leaf shape -->
+      <path d="M200,130 Q120,110 80,60 Q100,20 200,15 Q300,20 320,60 Q280,110 200,130 Z" fill="rgba(76,175,80,0.2)" stroke="#4caf50" stroke-width="2"/>
+      <!-- Midrib -->
+      <line x1="200" y1="130" x2="200" y2="18" stroke="#4caf50" stroke-width="1.5" opacity="0.5"/>
+      <!-- Veins -->
+      <line x1="200" y1="50" x2="140" y2="75" stroke="#4caf50" stroke-width="1" opacity="0.4"/>
+      <line x1="200" y1="70" x2="150" y2="90" stroke="#4caf50" stroke-width="1" opacity="0.4"/>
+      <line x1="200" y1="50" x2="260" y2="75" stroke="#4caf50" stroke-width="1" opacity="0.4"/>
+      <line x1="200" y1="70" x2="250" y2="90" stroke="#4caf50" stroke-width="1" opacity="0.4"/>
+      <!-- Sun arrow -->
+      <circle cx="50" cy="30" r="18" fill="rgba(255,215,0,0.3)" stroke="#ffd700" stroke-width="2"/>
+      <text x="50" y="35" text-anchor="middle" fill="#ffd700" font-size="14">☀</text>
+      <line x1="68" y1="45" x2="120" y2="70" stroke="#ffd700" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#gArr)"/>
+      <text x="80" y="68" fill="#ffd700" font-size="9" font-family="Nunito,sans-serif">light</text>
+      <defs><marker id="gArr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4caf50"/></marker></defs>
+      <!-- CO2 in -->
+      <text x="30" y="110" fill="rgba(255,150,150,0.8)" font-size="10" font-family="Nunito,sans-serif" font-weight="700">CO₂ →</text>
+      <line x1="82" y1="108" x2="120" y2="95" stroke="rgba(255,150,150,0.6)" stroke-width="1.5" marker-end="url(#rArr)"/>
+      <defs><marker id="rArr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="rgba(255,150,150,0.8)"/></marker></defs>
+      <!-- H2O up from roots -->
+      <text x="200" y="148" text-anchor="middle" fill="rgba(96,165,250,0.8)" font-size="10" font-family="Nunito,sans-serif" font-weight="700">H₂O ↑ (roots)</text>
+      <!-- O2 out -->
+      <text x="318" y="110" fill="rgba(150,255,150,0.8)" font-size="10" font-family="Nunito,sans-serif" font-weight="700">← O₂</text>
+      <!-- Glucose label inside leaf -->
+      <text x="200" y="74" text-anchor="middle" fill="#fff" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Glucose</text>
+      <text x="200" y="88" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">C₆H₁₂O₆</text>
+      <text x="200" y="102" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">made here</text>
+    </svg>
+  </div>
+  <div class="formula-box">6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂</div>
+  <ul class="info-list">
+    <li>Happens in <strong>chloroplasts</strong> — contain green pigment chlorophyll that absorbs light</li>
+    <li>Inputs: carbon dioxide (from air via stomata) + water (from roots via xylem) + light energy</li>
+    <li>Outputs: glucose (stored as starch, used for energy/growth) + oxygen (released into air)</li>
+  </ul>
+  <div class="key-box"><strong>Why leaves are green:</strong> Chlorophyll absorbs red and blue light, reflects green light back to our eyes. Variegated (white) parts of leaves cannot photosynthesise — no chlorophyll.</div>
+</div>
+
+<!-- EASY 3: Respiration -->
+<div class="concept-card">
+  <h2>💨 Respiration</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 380 130" width="380" height="130" xmlns="http://www.w3.org/2000/svg">
+      <!-- Mitochondrion shape -->
+      <ellipse cx="140" cy="65" rx="90" ry="50" fill="rgba(76,175,80,0.12)" stroke="#4caf50" stroke-width="2"/>
+      <!-- Inner membrane folds (cristae) -->
+      <path d="M80,65 Q95,40 110,65 Q125,90 140,65 Q155,40 170,65 Q185,90 200,65" fill="none" stroke="#4caf50" stroke-width="1.5" opacity="0.5"/>
+      <text x="140" y="30" text-anchor="middle" fill="#4caf50" font-size="11" font-family="Nunito,sans-serif" font-weight="700">Mitochondrion</text>
+      <!-- ATP label -->
+      <text x="140" y="80" text-anchor="middle" fill="#ffd700" font-size="14" font-family="Fredoka One,cursive">⚡ ATP</text>
+      <text x="140" y="95" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="9" font-family="Nunito,sans-serif">energy currency of cells</text>
+      <!-- Inputs/outputs -->
+      <text x="16" y="50" fill="rgba(255,255,255,0.6)" font-size="10" font-family="Nunito,sans-serif">Glucose →</text>
+      <text x="16" y="65" fill="rgba(96,165,250,0.7)" font-size="10" font-family="Nunito,sans-serif">O₂ →</text>
+      <text x="240" y="50" fill="rgba(255,150,150,0.7)" font-size="10" font-family="Nunito,sans-serif">→ CO₂</text>
+      <text x="240" y="65" fill="rgba(96,165,250,0.7)" font-size="10" font-family="Nunito,sans-serif">→ H₂O</text>
+      <text x="240" y="80" fill="#ffd700" font-size="10" font-family="Nunito,sans-serif">→ ATP ⚡</text>
+      <!-- Anaerobic box -->
+      <rect x="270" y="20" width="105" height="85" rx="8" fill="rgba(255,150,50,0.1)" stroke="rgba(255,150,50,0.4)" stroke-width="1.5"/>
+      <text x="322" y="36" text-anchor="middle" fill="#ffa040" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Anaerobic</text>
+      <text x="322" y="50" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">no O₂ needed</text>
+      <text x="322" y="64" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">glucose →</text>
+      <text x="322" y="78" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">lactic acid</text>
+      <text x="322" y="92" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">(in animals)</text>
+    </svg>
+  </div>
+  <div class="formula-box">C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + ATP energy</div>
+  <ul class="info-list">
+    <li><strong>Aerobic respiration</strong> — uses oxygen, happens in mitochondria, releases lots of energy as ATP</li>
+    <li><strong>ALL living things respire</strong> — plants, animals, fungi, bacteria — to release energy from food</li>
+    <li><strong>Anaerobic respiration</strong> — no oxygen needed; animals produce lactic acid (muscle fatigue); yeast produces ethanol + CO₂ (fermentation)</li>
+    <li>Respiration ≠ breathing. Breathing moves air in/out; respiration is a chemical process in cells</li>
+  </ul>
+  <div class="key-box"><strong>Yeast fermentation:</strong> glucose → ethanol + CO₂. Used in bread making (CO₂ makes dough rise) and brewing (ethanol makes alcohol).</div>
+</div>
+
+<!-- EASY 4: Food chains and webs -->
+<div class="concept-card">
+  <h2>🌾 Food Chains and Webs</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 420 130" width="420" height="130" xmlns="http://www.w3.org/2000/svg">
+      <!-- Simple chain -->
+      <text x="40" y="14" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Producer</text>
+      <text x="40" y="60" text-anchor="middle" fill="#4caf50" font-size="28">🌿</text>
+      <text x="40" y="85" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">Grass</text>
+      <line x1="65" y1="60" x2="95" y2="60" stroke="#4caf50" stroke-width="2.5" marker-end="url(#gA2)"/>
+      <defs><marker id="gA2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4caf50"/></marker></defs>
+      <text x="130" y="14" text-anchor="middle" fill="#ffd700" font-size="10" font-family="Nunito,sans-serif" font-weight="700">1° Consumer</text>
+      <text x="130" y="60" text-anchor="middle" fill="#ffd700" font-size="28">🐇</text>
+      <text x="130" y="85" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">Rabbit</text>
+      <line x1="158" y1="60" x2="188" y2="60" stroke="#4caf50" stroke-width="2.5" marker-end="url(#gA3)"/>
+      <defs><marker id="gA3" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4caf50"/></marker></defs>
+      <text x="220" y="14" text-anchor="middle" fill="#ff8080" font-size="10" font-family="Nunito,sans-serif" font-weight="700">2° Consumer</text>
+      <text x="220" y="60" text-anchor="middle" fill="#ff8080" font-size="28">🦊</text>
+      <text x="220" y="85" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">Fox</text>
+      <line x1="248" y1="60" x2="278" y2="60" stroke="#4caf50" stroke-width="2.5" marker-end="url(#gA4)"/>
+      <defs><marker id="gA4" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4caf50"/></marker></defs>
+      <text x="310" y="14" text-anchor="middle" fill="#ff5050" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Apex Predator</text>
+      <text x="310" y="60" text-anchor="middle" fill="#ff5050" font-size="28">🦅</text>
+      <text x="310" y="85" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">Eagle</text>
+      <!-- Energy lost label -->
+      <text x="210" y="110" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="9" font-family="Nunito,sans-serif">Arrow = energy transfer (direction of eating)</text>
+      <!-- ~10% rule -->
+      <rect x="340" y="20" width="75" height="50" rx="6" fill="rgba(76,175,80,0.1)" stroke="#4caf50" stroke-width="1"/>
+      <text x="377" y="36" text-anchor="middle" fill="#4caf50" font-size="9" font-family="Nunito,sans-serif" font-weight="700">~10% rule</text>
+      <text x="377" y="50" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">only 10% energy</text>
+      <text x="377" y="62" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">passes each level</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li><strong>Producer</strong> — makes own food via photosynthesis (plants, algae)</li>
+    <li><strong>Primary consumer</strong> — herbivore; eats producers</li>
+    <li><strong>Secondary consumer</strong> — eats primary consumers</li>
+    <li><strong>Apex predator</strong> — top of chain; nothing hunts it</li>
+    <li>Arrows show <strong>direction of energy flow</strong> (what is eaten → what eats it)</li>
+    <li>Only ~10% of energy transfers between trophic levels; rest lost as heat/waste</li>
+  </ul>
+  <div class="key-box"><strong>Food web</strong> = many food chains linked together. More connections = more stable ecosystem. Remove one species and others are affected (knock-on effect).</div>
+</div>
+
+<!-- EASY 5: Classification -->
+<div class="concept-card">
+  <h2>📋 Classification of Living Things</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 400 150" width="400" height="150" xmlns="http://www.w3.org/2000/svg">
+      <!-- Hierarchy pyramid -->
+      <polygon points="200,10 370,140 30,140" fill="rgba(76,175,80,0.08)" stroke="#4caf50" stroke-width="1.5"/>
+      <!-- Level lines -->
+      <line x1="168" y1="34" x2="232" y2="34" stroke="rgba(76,175,80,0.3)" stroke-width="1"/>
+      <line x1="142" y1="58" x2="258" y2="58" stroke="rgba(76,175,80,0.3)" stroke-width="1"/>
+      <line x1="118" y1="82" x2="282" y2="82" stroke="rgba(76,175,80,0.3)" stroke-width="1"/>
+      <line x1="92" y1="106" x2="308" y2="106" stroke="rgba(76,175,80,0.3)" stroke-width="1"/>
+      <line x1="64" y1="130" x2="336" y2="130" stroke="rgba(76,175,80,0.3)" stroke-width="1"/>
+      <!-- Labels left -->
+      <text x="200" y="28" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Kingdom</text>
+      <text x="200" y="52" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Phylum</text>
+      <text x="200" y="76" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Class</text>
+      <text x="200" y="100" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Order</text>
+      <text x="200" y="124" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Family → Genus → Species</text>
+      <!-- Human example on right -->
+      <text x="370" y="28" fill="rgba(255,255,255,0.45)" font-size="9" font-family="Nunito,sans-serif">Animalia</text>
+      <text x="370" y="52" fill="rgba(255,255,255,0.45)" font-size="9" font-family="Nunito,sans-serif">Chordata</text>
+      <text x="370" y="76" fill="rgba(255,255,255,0.45)" font-size="9" font-family="Nunito,sans-serif">Mammalia</text>
+      <text x="370" y="100" fill="rgba(255,255,255,0.45)" font-size="9" font-family="Nunito,sans-serif">Primates</text>
+      <text x="370" y="124" fill="rgba(255,255,255,0.45)" font-size="9" font-family="Nunito,sans-serif">Hominidae / Homo / sapiens</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li>7 levels from broadest to most specific: Kingdom → Phylum → Class → Order → Family → Genus → Species</li>
+    <li><strong>Mnemonic:</strong> "King Philip Came Over For Good Soup"</li>
+    <li>Species = organisms that can interbreed and produce fertile offspring</li>
+    <li>Scientific name = Genus + species (e.g. <em>Homo sapiens</em>). Always italicised</li>
+  </ul>
+  <div class="key-box"><strong>5 Kingdoms:</strong> Animals · Plants · Fungi · Protists · Bacteria (Prokaryotes). The more classification levels two organisms share, the more closely related they are.</div>
+</div>
+
+<!-- EASY 6: Vertebrates vs Invertebrates -->
+<div class="concept-card">
+  <h2>🐟 Vertebrates vs Invertebrates</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 420 130" width="420" height="130" xmlns="http://www.w3.org/2000/svg">
+      <!-- Vertebrates box -->
+      <rect x="10" y="20" width="190" height="100" rx="10" fill="rgba(76,175,80,0.1)" stroke="#4caf50" stroke-width="1.5"/>
+      <text x="105" y="14" text-anchor="middle" fill="#4caf50" font-size="11" font-family="Nunito,sans-serif" font-weight="700">VERTEBRATES (have backbone)</text>
+      <text x="30" y="42" fill="rgba(255,255,255,0.7)" font-size="11">🐟 Fish</text>
+      <text x="30" y="58" fill="rgba(255,255,255,0.7)" font-size="11">🐸 Amphibians</text>
+      <text x="30" y="74" fill="rgba(255,255,255,0.7)" font-size="11">🦎 Reptiles</text>
+      <text x="30" y="90" fill="rgba(255,255,255,0.7)" font-size="11">🐦 Birds</text>
+      <text x="30" y="106" fill="rgba(255,255,255,0.7)" font-size="11">🐘 Mammals</text>
+      <text x="105" y="125" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="9" font-family="Nunito,sans-serif">~5% of all animals</text>
+
+      <!-- Invertebrates box -->
+      <rect x="220" y="20" width="190" height="100" rx="10" fill="rgba(255,200,80,0.07)" stroke="rgba(255,200,80,0.4)" stroke-width="1.5"/>
+      <text x="315" y="14" text-anchor="middle" fill="#ffd700" font-size="11" font-family="Nunito,sans-serif" font-weight="700">INVERTEBRATES (no backbone)</text>
+      <text x="238" y="42" fill="rgba(255,255,255,0.7)" font-size="11">🐛 Insects &amp; Worms</text>
+      <text x="238" y="58" fill="rgba(255,255,255,0.7)" font-size="11">🦀 Crustaceans</text>
+      <text x="238" y="74" fill="rgba(255,255,255,0.7)" font-size="11">🦑 Molluscs</text>
+      <text x="238" y="90" fill="rgba(255,255,255,0.7)" font-size="11">🕷️ Arachnids</text>
+      <text x="238" y="106" fill="rgba(255,255,255,0.7)" font-size="11">⭐ Echinoderms</text>
+      <text x="315" y="125" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="9" font-family="Nunito,sans-serif">~95% of all animals!</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li><strong>Vertebrates</strong> — have a vertebral column (backbone/spine); internal skeleton (endoskeleton)</li>
+    <li><strong>Invertebrates</strong> — no backbone; may have exoskeleton (insects), hydrostatic skeleton (worms), or none</li>
+    <li>Mammals: warm-blooded, breathe air, give birth to live young (mostly), nurse with milk, have hair/fur</li>
+    <li>Insects: 6 legs, 3 body segments (head, thorax, abdomen), exoskeleton, mostly 2 pairs of wings</li>
+  </ul>
+  <div class="key-box"><strong>Surprising fact:</strong> Invertebrates make up about 95% of all animal species. Insects alone account for over 1 million described species — more than all other animals combined!</div>
+</div>
+
+<!-- ═══════════ MEDIUM ═══════════ -->
+<div class="section-label">🟡 Medium</div>
+
+<!-- MED 1: Genetics — DNA -->
+<div class="concept-card">
+  <h2>🧬 Genetics — DNA and Chromosomes</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 420 140" width="420" height="140" xmlns="http://www.w3.org/2000/svg">
+      <!-- Cell -->
+      <ellipse cx="40" cy="70" rx="30" ry="35" fill="rgba(76,175,80,0.1)" stroke="#4caf50" stroke-width="1.5"/>
+      <ellipse cx="40" cy="70" rx="14" ry="16" fill="rgba(76,175,80,0.25)" stroke="#4caf50" stroke-width="1.5"/>
+      <text x="40" y="74" text-anchor="middle" fill="#fff" font-size="8" font-family="Nunito,sans-serif">nucleus</text>
+      <text x="40" y="116" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">Cell</text>
+      <!-- Arrow -->
+      <line x1="74" y1="70" x2="95" y2="70" stroke="#4caf50" stroke-width="2" marker-end="url(#gA5)"/>
+      <defs><marker id="gA5" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4caf50"/></marker></defs>
+      <!-- Chromosome -->
+      <path d="M108,50 Q115,40 122,50 L122,90 Q115,100 108,90 Z" fill="rgba(76,175,80,0.3)" stroke="#4caf50" stroke-width="1.5"/>
+      <text x="115" y="116" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">Chromosome</text>
+      <!-- Arrow -->
+      <line x1="130" y1="70" x2="150" y2="70" stroke="#4caf50" stroke-width="2" marker-end="url(#gA6)"/>
+      <defs><marker id="gA6" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4caf50"/></marker></defs>
+      <!-- DNA double helix -->
+      <path d="M165,30 Q175,45 185,60 Q195,75 205,90 Q215,105 225,120" fill="none" stroke="#4caf50" stroke-width="2.5"/>
+      <path d="M225,30 Q215,45 205,60 Q195,75 185,90 Q175,105 165,120" fill="none" stroke="#80ff80" stroke-width="2.5"/>
+      <!-- Rungs (base pairs) -->
+      <line x1="168" y1="36" x2="222" y2="36" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+      <line x1="172" y1="50" x2="218" y2="50" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+      <line x1="178" y1="64" x2="212" y2="64" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+      <line x1="188" y1="78" x2="202" y2="78" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+      <line x1="178" y1="92" x2="212" y2="92" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+      <line x1="172" y1="106" x2="218" y2="106" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+      <line x1="168" y1="118" x2="222" y2="118" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+      <text x="195" y="138" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">DNA double helix</text>
+      <!-- Gene zoom box -->
+      <rect x="255" y="20" width="155" height="100" rx="8" fill="rgba(0,0,0,0.25)" stroke="rgba(76,175,80,0.35)" stroke-width="1.2"/>
+      <text x="332" y="36" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Key Facts</text>
+      <text x="270" y="52" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">▸ Humans: 46 chromosomes</text>
+      <text x="270" y="66" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">▸ 23 pairs</text>
+      <text x="270" y="80" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">▸ Pair 23 = sex chromosomes</text>
+      <text x="270" y="94" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">▸ XX = female, XY = male</text>
+      <text x="270" y="108" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">▸ Gene = section coding a trait</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li><strong>DNA</strong> (deoxyribonucleic acid) — double helix molecule carrying genetic instructions</li>
+    <li><strong>Gene</strong> — a section of DNA that codes for one protein / one trait</li>
+    <li><strong>Chromosome</strong> — tightly coiled DNA; humans have 46 (23 pairs) in every body cell nucleus</li>
+    <li>Chromosome 23 = sex chromosomes: <strong>XX = female, XY = male</strong></li>
+    <li>DNA bases pair: A-T and C-G (complementary base pairing)</li>
+  </ul>
+  <div class="key-box"><strong>The Human Genome</strong> contains about 3 billion base pairs and ~20,000 genes — yet only ~2% of DNA actually codes for proteins. The rest was once called "junk DNA" but has regulatory roles.</div>
+</div>
+
+<!-- MED 2: Inheritance -->
+<div class="concept-card">
+  <h2>🔁 Inheritance</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 400 155" width="400" height="155" xmlns="http://www.w3.org/2000/svg">
+      <!-- Parents -->
+      <text x="80" y="14" text-anchor="middle" fill="#4caf50" font-size="11" font-family="Nunito,sans-serif" font-weight="700">Parent 1 (Rr)</text>
+      <text x="280" y="14" text-anchor="middle" fill="#4caf50" font-size="11" font-family="Nunito,sans-serif" font-weight="700">Parent 2 (Rr)</text>
+      <!-- Gametes -->
+      <text x="60" y="30" fill="rgba(255,255,255,0.55)" font-size="10" font-family="Nunito,sans-serif">Gametes: R  r</text>
+      <text x="225" y="30" fill="rgba(255,255,255,0.55)" font-size="10" font-family="Nunito,sans-serif">Gametes: R  r</text>
+      <!-- Punnett square -->
+      <rect x="120" y="40" width="160" height="110" rx="4" fill="rgba(0,0,0,0.2)" stroke="#4caf50" stroke-width="1.5"/>
+      <!-- Grid lines -->
+      <line x1="200" y1="40" x2="200" y2="150" stroke="#4caf50" stroke-width="1" opacity="0.5"/>
+      <line x1="120" y1="95" x2="280" y2="95" stroke="#4caf50" stroke-width="1" opacity="0.5"/>
+      <!-- Column headers -->
+      <text x="160" y="58" text-anchor="middle" fill="#4caf50" font-size="12" font-family="Nunito,sans-serif" font-weight="700">R</text>
+      <text x="240" y="58" text-anchor="middle" fill="#4caf50" font-size="12" font-family="Nunito,sans-serif" font-weight="700">r</text>
+      <!-- Row headers -->
+      <text x="132" y="80" text-anchor="middle" fill="#4caf50" font-size="12" font-family="Nunito,sans-serif" font-weight="700">R</text>
+      <text x="132" y="135" text-anchor="middle" fill="#4caf50" font-size="12" font-family="Nunito,sans-serif" font-weight="700">r</text>
+      <!-- Cells -->
+      <text x="160" y="82" text-anchor="middle" fill="#ff5050" font-size="13" font-family="Nunito,sans-serif" font-weight="700">RR</text>
+      <text x="160" y="96" text-anchor="middle" fill="rgba(255,80,80,0.5)" font-size="9" font-family="Nunito,sans-serif">red</text>
+      <text x="240" y="82" text-anchor="middle" fill="#ff8080" font-size="13" font-family="Nunito,sans-serif" font-weight="700">Rr</text>
+      <text x="240" y="96" text-anchor="middle" fill="rgba(255,150,150,0.5)" font-size="9" font-family="Nunito,sans-serif">red</text>
+      <text x="160" y="132" text-anchor="middle" fill="#ff8080" font-size="13" font-family="Nunito,sans-serif" font-weight="700">Rr</text>
+      <text x="160" y="146" text-anchor="middle" fill="rgba(255,150,150,0.5)" font-size="9" font-family="Nunito,sans-serif">red</text>
+      <text x="240" y="132" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="13" font-family="Nunito,sans-serif" font-weight="700">rr</text>
+      <text x="240" y="146" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9" font-family="Nunito,sans-serif">white</text>
+      <!-- Ratio label -->
+      <text x="310" y="85" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">Ratio:</text>
+      <text x="310" y="100" fill="#ff5050" font-size="9" font-family="Nunito,sans-serif">3 red :</text>
+      <text x="310" y="114" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">1 white</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li><strong>Alleles</strong> — different versions of the same gene (e.g. R = red, r = white)</li>
+    <li><strong>Dominant</strong> allele (capital letter) — expressed even if only one copy present</li>
+    <li><strong>Recessive</strong> allele (lowercase) — only expressed if two copies present (rr)</li>
+    <li><strong>Homozygous</strong> = two same alleles (RR or rr). <strong>Heterozygous</strong> = two different alleles (Rr)</li>
+    <li><strong>Genotype</strong> = allele combination. <strong>Phenotype</strong> = physical appearance/trait expressed</li>
+  </ul>
+  <div class="key-box"><strong>Codominance:</strong> Both alleles expressed equally. E.g. red (RR) × white (WW) → pink (RW). Neither allele is fully dominant — both show in the phenotype.</div>
+</div>
+
+<!-- MED 3: Human body systems -->
+<div class="concept-card">
+  <h2>🫀 Human Body Systems</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 440 140" width="440" height="140" xmlns="http://www.w3.org/2000/svg">
+      <!-- Circulatory -->
+      <rect x="10" y="10" width="80" height="55" rx="7" fill="rgba(255,80,80,0.12)" stroke="rgba(255,80,80,0.4)" stroke-width="1.5"/>
+      <text x="50" y="26" text-anchor="middle" fill="#ff8080" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Circulatory</text>
+      <text x="50" y="39" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">Heart pumps</text>
+      <text x="50" y="51" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">blood + nutrients</text>
+      <text x="50" y="63" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="8" font-family="Nunito,sans-serif">Heart, arteries, veins</text>
+      <!-- Digestive -->
+      <rect x="100" y="10" width="80" height="55" rx="7" fill="rgba(255,200,80,0.1)" stroke="rgba(255,200,80,0.4)" stroke-width="1.5"/>
+      <text x="140" y="26" text-anchor="middle" fill="#ffd700" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Digestive</text>
+      <text x="140" y="39" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">Breaks down food</text>
+      <text x="140" y="51" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">absorbs nutrients</text>
+      <text x="140" y="63" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="8" font-family="Nunito,sans-serif">Mouth→stomach→gut</text>
+      <!-- Respiratory -->
+      <rect x="190" y="10" width="80" height="55" rx="7" fill="rgba(96,165,250,0.1)" stroke="rgba(96,165,250,0.4)" stroke-width="1.5"/>
+      <text x="230" y="26" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Respiratory</text>
+      <text x="230" y="39" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">Gas exchange</text>
+      <text x="230" y="51" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">O₂ in, CO₂ out</text>
+      <text x="230" y="63" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="8" font-family="Nunito,sans-serif">Lungs, trachea</text>
+      <!-- Nervous -->
+      <rect x="280" y="10" width="80" height="55" rx="7" fill="rgba(200,100,255,0.1)" stroke="rgba(200,100,255,0.4)" stroke-width="1.5"/>
+      <text x="320" y="26" text-anchor="middle" fill="#c471ed" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Nervous</text>
+      <text x="320" y="39" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">Brain, spinal cord</text>
+      <text x="320" y="51" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">nerves; controls all</text>
+      <text x="320" y="63" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="8" font-family="Nunito,sans-serif">electrical signals</text>
+      <!-- Skeletal -->
+      <rect x="370" y="10" width="60" height="55" rx="7" fill="rgba(255,255,200,0.07)" stroke="rgba(255,255,200,0.3)" stroke-width="1.5"/>
+      <text x="400" y="26" text-anchor="middle" fill="rgba(255,255,200,0.7)" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Skeletal</text>
+      <text x="400" y="39" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">206 bones</text>
+      <text x="400" y="51" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">support &amp;</text>
+      <text x="400" y="63" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="8" font-family="Nunito,sans-serif">protection</text>
+      <!-- Bottom row -->
+      <text x="220" y="90" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9" font-family="Nunito,sans-serif">All systems work together and are interdependent</text>
+      <text x="220" y="106" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="9" font-family="Nunito,sans-serif">e.g. Circulatory delivers O₂ absorbed by Respiratory to muscles controlled by Nervous system</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li><strong>Circulatory</strong> — double circulation: pulmonary (heart→lungs→heart) + systemic (heart→body→heart)</li>
+    <li><strong>Digestive</strong> — enzymes break down food: amylase (starch), protease (protein), lipase (fat)</li>
+    <li><strong>Respiratory</strong> — alveoli in lungs provide huge surface area for gas exchange by diffusion</li>
+    <li><strong>Nervous</strong> — CNS (brain + spinal cord) + PNS (all other nerves)</li>
+  </ul>
+</div>
+
+<!-- MED 4: Microorganisms -->
+<div class="concept-card">
+  <h2>🦠 Microorganisms</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 440 130" width="440" height="130" xmlns="http://www.w3.org/2000/svg">
+      <!-- Bacteria (rod) -->
+      <text x="70" y="14" text-anchor="middle" fill="#4caf50" font-size="11" font-family="Nunito,sans-serif" font-weight="700">Bacteria</text>
+      <rect x="35" y="30" width="70" height="30" rx="15" fill="rgba(76,175,80,0.3)" stroke="#4caf50" stroke-width="2"/>
+      <line x1="70" y1="20" x2="75" y2="35" stroke="#4caf50" stroke-width="1.5"/>
+      <line x1="90" y1="22" x2="88" y2="37" stroke="#4caf50" stroke-width="1.5"/>
+      <line x1="50" y1="22" x2="52" y2="37" stroke="#4caf50" stroke-width="1.5"/>
+      <text x="70" y="49" text-anchor="middle" fill="#fff" font-size="9" font-family="Nunito,sans-serif">rod bacterium</text>
+      <text x="70" y="78" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">Living cells</text>
+      <text x="70" y="90" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">No nucleus</text>
+      <text x="70" y="102" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">(prokaryote)</text>
+      <text x="70" y="120" text-anchor="middle" fill="rgba(76,200,100,0.7)" font-size="8" font-family="Nunito,sans-serif">Yogurt, gut bacteria</text>
+
+      <!-- Virus (spiky) -->
+      <text x="185" y="14" text-anchor="middle" fill="#ff8080" font-size="11" font-family="Nunito,sans-serif" font-weight="700">Virus</text>
+      <circle cx="185" cy="52" r="22" fill="rgba(255,80,80,0.2)" stroke="#ff8080" stroke-width="2"/>
+      <!-- Spikes -->
+      <line x1="185" y1="30" x2="185" y2="18" stroke="#ff8080" stroke-width="2"/><line x1="200" y1="35" x2="210" y2="25" stroke="#ff8080" stroke-width="2"/>
+      <line x1="207" y1="52" x2="220" y2="52" stroke="#ff8080" stroke-width="2"/><line x1="200" y1="69" x2="210" y2="79" stroke="#ff8080" stroke-width="2"/>
+      <line x1="185" y1="74" x2="185" y2="86" stroke="#ff8080" stroke-width="2"/><line x1="170" y1="69" x2="160" y2="79" stroke="#ff8080" stroke-width="2"/>
+      <line x1="163" y1="52" x2="150" y2="52" stroke="#ff8080" stroke-width="2"/><line x1="170" y1="35" x2="160" y2="25" stroke="#ff8080" stroke-width="2"/>
+      <text x="185" y="56" text-anchor="middle" fill="#fff" font-size="9" font-family="Nunito,sans-serif">RNA/DNA</text>
+      <text x="185" y="102" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">NOT living</text>
+      <text x="185" y="114" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">Needs host</text>
+      <text x="185" y="126" text-anchor="middle" fill="rgba(255,120,120,0.7)" font-size="8" font-family="Nunito,sans-serif">Flu, COVID, cold</text>
+
+      <!-- Fungus -->
+      <text x="310" y="14" text-anchor="middle" fill="#ffd700" font-size="11" font-family="Nunito,sans-serif" font-weight="700">Fungus</text>
+      <!-- Hyphae lines -->
+      <path d="M275,80 Q290,50 305,70 Q315,40 330,65 Q340,45 355,70" fill="none" stroke="#ffd700" stroke-width="2.5"/>
+      <path d="M280,80 Q285,100 295,85" fill="none" stroke="#ffd700" stroke-width="1.5"/>
+      <path d="M320,65 Q315,85 325,90" fill="none" stroke="#ffd700" stroke-width="1.5"/>
+      <text x="310" y="102" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">hyphae network</text>
+      <text x="310" y="114" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">Decomposer</text>
+      <text x="310" y="126" text-anchor="middle" fill="rgba(255,220,80,0.7)" font-size="8" font-family="Nunito,sans-serif">Mushrooms, bread mould</text>
+
+      <!-- Protist box -->
+      <rect x="380" y="25" width="55" height="75" rx="6" fill="rgba(96,165,250,0.1)" stroke="rgba(96,165,250,0.35)" stroke-width="1.2"/>
+      <text x="407" y="40" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="Nunito,sans-serif" font-weight="700">Protist</text>
+      <text x="407" y="54" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">single cell</text>
+      <text x="407" y="66" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">has nucleus</text>
+      <text x="407" y="78" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">amoeba</text>
+      <text x="407" y="90" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">malaria</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li><strong>Bacteria</strong> — prokaryotes (no nucleus); reproduce rapidly by binary fission; some cause disease (Salmonella, TB), some are beneficial (gut bacteria, yogurt, nitrogen fixation)</li>
+    <li><strong>Viruses</strong> — not living cells; protein coat + genetic material; hijack host cells to reproduce; treated by vaccines, not antibiotics</li>
+    <li><strong>Fungi</strong> — eukaryotes; absorb nutrients from dead material (decomposers); some cause athlete's foot, thrush</li>
+    <li><strong>Protists</strong> — single-celled eukaryotes; Plasmodium causes malaria (spread by Anopheles mosquito)</li>
+  </ul>
+  <div class="key-box"><strong>Antibiotics vs antivirals:</strong> Antibiotics kill bacteria (e.g. penicillin). They do NOT work on viruses. Overusing antibiotics leads to antibiotic-resistant bacteria (e.g. MRSA).</div>
+</div>
+
+<!-- MED 5: Evolution -->
+<div class="concept-card">
+  <h2>🦒 Evolution and Natural Selection</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 420 130" width="420" height="130" xmlns="http://www.w3.org/2000/svg">
+      <!-- Generation 1 -->
+      <text x="50" y="14" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Generation 1</text>
+      <!-- Short-necked giraffe -->
+      <rect x="25" y="60" width="12" height="35" rx="3" fill="rgba(255,200,80,0.5)" stroke="#ffd700" stroke-width="1.5"/>
+      <rect x="20" y="40" width="22" height="22" rx="6" fill="rgba(255,200,80,0.5)" stroke="#ffd700" stroke-width="1.5"/>
+      <line x1="31" y1="40" x2="34" y2="28" stroke="#ffd700" stroke-width="2"/>
+      <circle cx="34" cy="25" r="5" fill="rgba(255,200,80,0.5)" stroke="#ffd700" stroke-width="1.5"/>
+      <!-- Tree (out of reach) -->
+      <line x1="72" y1="95" x2="72" y2="25" stroke="#80a060" stroke-width="2"/>
+      <circle cx="72" cy="20" r="14" fill="rgba(76,175,80,0.3)" stroke="#4caf50" stroke-width="1.5"/>
+      <text x="72" y="24" text-anchor="middle" fill="#4caf50" font-size="8" font-family="Nunito,sans-serif">leaves</text>
+      <text x="38" y="115" text-anchor="middle" fill="rgba(255,80,80,0.7)" font-size="8" font-family="Nunito,sans-serif">❌ can't reach</text>
+
+      <!-- Arrow right -->
+      <text x="130" y="65" text-anchor="middle" fill="#4caf50" font-size="22">→</text>
+      <text x="130" y="82" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="8" font-family="Nunito,sans-serif">many generations</text>
+
+      <!-- Generation many -->
+      <text x="230" y="14" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Many Generations Later</text>
+      <!-- Tall-necked giraffe -->
+      <rect x="200" y="70" width="12" height="30" rx="3" fill="rgba(255,200,80,0.5)" stroke="#ffd700" stroke-width="1.5"/>
+      <rect x="195" y="50" width="22" height="22" rx="6" fill="rgba(255,200,80,0.5)" stroke="#ffd700" stroke-width="1.5"/>
+      <line x1="206" y1="50" x2="210" y2="18" stroke="#ffd700" stroke-width="2.5"/>
+      <circle cx="210" cy="14" r="5" fill="rgba(255,200,80,0.5)" stroke="#ffd700" stroke-width="1.5"/>
+      <!-- Tree reachable -->
+      <line x1="250" y1="100" x2="250" y2="18" stroke="#80a060" stroke-width="2"/>
+      <circle cx="250" cy="12" r="14" fill="rgba(76,175,80,0.35)" stroke="#4caf50" stroke-width="1.5"/>
+      <text x="250" y="16" text-anchor="middle" fill="#4caf50" font-size="8" font-family="Nunito,sans-serif">leaves</text>
+      <text x="220" y="115" text-anchor="middle" fill="rgba(100,255,100,0.7)" font-size="8" font-family="Nunito,sans-serif">✓ can reach — survives!</text>
+
+      <!-- Darwin box -->
+      <rect x="300" y="20" width="115" height="85" rx="8" fill="rgba(76,175,80,0.1)" stroke="#4caf50" stroke-width="1"/>
+      <text x="357" y="36" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Natural Selection</text>
+      <text x="312" y="52" fill="rgba(255,255,255,0.55)" font-size="8" font-family="Nunito,sans-serif">1. Variation exists</text>
+      <text x="312" y="65" fill="rgba(255,255,255,0.55)" font-size="8" font-family="Nunito,sans-serif">2. Struggle to survive</text>
+      <text x="312" y="78" fill="rgba(255,255,255,0.55)" font-size="8" font-family="Nunito,sans-serif">3. Best adapted survive</text>
+      <text x="312" y="91" fill="rgba(255,255,255,0.55)" font-size="8" font-family="Nunito,sans-serif">4. Pass on traits → offspring</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li><strong>Variation</strong> — individuals in a population are not identical (genetic variation from mutations and sexual reproduction)</li>
+    <li><strong>Selection pressure</strong> — environmental challenges (predators, disease, food scarcity) that determine survival</li>
+    <li>Better adapted individuals have more offspring → advantageous traits become more common</li>
+    <li>Over many generations → populations change → eventually new species (speciation)</li>
+    <li>Charles Darwin proposed natural selection in "On the Origin of Species" (1859)</li>
+  </ul>
+  <div class="key-box"><strong>Evidence for evolution:</strong> Fossil record · Comparative anatomy (homologous structures) · DNA comparisons · Observed evolution (antibiotic resistance, Galapagos finches)</div>
+</div>
+
+<!-- MED 6: Ecosystems and biomes -->
+<div class="concept-card">
+  <h2>🌍 Ecosystems and Biomes</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 420 130" width="420" height="130" xmlns="http://www.w3.org/2000/svg">
+      <!-- World map outline (simplified) -->
+      <ellipse cx="210" cy="65" rx="185" ry="58" fill="rgba(96,165,250,0.12)" stroke="rgba(96,165,250,0.3)" stroke-width="1.5"/>
+      <!-- Biome blobs -->
+      <!-- Tropical rainforest -->
+      <ellipse cx="130" cy="70" rx="30" ry="22" fill="rgba(0,200,50,0.3)" stroke="#00c832" stroke-width="1.5"/>
+      <text x="130" y="74" text-anchor="middle" fill="#00c832" font-size="8" font-family="Nunito,sans-serif" font-weight="700">Rainforest</text>
+      <!-- Desert -->
+      <ellipse cx="230" cy="55" rx="30" ry="18" fill="rgba(255,180,50,0.25)" stroke="#ffb432" stroke-width="1.5"/>
+      <text x="230" y="59" text-anchor="middle" fill="#ffb432" font-size="8" font-family="Nunito,sans-serif" font-weight="700">Desert</text>
+      <!-- Tundra -->
+      <ellipse cx="200" cy="22" rx="60" ry="12" fill="rgba(200,230,255,0.2)" stroke="rgba(200,230,255,0.5)" stroke-width="1.5"/>
+      <text x="200" y="26" text-anchor="middle" fill="rgba(200,230,255,0.8)" font-size="8" font-family="Nunito,sans-serif" font-weight="700">Tundra</text>
+      <!-- Grassland -->
+      <ellipse cx="310" cy="75" rx="35" ry="20" fill="rgba(200,255,100,0.2)" stroke="rgba(200,255,100,0.5)" stroke-width="1.5"/>
+      <text x="310" y="79" text-anchor="middle" fill="rgba(200,255,100,0.8)" font-size="8" font-family="Nunito,sans-serif" font-weight="700">Grassland</text>
+      <!-- Ocean -->
+      <text x="60" y="50" fill="rgba(96,165,250,0.7)" font-size="9" font-family="Nunito,sans-serif" font-weight="700">Ocean</text>
+      <!-- Key below -->
+      <text x="210" y="110" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9" font-family="Nunito,sans-serif">Abiotic factors: temperature, rainfall, light, soil type</text>
+      <text x="210" y="122" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9" font-family="Nunito,sans-serif">Biotic factors: organisms living in the ecosystem</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li><strong>Ecosystem</strong> — community of organisms + their non-living environment interacting together</li>
+    <li><strong>Biome</strong> — large-scale ecosystem defined by climate: tropical rainforest, desert, tundra, ocean, temperate forest, grassland</li>
+    <li><strong>Abiotic factors</strong> — non-living: temperature, rainfall, light intensity, pH, wind</li>
+    <li><strong>Biotic factors</strong> — living: predators, prey, competitors, disease, parasites</li>
+    <li><strong>Habitat</strong> — where an organism lives. <strong>Niche</strong> — its role in the ecosystem</li>
+  </ul>
+  <div class="key-box"><strong>Tropical rainforests</strong> cover ~6% of Earth's surface but contain over 50% of plant and animal species. They also absorb huge amounts of CO₂ — vital for climate regulation.</div>
+</div>
+
+<!-- ═══════════ HARD ═══════════ -->
+<div class="section-label">🔴 Hard</div>
+
+<!-- HARD 1: Mitosis and meiosis -->
+<div class="concept-card">
+  <h2>🔄 Mitosis and Meiosis</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 440 155" width="440" height="155" xmlns="http://www.w3.org/2000/svg">
+      <!-- Mitosis column -->
+      <text x="100" y="14" text-anchor="middle" fill="#4caf50" font-size="11" font-family="Nunito,sans-serif" font-weight="700">MITOSIS</text>
+      <!-- Parent cell -->
+      <circle cx="100" cy="45" r="25" fill="rgba(76,175,80,0.2)" stroke="#4caf50" stroke-width="2"/>
+      <text x="100" y="49" text-anchor="middle" fill="#fff" font-size="9" font-family="Nunito,sans-serif">2n=46</text>
+      <!-- Arrow down -->
+      <line x1="100" y1="70" x2="100" y2="85" stroke="#4caf50" stroke-width="2" marker-end="url(#dArr)"/>
+      <defs><marker id="dArr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4caf50"/></marker></defs>
+      <!-- Two daughter cells -->
+      <circle cx="72" cy="118" r="20" fill="rgba(76,175,80,0.2)" stroke="#4caf50" stroke-width="2"/>
+      <text x="72" y="122" text-anchor="middle" fill="#fff" font-size="9" font-family="Nunito,sans-serif">2n=46</text>
+      <circle cx="128" cy="118" r="20" fill="rgba(76,175,80,0.2)" stroke="#4caf50" stroke-width="2"/>
+      <text x="128" y="122" text-anchor="middle" fill="#fff" font-size="9" font-family="Nunito,sans-serif">2n=46</text>
+      <text x="100" y="148" text-anchor="middle" fill="#4caf50" font-size="9" font-family="Nunito,sans-serif">2 identical daughter cells</text>
+      <text x="100" y="158" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">Growth &amp; repair</text>
+
+      <!-- Divider -->
+      <line x1="215" y1="10" x2="215" y2="155" stroke="rgba(255,255,255,0.15)" stroke-width="1" stroke-dasharray="4 3"/>
+
+      <!-- Meiosis column -->
+      <text x="330" y="14" text-anchor="middle" fill="#ffd700" font-size="11" font-family="Nunito,sans-serif" font-weight="700">MEIOSIS</text>
+      <!-- Parent cell -->
+      <circle cx="330" cy="40" r="22" fill="rgba(255,200,80,0.15)" stroke="#ffd700" stroke-width="2"/>
+      <text x="330" y="44" text-anchor="middle" fill="#fff" font-size="9" font-family="Nunito,sans-serif">2n=46</text>
+      <!-- Arrow down -->
+      <line x1="330" y1="62" x2="330" y2="72" stroke="#ffd700" stroke-width="2" marker-end="url(#dArr2)"/>
+      <defs><marker id="dArr2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ffd700"/></marker></defs>
+      <!-- 4 gametes -->
+      <circle cx="258" cy="115" r="16" fill="rgba(255,200,80,0.15)" stroke="#ffd700" stroke-width="1.5"/>
+      <text x="258" y="119" text-anchor="middle" fill="#ffd700" font-size="9" font-family="Nunito,sans-serif">n=23</text>
+      <circle cx="294" cy="115" r="16" fill="rgba(255,200,80,0.15)" stroke="#ffd700" stroke-width="1.5"/>
+      <text x="294" y="119" text-anchor="middle" fill="#ffd700" font-size="9" font-family="Nunito,sans-serif">n=23</text>
+      <circle cx="330" cy="115" r="16" fill="rgba(255,200,80,0.15)" stroke="#ffd700" stroke-width="1.5"/>
+      <text x="330" y="119" text-anchor="middle" fill="#ffd700" font-size="9" font-family="Nunito,sans-serif">n=23</text>
+      <circle cx="366" cy="115" r="16" fill="rgba(255,200,80,0.15)" stroke="#ffd700" stroke-width="1.5"/>
+      <text x="366" y="119" text-anchor="middle" fill="#ffd700" font-size="9" font-family="Nunito,sans-serif">n=23</text>
+      <text x="330" y="143" text-anchor="middle" fill="#ffd700" font-size="9" font-family="Nunito,sans-serif">4 unique gametes (sex cells)</text>
+      <text x="330" y="153" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">Sexual reproduction</text>
+    </svg>
+  </div>
+  <div class="two-col">
+    <div class="col-box">
+      <div class="col-title">Mitosis</div>
+      1 cell → 2 genetically identical daughter cells. Chromosome number maintained (diploid, 2n). Used for growth, tissue repair, and asexual reproduction. Produces clones.
+    </div>
+    <div class="col-box">
+      <div class="col-title">Meiosis</div>
+      1 cell → 4 genetically unique gametes (sex cells). Chromosome number halved (haploid, n=23). Crossing over creates variation. Sperm (n=23) + egg (n=23) → zygote (2n=46).
+    </div>
+  </div>
+</div>
+
+<!-- HARD 2: Protein synthesis -->
+<div class="concept-card">
+  <h2>🧪 Protein Synthesis</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 440 135" width="440" height="135" xmlns="http://www.w3.org/2000/svg">
+      <!-- Step 1: DNA in nucleus -->
+      <rect x="10" y="20" width="110" height="90" rx="8" fill="rgba(76,175,80,0.08)" stroke="#4caf50" stroke-width="1.2"/>
+      <text x="65" y="35" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">NUCLEUS</text>
+      <!-- DNA helix mini -->
+      <path d="M35,50 Q45,62 55,50 Q65,38 75,50 Q85,62 95,50" fill="none" stroke="#4caf50" stroke-width="2"/>
+      <path d="M35,62 Q45,50 55,62 Q65,74 75,62 Q85,50 95,62" fill="none" stroke="#80ff80" stroke-width="2"/>
+      <text x="65" y="82" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">DNA template</text>
+      <text x="65" y="100" text-anchor="middle" fill="#4caf50" font-size="9" font-family="Nunito,sans-serif" font-weight="700">TRANSCRIPTION</text>
+      <text x="65" y="112" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="8" font-family="Nunito,sans-serif">DNA → mRNA</text>
+
+      <!-- Arrow 1 -->
+      <line x1="122" y1="65" x2="148" y2="65" stroke="#4caf50" stroke-width="2.5" marker-end="url(#gA7)"/>
+      <defs><marker id="gA7" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4caf50"/></marker></defs>
+      <text x="135" y="58" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">mRNA</text>
+      <text x="135" y="80" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">exits</text>
+
+      <!-- Step 2: Ribosome translation -->
+      <rect x="155" y="20" width="140" height="90" rx="8" fill="rgba(76,175,80,0.08)" stroke="#4caf50" stroke-width="1.2"/>
+      <text x="225" y="35" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">RIBOSOME</text>
+      <!-- mRNA strand -->
+      <rect x="170" y="55" width="110" height="16" rx="4" fill="rgba(255,200,80,0.25)" stroke="#ffd700" stroke-width="1.5"/>
+      <text x="225" y="67" text-anchor="middle" fill="#ffd700" font-size="9" font-family="Nunito,sans-serif">mRNA codon: AUG...UUU</text>
+      <!-- tRNA -->
+      <rect x="178" y="35" width="30" height="20" rx="3" fill="rgba(96,165,250,0.2)" stroke="#60a5fa" stroke-width="1"/>
+      <text x="193" y="49" text-anchor="middle" fill="#60a5fa" font-size="8" font-family="Nunito,sans-serif">tRNA</text>
+      <text x="225" y="86" text-anchor="middle" fill="#4caf50" font-size="9" font-family="Nunito,sans-serif" font-weight="700">TRANSLATION</text>
+      <text x="225" y="100" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="8" font-family="Nunito,sans-serif">mRNA → protein</text>
+      <text x="225" y="112" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">3 bases = 1 codon = 1 amino acid</text>
+
+      <!-- Arrow 2 -->
+      <line x1="296" y1="65" x2="316" y2="65" stroke="#4caf50" stroke-width="2.5" marker-end="url(#gA8)"/>
+      <defs><marker id="gA8" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4caf50"/></marker></defs>
+
+      <!-- Step 3: Protein chain -->
+      <rect x="320" y="20" width="115" height="90" rx="8" fill="rgba(76,175,80,0.08)" stroke="#4caf50" stroke-width="1.2"/>
+      <text x="377" y="35" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">PROTEIN</text>
+      <!-- Amino acid chain -->
+      <circle cx="340" cy="65" r="9" fill="rgba(76,175,80,0.4)" stroke="#4caf50" stroke-width="1.5"/>
+      <line x1="349" y1="65" x2="357" y2="65" stroke="#4caf50" stroke-width="2"/>
+      <circle cx="366" cy="65" r="9" fill="rgba(76,175,80,0.4)" stroke="#4caf50" stroke-width="1.5"/>
+      <line x1="375" y1="65" x2="383" y2="65" stroke="#4caf50" stroke-width="2"/>
+      <circle cx="392" cy="65" r="9" fill="rgba(76,175,80,0.4)" stroke="#4caf50" stroke-width="1.5"/>
+      <text x="377" y="90" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="8" font-family="Nunito,sans-serif">amino acid chain</text>
+      <text x="377" y="104" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">folds into</text>
+      <text x="377" y="116" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">3D protein</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li><strong>Transcription</strong> — in the nucleus: DNA template strand copied into messenger RNA (mRNA)</li>
+    <li><strong>Translation</strong> — in the ribosome: mRNA sequence read in triplets (codons); each codon codes for one amino acid</li>
+    <li>20 amino acids. Order determines protein's shape and function</li>
+    <li>Proteins include: enzymes (biological catalysts), hormones (insulin), structural proteins (collagen, keratin), antibodies</li>
+  </ul>
+  <div class="key-box"><strong>Mutation</strong> = change in DNA base sequence. Can alter the amino acid sequence → non-functional protein. Most mutations are harmless; some cause disease (e.g. sickle cell anaemia). Some are beneficial → evolution.</div>
+</div>
+
+<!-- HARD 3: Nervous system -->
+<div class="concept-card">
+  <h2>⚡ Nervous System</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 440 145" width="440" height="145" xmlns="http://www.w3.org/2000/svg">
+      <!-- Neuron diagram -->
+      <text x="220" y="14" text-anchor="middle" fill="#4caf50" font-size="11" font-family="Nunito,sans-serif" font-weight="700">Motor Neuron</text>
+      <!-- Dendrites left -->
+      <line x1="30" y1="68" x2="70" y2="72" stroke="#4caf50" stroke-width="2"/>
+      <line x1="28" y1="80" x2="68" y2="76" stroke="#4caf50" stroke-width="2"/>
+      <line x1="35" y1="58" x2="68" y2="68" stroke="#4caf50" stroke-width="2"/>
+      <text x="28" y="50" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">Dendrites</text>
+      <text x="20" y="62" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">(receive</text>
+      <text x="20" y="74" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">signals)</text>
+      <!-- Cell body -->
+      <circle cx="90" cy="72" r="22" fill="rgba(76,175,80,0.3)" stroke="#4caf50" stroke-width="2"/>
+      <text x="90" y="70" text-anchor="middle" fill="#fff" font-size="9" font-family="Nunito,sans-serif">Cell</text>
+      <text x="90" y="82" text-anchor="middle" fill="#fff" font-size="9" font-family="Nunito,sans-serif">body</text>
+      <!-- Axon -->
+      <line x1="112" y1="72" x2="290" y2="72" stroke="#4caf50" stroke-width="3"/>
+      <!-- Myelin sheath segments -->
+      <rect x="130" y="65" width="25" height="14" rx="7" fill="rgba(255,200,80,0.2)" stroke="#ffd700" stroke-width="1"/>
+      <rect x="165" y="65" width="25" height="14" rx="7" fill="rgba(255,200,80,0.2)" stroke="#ffd700" stroke-width="1"/>
+      <rect x="200" y="65" width="25" height="14" rx="7" fill="rgba(255,200,80,0.2)" stroke="#ffd700" stroke-width="1"/>
+      <rect x="235" y="65" width="25" height="14" rx="7" fill="rgba(255,200,80,0.2)" stroke="#ffd700" stroke-width="1"/>
+      <rect x="270" y="65" width="20" height="14" rx="7" fill="rgba(255,200,80,0.2)" stroke="#ffd700" stroke-width="1"/>
+      <text x="200" y="55" text-anchor="middle" fill="#ffd700" font-size="9" font-family="Nunito,sans-serif">Myelin sheath (speeds signals)</text>
+      <!-- Axon terminals / synapse -->
+      <line x1="290" y1="72" x2="310" y2="60" stroke="#4caf50" stroke-width="2"/>
+      <line x1="290" y1="72" x2="310" y2="80" stroke="#4caf50" stroke-width="2"/>
+      <circle cx="318" cy="57" r="5" fill="rgba(76,175,80,0.5)" stroke="#4caf50" stroke-width="1.5"/>
+      <circle cx="318" cy="80" r="5" fill="rgba(76,175,80,0.5)" stroke="#4caf50" stroke-width="1.5"/>
+      <text x="330" y="61" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">Synapse</text>
+      <!-- Signal direction arrow -->
+      <line x1="145" y1="92" x2="265" y2="92" stroke="rgba(76,175,80,0.5)" stroke-width="1.5" marker-end="url(#gA9)" stroke-dasharray="3 3"/>
+      <defs><marker id="gA9" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="rgba(76,175,80,0.5)"/></marker></defs>
+      <text x="200" y="105" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="8" font-family="Nunito,sans-serif">electrical signal travels along axon</text>
+      <!-- Synapse zoom inset -->
+      <rect x="340" y="20" width="95" height="110" rx="8" fill="rgba(0,0,0,0.25)" stroke="rgba(76,175,80,0.3)" stroke-width="1"/>
+      <text x="387" y="34" text-anchor="middle" fill="#4caf50" font-size="9" font-family="Nunito,sans-serif" font-weight="700">Synapse</text>
+      <rect x="350" y="40" width="30" height="30" rx="4" fill="rgba(76,175,80,0.2)" stroke="#4caf50" stroke-width="1"/>
+      <text x="365" y="59" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">pre</text>
+      <!-- Vesicles -->
+      <circle cx="368" cy="72" r="4" fill="rgba(76,175,80,0.5)"/>
+      <circle cx="378" cy="72" r="4" fill="rgba(76,175,80,0.5)"/>
+      <circle cx="373" cy="80" r="4" fill="rgba(76,175,80,0.5)"/>
+      <text x="387" y="88" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">neuro-</text>
+      <text x="387" y="98" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">transmit.</text>
+      <rect x="405" y="95" width="25" height="30" rx="4" fill="rgba(76,175,80,0.2)" stroke="#4caf50" stroke-width="1"/>
+      <text x="417" y="113" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">post</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li><strong>Sensory neuron</strong> — carries signals from receptors (skin, eye, nose) to CNS</li>
+    <li><strong>Motor neuron</strong> — carries signals from CNS to effectors (muscles, glands)</li>
+    <li><strong>Relay neuron</strong> — connects sensory and motor neurons (in CNS)</li>
+    <li><strong>Reflex arc</strong> — receptor → sensory neuron → relay neuron (spinal cord) → motor neuron → effector. Faster than conscious thought — protective</li>
+    <li><strong>Synapse</strong> — gap between neurons. Neurotransmitters (chemicals) carry signal across. e.g. acetylcholine, dopamine</li>
+  </ul>
+  <div class="key-box"><strong>Reflex example:</strong> Touch hot object → pain receptor → sensory neuron → spinal cord (reflex arc) → motor neuron → arm muscle contracts and pulls away. Brain receives signal AFTER you've already moved.</div>
+</div>
+
+<!-- HARD 4: Hormones vs Nervous -->
+<div class="concept-card">
+  <h2>⚖️ Hormones vs Nervous System</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 420 130" width="420" height="130" xmlns="http://www.w3.org/2000/svg">
+      <!-- Headers -->
+      <rect x="10" y="10" width="185" height="22" rx="5" fill="rgba(76,175,80,0.25)" stroke="#4caf50" stroke-width="1.5"/>
+      <text x="102" y="25" text-anchor="middle" fill="#4caf50" font-size="11" font-family="Nunito,sans-serif" font-weight="700">NERVOUS SYSTEM</text>
+      <rect x="225" y="10" width="185" height="22" rx="5" fill="rgba(255,200,80,0.2)" stroke="#ffd700" stroke-width="1.5"/>
+      <text x="317" y="25" text-anchor="middle" fill="#ffd700" font-size="11" font-family="Nunito,sans-serif" font-weight="700">ENDOCRINE (HORMONES)</text>
+      <!-- Comparison rows -->
+      <text x="15" y="48" fill="#4caf50" font-size="9" font-family="Nunito,sans-serif">Signal type: electrical impulse</text>
+      <text x="230" y="48" fill="#ffd700" font-size="9" font-family="Nunito,sans-serif">Signal type: chemical in blood</text>
+      <text x="15" y="64" fill="#4caf50" font-size="9" font-family="Nunito,sans-serif">Speed: very fast (milliseconds)</text>
+      <text x="230" y="64" fill="#ffd700" font-size="9" font-family="Nunito,sans-serif">Speed: slow (minutes → hours)</text>
+      <text x="15" y="80" fill="#4caf50" font-size="9" font-family="Nunito,sans-serif">Duration: short-lived effects</text>
+      <text x="230" y="80" fill="#ffd700" font-size="9" font-family="Nunito,sans-serif">Duration: long-lasting effects</text>
+      <text x="15" y="96" fill="#4caf50" font-size="9" font-family="Nunito,sans-serif">Target: specific cell/organ</text>
+      <text x="230" y="96" fill="#ffd700" font-size="9" font-family="Nunito,sans-serif">Target: target organs (receptors)</text>
+      <text x="15" y="112" fill="#4caf50" font-size="9" font-family="Nunito,sans-serif">Example: reflex arc, vision</text>
+      <text x="230" y="112" fill="#ffd700" font-size="9" font-family="Nunito,sans-serif">Example: insulin, adrenaline</text>
+      <!-- VS divider -->
+      <text x="212" y="72" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="18" font-family="Nunito,sans-serif">vs</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li><strong>Insulin</strong> (pancreas) — lowers blood glucose when it rises after eating. Opposite: glucagon raises blood glucose</li>
+    <li><strong>Adrenaline</strong> (adrenal glands) — fight or flight response: increases heart rate, dilates airways, raises blood sugar</li>
+    <li><strong>Testosterone</strong> (testes) / <strong>Oestrogen</strong> (ovaries) — sex hormones controlling secondary sexual characteristics and reproduction</li>
+    <li><strong>ADH</strong> (pituitary) — controls water reabsorption in kidneys; regulates water balance</li>
+    <li><strong>Type 1 diabetes</strong> — immune system destroys insulin-producing cells. Treated with insulin injections</li>
+  </ul>
+  <div class="key-box"><strong>Negative feedback:</strong> Blood glucose rises → pancreas releases insulin → glucose taken into cells → blood glucose falls → insulin production stops. This self-regulation maintains homeostasis.</div>
+</div>
+
+<!-- HARD 5: Biodiversity and conservation -->
+<div class="concept-card">
+  <h2>🌱 Biodiversity and Conservation</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 420 130" width="420" height="130" xmlns="http://www.w3.org/2000/svg">
+      <!-- Extinction risk graph -->
+      <line x1="30" y1="110" x2="30" y2="15" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+      <line x1="30" y1="110" x2="300" y2="110" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+      <text x="8" y="65" fill="rgba(255,255,255,0.45)" font-size="9" font-family="Nunito,sans-serif" transform="rotate(-90 8 65)">Species</text>
+      <text x="165" y="125" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="9" font-family="Nunito,sans-serif">Time →</text>
+      <!-- Stable line (historical) -->
+      <path d="M30,60 Q80,58 130,62 Q160,63 200,60" fill="none" stroke="#4caf50" stroke-width="2.5"/>
+      <!-- Sharp decline -->
+      <path d="M200,60 Q230,65 260,90 Q280,102 300,110" fill="none" stroke="#ff4040" stroke-width="2.5"/>
+      <!-- Labels -->
+      <text x="80" y="52" fill="#4caf50" font-size="9" font-family="Nunito,sans-serif">Historical level</text>
+      <text x="215" y="75" fill="#ff4040" font-size="9" font-family="Nunito,sans-serif">Mass extinction</text>
+      <!-- Now marker -->
+      <line x1="200" y1="20" x2="200" y2="110" stroke="rgba(255,255,255,0.25)" stroke-width="1" stroke-dasharray="4 3"/>
+      <text x="204" y="28" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Nunito,sans-serif">Now →</text>
+      <!-- Causes box -->
+      <rect x="308" y="10" width="108" height="95" rx="8" fill="rgba(255,80,80,0.08)" stroke="rgba(255,80,80,0.35)" stroke-width="1.2"/>
+      <text x="362" y="26" text-anchor="middle" fill="#ff8080" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Causes</text>
+      <text x="315" y="40" fill="rgba(255,255,255,0.55)" font-size="8" font-family="Nunito,sans-serif">▸ Habitat destruction</text>
+      <text x="315" y="53" fill="rgba(255,255,255,0.55)" font-size="8" font-family="Nunito,sans-serif">▸ Climate change</text>
+      <text x="315" y="66" fill="rgba(255,255,255,0.55)" font-size="8" font-family="Nunito,sans-serif">▸ Pollution</text>
+      <text x="315" y="79" fill="rgba(255,255,255,0.55)" font-size="8" font-family="Nunito,sans-serif">▸ Invasive species</text>
+      <text x="315" y="92" fill="rgba(255,255,255,0.55)" font-size="8" font-family="Nunito,sans-serif">▸ Overhunting</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li><strong>Biodiversity</strong> — variety of species in an area; also includes genetic variation within species and habitat variety</li>
+    <li>High biodiversity = stable ecosystem (more food web connections = more resilient to change)</li>
+    <li><strong>Habitat destruction</strong> (deforestation, urbanisation) is the #1 cause of species loss</li>
+    <li><strong>Conservation methods:</strong> National parks and nature reserves · Captive breeding programmes · Seed banks (e.g. Svalbard) · Rewilding · International agreements (CITES)</li>
+    <li>Extinction is <strong>permanent</strong> — once gone, a species cannot be recovered (generally)</li>
+  </ul>
+  <div class="key-box"><strong>Ecosystem services</strong> provided by biodiversity: pollination of crops · water purification · carbon storage · soil fertility · medicines (penicillin from mould, aspirin from willow bark). Loss of biodiversity threatens all of these.</div>
+</div>
+
+<!-- HARD 6: Biotechnology -->
+<div class="concept-card">
+  <h2>🔬 Biotechnology</h2>
+  <div class="svg-box">
+    <svg viewBox="0 0 440 145" width="440" height="145" xmlns="http://www.w3.org/2000/svg">
+      <!-- Bacterium with plasmid -->
+      <ellipse cx="100" cy="72" rx="65" ry="40" fill="rgba(76,175,80,0.15)" stroke="#4caf50" stroke-width="2"/>
+      <text x="100" y="62" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Bacterium</text>
+      <!-- Chromosome inside -->
+      <ellipse cx="90" cy="75" rx="20" ry="14" fill="rgba(76,175,80,0.25)" stroke="#4caf50" stroke-width="1.5"/>
+      <text x="90" y="79" text-anchor="middle" fill="#fff" font-size="7" font-family="Nunito,sans-serif">chromosome</text>
+      <!-- Plasmid with human gene inserted -->
+      <circle cx="140" cy="80" r="14" fill="rgba(255,200,80,0.15)" stroke="#ffd700" stroke-width="2"/>
+      <text x="140" y="78" text-anchor="middle" fill="#ffd700" font-size="7" font-family="Nunito,sans-serif">plasmid</text>
+      <text x="140" y="88" text-anchor="middle" fill="#ffd700" font-size="7" font-family="Nunito,sans-serif">+insulin</text>
+      <text x="100" y="125" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9" font-family="Nunito,sans-serif">E. coli makes human insulin</text>
+
+      <!-- Process steps right -->
+      <rect x="190" y="10" width="245" height="125" rx="8" fill="rgba(0,0,0,0.2)" stroke="rgba(76,175,80,0.3)" stroke-width="1"/>
+      <text x="312" y="26" text-anchor="middle" fill="#4caf50" font-size="10" font-family="Nunito,sans-serif" font-weight="700">Genetic Engineering Steps</text>
+      <text x="200" y="42" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">1. Identify useful gene (e.g. human insulin gene)</text>
+      <text x="200" y="57" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">2. Cut gene out using restriction enzymes</text>
+      <text x="200" y="72" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">3. Cut open plasmid (bacterial DNA ring)</text>
+      <text x="200" y="87" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">4. Insert gene into plasmid (ligase enzyme)</text>
+      <text x="200" y="102" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">5. Insert recombinant plasmid into bacterium</text>
+      <text x="200" y="117" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">6. Bacterium reproduces → all copies make protein</text>
+      <!-- CRISPR note -->
+      <text x="200" y="130" fill="rgba(76,175,80,0.6)" font-size="8" font-family="Nunito,sans-serif">CRISPR-Cas9: molecular scissors that edit DNA precisely</text>
+    </svg>
+  </div>
+  <ul class="info-list">
+    <li><strong>Genetic engineering</strong> — cutting a gene from one organism and inserting it into another using restriction enzymes (cut) and ligase (join)</li>
+    <li><strong>Insulin production</strong> — human insulin gene inserted into <em>E. coli</em> bacteria; bacteria ferment in vats and produce insulin at scale for diabetics</li>
+    <li><strong>Golden Rice</strong> — rice genetically modified to produce beta-carotene (vitamin A precursor) to combat deficiency in developing countries</li>
+    <li><strong>CRISPR-Cas9</strong> — gene editing tool that can cut and modify DNA at precise locations; potential to cure genetic diseases</li>
+    <li><strong>Stem cells</strong> — undifferentiated cells that can develop into any specialised cell type; used in medicine to repair damaged tissues</li>
+  </ul>
+  <div class="key-box"><strong>Ethical considerations:</strong> GM crops — could harm ecosystems, reduce biodiversity, or be monopolised by corporations. Designer babies — where is the line between treatment and enhancement? These questions have no single right answer.</div>
+</div>
+
+</div><!-- end .page -->
+
+<script>
+  const el = document.getElementById('ptsDisplay');
+  if(el) el.textContent = '⭐ ' + (parseInt(localStorage.getItem('kids_points')||'0'));
+</script>
+</body>
+</html>

@@ -170,6 +170,7 @@
   <div class="tile-row"><div class="tile-info"><span class="tile-icon">🌍</span><span class="tile-name">Environmental Science</span></div><label class="toggle"><input type="checkbox" id="t-environmental" onchange="toggleTile('environmental',this.checked)"><span class="toggle-track"></span></label></div>
   <div class="tile-row"><div class="tile-info"><span class="tile-icon">🔬</span><span class="tile-name">Biology</span></div><label class="toggle"><input type="checkbox" id="t-biology" onchange="toggleTile('biology',this.checked)"><span class="toggle-track"></span></label></div>
   <div class="tile-row"><div class="tile-info"><span class="tile-icon">🎓</span><span class="tile-name">NSC Science Bowl</span></div><label class="toggle"><input type="checkbox" id="t-nsc" onchange="toggleTile('nsc',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">📚</span><span class="tile-name">Learn Hub</span></div><label class="toggle"><input type="checkbox" id="t-learn" onchange="toggleTile('learn',this.checked)"><span class="toggle-track"></span></label></div>
 </div>
 
 <div class="actions">
@@ -314,7 +315,7 @@ function resetAll() {
   }
 }
 
-const ALL_TILES = ['princess','soccer','sba-math','sba-ela','sba-science','area-2d','circles','volume-3d','chemistry','physics','maths','environmental','biology','nsc'];
+const ALL_TILES = ['princess','soccer','sba-math','sba-ela','sba-science','area-2d','circles','volume-3d','chemistry','physics','maths','environmental','biology','nsc','learn'];
 function getHidden() { return JSON.parse(localStorage.getItem('kids_hidden_tiles')||'[]'); }
 function saveHidden(arr) { localStorage.setItem('kids_hidden_tiles', JSON.stringify(arr)); }
 function toggleTile(id, visible) {

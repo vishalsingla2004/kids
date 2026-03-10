@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌍 Earth Science — Learn</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --c1: #001426;
+    --c2: #00354f;
+    --acc: #26c6da;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--c1);
+    color: #e0f7fa;
+    min-height: 100dvh;
+    padding-bottom: 60px;
+  }
+
+  /* STICKY HEADER */
+  .site-header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(0,20,38,0.96);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(38,198,218,0.2);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 20px; gap: 12px;
+  }
+  .site-header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.1rem, 4vw, 1.6rem);
+    color: var(--acc);
+    text-shadow: 0 0 20px rgba(38,198,218,0.4);
+    flex: 1; text-align: center;
+  }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: rgba(255,255,255,0.6); text-decoration: none;
+    font-size: 0.85rem; font-weight: 700;
+    padding: 5px 12px; border-radius: 50px;
+    border: 1px solid rgba(38,198,218,0.25);
+    background: rgba(38,198,218,0.07);
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .back-link:hover { color: var(--acc); background: rgba(38,198,218,0.15); }
+  .pts-pill {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem; color: #ffd700;
+    background: rgba(255,215,0,0.1);
+    border: 1px solid rgba(255,215,0,0.3);
+    padding: 4px 12px; border-radius: 50px;
+    white-space: nowrap;
+  }
+
+  /* MAIN CONTENT */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 16px;
+  }
+
+  /* SECTION HEADERS */
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    margin: 36px 0 18px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(38,198,218,0.2);
+  }
+  .section-header .badge {
+    font-size: 1.5rem;
+  }
+  .section-header h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    color: var(--acc);
+  }
+  .section-header .count {
+    font-size: 0.8rem; color: rgba(255,255,255,0.4);
+    margin-left: auto;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--c2);
+    border-radius: 16px;
+    border-left: 4px solid var(--acc);
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  .card h3 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.25rem;
+    color: var(--acc);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* SVG WRAPPER */
+  .svg-wrap {
+    background: rgba(0,20,38,0.7);
+    border-radius: 12px;
+    border: 1px solid rgba(38,198,218,0.2);
+    margin-bottom: 16px;
+    padding: 8px;
+    overflow: hidden;
+    text-align: center;
+  }
+  .svg-wrap svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* KEY BOX */
+  .key-box {
+    background: rgba(0,10,20,0.7);
+    border: 1px solid var(--acc);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+  .key-box strong { color: var(--acc); }
+  .key-box .krow { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 4px; }
+  .key-box .krow:last-child { margin-bottom: 0; }
+  .key-box .klabel {
+    color: var(--acc); font-weight: 900;
+    min-width: 110px; flex-shrink: 0;
+  }
+
+  /* FACT / EXAMPLE BOX */
+  .fact-box {
+    background: rgba(38,198,218,0.05);
+    border-left: 3px solid var(--acc);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: rgba(224,247,250,0.88);
+  }
+  .fact-box strong { color: #ffd700; }
+
+  /* EXPLANATION TEXT */
+  .explain {
+    font-size: 0.93rem;
+    line-height: 1.7;
+    color: rgba(224,247,250,0.9);
+    margin-bottom: 10px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem; font-weight: 900;
+    padding: 2px 8px; border-radius: 20px;
+    margin-left: 8px; vertical-align: middle;
+    letter-spacing: 0.5px;
+  }
+  .tag-easy { background: rgba(76,175,80,0.2); color: #4caf50; border: 1px solid #4caf50; }
+  .tag-med  { background: rgba(255,193,7,0.2);  color: #ffc107; border: 1px solid #ffc107; }
+  .tag-hard { background: rgba(244,67,54,0.2);  color: #f44336; border: 1px solid #f44336; }
+
+  /* RESPONSIVE */
+  @media (max-width: 480px) {
+    .card { padding: 16px; }
+    .key-box .klabel { min-width: 85px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="../" class="back-link">← Back</a>
+  <h1>🌍 Earth Science</h1>
+  <div class="pts-pill" id="ptsDisplay">⭐ 0</div>
+</header>
+
+<main>
+
+<!-- ═══════════════════════════════════════════
+     EASY SECTION
+════════════════════════════════════════════ -->
+<div class="section-header">
+  <span class="badge">🟢</span>
+  <h2>Easy — Core Concepts</h2>
+  <span class="count">6 cards</span>
+</div>
+
+<!-- EASY 1: Earth's Layers -->
+<div class="card">
+  <h3>🌐 Earth's Layers <span class="tag tag-easy">EASY</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 400 340" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <!-- Background -->
+      <rect width="400" height="340" fill="#001426" rx="8"/>
+      <!-- Inner Core -->
+      <circle cx="200" cy="175" r="52" fill="#ff6b35" stroke="#ff9a3c" stroke-width="2"/>
+      <text x="200" y="170" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">Inner Core</text>
+      <text x="200" y="183" text-anchor="middle" fill="#ffcc99" font-size="9">Solid iron/nickel</text>
+      <text x="200" y="195" text-anchor="middle" fill="#ffcc99" font-size="9">~5100-6371 km depth</text>
+      <!-- Outer Core -->
+      <circle cx="200" cy="175" r="88" fill="none" stroke="#ff9a3c" stroke-width="36" opacity="0.55"/>
+      <text x="310" y="148" fill="#ffb347" font-size="9" font-weight="bold">Outer Core</text>
+      <text x="310" y="160" fill="#ffcc80" font-size="8">Liquid iron/nickel</text>
+      <text x="310" y="172" fill="#ffcc80" font-size="8">2900–5100 km</text>
+      <line x1="270" y1="155" x2="255" y2="163" stroke="#ff9a3c" stroke-width="1" stroke-dasharray="3,2"/>
+      <!-- Mantle -->
+      <circle cx="200" cy="175" r="145" fill="none" stroke="#e07b39" stroke-width="108" opacity="0.35"/>
+      <circle cx="200" cy="175" r="145" fill="none" stroke="#c0622a" stroke-width="2"/>
+      <text x="60" y="80" fill="#e8a87c" font-size="9" font-weight="bold">Mantle</text>
+      <text x="60" y="92" fill="#d4956a" font-size="8">Semi-solid rock</text>
+      <text x="60" y="104" fill="#d4956a" font-size="8">30–2900 km</text>
+      <text x="60" y="116" fill="#d4956a" font-size="8">Largest layer</text>
+      <line x1="100" y1="110" x2="130" y2="135" stroke="#e07b39" stroke-width="1" stroke-dasharray="3,2"/>
+      <!-- Crust -->
+      <circle cx="200" cy="175" r="149" fill="none" stroke="#4caf50" stroke-width="6"/>
+      <text x="200" y="22" text-anchor="middle" fill="#81c784" font-size="10" font-weight="bold">Crust (5–70 km)</text>
+      <text x="200" y="34" text-anchor="middle" fill="#a5d6a7" font-size="9">Solid rock — where we live</text>
+      <line x1="200" y1="38" x2="200" y2="26" stroke="#4caf50" stroke-width="1" stroke-dasharray="3,2"/>
+      <!-- Convection arrow hint in mantle -->
+      <path d="M 155 175 Q 140 145 165 130 Q 190 115 200 130" fill="none" stroke="#ffaa44" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+      <polygon points="200,127 205,133 195,133" fill="#ffaa44" opacity="0.6"/>
+      <text x="105" y="175" fill="#ffaa44" font-size="8" opacity="0.8">Convection</text>
+      <text x="105" y="185" fill="#ffaa44" font-size="8" opacity="0.8">currents</text>
+      <!-- Depth scale on right -->
+      <text x="360" y="30" fill="rgba(255,255,255,0.4)" font-size="8">depth</text>
+      <line x1="370" y1="26" x2="370" y2="322" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+      <line x1="366" y1="26" x2="374" y2="26" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+      <text x="376" y="30" fill="rgba(255,255,255,0.5)" font-size="7">0 km</text>
+      <line x1="366" y1="110" x2="374" y2="110" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+      <text x="376" y="114" fill="rgba(255,255,255,0.5)" font-size="7">~30</text>
+      <line x1="366" y1="200" x2="374" y2="200" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+      <text x="376" y="204" fill="rgba(255,255,255,0.5)" font-size="7">2900</text>
+      <line x1="366" y1="262" x2="374" y2="262" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+      <text x="376" y="266" fill="rgba(255,255,255,0.5)" font-size="7">5100</text>
+      <line x1="366" y1="322" x2="374" y2="322" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+      <text x="376" y="326" fill="rgba(255,255,255,0.5)" font-size="7">6371</text>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Crust:</span><span>Outermost solid layer, 5–70 km thick. Oceanic crust is thinner and denser; continental crust is thicker.</span></div>
+    <div class="krow"><span class="klabel">Mantle:</span><span>Thickest layer (2,870 km). Semi-solid rock that flows slowly. <strong>Convection currents</strong> here drive plate movement.</span></div>
+    <div class="krow"><span class="klabel">Outer Core:</span><span>Liquid iron and nickel. Its movement generates Earth's <strong>magnetic field</strong>.</span></div>
+    <div class="krow"><span class="klabel">Inner Core:</span><span>Solid iron and nickel. Hottest part (~5,000°C). Solid due to intense pressure despite extreme heat.</span></div>
+  </div>
+  <p class="explain">Earth formed about 4.6 billion years ago. Denser materials sank to the centre (iron/nickel) while lighter rock rose to form the crust — a process called <strong>differentiation</strong>. We know about Earth's interior from how seismic (earthquake) waves travel through it.</p>
+  <div class="fact-box"><strong>Remember:</strong> Crust → Mantle → Outer Core → Inner Core. The mantle makes up about 84% of Earth's volume. Mantle convection is the engine behind all plate tectonic activity.</div>
+</div>
+
+<!-- EASY 2: Rock Types -->
+<div class="card">
+  <h3>🪨 Rock Types &amp; the Rock Cycle <span class="tag tag-easy">EASY</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 440 300" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="440" height="300" fill="#001426" rx="8"/>
+      <!-- Three rock type nodes -->
+      <!-- Igneous (top) -->
+      <ellipse cx="220" cy="55" rx="70" ry="32" fill="#b71c1c" stroke="#ef5350" stroke-width="2"/>
+      <text x="220" y="50" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">IGNEOUS</text>
+      <text x="220" y="64" text-anchor="middle" fill="#ffcdd2" font-size="9">cooled magma/lava</text>
+      <!-- Sedimentary (bottom-left) -->
+      <ellipse cx="100" cy="230" rx="70" ry="32" fill="#1565c0" stroke="#42a5f5" stroke-width="2"/>
+      <text x="100" y="225" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">SEDIMENTARY</text>
+      <text x="100" y="239" text-anchor="middle" fill="#bbdefb" font-size="9">compressed layers</text>
+      <!-- Metamorphic (bottom-right) -->
+      <ellipse cx="340" cy="230" rx="70" ry="32" fill="#1b5e20" stroke="#66bb6a" stroke-width="2"/>
+      <text x="340" y="225" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">METAMORPHIC</text>
+      <text x="340" y="239" text-anchor="middle" fill="#c8e6c9" font-size="9">heat &amp; pressure</text>
+      <!-- Arrows: Igneous → Sedimentary (weathering/erosion) -->
+      <path d="M 162 75 Q 80 130 110 198" fill="none" stroke="#42a5f5" stroke-width="1.8" marker-end="url(#arr-teal)"/>
+      <text x="55" y="140" fill="#90caf9" font-size="8.5" text-anchor="middle">weathering</text>
+      <text x="55" y="151" fill="#90caf9" font-size="8.5" text-anchor="middle">&amp; erosion</text>
+      <!-- Arrows: Sedimentary → Metamorphic (heat/pressure) -->
+      <path d="M 170 230 L 270 230" fill="none" stroke="#66bb6a" stroke-width="1.8" marker-end="url(#arr-green)"/>
+      <text x="220" y="222" fill="#a5d6a7" font-size="8.5" text-anchor="middle">heat &amp; pressure</text>
+      <!-- Arrows: Metamorphic → Igneous (melting) -->
+      <path d="M 330 198 Q 320 130 280 75" fill="none" stroke="#ef5350" stroke-width="1.8" marker-end="url(#arr-red)"/>
+      <text x="370" y="140" fill="#ef9a9a" font-size="8.5" text-anchor="middle">melting</text>
+      <text x="370" y="151" fill="#ef9a9a" font-size="8.5" text-anchor="middle">→ magma</text>
+      <!-- Extra: Igneous → Metamorphic -->
+      <path d="M 278 72 Q 350 110 340 198" fill="none" stroke="#ffa726" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arr-orange)"/>
+      <text x="378" y="90" fill="#ffb74d" font-size="7.5">heat</text>
+      <!-- Extra: Metamorphic → Sedimentary -->
+      <path d="M 270 230 Q 220 280 170 230" fill="none" stroke="#ce93d8" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arr-purple)"/>
+      <text x="220" y="275" fill="#ce93d8" font-size="7.5" text-anchor="middle">erosion → sediment</text>
+      <!-- Extra: Sedimentary → Igneous (subduction+melting) -->
+      <path d="M 110 198 Q 100 130 162 75" fill="none" stroke="#ffa726" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arr-orange)"/>
+      <text x="30" y="110" fill="#ffb74d" font-size="7.5">subduction</text>
+      <text x="30" y="121" fill="#ffb74d" font-size="7.5">&amp; melting</text>
+      <!-- Centre label -->
+      <text x="220" y="148" text-anchor="middle" fill="rgba(38,198,218,0.7)" font-size="9" font-weight="bold">ROCK CYCLE</text>
+      <!-- Arrow defs -->
+      <defs>
+        <marker id="arr-teal" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#42a5f5"/></marker>
+        <marker id="arr-green" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#66bb6a"/></marker>
+        <marker id="arr-red" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#ef5350"/></marker>
+        <marker id="arr-orange" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#ffa726"/></marker>
+        <marker id="arr-purple" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#ce93d8"/></marker>
+      </defs>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Igneous:</span><span>Formed when magma (underground) or lava (surface) cools &amp; solidifies. <strong>Intrusive</strong>: cools slowly underground → large crystals (e.g. granite). <strong>Extrusive</strong>: cools fast at surface → small crystals (e.g. basalt).</span></div>
+    <div class="krow"><span class="klabel">Sedimentary:</span><span>Layers of sediment (sand, silt, shells) compressed over millions of years. Examples: limestone, sandstone, chalk. Can contain <strong>fossils</strong>.</span></div>
+    <div class="krow"><span class="klabel">Metamorphic:</span><span>Existing rocks transformed by heat and/or pressure. Limestone → marble; shale → slate; sandstone → quartzite.</span></div>
+  </div>
+  <p class="explain">All three rock types can be converted into one another through the rock cycle. This cycle is driven by plate tectonics, the water cycle, and Earth's internal heat. No rock is permanently one type — given enough time and the right conditions, any rock can change.</p>
+  <div class="fact-box"><strong>Key fact:</strong> Fossils are only found in <strong>sedimentary</strong> rock because the other types involve conditions (extreme heat/pressure/melting) that would destroy organic material. Most of Earth's surface rock is sedimentary, but the most abundant rock by volume in the crust is igneous.</div>
+</div>
+
+<!-- EASY 3: Water Cycle -->
+<div class="card">
+  <h3>💧 The Water Cycle <span class="tag tag-easy">EASY</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 460 280" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="460" height="280" fill="#001426" rx="8"/>
+      <!-- Sky gradient area -->
+      <rect x="0" y="0" width="460" height="150" fill="rgba(0,30,60,0.5)" rx="8"/>
+      <!-- Sun -->
+      <circle cx="390" cy="42" r="28" fill="#ffd600" opacity="0.85"/>
+      <text x="390" y="47" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">SUN</text>
+      <line x1="390" y1="8" x2="390" y2="0" stroke="#ffd600" stroke-width="2" opacity="0.6"/>
+      <line x1="420" y1="15" x2="426" y2="10" stroke="#ffd600" stroke-width="2" opacity="0.6"/>
+      <line x1="426" y1="42" x2="434" y2="42" stroke="#ffd600" stroke-width="2" opacity="0.6"/>
+      <line x1="360" y1="15" x2="354" y2="10" stroke="#ffd600" stroke-width="2" opacity="0.6"/>
+      <!-- Ocean -->
+      <ellipse cx="90" cy="228" rx="80" ry="28" fill="#0277bd" opacity="0.8"/>
+      <text x="90" y="233" text-anchor="middle" fill="#e3f2fd" font-size="10" font-weight="bold">OCEAN</text>
+      <!-- Mountain -->
+      <polygon points="280,240 330,130 380,240" fill="#37474f" stroke="#546e7a" stroke-width="1.5"/>
+      <polygon points="315,155 330,130 345,155" fill="#eceff1" opacity="0.7"/>
+      <!-- Ground -->
+      <rect x="0" y="238" width="460" height="42" fill="#1b5e20" rx="0"/>
+      <rect x="0" y="238" width="460" height="5" fill="#2e7d32"/>
+      <text x="230" y="262" text-anchor="middle" fill="#a5d6a7" font-size="9">Ground / Collection zone</text>
+      <!-- Underground water arrow -->
+      <path d="M 200 252 Q 140 260 100 248" fill="none" stroke="#42a5f5" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#aw1)"/>
+      <text x="155" y="270" fill="#90caf9" font-size="8" text-anchor="middle">groundwater</text>
+      <!-- Evaporation arrows -->
+      <path d="M 80 200 Q 85 165 100 130" fill="none" stroke="#ffb74d" stroke-width="2" marker-end="url(#aw2)"/>
+      <path d="M 100 195 Q 110 158 125 125" fill="none" stroke="#ffb74d" stroke-width="2" opacity="0.6" marker-end="url(#aw2)"/>
+      <text x="40" y="155" fill="#ffcc80" font-size="9" font-weight="bold">EVAPORATION</text>
+      <text x="40" y="167" fill="#ffcc80" font-size="8">Sun heats water</text>
+      <text x="40" y="178" fill="#ffcc80" font-size="8">→ water vapour</text>
+      <!-- Cloud -->
+      <ellipse cx="200" cy="78" rx="50" ry="22" fill="#b0bec5" opacity="0.9"/>
+      <ellipse cx="175" cy="85" rx="32" ry="18" fill="#cfd8dc"/>
+      <ellipse cx="225" cy="83" rx="35" ry="19" fill="#cfd8dc"/>
+      <text x="200" y="80" text-anchor="middle" fill="#37474f" font-size="9" font-weight="bold">Cloud</text>
+      <!-- Condensation label -->
+      <text x="200" y="50" text-anchor="middle" fill="#e0f7fa" font-size="9" font-weight="bold">CONDENSATION</text>
+      <text x="200" y="61" text-anchor="middle" fill="#b2ebf2" font-size="8">vapour cools → droplets</text>
+      <!-- Precipitation arrows (rain) -->
+      <line x1="178" y1="103" x2="170" y2="125" stroke="#42a5f5" stroke-width="2" marker-end="url(#aw3)"/>
+      <line x1="192" y1="105" x2="184" y2="133" stroke="#42a5f5" stroke-width="2" marker-end="url(#aw3)"/>
+      <line x1="207" y1="105" x2="199" y2="133" stroke="#42a5f5" stroke-width="2" marker-end="url(#aw3)"/>
+      <line x1="222" y1="103" x2="216" y2="131" stroke="#42a5f5" stroke-width="2" marker-end="url(#aw3)"/>
+      <text x="158" y="142" fill="#81d4fa" font-size="9" font-weight="bold">PRECIPITATION</text>
+      <text x="158" y="153" fill="#81d4fa" font-size="8">rain / snow / hail</text>
+      <!-- Runoff arrow -->
+      <path d="M 270 238 Q 220 245 150 242" fill="none" stroke="#26c6da" stroke-width="2.5" marker-end="url(#aw4)"/>
+      <text x="210" y="233" fill="#80deea" font-size="9" font-weight="bold">RUNOFF</text>
+      <!-- Transpiration (plant) -->
+      <ellipse cx="250" cy="235" rx="12" ry="5" fill="#388e3c"/>
+      <line x1="250" y1="230" x2="250" y2="215" stroke="#388e3c" stroke-width="2"/>
+      <circle cx="250" cy="212" r="6" fill="#43a047"/>
+      <path d="M 252 210 Q 258 195 265 188" fill="none" stroke="#a5d6a7" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#aw5)"/>
+      <text x="268" y="185" fill="#a5d6a7" font-size="7.5">transpiration</text>
+      <!-- Arrow defs -->
+      <defs>
+        <marker id="aw1" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#42a5f5"/></marker>
+        <marker id="aw2" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#ffb74d"/></marker>
+        <marker id="aw3" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#42a5f5"/></marker>
+        <marker id="aw4" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#26c6da"/></marker>
+        <marker id="aw5" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#a5d6a7"/></marker>
+      </defs>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Evaporation:</span><span>Sun's energy heats surface water → turns to water vapour → rises into atmosphere. Also: transpiration from plants adds vapour.</span></div>
+    <div class="krow"><span class="klabel">Condensation:</span><span>Water vapour rises, cools, and condenses around tiny dust particles → forms clouds and fog.</span></div>
+    <div class="krow"><span class="klabel">Precipitation:</span><span>Water falls from clouds as rain, snow, sleet, or hail depending on temperature.</span></div>
+    <div class="krow"><span class="klabel">Collection:</span><span>Water collects in oceans, lakes, rivers (surface runoff) or soaks into soil (groundwater). Eventually returns to step 1.</span></div>
+  </div>
+  <p class="explain">The water cycle is a <strong>closed system</strong> — Earth's total water stays the same, it just changes location and state (solid, liquid, gas). The cycle is powered by solar energy and gravity. It distributes fresh water across the planet and regulates temperature.</p>
+  <div class="fact-box"><strong>Key numbers:</strong> About 97% of Earth's water is in the oceans (salt water). Of the 3% fresh water, most (~69%) is locked in glaciers and ice caps. Only about 0.3% of all fresh water is in rivers and lakes — what most life depends on.</div>
+</div>
+
+<!-- EASY 4: Atmosphere Layers -->
+<div class="card">
+  <h3>🌬️ Atmosphere Layers <span class="tag tag-easy">EASY</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 420 320" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="420" height="320" fill="#001426" rx="8"/>
+      <!-- Ground -->
+      <rect x="0" y="290" width="420" height="30" fill="#2e7d32" rx="0"/>
+      <text x="210" y="308" text-anchor="middle" fill="#a5d6a7" font-size="10" font-weight="bold">Earth's Surface (0 km)</text>
+      <!-- Layer bands (bottom to top = left to right in vertical layout) -->
+      <!-- Troposphere 0-12km → y 240-290 -->
+      <rect x="0" y="240" width="420" height="50" fill="rgba(41,182,246,0.18)"/>
+      <rect x="0" y="240" width="3" height="50" fill="#29b6f6"/>
+      <text x="12" y="258" fill="#29b6f6" font-size="10" font-weight="bold">Troposphere</text>
+      <text x="12" y="270" fill="#b3e5fc" font-size="8.5">0 – 12 km | Weather happens here</text>
+      <text x="12" y="282" fill="#b3e5fc" font-size="8">Temperature ↓ as altitude ↑</text>
+      <text x="390" y="258" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="8">12 km</text>
+      <!-- Stratosphere 12-50km → y 175-240 -->
+      <rect x="0" y="175" width="420" height="65" fill="rgba(102,187,106,0.12)"/>
+      <rect x="0" y="175" width="3" height="65" fill="#66bb6a"/>
+      <text x="12" y="193" fill="#66bb6a" font-size="10" font-weight="bold">Stratosphere</text>
+      <text x="12" y="205" fill="#c8e6c9" font-size="8.5">12 – 50 km | Ozone layer absorbs UV</text>
+      <text x="12" y="217" fill="#c8e6c9" font-size="8">Temperature ↑ as altitude ↑ (ozone heating)</text>
+      <text x="12" y="229" fill="#c8e6c9" font-size="8">Jets fly here — no weather turbulence</text>
+      <text x="390" y="193" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="8">50 km</text>
+      <!-- Mesosphere 50-80km → y 125-175 -->
+      <rect x="0" y="125" width="420" height="50" fill="rgba(255,167,38,0.12)"/>
+      <rect x="0" y="125" width="3" height="50" fill="#ffa726"/>
+      <text x="12" y="143" fill="#ffa726" font-size="10" font-weight="bold">Mesosphere</text>
+      <text x="12" y="155" fill="#ffe0b2" font-size="8.5">50 – 80 km | Meteors burn up here</text>
+      <text x="12" y="167" fill="#ffe0b2" font-size="8">Coldest layer (−90°C)</text>
+      <text x="390" y="143" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="8">80 km</text>
+      <!-- Thermosphere 80-700km → y 55-125 -->
+      <rect x="0" y="55" width="420" height="70" fill="rgba(244,67,54,0.1)"/>
+      <rect x="0" y="55" width="3" height="70" fill="#ef5350"/>
+      <text x="12" y="73" fill="#ef5350" font-size="10" font-weight="bold">Thermosphere</text>
+      <text x="12" y="85" fill="#ffcdd2" font-size="8.5">80 – 700 km | Auroras form here</text>
+      <text x="12" y="97" fill="#ffcdd2" font-size="8">ISS orbits here | Very hot but very thin</text>
+      <text x="390" y="73" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="8">700 km</text>
+      <!-- Exosphere -->
+      <rect x="0" y="10" width="420" height="45" fill="rgba(156,39,176,0.08)"/>
+      <rect x="0" y="10" width="3" height="45" fill="#ab47bc"/>
+      <text x="12" y="28" fill="#ce93d8" font-size="10" font-weight="bold">Exosphere</text>
+      <text x="12" y="40" fill="#e1bee7" font-size="8.5">700+ km | Satellites orbit here | fades into space</text>
+      <!-- Temp trend arrow -->
+      <text x="380" y="130" fill="rgba(255,255,255,0.35)" font-size="8" text-anchor="end">ALTITUDE</text>
+      <line x1="390" y1="285" x2="390" y2="15" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+      <polygon points="390,10 386,20 394,20" fill="rgba(255,255,255,0.3)"/>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Troposphere:</span><span>All weather (clouds, rain, storms) occurs here. Contains ~75% of atmospheric mass. Temperature drops ~6.5°C per km.</span></div>
+    <div class="krow"><span class="klabel">Stratosphere:</span><span>Ozone (O₃) layer absorbs harmful UV radiation. Temperature increases upward (unique). Passenger jets cruise here.</span></div>
+    <div class="krow"><span class="klabel">Mesosphere:</span><span>Coldest layer. Most meteors (shooting stars) burn up here through friction with air molecules.</span></div>
+    <div class="krow"><span class="klabel">Thermosphere:</span><span>Aurora borealis/australis visible here. Extremely hot (~2000°C) but very sparse air — you'd still freeze.</span></div>
+    <div class="krow"><span class="klabel">Exosphere:</span><span>Outermost layer. Gradually merges with outer space. Satellites orbit here.</span></div>
+  </div>
+  <p class="explain">Temperature does not change uniformly through the atmosphere — it alternates between decreasing and increasing with altitude. This is because different layers are heated by different mechanisms (ground radiation vs. ozone absorption vs. solar wind interactions).</p>
+  <div class="fact-box"><strong>Key fact:</strong> The ozone layer in the stratosphere is vital for life on Earth — it absorbs 97–99% of the Sun's harmful UV radiation. CFCs (chlorofluorocarbons) from aerosols damaged it, leading to international agreements (Montreal Protocol, 1987) that helped it recover.</div>
+</div>
+
+<!-- EASY 5: Weather vs Climate -->
+<div class="card">
+  <h3>🌦️ Weather vs Climate <span class="tag tag-easy">EASY</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 440 260" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="440" height="260" fill="#001426" rx="8"/>
+      <!-- LEFT PANEL: Weather (daily) -->
+      <rect x="10" y="10" width="195" height="240" fill="rgba(41,182,246,0.08)" rx="10" stroke="rgba(41,182,246,0.3)" stroke-width="1.5"/>
+      <text x="107" y="32" text-anchor="middle" fill="#29b6f6" font-size="11" font-weight="bold">WEATHER</text>
+      <text x="107" y="45" text-anchor="middle" fill="#b3e5fc" font-size="8.5">short-term • hours to days</text>
+      <!-- Daily weather icons row -->
+      <!-- Mon: Sun -->
+      <circle cx="40" cy="85" r="14" fill="#ffd600" opacity="0.85"/>
+      <text x="40" y="108" text-anchor="middle" fill="#b3e5fc" font-size="8">Mon</text>
+      <text x="40" y="118" text-anchor="middle" fill="#fff176" font-size="7">sunny</text>
+      <!-- Tue: Cloud rain -->
+      <ellipse cx="87" cy="80" rx="14" ry="9" fill="#78909c"/>
+      <ellipse cx="100" cy="83" rx="10" ry="7" fill="#90a4ae"/>
+      <line x1="87" y1="92" x2="84" y2="100" stroke="#42a5f5" stroke-width="2"/>
+      <line x1="93" y1="92" x2="90" y2="100" stroke="#42a5f5" stroke-width="2"/>
+      <text x="93" y="108" text-anchor="middle" fill="#b3e5fc" font-size="8">Tue</text>
+      <text x="93" y="118" text-anchor="middle" fill="#90caf9" font-size="7">rainy</text>
+      <!-- Wed: Snowflake -->
+      <text x="143" y="87" text-anchor="middle" fill="#e3f2fd" font-size="22">❄</text>
+      <text x="143" y="108" text-anchor="middle" fill="#b3e5fc" font-size="8">Wed</text>
+      <text x="143" y="118" text-anchor="middle" fill="#b3e5fc" font-size="7">snowy</text>
+      <!-- Thu: Sun + cloud -->
+      <circle cx="183" cy="79" r="10" fill="#ffd600" opacity="0.7"/>
+      <ellipse cx="190" cy="85" rx="12" ry="7" fill="#b0bec5"/>
+      <text x="185" y="108" text-anchor="middle" fill="#b3e5fc" font-size="8">Thu</text>
+      <text x="185" y="118" text-anchor="middle" fill="#b3e5fc" font-size="7">cloudy</text>
+      <!-- Temp bar chart -->
+      <text x="107" y="138" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8">Daily temperatures (°C)</text>
+      <rect x="25" y="155" width="18" height="30" fill="#ef5350" rx="2"/>
+      <text x="34" y="152" text-anchor="middle" fill="#ef9a9a" font-size="7.5">22</text>
+      <rect x="60" y="168" width="18" height="17" fill="#42a5f5" rx="2"/>
+      <text x="69" y="165" text-anchor="middle" fill="#90caf9" font-size="7.5">12</text>
+      <rect x="95" y="160" width="18" height="25" fill="#66bb6a" rx="2"/>
+      <text x="104" y="157" text-anchor="middle" fill="#a5d6a7" font-size="7.5">18</text>
+      <rect x="130" y="163" width="18" height="22" fill="#ffa726" rx="2"/>
+      <text x="139" y="160" text-anchor="middle" fill="#ffcc80" font-size="7.5">16</text>
+      <rect x="165" y="150" width="18" height="35" fill="#ef5350" rx="2"/>
+      <text x="174" y="147" text-anchor="middle" fill="#ef9a9a" font-size="7.5">28</text>
+      <line x1="20" y1="185" x2="195" y2="185" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+      <text x="107" y="225" text-anchor="middle" fill="#b3e5fc" font-size="8.5">"Today's forecast"</text>
+      <text x="107" y="238" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="7.5">= weather</text>
+      <!-- RIGHT PANEL: Climate (long-term) -->
+      <rect x="235" y="10" width="195" height="240" fill="rgba(255,167,38,0.08)" rx="10" stroke="rgba(255,167,38,0.25)" stroke-width="1.5"/>
+      <text x="332" y="32" text-anchor="middle" fill="#ffa726" font-size="11" font-weight="bold">CLIMATE</text>
+      <text x="332" y="45" text-anchor="middle" fill="#ffe0b2" font-size="8.5">long-term • 30+ year averages</text>
+      <!-- Climate zones mini map (simplified) -->
+      <rect x="247" y="55" width="171" height="90" fill="rgba(0,0,0,0.3)" rx="6"/>
+      <!-- Polar top & bottom -->
+      <rect x="247" y="55" width="171" height="18" fill="#e3f2fd" rx="6" opacity="0.5"/>
+      <text x="332" y="68" text-anchor="middle" fill="#37474f" font-size="8" font-weight="bold">POLAR (cold)</text>
+      <rect x="247" y="127" width="171" height="18" fill="#e3f2fd" opacity="0.5"/>
+      <text x="332" y="140" text-anchor="middle" fill="#37474f" font-size="8" font-weight="bold">POLAR (cold)</text>
+      <!-- Temperate -->
+      <rect x="247" y="73" width="171" height="18" fill="#66bb6a" opacity="0.4"/>
+      <text x="332" y="86" text-anchor="middle" fill="#e8f5e9" font-size="8" font-weight="bold">TEMPERATE</text>
+      <rect x="247" y="109" width="171" height="18" fill="#66bb6a" opacity="0.4"/>
+      <text x="332" y="122" text-anchor="middle" fill="#e8f5e9" font-size="8" font-weight="bold">TEMPERATE</text>
+      <!-- Tropical -->
+      <rect x="247" y="91" width="171" height="18" fill="#ef5350" opacity="0.4"/>
+      <text x="332" y="104" text-anchor="middle" fill="#fff" font-size="8" font-weight="bold">TROPICAL (equator)</text>
+      <!-- Greenhouse effect label -->
+      <text x="332" y="168" text-anchor="middle" fill="#ffa726" font-size="9" font-weight="bold">Greenhouse Effect</text>
+      <text x="332" y="180" text-anchor="middle" fill="#ffe0b2" font-size="8">CO₂ traps heat → warms climate</text>
+      <!-- Simple greenhouse diagram -->
+      <path d="M 250 200 Q 332 185 415 200" fill="none" stroke="#ffa726" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <text x="260" y="215" fill="#ffcc80" font-size="8">↑ CO₂ emissions</text>
+      <text x="260" y="226" fill="#ffcc80" font-size="8">→ ↑ avg temperature</text>
+      <text x="260" y="240" fill="rgba(255,255,255,0.4)" font-size="7.5">= climate change</text>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Weather:</span><span>Short-term atmospheric conditions at a specific place and time. Can change hour by hour. Examples: today's temperature, rain, wind.</span></div>
+    <div class="krow"><span class="klabel">Climate:</span><span>The average weather patterns over 30+ years for a region. Changes very slowly. Example: "London has a temperate maritime climate."</span></div>
+    <div class="krow"><span class="klabel">Climate zones:</span><span><strong>Polar</strong> (very cold, ice), <strong>Temperate</strong> (4 seasons, moderate), <strong>Tropical</strong> (hot and wet year-round near equator).</span></div>
+    <div class="krow"><span class="klabel">Greenhouse effect:</span><span>CO₂, methane, and water vapour trap heat from escaping Earth → warms the planet. Natural process, but <strong>enhanced</strong> by human emissions.</span></div>
+  </div>
+  <p class="explain">The classic distinction: <em>"Climate is what you expect, weather is what you get."</em> A region's climate is determined by latitude, altitude, distance from ocean, and ocean currents. Climate change is the long-term shift in these averages due to increased greenhouse gases since industrialisation.</p>
+  <div class="fact-box"><strong>Example:</strong> Seattle has a reputation for rain (climate). But any given day in Seattle might be sunny (weather). — The UK's climate is warmed significantly by the Gulf Stream ocean current, making it much milder than its latitude would suggest.</div>
+</div>
+
+<!-- EASY 6: Renewable vs Non-renewable energy -->
+<div class="card">
+  <h3>⚡ Renewable vs Non-Renewable Energy <span class="tag tag-easy">EASY</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 440 270" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="440" height="270" fill="#001426" rx="8"/>
+      <!-- Divider -->
+      <line x1="220" y1="10" x2="220" y2="260" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <!-- LEFT: Non-renewable -->
+      <text x="110" y="28" text-anchor="middle" fill="#ef5350" font-size="11" font-weight="bold">NON-RENEWABLE</text>
+      <text x="110" y="40" text-anchor="middle" fill="#ffcdd2" font-size="8">fossil fuels — finite supply</text>
+      <!-- Coal icon -->
+      <rect x="22" y="55" width="40" height="32" fill="#424242" rx="6" stroke="#757575" stroke-width="1.5"/>
+      <text x="42" y="76" text-anchor="middle" fill="#bdbdbd" font-size="9" font-weight="bold">Coal</text>
+      <text x="42" y="100" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7.5">300+ mya</text>
+      <!-- Oil drum -->
+      <rect x="80" y="55" width="40" height="32" fill="#1a237e" rx="6" stroke="#3949ab" stroke-width="1.5"/>
+      <text x="100" y="76" text-anchor="middle" fill="#c5cae9" font-size="9" font-weight="bold">Oil</text>
+      <text x="100" y="100" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7.5">millions of yrs</text>
+      <!-- Gas flame -->
+      <rect x="138" y="55" width="52" height="32" fill="#311b92" rx="6" stroke="#7c4dff" stroke-width="1.5"/>
+      <text x="164" y="76" text-anchor="middle" fill="#d1c4e9" font-size="9" font-weight="bold">Nat. Gas</text>
+      <text x="164" y="100" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7.5">fossils → fuel</text>
+      <!-- CO2 cloud -->
+      <ellipse cx="60" cy="130" rx="38" ry="20" fill="#b71c1c" opacity="0.35"/>
+      <ellipse cx="80" cy="125" rx="28" ry="16" fill="#c62828" opacity="0.3"/>
+      <text x="75" y="131" text-anchor="middle" fill="#ef9a9a" font-size="10" font-weight="bold">CO₂ ↑</text>
+      <text x="110" y="150" text-anchor="middle" fill="#ef5350" font-size="8.5">Burning releases</text>
+      <text x="110" y="162" text-anchor="middle" fill="#ef5350" font-size="8.5">stored carbon</text>
+      <!-- Thermometer -->
+      <rect x="55" y="170" width="12" height="55" fill="rgba(255,255,255,0.1)" rx="6" stroke="#ef5350" stroke-width="1.5"/>
+      <rect x="56" y="195" width="10" height="30" fill="#ef5350" rx="4"/>
+      <circle cx="61" cy="228" r="8" fill="#ef5350"/>
+      <text x="80" y="200" fill="#ef9a9a" font-size="8.5">Global</text>
+      <text x="80" y="211" fill="#ef9a9a" font-size="8.5">warming</text>
+      <text x="80" y="222" fill="#ef9a9a" font-size="8.5">↑ temp</text>
+      <!-- Finite label -->
+      <text x="110" y="252" text-anchor="middle" fill="#757575" font-size="8">Will run out — cannot be replenished</text>
+      <!-- RIGHT: Renewable -->
+      <text x="330" y="28" text-anchor="middle" fill="#66bb6a" font-size="11" font-weight="bold">RENEWABLE</text>
+      <text x="330" y="40" text-anchor="middle" fill="#c8e6c9" font-size="8">naturally replenished — infinite</text>
+      <!-- Solar panel -->
+      <rect x="228" y="55" width="42" height="28" fill="#0d47a1" rx="4" stroke="#42a5f5" stroke-width="1.5"/>
+      <line x1="249" y1="55" x2="249" y2="83" stroke="#1565c0" stroke-width="1"/>
+      <line x1="228" y1="69" x2="270" y2="69" stroke="#1565c0" stroke-width="1"/>
+      <text x="249" y="97" text-anchor="middle" fill="#90caf9" font-size="8">Solar</text>
+      <!-- Wind turbine -->
+      <line x1="310" y1="83" x2="310" y2="55" stroke="#78909c" stroke-width="2.5"/>
+      <ellipse cx="310" cy="58" rx="3" ry="3" fill="#b0bec5"/>
+      <line x1="310" y1="58" x2="296" y2="72" stroke="#90a4ae" stroke-width="2"/>
+      <line x1="310" y1="58" x2="324" y2="72" stroke="#90a4ae" stroke-width="2"/>
+      <line x1="310" y1="58" x2="310" y2="44" stroke="#90a4ae" stroke-width="2"/>
+      <text x="310" y="97" text-anchor="middle" fill="#b0bec5" font-size="8">Wind</text>
+      <!-- Hydro dam simple -->
+      <rect x="338" y="60" width="32" height="23" fill="#1565c0" rx="3" stroke="#42a5f5" stroke-width="1.5"/>
+      <text x="354" y="75" text-anchor="middle" fill="#e3f2fd" font-size="7.5">Hydro</text>
+      <line x1="370" y1="72" x2="382" y2="72" stroke="#42a5f5" stroke-width="2" marker-end="url(#aw_h)"/>
+      <text x="354" y="97" text-anchor="middle" fill="#90caf9" font-size="8">Hydro</text>
+      <!-- Geothermal -->
+      <text x="415" y="75" text-anchor="middle" fill="#ff7043" font-size="8.5">🌋</text>
+      <text x="415" y="97" text-anchor="middle" fill="#ffab91" font-size="7.5">Geo</text>
+      <!-- Recycle loop -->
+      <path d="M 280 115 Q 260 130 270 150 Q 280 170 310 170 Q 340 170 350 150 Q 360 130 340 115" fill="none" stroke="#66bb6a" stroke-width="2" marker-end="url(#aw_g)"/>
+      <text x="310" y="148" text-anchor="middle" fill="#a5d6a7" font-size="9" font-weight="bold">Replenish</text>
+      <text x="310" y="160" text-anchor="middle" fill="#a5d6a7" font-size="8">naturally ♻</text>
+      <text x="310" y="200" text-anchor="middle" fill="#66bb6a" font-size="8.5">No CO₂ emissions</text>
+      <text x="310" y="212" text-anchor="middle" fill="#66bb6a" font-size="8.5">(or very low)</text>
+      <text x="310" y="252" text-anchor="middle" fill="#66bb6a" font-size="8">Key to sustainable future</text>
+      <defs>
+        <marker id="aw_h" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#42a5f5"/></marker>
+        <marker id="aw_g" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#66bb6a"/></marker>
+      </defs>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Fossil fuels:</span><span>Coal, oil, natural gas — formed from ancient organisms over millions of years. Finite. Burning releases CO₂ and other greenhouse gases.</span></div>
+    <div class="krow"><span class="klabel">Solar:</span><span>Photovoltaic (PV) cells convert sunlight to electricity. Abundant and free — but depends on sunlight hours.</span></div>
+    <div class="krow"><span class="klabel">Wind:</span><span>Turbines convert kinetic energy of wind. No emissions, but land-use concerns and not always windy.</span></div>
+    <div class="krow"><span class="klabel">Hydroelectric:</span><span>Flowing/falling water drives turbines. Reliable and large-scale but requires rivers/dams.</span></div>
+    <div class="krow"><span class="klabel">Geothermal:</span><span>Heat from inside Earth heats water to steam → drives turbines. Reliable and low-emission.</span></div>
+    <div class="krow"><span class="klabel">Biomass:</span><span>Burning organic material (wood, crops). Carbon-neutral if managed sustainably.</span></div>
+  </div>
+  <p class="explain">Fossil fuels currently provide ~80% of the world's energy but are responsible for most human-caused CO₂ emissions. The transition to renewable energy is essential to prevent the worst effects of climate change. Energy storage (batteries) is a key challenge for solar and wind power.</p>
+  <div class="fact-box"><strong>Key comparison:</strong> In 2023, the UK generated more electricity from renewables (wind, solar, hydro, biomass: ~50%) than from fossil fuels for the first time since the Industrial Revolution. Global renewable capacity is growing faster than any energy source in history.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MEDIUM SECTION
+════════════════════════════════════════════ -->
+<div class="section-header">
+  <span class="badge">🟡</span>
+  <h2>Medium — Going Deeper</h2>
+  <span class="count">6 cards</span>
+</div>
+
+<!-- MEDIUM 1: Plate Tectonics -->
+<div class="card">
+  <h3>🗺️ Plate Tectonics <span class="tag tag-med">MEDIUM</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 460 280" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="460" height="280" fill="#001426" rx="8"/>
+      <!-- Simplified world map (outlined continents as polygons) -->
+      <!-- Ocean base -->
+      <rect x="8" y="8" width="444" height="200" fill="#0d3b5e" rx="6"/>
+      <!-- North America -->
+      <polygon points="40,20 90,18 95,35 85,55 70,70 55,80 35,75 25,55 30,35" fill="#2e7d32" stroke="#43a047" stroke-width="0.8" opacity="0.85"/>
+      <!-- South America -->
+      <polygon points="80,95 105,90 112,110 108,135 95,155 75,150 65,130 70,110" fill="#1b5e20" stroke="#388e3c" stroke-width="0.8" opacity="0.85"/>
+      <!-- Europe -->
+      <polygon points="175,18 205,15 215,30 210,45 195,48 180,42 168,30" fill="#2e7d32" stroke="#43a047" stroke-width="0.8" opacity="0.85"/>
+      <!-- Africa -->
+      <polygon points="175,55 210,50 220,70 218,110 205,140 185,150 165,135 160,100 163,70" fill="#1b5e20" stroke="#388e3c" stroke-width="0.8" opacity="0.85"/>
+      <!-- Asia -->
+      <polygon points="215,15 300,12 320,30 315,55 290,65 250,62 225,55 215,40 210,25" fill="#2e7d32" stroke="#43a047" stroke-width="0.8" opacity="0.85"/>
+      <!-- Australia -->
+      <polygon points="310,115 355,110 365,130 358,150 335,158 310,148 302,130" fill="#1b5e20" stroke="#388e3c" stroke-width="0.8" opacity="0.85"/>
+      <!-- Antarctica -->
+      <ellipse cx="230" cy="195" rx="100" ry="12" fill="#e3f2fd" opacity="0.35"/>
+      <!-- PLATE BOUNDARIES (simplified lines) -->
+      <!-- Ring of Fire (Pacific) - dashed red -->
+      <path d="M 130 20 Q 140 60 135 100 Q 130 140 145 175" fill="none" stroke="#ef5350" stroke-width="2" stroke-dasharray="5,3"/>
+      <path d="M 295 18 Q 310 55 318 100 Q 322 145 310 175" fill="none" stroke="#ef5350" stroke-width="2" stroke-dasharray="5,3"/>
+      <path d="M 145 175 Q 215 195 310 175" fill="none" stroke="#ef5350" stroke-width="2" stroke-dasharray="5,3"/>
+      <text x="360" y="165" fill="#ef9a9a" font-size="8.5" font-weight="bold">Ring</text>
+      <text x="360" y="175" fill="#ef9a9a" font-size="8.5" font-weight="bold">of Fire</text>
+      <!-- Mid-Atlantic Ridge (divergent) -->
+      <path d="M 140 18 Q 138 80 140 175" fill="none" stroke="#ffa726" stroke-width="2" stroke-dasharray="4,2"/>
+      <text x="115" y="100" fill="#ffcc80" font-size="7.5">Mid-Atlantic</text>
+      <text x="115" y="110" fill="#ffcc80" font-size="7.5">Ridge ↔</text>
+      <!-- Labels on map -->
+      <text x="57" y="48" text-anchor="middle" fill="#a5d6a7" font-size="7.5">N. America</text>
+      <text x="88" y="125" text-anchor="middle" fill="#a5d6a7" font-size="7.5">S. America</text>
+      <text x="193" y="32" text-anchor="middle" fill="#a5d6a7" font-size="7.5">Europe</text>
+      <text x="191" y="100" text-anchor="middle" fill="#a5d6a7" font-size="7.5">Africa</text>
+      <text x="265" y="38" text-anchor="middle" fill="#a5d6a7" font-size="7.5">Asia</text>
+      <text x="335" y="133" text-anchor="middle" fill="#a5d6a7" font-size="7.5">Australia</text>
+      <!-- BOUNDARY TYPE DIAGRAMS below map -->
+      <text x="230" y="218" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8">BOUNDARY TYPES</text>
+      <!-- Convergent -->
+      <rect x="10" y="222" width="130" height="50" fill="rgba(239,83,80,0.1)" rx="6" stroke="rgba(239,83,80,0.3)" stroke-width="1"/>
+      <polygon points="35,258 65,238 65,258" fill="#546e7a"/>
+      <polygon points="105,258 75,238 75,258" fill="#455a64"/>
+      <line x1="10" y1="258" x2="140" y2="258" stroke="#37474f" stroke-width="2"/>
+      <polygon points="65,238 75,238 70,225" fill="#b71c1c" opacity="0.7"/>
+      <text x="70" y="231" text-anchor="middle" fill="#ef5350" font-size="7.5" font-weight="bold">▲mountain</text>
+      <text x="70" y="270" text-anchor="middle" fill="#ef9a9a" font-size="8.5" font-weight="bold">CONVERGENT</text>
+      <!-- Divergent -->
+      <rect x="165" y="222" width="130" height="50" fill="rgba(255,167,38,0.1)" rx="6" stroke="rgba(255,167,38,0.3)" stroke-width="1"/>
+      <polygon points="190,258 210,238 210,258" fill="#546e7a"/>
+      <polygon points="310,258 290,238 290,258" fill="#455a64"/>
+      <line x1="165" y1="258" x2="295" y2="258" stroke="#37474f" stroke-width="2"/>
+      <line x1="210" y1="255" x2="290" y2="255" stroke="#ff6d00" stroke-width="3" stroke-dasharray="3,2"/>
+      <text x="230" y="240" text-anchor="middle" fill="#ffa726" font-size="7">↑ new crust</text>
+      <text x="155" y="245" fill="#ffcc80" font-size="8">←</text>
+      <text x="295" y="245" fill="#ffcc80" font-size="8">→</text>
+      <text x="230" y="270" text-anchor="middle" fill="#ffcc80" font-size="8.5" font-weight="bold">DIVERGENT</text>
+      <!-- Transform -->
+      <rect x="320" y="222" width="130" height="50" fill="rgba(102,187,106,0.1)" rx="6" stroke="rgba(102,187,106,0.3)" stroke-width="1"/>
+      <rect x="320" y="237" width="130" height="10" fill="#455a64" rx="2"/>
+      <rect x="320" y="252" width="130" height="10" fill="#546e7a" rx="2"/>
+      <text x="330" y="246" fill="#ffd600" font-size="8">→</text>
+      <text x="430" y="261" text-anchor="end" fill="#ffd600" font-size="8">←</text>
+      <text x="385" y="270" text-anchor="middle" fill="#a5d6a7" font-size="8.5" font-weight="bold">TRANSFORM</text>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Convergent:</span><span>Two plates collide. If oceanic meets continental → subduction (oceanic plate sinks) → volcanoes, deep trenches. Two continental plates → fold mountains (e.g. Himalayas).</span></div>
+    <div class="krow"><span class="klabel">Divergent:</span><span>Plates pull apart → magma rises and fills gap → new crust forms (seafloor spreading). Creates mid-ocean ridges (e.g. Mid-Atlantic Ridge).</span></div>
+    <div class="krow"><span class="klabel">Transform:</span><span>Plates slide horizontally past each other → no crust created or destroyed → major earthquakes. Example: San Andreas Fault (California).</span></div>
+    <div class="krow"><span class="klabel">Subduction:</span><span>When one plate sinks beneath another into the mantle. Creates the deepest ocean trenches and volcanic arcs.</span></div>
+  </div>
+  <p class="explain">Earth's lithosphere (crust + upper mantle) is broken into about 15 major tectonic plates that move 2–10 cm per year — roughly the speed your fingernails grow. This movement is driven by convection currents in the mantle. Over millions of years, plates have assembled and broken apart "supercontinents" like Pangaea (~250 mya).</p>
+  <div class="fact-box"><strong>Ring of Fire:</strong> A 40,000 km horseshoe-shaped zone around the Pacific Ocean containing 75% of the world's volcanoes and 90% of earthquakes. Caused by multiple convergent plate boundaries where oceanic plates subduct under continental plates.</div>
+</div>
+
+<!-- MEDIUM 2: Volcanoes and Earthquakes -->
+<div class="card">
+  <h3>🌋 Volcanoes &amp; Earthquakes <span class="tag tag-med">MEDIUM</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 460 270" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="460" height="270" fill="#001426" rx="8"/>
+      <!-- LEFT: Volcano cross-section -->
+      <text x="115" y="20" text-anchor="middle" fill="#ffa726" font-size="10" font-weight="bold">VOLCANO CROSS-SECTION</text>
+      <!-- Ground surface -->
+      <polygon points="10,200 80,100 115,75 150,100 220,200" fill="#546e7a" stroke="#607d8b" stroke-width="1.5"/>
+      <!-- Snow cap -->
+      <polygon points="100,78 115,60 130,78" fill="#eceff1" opacity="0.7"/>
+      <!-- Vent / pipe -->
+      <rect x="108" y="75" width="14" height="125" fill="#b71c1c" opacity="0.7"/>
+      <!-- Magma chamber -->
+      <ellipse cx="115" cy="220" rx="60" ry="28" fill="#ff6d00" stroke="#ffa726" stroke-width="2" opacity="0.85"/>
+      <text x="115" y="224" text-anchor="middle" fill="#fff" font-size="9" font-weight="bold">Magma Chamber</text>
+      <!-- Lava flows -->
+      <path d="M 108 75 Q 70 110 50 140" fill="none" stroke="#ff6d00" stroke-width="4" opacity="0.7"/>
+      <path d="M 122 75 Q 160 115 180 145" fill="none" stroke="#ff6d00" stroke-width="3.5" opacity="0.6"/>
+      <!-- Eruption plume -->
+      <ellipse cx="115" cy="55" rx="22" ry="14" fill="#424242" opacity="0.7"/>
+      <ellipse cx="105" cy="45" rx="15" ry="10" fill="#616161" opacity="0.6"/>
+      <ellipse cx="128" cy="42" rx="12" ry="8" fill="#757575" opacity="0.5"/>
+      <!-- Labels -->
+      <text x="42" y="158" fill="#ffa726" font-size="8">Lava flow</text>
+      <text x="175" y="158" fill="#ffa726" font-size="8">Lava flow</text>
+      <text x="128" y="130" fill="#ffccbc" font-size="8">Vent</text>
+      <line x1="126" y1="125" x2="122" y2="115" stroke="#ffccbc" stroke-width="1"/>
+      <text x="115" y="57" text-anchor="middle" fill="#bdbdbd" font-size="8">Ash &amp; gas</text>
+      <!-- Dyke labels -->
+      <text x="18" y="185" fill="#b0bec5" font-size="7.5">Dyke</text>
+      <text x="182" y="185" fill="#b0bec5" font-size="7.5">Dyke</text>
+      <!-- RIGHT: Earthquake diagram -->
+      <text x="340" y="20" text-anchor="middle" fill="#42a5f5" font-size="10" font-weight="bold">EARTHQUAKE DIAGRAM</text>
+      <!-- Ground layers -->
+      <line x1="240" y1="140" x2="455" y2="140" stroke="#546e7a" stroke-width="2"/>
+      <line x1="240" y1="155" x2="455" y2="155" stroke="#455a64" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <line x1="240" y1="175" x2="455" y2="175" stroke="#37474f" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <!-- Focus -->
+      <circle cx="340" cy="220" r="10" fill="#ef5350" stroke="#ff8a80" stroke-width="2"/>
+      <text x="355" y="224" fill="#ef9a9a" font-size="9" font-weight="bold">Focus (hypocenter)</text>
+      <text x="355" y="235" fill="#ffcdd2" font-size="8">Where earthquake starts</text>
+      <!-- Epicenter -->
+      <circle cx="340" cy="140" r="8" fill="#ffd600" stroke="#fff176" stroke-width="2"/>
+      <text x="353" y="138" fill="#fff176" font-size="9" font-weight="bold">Epicenter</text>
+      <text x="353" y="149" fill="#fffde7" font-size="8">Point on surface above focus</text>
+      <!-- Vertical line focus to epicenter -->
+      <line x1="340" y1="140" x2="340" y2="210" stroke="#ef5350" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <!-- Seismic waves (P and S) ripples -->
+      <ellipse cx="340" cy="220" rx="30" ry="12" fill="none" stroke="#42a5f5" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.7"/>
+      <ellipse cx="340" cy="220" rx="52" ry="21" fill="none" stroke="#42a5f5" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+      <ellipse cx="340" cy="220" rx="73" ry="30" fill="none" stroke="#42a5f5" stroke-width="1" stroke-dasharray="4,3" opacity="0.35"/>
+      <text x="260" y="262" fill="#90caf9" font-size="8">← Seismic waves travel outward</text>
+      <!-- Richter scale indicator -->
+      <text x="248" y="28" fill="#ffa726" font-size="9" font-weight="bold">Richter Scale:</text>
+      <rect x="248" y="32" width="100" height="12" fill="rgba(0,0,0,0.3)" rx="3"/>
+      <rect x="248" y="32" width="100" height="12" fill="url(#richterGrad)" rx="3" opacity="0.8"/>
+      <text x="248" y="56" fill="#a5d6a7" font-size="8">1-3: Minor (felt)</text>
+      <text x="248" y="67" fill="#ffc107" font-size="8">4-5: Light-Moderate</text>
+      <text x="248" y="78" fill="#ff7043" font-size="8">6-7: Strong-Major</text>
+      <text x="248" y="89" fill="#ef5350" font-size="8">8+: Great (catastrophic)</text>
+      <defs>
+        <linearGradient id="richterGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#4caf50"/>
+          <stop offset="50%" stop-color="#ffc107"/>
+          <stop offset="100%" stop-color="#f44336"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Volcano types:</span><span><strong>Shield</strong> (gentle slopes, fluid lava — Hawaii), <strong>Stratovolcano/composite</strong> (steep, explosive — Mt Fuji, Mt St Helens), <strong>Cinder cone</strong> (small, steep, brief eruptions).</span></div>
+    <div class="krow"><span class="klabel">Focus vs Epicenter:</span><span>The focus (hypocenter) is where the earthquake originates underground. The epicenter is the point on the surface directly above — where shaking is usually strongest.</span></div>
+    <div class="krow"><span class="klabel">Seismic waves:</span><span><strong>P-waves</strong> (primary) — fastest, travel through solids and liquids. <strong>S-waves</strong> (secondary) — slower, only through solids. <strong>Surface waves</strong> — cause most damage.</span></div>
+    <div class="krow"><span class="klabel">Hotspots:</span><span>Volcanic activity NOT at plate boundaries — caused by a plume of hot mantle rock. Hawaii and Yellowstone are hotspot volcanoes.</span></div>
+  </div>
+  <p class="explain">Earthquakes and volcanoes are closely linked to plate boundaries but work differently. Earthquakes result from sudden release of stress when rocks fracture along faults. Volcanoes form where magma can reach the surface — either at divergent boundaries, subduction zones, or hotspots. Scientists cannot yet predict earthquakes precisely.</p>
+  <div class="fact-box"><strong>Key fact:</strong> The 2004 Indian Ocean earthquake (magnitude 9.1) released energy equivalent to 23,000 Hiroshima atomic bombs. It triggered a tsunami that killed ~230,000 people across 14 countries — one of the deadliest natural disasters in recorded history.</div>
+</div>
+
+<!-- MEDIUM 3: Erosion and Deposition -->
+<div class="card">
+  <h3>🏔️ Erosion &amp; Deposition <span class="tag tag-med">MEDIUM</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 460 250" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="460" height="250" fill="#001426" rx="8"/>
+      <!-- Sky -->
+      <rect x="0" y="0" width="460" height="100" fill="rgba(0,30,55,0.5)" rx="8"/>
+      <!-- Mountain with river -->
+      <!-- Mountain shape -->
+      <polygon points="10,200 80,60 150,200" fill="#455a64" stroke="#546e7a" stroke-width="1.5"/>
+      <polygon points="60,80 80,50 100,80" fill="#eceff1" opacity="0.6"/>
+      <!-- Jagged rock erosion labels -->
+      <polygon points="30,190 45,175 55,190" fill="#546e7a"/>
+      <text x="15" y="205" fill="#90a4ae" font-size="7.5">angular rocks</text>
+      <!-- River from mountain -->
+      <path d="M 100 150 Q 180 180 260 175 Q 330 172 380 178 Q 415 182 450 190" fill="none" stroke="#42a5f5" stroke-width="5" opacity="0.75"/>
+      <!-- River labels -->
+      <text x="150" y="165" fill="#42a5f5" font-size="8.5" font-weight="bold">River</text>
+      <!-- Erosion zone label -->
+      <rect x="90" y="125" width="80" height="26" fill="rgba(239,83,80,0.15)" rx="5" stroke="rgba(239,83,80,0.4)" stroke-width="1"/>
+      <text x="130" y="137" text-anchor="middle" fill="#ef9a9a" font-size="8.5" font-weight="bold">EROSION</text>
+      <text x="130" y="148" text-anchor="middle" fill="#ffcdd2" font-size="7.5">rock broken down</text>
+      <!-- Transport zone -->
+      <rect x="200" y="160" width="90" height="26" fill="rgba(255,167,38,0.15)" rx="5" stroke="rgba(255,167,38,0.4)" stroke-width="1"/>
+      <text x="245" y="172" text-anchor="middle" fill="#ffa726" font-size="8.5" font-weight="bold">TRANSPORT</text>
+      <text x="245" y="183" text-anchor="middle" fill="#ffe0b2" font-size="7.5">particles carried</text>
+      <!-- Delta / deposition zone -->
+      <polygon points="420,175 460,175 460,210 420,210 400,195" fill="#795548" stroke="#8d6e63" stroke-width="1.5"/>
+      <!-- Water/ocean -->
+      <rect x="420" y="175" width="40" height="70" fill="#0277bd" opacity="0.6"/>
+      <rect x="0" y="210" width="420" height="40" fill="#01579b" opacity="0.4"/>
+      <text x="440" y="215" text-anchor="middle" fill="#b3e5fc" font-size="8.5">Ocean</text>
+      <text x="435" y="198" text-anchor="middle" fill="#8d6e63" font-size="8" font-weight="bold">Delta</text>
+      <!-- Deposition label -->
+      <rect x="335" y="160" width="80" height="26" fill="rgba(102,187,106,0.15)" rx="5" stroke="rgba(102,187,106,0.4)" stroke-width="1"/>
+      <text x="375" y="172" text-anchor="middle" fill="#66bb6a" font-size="8.5" font-weight="bold">DEPOSITION</text>
+      <text x="375" y="183" text-anchor="middle" fill="#c8e6c9" font-size="7.5">particles settle</text>
+      <!-- Glacier on mountain side -->
+      <polygon points="45,90 75,75 85,100 60,108" fill="#b3e5fc" opacity="0.55"/>
+      <text x="38" y="88" fill="#b3e5fc" font-size="7.5">Glacier</text>
+      <!-- Wind arrows -->
+      <path d="M 170 40 Q 200 30 235 38" fill="none" stroke="#b0bec5" stroke-width="1.5" marker-end="url(#aw_w)"/>
+      <path d="M 170 52 Q 210 44 248 51" fill="none" stroke="#b0bec5" stroke-width="1.5" marker-end="url(#aw_w)"/>
+      <text x="158" y="35" fill="#b0bec5" font-size="8">Wind erosion</text>
+      <!-- Agents list -->
+      <text x="10" y="232" fill="rgba(255,255,255,0.5)" font-size="8">Agents of erosion: Water (rivers, rain, waves) | Wind | Ice (glaciers) | Gravity (landslides)</text>
+      <defs>
+        <marker id="aw_w" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#b0bec5"/></marker>
+      </defs>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Weathering:</span><span>Breaking down of rock in place. <strong>Physical</strong>: freeze-thaw, temperature changes crack rock. <strong>Chemical</strong>: acid rain dissolves limestone (e.g. caves). <strong>Biological</strong>: plant roots split rock.</span></div>
+    <div class="krow"><span class="klabel">Erosion:</span><span>Wearing away and removal of material by water, wind, ice, or gravity. Happens faster on steep slopes and with heavier rainfall.</span></div>
+    <div class="krow"><span class="klabel">Transportation:</span><span>Eroded material carried downstream. Particles collide with each other → become rounded and smaller (attrition).</span></div>
+    <div class="krow"><span class="klabel">Deposition:</span><span>When energy drops (river slows), material is dropped. Heaviest particles drop first. Creates deltas, flood plains, beaches, and sand dunes.</span></div>
+  </div>
+  <p class="explain">Erosion and deposition work together to sculpt Earth's landscapes over millions of years. The Grand Canyon was carved by the Colorado River over ~6 million years. Glaciers carved the fjords of Norway. Wind erosion created the sandstone arches of Utah. Human activity (deforestation, construction) dramatically speeds up erosion.</p>
+  <div class="fact-box"><strong>Landforms created:</strong> River erosion → V-shaped valleys, waterfalls, gorges. River deposition → deltas, flood plains, meanders. Glacial erosion → U-shaped valleys, cirques, arêtes. Coastal erosion → cliffs, sea stacks, arches. Coastal deposition → beaches, spits, bars.</div>
+</div>
+
+<!-- MEDIUM 4: Ocean Structure -->
+<div class="card">
+  <h3>🌊 Ocean Structure <span class="tag tag-med">MEDIUM</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 440 280" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="440" height="280" fill="#001426" rx="8"/>
+      <!-- Ocean surface -->
+      <path d="M 0 40 Q 55 32 110 40 Q 165 48 220 40 Q 275 32 330 40 Q 385 48 440 40 L 440 0 L 0 0 Z" fill="#0277bd" opacity="0.5"/>
+      <text x="220" y="22" text-anchor="middle" fill="#b3e5fc" font-size="10" font-weight="bold">Ocean Surface</text>
+      <!-- Zone bands -->
+      <!-- Sunlight zone 0-200m -->
+      <rect x="0" y="40" width="440" height="52" fill="#0288d1" opacity="0.35"/>
+      <rect x="0" y="40" width="4" height="52" fill="#29b6f6"/>
+      <text x="14" y="57" fill="#29b6f6" font-size="10" font-weight="bold">Sunlight Zone</text>
+      <text x="14" y="69" fill="#b3e5fc" font-size="8.5">0–200 m | Most ocean life lives here</text>
+      <text x="14" y="80" fill="#b3e5fc" font-size="8">Photosynthesis possible | Coral reefs, fish, plankton</text>
+      <text x="418" y="57" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="8">200m</text>
+      <!-- Fish icons in sunlight zone -->
+      <ellipse cx="330" cy="58" rx="12" ry="6" fill="#ffa726" opacity="0.7"/>
+      <polygon points="342,58 350,52 350,64" fill="#ffa726" opacity="0.7"/>
+      <ellipse cx="365" cy="65" rx="9" ry="4.5" fill="#66bb6a" opacity="0.6"/>
+      <polygon points="374,65 381,60 381,70" fill="#66bb6a" opacity="0.6"/>
+      <!-- Twilight zone 200-1000m -->
+      <rect x="0" y="92" width="440" height="50" fill="#01579b" opacity="0.35"/>
+      <rect x="0" y="92" width="4" height="50" fill="#42a5f5"/>
+      <text x="14" y="108" fill="#42a5f5" font-size="10" font-weight="bold">Twilight Zone</text>
+      <text x="14" y="120" fill="#90caf9" font-size="8.5">200–1000 m | Dim light | Bioluminescent creatures</text>
+      <text x="14" y="131" fill="#90caf9" font-size="8">Some hunting fish, squid, jellyfish</text>
+      <text x="418" y="108" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="8">1000m</text>
+      <!-- Bioluminescence dots -->
+      <circle cx="320" cy="110" r="3" fill="#64ffda" opacity="0.7"/>
+      <circle cx="340" cy="118" r="2" fill="#64ffda" opacity="0.5"/>
+      <circle cx="360" cy="108" r="2.5" fill="#64ffda" opacity="0.6"/>
+      <!-- Midnight zone 1000-4000m -->
+      <rect x="0" y="142" width="440" height="55" fill="#0d47a1" opacity="0.3"/>
+      <rect x="0" y="142" width="4" height="55" fill="#1565c0"/>
+      <text x="14" y="158" fill="#5c8de8" font-size="10" font-weight="bold">Midnight Zone</text>
+      <text x="14" y="170" fill="#90a4ae" font-size="8.5">1000–4000 m | No light | Extreme pressure</text>
+      <text x="14" y="181" fill="#90a4ae" font-size="8">Anglerfish, gulper eels, vampire squid</text>
+      <text x="418" y="158" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="8">4000m</text>
+      <!-- Abyssal zone -->
+      <rect x="0" y="197" width="440" height="45" fill="#030f2a" opacity="0.5"/>
+      <rect x="0" y="197" width="4" height="45" fill="#0d47a1"/>
+      <text x="14" y="213" fill="#3f51b5" font-size="10" font-weight="bold">Abyssal Zone</text>
+      <text x="14" y="225" fill="#7986cb" font-size="8.5">4000–6000 m | Near-freezing | Hydrothermal vents</text>
+      <text x="14" y="236" fill="#7986cb" font-size="8">Tube worms, sea cucumbers, amphipods</text>
+      <!-- Hadal zone (trenches) -->
+      <!-- Narrow V trench at right -->
+      <polygon points="360,240 400,242 385,278 375,278" fill="#010d1f" stroke="#1a237e" stroke-width="1.5"/>
+      <text x="380" y="262" text-anchor="middle" fill="#5c6bc0" font-size="7.5" font-weight="bold">Hadal</text>
+      <text x="380" y="272" text-anchor="middle" fill="#5c6bc0" font-size="7">6000m+</text>
+      <!-- Gulf Stream note -->
+      <path d="M 20 272 Q 120 260 200 268" fill="none" stroke="#ffa726" stroke-width="2" marker-end="url(#aw_gs)"/>
+      <text x="15" y="270" fill="#ffcc80" font-size="8">Gulf Stream →</text>
+      <text x="205" y="265" fill="#ffcc80" font-size="8">warms N. Europe</text>
+      <defs>
+        <marker id="aw_gs" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#ffa726"/></marker>
+      </defs>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Sunlight zone:</span><span>0–200 m. Photic zone — enough light for photosynthesis. Contains 90% of ocean life. Includes coral reefs, kelp forests, most fish.</span></div>
+    <div class="krow"><span class="klabel">Twilight zone:</span><span>200–1,000 m. Some light but not enough for photosynthesis. Many creatures migrate here daily to feed, then return to depths. Bioluminescence common.</span></div>
+    <div class="krow"><span class="klabel">Midnight zone:</span><span>1,000–4,000 m. Completely dark, cold (~4°C), high pressure. Strange adaptations: anglerfish lures, transparent bodies.</span></div>
+    <div class="krow"><span class="klabel">Abyssal zone:</span><span>4,000–6,000 m. Covers ~60% of Earth's surface. Home to hydrothermal vents supporting unique ecosystems via chemosynthesis (not photosynthesis).</span></div>
+    <div class="krow"><span class="klabel">Ocean currents:</span><span>Large-scale circulation of ocean water driven by wind, density differences (temperature &amp; salinity). The Gulf Stream carries warm tropical water northward, warming Western Europe.</span></div>
+  </div>
+  <p class="explain">The ocean covers 71% of Earth's surface and averages 3,688 m depth. The deepest point is the Mariana Trench at ~11,000 m (deeper than Mount Everest is tall). Despite harsh conditions in deeper zones, life exists everywhere — even in the hadal zone at the bottom of ocean trenches.</p>
+  <div class="fact-box"><strong>Thermohaline circulation:</strong> A global "conveyor belt" of ocean currents driven by differences in water temperature (thermo) and salinity (haline). This global ocean circulation redistributes heat around the planet and is crucial for regulating climate. Climate change could slow or disrupt it with serious consequences for Europe's temperature.</div>
+</div>
+
+<!-- MEDIUM 5: Earth's History and Fossil Record -->
+<div class="card">
+  <h3>🦕 Earth's History &amp; Fossil Record <span class="tag tag-med">MEDIUM</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 450 270" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="450" height="270" fill="#001426" rx="8"/>
+      <!-- Title -->
+      <text x="225" y="20" text-anchor="middle" fill="#26c6da" font-size="10" font-weight="bold">GEOLOGICAL TIME SCALE (simplified, billion years ago)</text>
+      <!-- Timeline bar -->
+      <rect x="20" y="35" width="410" height="22" fill="#1a237e" rx="4"/>
+      <!-- 4.6 bya marker (left) -->
+      <rect x="20" y="35" width="24" height="22" fill="#37474f" rx="4"/>
+      <text x="32" y="50" text-anchor="middle" fill="#eceff1" font-size="7">4.6 bya</text>
+      <!-- 3.8 bya - first life -->
+      <rect x="44" y="35" width="20" height="22" fill="#1b5e20" opacity="0.7"/>
+      <text x="54" y="50" text-anchor="middle" fill="#a5d6a7" font-size="7">3.8 bya</text>
+      <!-- Multi-cellular ~600mya -->
+      <rect x="340" y="35" width="26" height="22" fill="#0d47a1" opacity="0.7"/>
+      <text x="353" y="50" text-anchor="middle" fill="#90caf9" font-size="7">600 mya</text>
+      <!-- Dinosaurs 250-65 mya -->
+      <rect x="382" y="35" width="28" height="22" fill="#b71c1c" opacity="0.7"/>
+      <text x="396" y="50" text-anchor="middle" fill="#ef9a9a" font-size="7">250–65 mya</text>
+      <!-- Humans ~200kya (rightmost) -->
+      <rect x="426" y="35" width="4" height="22" fill="#ffd600"/>
+      <!-- Labels below timeline -->
+      <line x1="32" y1="57" x2="32" y2="75" stroke="#90a4ae" stroke-width="1"/>
+      <text x="32" y="83" text-anchor="middle" fill="#b0bec5" font-size="7.5">Earth forms</text>
+      <line x1="54" y1="57" x2="54" y2="75" stroke="#66bb6a" stroke-width="1"/>
+      <text x="54" y="83" text-anchor="middle" fill="#a5d6a7" font-size="7.5">First life</text>
+      <text x="54" y="92" text-anchor="middle" fill="#a5d6a7" font-size="7">(bacteria)</text>
+      <line x1="353" y1="57" x2="353" y2="75" stroke="#42a5f5" stroke-width="1"/>
+      <text x="353" y="83" text-anchor="middle" fill="#90caf9" font-size="7.5">Complex</text>
+      <text x="353" y="92" text-anchor="middle" fill="#90caf9" font-size="7">life</text>
+      <line x1="396" y1="57" x2="396" y2="75" stroke="#ef5350" stroke-width="1"/>
+      <text x="396" y="83" text-anchor="middle" fill="#ef9a9a" font-size="7.5">Dinosaurs</text>
+      <line x1="428" y1="57" x2="428" y2="75" stroke="#ffd600" stroke-width="1"/>
+      <text x="428" y="83" text-anchor="middle" fill="#fff176" font-size="7.5">Humans</text>
+      <!-- Fossil formation diagram below -->
+      <text x="225" y="108" text-anchor="middle" fill="#26c6da" font-size="9.5" font-weight="bold">HOW FOSSILS FORM (in sedimentary rock)</text>
+      <!-- Step 1 -->
+      <rect x="10" y="115" width="96" height="75" fill="rgba(38,198,218,0.07)" rx="8" stroke="rgba(38,198,218,0.2)" stroke-width="1"/>
+      <text x="58" y="128" text-anchor="middle" fill="#26c6da" font-size="8" font-weight="bold">① Organism dies</text>
+      <ellipse cx="58" cy="158" rx="25" ry="10" fill="#546e7a" opacity="0.5"/>
+      <text x="58" y="162" text-anchor="middle" fill="#cfd8dc" font-size="14">🦕</text>
+      <text x="58" y="182" text-anchor="middle" fill="#90a4ae" font-size="7.5">sinks / buried</text>
+      <!-- Step 2 -->
+      <rect x="115" y="115" width="96" height="75" fill="rgba(38,198,218,0.07)" rx="8" stroke="rgba(38,198,218,0.2)" stroke-width="1"/>
+      <text x="163" y="128" text-anchor="middle" fill="#26c6da" font-size="8" font-weight="bold">② Buried by layers</text>
+      <rect x="128" y="148" width="70" height="8" fill="#6d4c41" rx="2"/>
+      <rect x="128" y="158" width="70" height="8" fill="#795548" rx="2"/>
+      <rect x="128" y="168" width="70" height="8" fill="#8d6e63" rx="2"/>
+      <text x="163" y="182" text-anchor="middle" fill="#90a4ae" font-size="7.5">sediment layers</text>
+      <!-- Step 3 -->
+      <rect x="220" y="115" width="96" height="75" fill="rgba(38,198,218,0.07)" rx="8" stroke="rgba(38,198,218,0.2)" stroke-width="1"/>
+      <text x="268" y="128" text-anchor="middle" fill="#26c6da" font-size="8" font-weight="bold">③ Minerals replace</text>
+      <rect x="233" y="143" width="70" height="36" fill="#5d4037" rx="3"/>
+      <text x="268" y="165" text-anchor="middle" fill="#ffcc80" font-size="10">🦴</text>
+      <text x="268" y="182" text-anchor="middle" fill="#90a4ae" font-size="7.5">rock replaces bone</text>
+      <!-- Step 4 -->
+      <rect x="325" y="115" width="110" height="75" fill="rgba(38,198,218,0.07)" rx="8" stroke="rgba(38,198,218,0.2)" stroke-width="1"/>
+      <text x="380" y="128" text-anchor="middle" fill="#26c6da" font-size="8" font-weight="bold">④ Erosion exposes</text>
+      <polygon points="345,175 380,140 415,175" fill="#546e7a" stroke="#607d8b" stroke-width="1"/>
+      <text x="380" y="162" text-anchor="middle" fill="#ffcc80" font-size="10">🦴</text>
+      <text x="380" y="182" text-anchor="middle" fill="#90a4ae" font-size="7.5">fossil found!</text>
+      <!-- Bottom: extinctions -->
+      <text x="225" y="202" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8.5">Major extinctions: Late Ordovician • Late Devonian • End-Permian (96% of species) • End-Cretaceous (dinosaurs, asteroid, 65 mya)</text>
+      <!-- Carbon dating note -->
+      <text x="225" y="222" text-anchor="middle" fill="#80cbc4" font-size="8.5">Dating methods: Carbon-14 (up to 50,000 yrs) | Potassium-Argon (rocks millions of years old)</text>
+      <text x="225" y="238" text-anchor="middle" fill="#80cbc4" font-size="8">Relative dating: deeper layers are older (Law of Superposition)</text>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Earth's age:</span><span>4.6 billion years (4,600,000,000). Put in perspective: if Earth's history = 1 year, humans appear in the last 4 seconds of Dec 31st.</span></div>
+    <div class="krow"><span class="klabel">Fossil record:</span><span>Preserved remains or traces (footprints, burrows) of ancient organisms. Found almost exclusively in sedimentary rock. Shows how life has evolved over time.</span></div>
+    <div class="krow"><span class="klabel">Index fossils:</span><span>Fossils of organisms that lived for a short, well-defined time period and were widespread. Used to date rock layers (e.g. ammonites, trilobites).</span></div>
+    <div class="krow"><span class="klabel">Mass extinctions:</span><span>5 major events. The end-Cretaceous (65 mya) was likely caused by an asteroid impact + volcanic activity. Wiped out ~75% of all species including non-avian dinosaurs.</span></div>
+  </div>
+  <p class="explain">The geological time scale divides Earth's history into eons, eras, periods, and epochs based on changes in rock layers and fossil records. The Precambrian (4.6 billion–541 million years ago) covers 88% of Earth's history. The Phanerozoic (541 mya–present) is when complex life flourished. Scientists use radiometric dating to determine the age of rocks and fossils by measuring radioactive isotope decay.</p>
+  <div class="fact-box"><strong>Birds are dinosaurs:</strong> Modern birds evolved directly from theropod dinosaurs. Archaeopteryx (150 mya) shows features of both dinosaurs and birds. So technically, dinosaurs did NOT go fully extinct 65 million years ago — about 10,000 species of feathered dinosaurs are alive today.</div>
+</div>
+
+<!-- MEDIUM 6: Solar System -->
+<div class="card">
+  <h3>🪐 The Solar System <span class="tag tag-med">MEDIUM</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 460 220" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="460" height="220" fill="#001020" rx="8"/>
+      <!-- Stars background -->
+      <circle cx="30" cy="15" r="1" fill="white" opacity="0.4"/>
+      <circle cx="85" cy="8" r="1.2" fill="white" opacity="0.3"/>
+      <circle cx="150" cy="18" r="0.8" fill="white" opacity="0.5"/>
+      <circle cx="220" cy="5" r="1" fill="white" opacity="0.4"/>
+      <circle cx="300" cy="12" r="1.3" fill="white" opacity="0.3"/>
+      <circle cx="380" cy="7" r="0.9" fill="white" opacity="0.5"/>
+      <circle cx="430" cy="20" r="1.1" fill="white" opacity="0.35"/>
+      <!-- Sun -->
+      <circle cx="28" cy="110" r="24" fill="#ffd600"/>
+      <circle cx="28" cy="110" r="20" fill="#ff9800"/>
+      <text x="28" y="114" text-anchor="middle" fill="#fff" font-size="8" font-weight="bold">SUN</text>
+      <!-- Orbit lines (ellipses, horizontal) -->
+      <ellipse cx="28" cy="145" rx="38" ry="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <ellipse cx="28" cy="145" rx="55" ry="11" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <ellipse cx="28" cy="145" rx="74" ry="14" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <ellipse cx="28" cy="145" rx="97" ry="17" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <ellipse cx="28" cy="145" rx="160" ry="24" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      <ellipse cx="28" cy="145" rx="240" ry="30" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      <ellipse cx="28" cy="145" rx="330" ry="36" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      <ellipse cx="28" cy="145" rx="420" ry="42" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+      <!-- Mercury -->
+      <circle cx="66" cy="110" r="4" fill="#9e9e9e"/>
+      <text x="66" y="100" text-anchor="middle" fill="#bdbdbd" font-size="7.5">Mercury</text>
+      <text x="66" y="122" text-anchor="middle" fill="#9e9e9e" font-size="6.5">rocky</text>
+      <!-- Venus -->
+      <circle cx="83" cy="110" r="5.5" fill="#ff8f00"/>
+      <text x="83" y="98" text-anchor="middle" fill="#ffcc80" font-size="7.5">Venus</text>
+      <text x="83" y="122" text-anchor="middle" fill="#ff8f00" font-size="6.5">rocky</text>
+      <!-- Earth -->
+      <circle cx="102" cy="110" r="5.5" fill="#1565c0"/>
+      <ellipse cx="102" cy="108" rx="3.5" ry="2" fill="#2e7d32" opacity="0.8"/>
+      <text x="102" y="98" text-anchor="middle" fill="#42a5f5" font-size="7.5">Earth</text>
+      <text x="102" y="122" text-anchor="middle" fill="#42a5f5" font-size="6.5">rocky</text>
+      <!-- Mars -->
+      <circle cx="125" cy="110" r="4.5" fill="#b71c1c"/>
+      <text x="125" y="99" text-anchor="middle" fill="#ef9a9a" font-size="7.5">Mars</text>
+      <text x="125" y="122" text-anchor="middle" fill="#ef5350" font-size="6.5">rocky</text>
+      <!-- Asteroid belt -->
+      <text x="147" y="90" fill="rgba(255,255,255,0.35)" font-size="7" text-anchor="middle">· · ·</text>
+      <text x="147" y="98" fill="rgba(255,255,255,0.35)" font-size="7" text-anchor="middle">belt</text>
+      <!-- Jupiter -->
+      <circle cx="188" cy="110" r="14" fill="#e65100"/>
+      <ellipse cx="188" cy="113" rx="14" ry="3.5" fill="#bf360c" opacity="0.6"/>
+      <ellipse cx="188" cy="108" rx="14" ry="2.5" fill="#ff6d00" opacity="0.4"/>
+      <text x="188" y="100" text-anchor="middle" fill="#ffcc80" font-size="7.5" font-weight="bold">Jupiter</text>
+      <text x="188" y="130" text-anchor="middle" fill="#ff9800" font-size="6.5">gas giant</text>
+      <!-- Saturn -->
+      <circle cx="268" cy="110" r="12" fill="#f9a825"/>
+      <!-- Saturn rings -->
+      <ellipse cx="268" cy="112" rx="22" ry="5" fill="none" stroke="#ffeb3b" stroke-width="3" opacity="0.7"/>
+      <ellipse cx="268" cy="112" rx="26" ry="6.5" fill="none" stroke="#ffc107" stroke-width="2" opacity="0.45"/>
+      <text x="268" y="98" text-anchor="middle" fill="#fff176" font-size="7.5" font-weight="bold">Saturn</text>
+      <text x="268" y="130" text-anchor="middle" fill="#ffd600" font-size="6.5">gas giant + rings</text>
+      <!-- Uranus -->
+      <circle cx="360" cy="110" r="9" fill="#4dd0e1"/>
+      <!-- Uranus tilted ring -->
+      <ellipse cx="360" cy="110" rx="3" ry="14" fill="none" stroke="#80deea" stroke-width="1.5" opacity="0.6"/>
+      <text x="360" y="98" text-anchor="middle" fill="#80deea" font-size="7.5">Uranus</text>
+      <text x="360" y="127" text-anchor="middle" fill="#4dd0e1" font-size="6.5">ice giant</text>
+      <!-- Neptune -->
+      <circle cx="430" cy="110" r="9" fill="#1565c0"/>
+      <text x="430" y="98" text-anchor="middle" fill="#90caf9" font-size="7.5">Neptune</text>
+      <text x="430" y="127" text-anchor="middle" fill="#42a5f5" font-size="6.5">ice giant</text>
+      <!-- Mnemonic -->
+      <text x="230" y="160" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">"My Very Energetic Mother Just Served Us Noodles"</text>
+      <text x="230" y="173" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="7.5">Mercury · Venus · Earth · Mars · Jupiter · Saturn · Uranus · Neptune</text>
+      <!-- Earth facts -->
+      <rect x="10" y="185" width="440" height="28" fill="rgba(38,198,218,0.06)" rx="6"/>
+      <text x="225" y="196" text-anchor="middle" fill="#80cbc4" font-size="8">Earth: 365.25 days to orbit Sun (1 year) | 24 hours to rotate on axis (1 day) | 1 moon | ~150 million km from Sun</text>
+      <text x="225" y="208" text-anchor="middle" fill="#80cbc4" font-size="8">Seasons caused by 23.5° axial tilt, NOT by distance from Sun</text>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Rocky planets:</span><span>Mercury, Venus, Earth, Mars — small, solid surfaces, close to Sun, relatively few moons.</span></div>
+    <div class="krow"><span class="klabel">Gas/ice giants:</span><span>Jupiter, Saturn (gas giants — mainly hydrogen/helium). Uranus, Neptune (ice giants — water, methane ice + gas). All have ring systems; Jupiter, Saturn, Uranus, Neptune have multiple moons.</span></div>
+    <div class="krow"><span class="klabel">Earth's motion:</span><span><strong>Rotation</strong> (spin on axis, 24h) → day/night. <strong>Revolution</strong> (orbit around Sun, 365.25 days) → 1 year. Axial tilt of 23.5° → seasons.</span></div>
+    <div class="krow"><span class="klabel">Moon's effects:</span><span>The Moon's gravity causes Earth's ocean tides. The Moon also stabilises Earth's axial tilt, which keeps our climate stable.</span></div>
+  </div>
+  <p class="explain">Our solar system formed ~4.6 billion years ago from a cloud of gas and dust (solar nebula). The Sun contains 99.86% of the solar system's mass. Jupiter is so large that 1,300 Earths could fit inside it. Light from the Sun takes 8 minutes to reach Earth, but ~4 years to reach the nearest other star (Proxima Centauri).</p>
+  <div class="fact-box"><strong>Scale check:</strong> If the Sun were the size of a basketball, Earth would be the size of a sesame seed about 26 meters away. Neptune would be the size of a pea nearly 800 meters away. The nearest star system (Alpha Centauri) would be ~6,700 km away on this same scale.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     HARD SECTION
+════════════════════════════════════════════ -->
+<div class="section-header">
+  <span class="badge">🔴</span>
+  <h2>Hard — Advanced Concepts</h2>
+  <span class="count">6 cards</span>
+</div>
+
+<!-- HARD 1: Carbon Cycle -->
+<div class="card">
+  <h3>♻️ The Carbon Cycle <span class="tag tag-hard">HARD</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 460 280" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="460" height="280" fill="#001426" rx="8"/>
+      <!-- Sky/atmosphere band -->
+      <rect x="0" y="0" width="460" height="80" fill="rgba(41,182,246,0.08)" rx="8"/>
+      <!-- Atmosphere label -->
+      <text x="230" y="18" text-anchor="middle" fill="#29b6f6" font-size="10" font-weight="bold">ATMOSPHERE (CO₂)</text>
+      <!-- CO2 molecules scattered -->
+      <text x="50" y="40" fill="#90caf9" font-size="8">CO₂</text>
+      <text x="130" y="35" fill="#90caf9" font-size="8">CO₂</text>
+      <text x="220" y="50" fill="#90caf9" font-size="8">CO₂</text>
+      <text x="320" y="38" fill="#90caf9" font-size="8">CO₂</text>
+      <text x="400" y="45" fill="#90caf9" font-size="8">CO₂</text>
+      <!-- Ground/land area -->
+      <rect x="0" y="195" width="460" height="85" fill="#1a3a1a" opacity="0.5"/>
+      <!-- Ocean -->
+      <rect x="300" y="155" width="160" height="125" fill="#0277bd" opacity="0.3" rx="4"/>
+      <text x="380" y="200" text-anchor="middle" fill="#90caf9" font-size="9" font-weight="bold">OCEAN</text>
+      <text x="380" y="213" text-anchor="middle" fill="#90caf9" font-size="8">carbon store</text>
+      <!-- Soil/fossil fuel underground -->
+      <rect x="0" y="238" width="280" height="42" fill="#3e2723" opacity="0.6" rx="4"/>
+      <text x="140" y="258" text-anchor="middle" fill="#8d6e63" font-size="9">Soil &amp; Fossil Fuels</text>
+      <text x="140" y="270" text-anchor="middle" fill="#6d4c41" font-size="8">(ancient carbon store)</text>
+      <!-- Tree/plant -->
+      <rect x="100" y="170" width="8" height="28" fill="#5d4037"/>
+      <circle cx="104" cy="162" r="18" fill="#2e7d32"/>
+      <text x="104" y="166" text-anchor="middle" fill="#a5d6a7" font-size="7.5" font-weight="bold">Plant</text>
+      <!-- Animal -->
+      <text x="185" y="198" text-anchor="middle" fill="#ffcc80" font-size="18">🐄</text>
+      <!-- Arrows and processes -->
+      <!-- Photosynthesis: atmosphere → plant (down-left arrow) -->
+      <path d="M 90 72 Q 80 120 95 160" fill="none" stroke="#66bb6a" stroke-width="2" marker-end="url(#ac1)"/>
+      <text x="48" y="110" fill="#66bb6a" font-size="8" font-weight="bold">Photo-</text>
+      <text x="48" y="121" fill="#66bb6a" font-size="8" font-weight="bold">synthesis</text>
+      <text x="48" y="132" fill="#a5d6a7" font-size="7.5">CO₂ absorbed</text>
+      <!-- Respiration: plant/animal → atmosphere (up arrow) -->
+      <path d="M 185 180 Q 190 130 200 75" fill="none" stroke="#ffa726" stroke-width="2" marker-end="url(#ac2)"/>
+      <text x="205" y="115" fill="#ffa726" font-size="8" font-weight="bold">Respiration</text>
+      <text x="205" y="126" fill="#ffe0b2" font-size="7.5">CO₂ released</text>
+      <!-- Decomposition: soil → atmosphere -->
+      <path d="M 120 238 Q 130 170 155 75" fill="none" stroke="#ce93d8" stroke-width="1.8" stroke-dasharray="4,3" marker-end="url(#ac3)"/>
+      <text x="150" y="155" fill="#ce93d8" font-size="8">Decomposition</text>
+      <!-- Combustion: fossil fuels → atmosphere (wide arrow up) -->
+      <path d="M 60 238 Q 30 160 55 78" fill="none" stroke="#ef5350" stroke-width="2.5" marker-end="url(#ac4)"/>
+      <text x="15" y="170" fill="#ef5350" font-size="8" font-weight="bold">Burning</text>
+      <text x="15" y="181" fill="#ef9a9a" font-size="7.5">fossil fuels</text>
+      <text x="15" y="192" fill="#ef9a9a" font-size="7.5">→ extra CO₂</text>
+      <!-- Ocean ↔ atmosphere -->
+      <path d="M 310 75 Q 340 100 350 155" fill="none" stroke="#42a5f5" stroke-width="1.8" stroke-dasharray="4,3" marker-end="url(#ac5)"/>
+      <path d="M 360 155 Q 370 100 380 78" fill="none" stroke="#42a5f5" stroke-width="1.8" stroke-dasharray="4,3" marker-end="url(#ac5)"/>
+      <text x="348" y="118" fill="#90caf9" font-size="8">Ocean ↔</text>
+      <text x="348" y="129" fill="#90caf9" font-size="8">atmosphere</text>
+      <!-- Weathering arrow -->
+      <path d="M 250 255 Q 255 230 260 210 Q 264 185 265 80" fill="none" stroke="#a5d6a7" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#ac6)"/>
+      <text x="268" y="155" fill="#a5d6a7" font-size="7.5">weathering</text>
+      <!-- Enhanced greenhouse bar at top -->
+      <rect x="0" y="0" width="460" height="5" fill="url(#ghGrad)" rx="4"/>
+      <defs>
+        <linearGradient id="ghGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="rgba(239,83,80,0)"/>
+          <stop offset="50%" stop-color="rgba(239,83,80,0.5)"/>
+          <stop offset="100%" stop-color="rgba(239,83,80,0)"/>
+        </linearGradient>
+        <marker id="ac1" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#66bb6a"/></marker>
+        <marker id="ac2" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#ffa726"/></marker>
+        <marker id="ac3" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#ce93d8"/></marker>
+        <marker id="ac4" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#ef5350"/></marker>
+        <marker id="ac5" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#42a5f5"/></marker>
+        <marker id="ac6" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#a5d6a7"/></marker>
+      </defs>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Carbon stores:</span><span>Atmosphere (CO₂, CH₄), Oceans (dissolved CO₂, shells), Living things (organic molecules), Soil (humus), Fossil fuels (ancient buried carbon), Rocks (limestone — largest store).</span></div>
+    <div class="krow"><span class="klabel">Photosynthesis:</span><span>6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂. Plants absorb CO₂ from atmosphere → remove carbon. Forests and oceans are key carbon sinks.</span></div>
+    <div class="krow"><span class="klabel">Respiration:</span><span>C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + energy. All living things release CO₂ back. Decomposition by bacteria/fungi also releases CO₂.</span></div>
+    <div class="krow"><span class="klabel">Human impact:</span><span>Burning fossil fuels releases carbon stored for 300+ million years into the atmosphere in decades → atmospheric CO₂ rising from 280 ppm (pre-industrial) to 420+ ppm today.</span></div>
+  </div>
+  <p class="explain">The natural carbon cycle is roughly balanced — what plants absorb, decomposition and respiration release. Human activity has broken this balance by adding ~10 billion tonnes of extra CO₂ per year from fossil fuel combustion, deforestation, and cement production. The ocean absorbs about 25% of this, causing ocean acidification (dissolving shells of marine organisms).</p>
+  <div class="fact-box"><strong>Feedback loops:</strong> Warming → Arctic permafrost melts → releases methane (CH₄, 80× more potent than CO₂ over 20 years) → more warming. This is a positive feedback loop (amplifies change). Methane from livestock and rice paddies also contributes significantly to greenhouse gas levels.</div>
+</div>
+
+<!-- HARD 2: Climate Change Evidence -->
+<div class="card">
+  <h3>📈 Climate Change Evidence <span class="tag tag-hard">HARD</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 460 260" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="460" height="260" fill="#001426" rx="8"/>
+      <!-- Temperature graph (main) -->
+      <text x="230" y="18" text-anchor="middle" fill="#ef5350" font-size="10" font-weight="bold">Global Average Temperature Anomaly (1850–2025)</text>
+      <!-- Graph axes -->
+      <line x1="45" y1="25" x2="45" y2="130" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+      <line x1="45" y1="130" x2="440" y2="130" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+      <!-- Y axis labels -->
+      <text x="40" y="30" text-anchor="end" fill="rgba(255,255,255,0.5)" font-size="7.5">+1.5°C</text>
+      <text x="40" y="68" text-anchor="end" fill="rgba(255,255,255,0.5)" font-size="7.5">+0.8°C</text>
+      <text x="40" y="108" text-anchor="end" fill="rgba(255,255,255,0.5)" font-size="7.5">0°C</text>
+      <!-- 0 line -->
+      <line x1="45" y1="108" x2="440" y2="108" stroke="rgba(255,255,255,0.15)" stroke-width="1" stroke-dasharray="4,3"/>
+      <!-- X axis labels -->
+      <text x="50" y="142" fill="rgba(255,255,255,0.5)" font-size="7.5">1850</text>
+      <text x="135" y="142" fill="rgba(255,255,255,0.5)" font-size="7.5">1900</text>
+      <text x="220" y="142" fill="rgba(255,255,255,0.5)" font-size="7.5">1950</text>
+      <text x="308" y="142" fill="rgba(255,255,255,0.5)" font-size="7.5">2000</text>
+      <text x="415" y="142" fill="rgba(255,255,255,0.5)" font-size="7.5">2025</text>
+      <!-- Temperature anomaly path (rising trend) -->
+      <path d="M 50,108 Q 60,106 70,109 Q 85,112 100,107 Q 115,103 130,106 Q 145,109 160,105 Q 175,101 190,104 Q 205,107 220,102 Q 235,97 250,95 Q 265,90 280,88 Q 295,82 310,78 Q 325,72 340,65 Q 355,58 370,52 Q 385,45 400,38 Q 415,33 430,28" fill="none" stroke="#ef5350" stroke-width="2.5"/>
+      <!-- Fill under curve -->
+      <path d="M 50,108 Q 60,106 70,109 Q 85,112 100,107 Q 115,103 130,106 Q 145,109 160,105 Q 175,101 190,104 Q 205,107 220,102 Q 235,97 250,95 Q 265,90 280,88 Q 295,82 310,78 Q 325,72 340,65 Q 355,58 370,52 Q 385,45 400,38 Q 415,33 430,28 L 430,108 L 50,108 Z" fill="rgba(239,83,80,0.15)"/>
+      <!-- 1.5°C Paris target line -->
+      <line x1="45" y1="30" x2="440" y2="30" stroke="#ffd600" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.7"/>
+      <text x="442" y="33" fill="#ffd600" font-size="7.5">Paris 1.5°C</text>
+      <!-- Evidence panels below graph -->
+      <text x="230" y="160" text-anchor="middle" fill="#26c6da" font-size="9" font-weight="bold">KEY EVIDENCE FOR CLIMATE CHANGE</text>
+      <!-- Evidence 1: Ice cores -->
+      <rect x="10" y="167" width="100" height="85" fill="rgba(41,182,246,0.1)" rx="8" stroke="rgba(41,182,246,0.25)" stroke-width="1"/>
+      <text x="60" y="181" text-anchor="middle" fill="#29b6f6" font-size="8.5" font-weight="bold">🧊 Ice Cores</text>
+      <text x="60" y="193" text-anchor="middle" fill="#b3e5fc" font-size="7.5">Trapped air bubbles</text>
+      <text x="60" y="203" text-anchor="middle" fill="#b3e5fc" font-size="7.5">show 800,000 yrs</text>
+      <text x="60" y="213" text-anchor="middle" fill="#b3e5fc" font-size="7.5">of CO₂ &amp; temp</text>
+      <text x="60" y="223" text-anchor="middle" fill="#80deea" font-size="7.5">Strong correlation</text>
+      <text x="60" y="234" text-anchor="middle" fill="#80deea" font-size="7.5">CO₂ ↑ = temp ↑</text>
+      <text x="60" y="245" text-anchor="middle" fill="#80deea" font-size="7.5">data confirms link</text>
+      <!-- Evidence 2: Sea level -->
+      <rect x="118" y="167" width="100" height="85" fill="rgba(102,187,106,0.1)" rx="8" stroke="rgba(102,187,106,0.25)" stroke-width="1"/>
+      <text x="168" y="181" text-anchor="middle" fill="#66bb6a" font-size="8.5" font-weight="bold">🌊 Sea Level</text>
+      <text x="168" y="193" text-anchor="middle" fill="#c8e6c9" font-size="7.5">+20cm since 1900</text>
+      <text x="168" y="203" text-anchor="middle" fill="#c8e6c9" font-size="7.5">Thermal expansion</text>
+      <text x="168" y="213" text-anchor="middle" fill="#c8e6c9" font-size="7.5">+ melting ice</text>
+      <text x="168" y="223" text-anchor="middle" fill="#a5d6a7" font-size="7.5">Threatens coastal</text>
+      <text x="168" y="234" text-anchor="middle" fill="#a5d6a7" font-size="7.5">cities (NYC, Miami,</text>
+      <text x="168" y="245" text-anchor="middle" fill="#a5d6a7" font-size="7.5">London, Jakarta)</text>
+      <!-- Evidence 3: Arctic ice -->
+      <rect x="226" y="167" width="100" height="85" fill="rgba(255,193,7,0.1)" rx="8" stroke="rgba(255,193,7,0.25)" stroke-width="1"/>
+      <text x="276" y="181" text-anchor="middle" fill="#ffc107" font-size="8.5" font-weight="bold">❄️ Arctic Ice</text>
+      <text x="276" y="193" text-anchor="middle" fill="#fff9c4" font-size="7.5">Arctic summer sea ice</text>
+      <text x="276" y="203" text-anchor="middle" fill="#fff9c4" font-size="7.5">↓ 40% since 1980</text>
+      <text x="276" y="213" text-anchor="middle" fill="#fff9c4" font-size="7.5">Greenland/Antarctica</text>
+      <text x="276" y="223" text-anchor="middle" fill="#ffe082" font-size="7.5">losing mass fast</text>
+      <text x="276" y="234" text-anchor="middle" fill="#ffe082" font-size="7.5">Albedo feedback:</text>
+      <text x="276" y="245" text-anchor="middle" fill="#ffe082" font-size="7.5">less ice → less reflect</text>
+      <!-- Evidence 4: Extreme weather -->
+      <rect x="334" y="167" width="118" height="85" fill="rgba(239,83,80,0.1)" rx="8" stroke="rgba(239,83,80,0.25)" stroke-width="1"/>
+      <text x="393" y="181" text-anchor="middle" fill="#ef5350" font-size="8.5" font-weight="bold">⛈️ Extremes</text>
+      <text x="393" y="193" text-anchor="middle" fill="#ffcdd2" font-size="7.5">More frequent &amp; intense:</text>
+      <text x="393" y="203" text-anchor="middle" fill="#ffcdd2" font-size="7.5">hurricanes, heatwaves,</text>
+      <text x="393" y="213" text-anchor="middle" fill="#ffcdd2" font-size="7.5">floods, droughts</text>
+      <text x="393" y="223" text-anchor="middle" fill="#ef9a9a" font-size="7.5">Ocean acidification</text>
+      <text x="393" y="234" text-anchor="middle" fill="#ef9a9a" font-size="7.5">pH from 8.2 → 8.1</text>
+      <text x="393" y="245" text-anchor="middle" fill="#ef9a9a" font-size="7.5">(30% more acidic)</text>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Scientific consensus:</span><span>97%+ of climate scientists agree that current climate change is primarily caused by human activity (burning fossil fuels, deforestation, agriculture).</span></div>
+    <div class="krow"><span class="klabel">CO₂ levels:</span><span>Pre-industrial (1750): ~280 ppm. Today (2025): ~425 ppm. Highest in at least 800,000 years (from ice core data). Rate of increase is ~100× faster than natural changes.</span></div>
+    <div class="krow"><span class="klabel">Ocean acidification:</span><span>Oceans absorb CO₂ → forms carbonic acid (H₂CO₃) → lowers pH → dissolves calcium carbonate shells → threatens coral reefs, shellfish, marine food chains.</span></div>
+    <div class="krow"><span class="klabel">IPCC:</span><span>Intergovernmental Panel on Climate Change — UN body that synthesises thousands of scientific studies. Reports guide international climate policy.</span></div>
+  </div>
+  <p class="explain">Climate change is distinguished from natural climate variability by its speed and cause. Natural climate cycles (Milankovitch cycles, volcanic eruptions) operate over thousands to millions of years. Current changes are occurring over decades. The "fingerprint" of human-caused warming — including cooling stratosphere, warming troposphere, and nighttime temperatures rising faster than daytime — cannot be explained by natural factors alone.</p>
+  <div class="fact-box"><strong>The Paris Agreement (2015):</strong> 196 countries agreed to limit warming to 1.5°C above pre-industrial levels and no more than 2°C. At current trajectories, we are on track for 2.5–3°C by 2100 without more ambitious action. Consequences: entire island nations submerged, extreme heat making parts of tropics uninhabitable, mass migration.</div>
+</div>
+
+<!-- HARD 3: Soil Formation and Composition -->
+<div class="card">
+  <h3>🌱 Soil Formation &amp; Composition <span class="tag tag-hard">HARD</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 440 270" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="440" height="270" fill="#001426" rx="8"/>
+      <!-- Soil Profile Cross-Section (left side) -->
+      <text x="115" y="18" text-anchor="middle" fill="#26c6da" font-size="10" font-weight="bold">SOIL PROFILE (horizons)</text>
+      <!-- Above surface: plants/grass -->
+      <rect x="10" y="30" width="200" height="18" fill="rgba(46,125,50,0.2)" rx="3"/>
+      <text x="110" y="43" text-anchor="middle" fill="#66bb6a" font-size="8.5">Ground surface / vegetation</text>
+      <!-- O Horizon (organic debris) -->
+      <rect x="10" y="48" width="200" height="28" fill="#4e342e" rx="2"/>
+      <text x="16" y="63" fill="#ffcc80" font-size="9" font-weight="bold">O — Organic layer</text>
+      <text x="16" y="74" fill="#bcaaa4" font-size="7.5">leaf litter, twigs, decomposing matter</text>
+      <!-- A Horizon (topsoil) -->
+      <rect x="10" y="76" width="200" height="42" fill="#5d4037"/>
+      <text x="16" y="91" fill="#ffb74d" font-size="9" font-weight="bold">A — Topsoil</text>
+      <text x="16" y="103" fill="#d7ccc8" font-size="7.5">Most nutrients &amp; organisms live here</text>
+      <text x="16" y="114" fill="#d7ccc8" font-size="7.5">Dark colour = high organic content</text>
+      <!-- B Horizon (subsoil) -->
+      <rect x="10" y="118" width="200" height="45" fill="#795548"/>
+      <text x="16" y="133" fill="#e6b88a" font-size="9" font-weight="bold">B — Subsoil</text>
+      <text x="16" y="145" fill="#bcaaa4" font-size="7.5">Clay, minerals leached from above</text>
+      <text x="16" y="156" fill="#bcaaa4" font-size="7.5">Less organic matter, fewer organisms</text>
+      <!-- C Horizon (parent material) -->
+      <rect x="10" y="163" width="200" height="45" fill="#8d6e63"/>
+      <text x="16" y="178" fill="#d7ccc8" font-size="9" font-weight="bold">C — Parent material</text>
+      <text x="16" y="190" fill="#bcaaa4" font-size="7.5">Partially weathered rock fragments</text>
+      <text x="16" y="201" fill="#bcaaa4" font-size="7.5">Little biological activity</text>
+      <!-- R Horizon (bedrock) -->
+      <rect x="10" y="208" width="200" height="55" fill="#546e7a" rx="0 0 4 4"/>
+      <text x="16" y="223" fill="#b0bec5" font-size="9" font-weight="bold">R — Bedrock</text>
+      <text x="16" y="235" fill="#90a4ae" font-size="7.5">Solid unweathered rock</text>
+      <text x="16" y="246" fill="#90a4ae" font-size="7.5">Parent material source</text>
+      <!-- Time arrow -->
+      <text x="4" y="260" fill="rgba(255,255,255,0.35)" font-size="7" transform="rotate(-90,4,260)">Bedrock</text>
+      <!-- RIGHT SIDE: Composition pie + formation -->
+      <text x="330" y="18" text-anchor="middle" fill="#26c6da" font-size="10" font-weight="bold">SOIL COMPOSITION</text>
+      <!-- Simplified pie chart -->
+      <!-- 45% minerals -->
+      <path d="M 330 110 L 330 60 A 50 50 0 0 1 380 110 Z" fill="#78909c"/>
+      <!-- 25% water -->
+      <path d="M 330 110 L 380 110 A 50 50 0 0 1 330 160 Z" fill="#0288d1" opacity="0.8"/>
+      <!-- 25% air -->
+      <path d="M 330 110 L 330 160 A 50 50 0 0 1 280 110 Z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+      <!-- 5% organic -->
+      <path d="M 330 110 L 280 110 A 50 50 0 0 1 330 60 Z" fill="#2e7d32"/>
+      <!-- Labels -->
+      <text x="357" y="85" fill="#eceff1" font-size="8.5" font-weight="bold">45%</text>
+      <text x="358" y="96" fill="#b0bec5" font-size="7.5">Minerals</text>
+      <text x="350" y="148" fill="#b3e5fc" font-size="8.5" font-weight="bold">25%</text>
+      <text x="351" y="159" fill="#90caf9" font-size="7.5">Water</text>
+      <text x="247" y="148" fill="rgba(255,255,255,0.6)" font-size="8.5" font-weight="bold">25%</text>
+      <text x="248" y="159" fill="rgba(255,255,255,0.5)" font-size="7.5">Air</text>
+      <text x="295" y="82" fill="#a5d6a7" font-size="8.5" font-weight="bold">5%</text>
+      <text x="287" y="93" fill="#a5d6a7" font-size="7.5">Organic</text>
+      <!-- Soil formation timeline -->
+      <text x="330" y="185" text-anchor="middle" fill="#ffa726" font-size="9" font-weight="bold">Formation time:</text>
+      <text x="330" y="198" text-anchor="middle" fill="#ffe0b2" font-size="8">~1 cm of topsoil takes</text>
+      <text x="330" y="209" text-anchor="middle" fill="#ffe0b2" font-size="8">100–1,000 years to form</text>
+      <text x="330" y="225" text-anchor="middle" fill="#ef9a9a" font-size="8">Once lost to erosion,</text>
+      <text x="330" y="236" text-anchor="middle" fill="#ef9a9a" font-size="8">effectively gone on</text>
+      <text x="330" y="247" text-anchor="middle" fill="#ef9a9a" font-size="8">human timescales</text>
+      <!-- Micro-organism note -->
+      <text x="330" y="263" text-anchor="middle" fill="#80cbc4" font-size="7.5">1 tsp soil = ~1 billion bacteria</text>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Soil formation:</span><span>Pedogenesis — takes thousands of years. Starts with physical/chemical weathering of bedrock → parent material. Add organic matter from organisms → slowly becomes soil. Climate, organisms, topography, time all influence soil type.</span></div>
+    <div class="krow"><span class="klabel">Soil texture:</span><span>Determined by particle size. <strong>Sandy</strong> (large particles, drains fast, poor nutrients), <strong>Clay</strong> (tiny particles, retains water, can waterlog), <strong>Silt</strong> (medium), <strong>Loam</strong> (mix of all three — ideal for agriculture).</span></div>
+    <div class="krow"><span class="klabel">Soil pH:</span><span>Affects which nutrients plants can absorb. Most crops prefer slightly acidic to neutral (pH 6–7). Acid rain, fertilisers, and industrial pollution can alter soil pH, reducing fertility.</span></div>
+    <div class="krow"><span class="klabel">Threats to soil:</span><span>Erosion (wind/water removes topsoil), compaction (heavy machinery reduces air spaces), salinisation (irrigation causes salt buildup), contamination (heavy metals, pesticides).</span></div>
+  </div>
+  <p class="explain">Soil is a complex ecosystem — a single teaspoon contains more microorganisms than there are people on Earth. These bacteria, fungi, and other organisms drive nutrient cycles essential for plant growth. Earthworms aerate and mix soil horizons. Soil is essentially a non-renewable resource on human timescales — one of the most precious and underappreciated on the planet.</p>
+  <div class="fact-box"><strong>Food security:</strong> 95% of our food is directly or indirectly produced in soil. Globally, about one-third of soil is degraded, and we are losing productive topsoil 10–40× faster than it forms. Sustainable farming practices (cover crops, reduced tillage, composting) are essential to maintain soil health for future food production.</div>
+</div>
+
+<!-- HARD 4: Seasons and Earth's Tilt -->
+<div class="card">
+  <h3>🌍 Seasons &amp; Earth's Axial Tilt <span class="tag tag-hard">HARD</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 460 270" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="460" height="270" fill="#001020" rx="8"/>
+      <!-- Sun at centre -->
+      <circle cx="230" cy="135" r="30" fill="#ffd600"/>
+      <circle cx="230" cy="135" r="24" fill="#ff9800"/>
+      <text x="230" y="139" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">SUN</text>
+      <!-- Solar rays -->
+      <line x1="230" y1="100" x2="230" y2="90" stroke="#ffd600" stroke-width="2" opacity="0.5"/>
+      <line x1="230" y1="170" x2="230" y2="180" stroke="#ffd600" stroke-width="2" opacity="0.5"/>
+      <line x1="195" y1="110" x2="188" y2="103" stroke="#ffd600" stroke-width="2" opacity="0.5"/>
+      <line x1="265" y1="110" x2="272" y2="103" stroke="#ffd600" stroke-width="2" opacity="0.5"/>
+      <line x1="195" y1="160" x2="188" y2="167" stroke="#ffd600" stroke-width="2" opacity="0.5"/>
+      <line x1="265" y1="160" x2="272" y2="167" stroke="#ffd600" stroke-width="2" opacity="0.5"/>
+      <!-- Orbit path (ellipse) -->
+      <ellipse cx="230" cy="135" rx="195" ry="115" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+      <!-- EARTH POSITIONS -->
+      <!-- Position 1: Northern Summer (top) — N hemisphere tilts toward sun -->
+      <g transform="translate(230,22)">
+        <circle cx="0" cy="0" r="16" fill="#1565c0"/>
+        <ellipse cx="-3" cy="-4" rx="10" ry="5" fill="#2e7d32" opacity="0.85"/>
+        <!-- Tilt axis: tilted toward sun (left in this position = toward sun) -->
+        <line x1="-6" y1="-18" x2="6" y2="18" stroke="#ffd600" stroke-width="2"/>
+        <text x="0" y="30" text-anchor="middle" fill="#ffd600" font-size="8.5" font-weight="bold">N. SUMMER</text>
+        <text x="0" y="40" text-anchor="middle" fill="#ffe082" font-size="7.5">N tilts toward sun</text>
+        <text x="0" y="50" text-anchor="middle" fill="#ffe082" font-size="7.5">→ longer days</text>
+      </g>
+      <!-- Position 2: Northern Winter (bottom) — N hemisphere tilts away from sun -->
+      <g transform="translate(230,248)">
+        <circle cx="0" cy="0" r="16" fill="#1565c0"/>
+        <ellipse cx="3" cy="-4" rx="10" ry="5" fill="#2e7d32" opacity="0.85"/>
+        <!-- Tilt axis: tilted away from sun -->
+        <line x1="-6" y1="-18" x2="6" y2="18" stroke="#90caf9" stroke-width="2"/>
+        <text x="0" y="-26" text-anchor="middle" fill="#90caf9" font-size="8.5" font-weight="bold">N. WINTER</text>
+        <text x="0" y="-16" text-anchor="middle" fill="#b3e5fc" font-size="7.5">N tilts away</text>
+        <text x="0" y="-6" text-anchor="middle" fill="#b3e5fc" font-size="7.5">→ shorter days</text>
+      </g>
+      <!-- Position 3: Autumn Equinox (left) -->
+      <g transform="translate(37,135)">
+        <circle cx="0" cy="0" r="14" fill="#1565c0"/>
+        <ellipse cx="0" cy="-3" rx="9" ry="4.5" fill="#2e7d32" opacity="0.8"/>
+        <line x1="-5" y1="-16" x2="5" y2="16" stroke="#a5d6a7" stroke-width="2"/>
+        <text x="0" y="26" text-anchor="middle" fill="#a5d6a7" font-size="8" font-weight="bold">EQUINOX</text>
+        <text x="0" y="36" text-anchor="middle" fill="#c8e6c9" font-size="7">Equal day &amp; night</text>
+      </g>
+      <!-- Position 4: Spring Equinox (right) -->
+      <g transform="translate(423,135)">
+        <circle cx="0" cy="0" r="14" fill="#1565c0"/>
+        <ellipse cx="0" cy="-3" rx="9" ry="4.5" fill="#2e7d32" opacity="0.8"/>
+        <line x1="-5" y1="-16" x2="5" y2="16" stroke="#a5d6a7" stroke-width="2"/>
+        <text x="0" y="26" text-anchor="middle" fill="#a5d6a7" font-size="8" font-weight="bold">EQUINOX</text>
+        <text x="0" y="36" text-anchor="middle" fill="#c8e6c9" font-size="7">Equal day &amp; night</text>
+      </g>
+      <!-- Tilt angle label -->
+      <text x="338" y="50" fill="#ffa726" font-size="10" font-weight="bold">23.5°</text>
+      <text x="338" y="62" fill="#ffe0b2" font-size="8">axial tilt</text>
+      <line x1="328" y1="45" x2="280" y2="38" stroke="#ffa726" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <!-- Common misconception label -->
+      <text x="230" y="200" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="8">NOT caused by distance from Sun — Earth is actually slightly closer to Sun in January (N. winter)!</text>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Why seasons occur:</span><span>Earth's axis is tilted at 23.5° relative to its orbital plane. As Earth orbits the Sun, each hemisphere alternates tilting toward and away from the Sun.</span></div>
+    <div class="krow"><span class="klabel">Summer (N. hemisphere):</span><span>Northern hemisphere tilts toward Sun → more direct sunlight (higher angle = more energy per m²) → longer days. June 21 = summer solstice (longest day).</span></div>
+    <div class="krow"><span class="klabel">Winter (N. hemisphere):</span><span>Northern hemisphere tilts away from Sun → sunlight hits at low angle → less energy per m² → shorter days. Dec 21 = winter solstice (shortest day).</span></div>
+    <div class="krow"><span class="klabel">Equinoxes:</span><span>Twice a year (March 20 &amp; Sept 22), neither hemisphere tilts toward Sun → 12 hours of daylight everywhere on Earth. "Equinox" = "equal night".</span></div>
+    <div class="krow"><span class="klabel">At the equator:</span><span>The equator always receives relatively direct sunlight → no strong seasons. Poles experience extreme variation: 24-hour daylight in summer, 24-hour darkness in winter.</span></div>
+  </div>
+  <p class="explain">Two effects of tilt cause seasons: (1) <strong>Angle of sunlight</strong> — when sunlight strikes at a lower angle, the same amount of energy is spread over a larger area → less intense heating. (2) <strong>Day length</strong> — more hours of daylight = more total energy received. Both effects reinforce each other to produce seasons. Distance from the Sun is NOT the cause — Earth is actually closest to the Sun (perihelion) in early January.</p>
+  <div class="fact-box"><strong>Milankovitch cycles:</strong> Over thousands to hundreds of thousands of years, three orbital parameters change: (1) eccentricity (shape of orbit), (2) axial tilt (changes between 22.1° and 24.5°), (3) precession (wobble of axis). These cycles are responsible for Earth's ice ages, occurring roughly every 100,000 years.</div>
+</div>
+
+<!-- HARD 5: Stars and HR Diagram -->
+<div class="card">
+  <h3>⭐ Stars &amp; the Hertzsprung-Russell Diagram <span class="tag tag-hard">HARD</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 460 280" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="460" height="280" fill="#001020" rx="8"/>
+      <!-- H-R Diagram -->
+      <text x="155" y="15" text-anchor="middle" fill="#26c6da" font-size="10" font-weight="bold">HERTZSPRUNG-RUSSELL DIAGRAM</text>
+      <!-- Axes -->
+      <line x1="40" y1="15" x2="40" y2="225" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+      <line x1="40" y1="225" x2="305" y2="225" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+      <!-- Y axis: Luminosity (top = bright) -->
+      <text x="10" y="115" fill="rgba(255,255,255,0.5)" font-size="8" transform="rotate(-90,10,115)">← Luminosity (L☉)</text>
+      <text x="30" y="22" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="7">bright</text>
+      <text x="30" y="222" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="7">dim</text>
+      <!-- X axis: Temperature (left = hot, right = cool) -->
+      <text x="172" y="240" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8">← Hot (blue)    Cool (red) →</text>
+      <text x="40" y="252" fill="rgba(255,255,255,0.4)" font-size="7">50,000K</text>
+      <text x="250" y="252" fill="rgba(255,255,255,0.4)" font-size="7">3,000K</text>
+      <!-- Main sequence band (diagonal) -->
+      <path d="M 50,25 Q 90,55 130,90 Q 170,130 200,160 Q 230,190 275,215" fill="none" stroke="rgba(38,198,218,0.5)" stroke-width="18" stroke-linecap="round"/>
+      <text x="90" y="65" fill="#26c6da" font-size="8.5" font-weight="bold" transform="rotate(-40,90,65)">MAIN SEQUENCE</text>
+      <!-- Stars on main sequence -->
+      <!-- O-type (blue giant, top left) -->
+      <circle cx="55" cy="30" r="8" fill="#7986cb"/>
+      <text x="55" y="34" text-anchor="middle" fill="#fff" font-size="6">O</text>
+      <text x="70" y="27" fill="#9fa8da" font-size="7">Blue giant</text>
+      <text x="70" y="36" fill="#9fa8da" font-size="6.5">hottest, most luminous</text>
+      <!-- A-type (white, upper mid) -->
+      <circle cx="120" cy="88" r="6" fill="#e8eaf6"/>
+      <text x="120" y="92" text-anchor="middle" fill="#37474f" font-size="6">A</text>
+      <text x="132" y="88" fill="#e8eaf6" font-size="7">White/blue-white</text>
+      <!-- Sun (G-type, yellow dwarf) -->
+      <circle cx="175" cy="140" r="7" fill="#ffd600"/>
+      <text x="175" y="144" text-anchor="middle" fill="#37474f" font-size="6.5" font-weight="bold">☉</text>
+      <text x="188" y="136" fill="#ffd600" font-size="8" font-weight="bold">OUR SUN</text>
+      <text x="188" y="146" fill="#fff176" font-size="7">Yellow dwarf (G-type)</text>
+      <text x="188" y="156" fill="#fff176" font-size="7">~5,778 K surface temp</text>
+      <!-- M-type (red dwarf, bottom right) -->
+      <circle cx="255" cy="205" r="4" fill="#ef5350"/>
+      <text x="255" y="209" text-anchor="middle" fill="#fff" font-size="5.5">M</text>
+      <text x="262" y="205" fill="#ef9a9a" font-size="7">Red dwarf — most common</text>
+      <!-- Giants (upper right) -->
+      <ellipse cx="245" cy="65" rx="22" ry="18" fill="rgba(255,138,101,0.2)" stroke="#ff8a65" stroke-width="1.5"/>
+      <circle cx="235" cy="70" r="10" fill="#ff7043"/>
+      <text x="245" y="60" text-anchor="middle" fill="#ff8a65" font-size="8.5" font-weight="bold">RED GIANTS</text>
+      <text x="245" y="90" text-anchor="middle" fill="#ffab91" font-size="7.5">cool but large</text>
+      <!-- Supergiants (very top right) -->
+      <circle cx="280" cy="32" r="14" fill="#bf360c" opacity="0.7"/>
+      <text x="280" y="30" text-anchor="middle" fill="#ffccbc" font-size="7.5" font-weight="bold">SUPER-</text>
+      <text x="280" y="40" text-anchor="middle" fill="#ffccbc" font-size="7.5" font-weight="bold">GIANTS</text>
+      <!-- White dwarfs (bottom left) -->
+      <ellipse cx="65" cy="200" rx="25" ry="14" fill="rgba(232,234,246,0.1)" stroke="#e8eaf6" stroke-width="1"/>
+      <circle cx="60" cy="202" r="4" fill="#e8eaf6"/>
+      <circle cx="75" cy="198" r="3" fill="#c5cae9"/>
+      <text x="65" y="220" text-anchor="middle" fill="#c5cae9" font-size="8" font-weight="bold">WHITE DWARFS</text>
+      <text x="65" y="230" text-anchor="middle" fill="#9fa8da" font-size="7">small, hot but dim</text>
+      <!-- Star Lifecycle panel (right side) -->
+      <text x="375" y="18" text-anchor="middle" fill="#26c6da" font-size="9.5" font-weight="bold">STAR LIFECYCLE</text>
+      <rect x="318" y="23" width="134" height="242" fill="rgba(0,0,0,0.3)" rx="8"/>
+      <!-- Low/medium mass (like our sun) -->
+      <text x="385" y="38" text-anchor="middle" fill="#ffa726" font-size="8" font-weight="bold">Low/medium mass:</text>
+      <text x="385" y="49" text-anchor="middle" fill="#ffe0b2" font-size="7.5">Nebula</text>
+      <text x="385" y="59" text-anchor="middle" fill="#ffe0b2" font-size="7.5">↓</text>
+      <text x="385" y="69" text-anchor="middle" fill="#ffe0b2" font-size="7.5">Protostar</text>
+      <text x="385" y="79" text-anchor="middle" fill="#ffe0b2" font-size="7.5">↓</text>
+      <text x="385" y="89" text-anchor="middle" fill="#ffd600" font-size="7.5" font-weight="bold">Main Sequence ☉</text>
+      <text x="385" y="99" text-anchor="middle" fill="#ffe0b2" font-size="7.5">↓ (billions of years)</text>
+      <text x="385" y="109" text-anchor="middle" fill="#ff7043" font-size="7.5">Red Giant</text>
+      <text x="385" y="119" text-anchor="middle" fill="#ffe0b2" font-size="7.5">↓</text>
+      <text x="385" y="129" text-anchor="middle" fill="#e8eaf6" font-size="7.5">White Dwarf</text>
+      <text x="385" y="139" text-anchor="middle" fill="#9fa8da" font-size="7.5">→ Black Dwarf</text>
+      <!-- Divider -->
+      <line x1="325" y1="150" x2="445" y2="150" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+      <!-- High mass -->
+      <text x="385" y="163" text-anchor="middle" fill="#ef5350" font-size="8" font-weight="bold">High mass:</text>
+      <text x="385" y="174" text-anchor="middle" fill="#ffcdd2" font-size="7.5">Nebula → Protostar</text>
+      <text x="385" y="184" text-anchor="middle" fill="#ffcdd2" font-size="7.5">↓</text>
+      <text x="385" y="194" text-anchor="middle" fill="#7986cb" font-size="7.5" font-weight="bold">Blue Supergiant</text>
+      <text x="385" y="204" text-anchor="middle" fill="#ffcdd2" font-size="7.5">↓</text>
+      <text x="385" y="214" text-anchor="middle" fill="#ff5722" font-size="7.5" font-weight="bold">SUPERNOVA 💥</text>
+      <text x="385" y="224" text-anchor="middle" fill="#ffcdd2" font-size="7.5">↓</text>
+      <text x="385" y="234" text-anchor="middle" fill="#b0bec5" font-size="7">Neutron star</text>
+      <text x="385" y="243" text-anchor="middle" fill="#b0bec5" font-size="7">or Black Hole</text>
+      <text x="385" y="258" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="7">(if mass &gt; ~3× Sun)</text>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">H-R diagram:</span><span>Plots stars by luminosity (y-axis) vs surface temperature (x-axis). About 90% of stars fall on the <strong>main sequence</strong> (diagonal band) including our Sun. Stars on the main sequence fuse hydrogen → helium in their cores.</span></div>
+    <div class="krow"><span class="klabel">Our Sun:</span><span>G-type yellow dwarf. Age: ~4.6 billion years. Estimated 5 billion years left on main sequence. Will expand into a red giant, then shed outer layers → planetary nebula → white dwarf.</span></div>
+    <div class="krow"><span class="klabel">Supernova:</span><span>Catastrophic explosion of a massive star. For a brief moment, outshines an entire galaxy. Creates and disperses heavy elements (iron, gold, uranium) — all atoms heavier than iron were forged in supernovae.</span></div>
+    <div class="krow"><span class="klabel">Nuclear fusion:</span><span>Stars shine by fusing hydrogen nuclei into helium at their cores (requires ~15 million °C). The energy released (E=mc²) provides outward pressure balancing gravity — this is hydrostatic equilibrium.</span></div>
+  </div>
+  <p class="explain">The H-R diagram is one of the most important tools in astrophysics — it reveals patterns in stellar evolution. A star's position on the diagram is determined by its mass. More massive stars are hotter, bluer, and more luminous, but burn through their fuel far faster. A star 10× the Sun's mass burns its fuel ~1,000× faster and lives only ~10 million years vs. the Sun's ~10 billion years.</p>
+  <div class="fact-box"><strong>"We are stardust":</strong> Every element in your body heavier than hydrogen and helium was forged inside a star or during a supernova explosion. The calcium in your bones, the iron in your blood, the oxygen you breathe — all were created in stellar nucleosynthesis and scattered by stellar winds and supernovae before being incorporated into our solar system.</div>
+</div>
+
+<!-- HARD 6: Human Impact on Environment -->
+<div class="card">
+  <h3>🌿 Human Impact on the Environment <span class="tag tag-hard">HARD</span></h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 460 270" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,sans-serif">
+      <rect width="460" height="270" fill="#001426" rx="8"/>
+      <!-- Earth centre -->
+      <circle cx="230" cy="130" r="55" fill="#1565c0" opacity="0.7"/>
+      <ellipse cx="215" cy="115" rx="30" ry="18" fill="#2e7d32" opacity="0.8"/>
+      <ellipse cx="248" cy="140" rx="20" ry="12" fill="#388e3c" opacity="0.7"/>
+      <text x="230" y="134" text-anchor="middle" fill="#e3f2fd" font-size="10" font-weight="bold">EARTH</text>
+      <!-- 6 impact areas arranged around Earth -->
+      <!-- 1: Deforestation (top-left) -->
+      <rect x="5" y="5" width="130" height="60" fill="rgba(239,83,80,0.1)" rx="8" stroke="rgba(239,83,80,0.3)" stroke-width="1"/>
+      <text x="70" y="19" text-anchor="middle" fill="#ef5350" font-size="9" font-weight="bold">🪓 Deforestation</text>
+      <text x="70" y="31" text-anchor="middle" fill="#ffcdd2" font-size="7.5">15 billion trees cut/year</text>
+      <text x="70" y="41" text-anchor="middle" fill="#ffcdd2" font-size="7.5">↓ CO₂ absorption</text>
+      <text x="70" y="51" text-anchor="middle" fill="#ffcdd2" font-size="7.5">↑ soil erosion, floods</text>
+      <text x="70" y="61" text-anchor="middle" fill="#ef9a9a" font-size="7">→ habitat loss</text>
+      <line x1="135" y1="35" x2="178" y2="85" stroke="rgba(239,83,80,0.4)" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <!-- 2: Plastic pollution (top-right) -->
+      <rect x="325" y="5" width="130" height="60" fill="rgba(255,167,38,0.1)" rx="8" stroke="rgba(255,167,38,0.3)" stroke-width="1"/>
+      <text x="390" y="19" text-anchor="middle" fill="#ffa726" font-size="9" font-weight="bold">🧴 Plastic Pollution</text>
+      <text x="390" y="31" text-anchor="middle" fill="#ffe0b2" font-size="7.5">8M tonnes into oceans/year</text>
+      <text x="390" y="41" text-anchor="middle" fill="#ffe0b2" font-size="7.5">Microplastics in food chain</text>
+      <text x="390" y="51" text-anchor="middle" fill="#ffe0b2" font-size="7.5">Sea turtles, seabirds die</text>
+      <text x="390" y="61" text-anchor="middle" fill="#ffa726" font-size="7">persists 500+ years</text>
+      <line x1="325" y1="35" x2="282" y2="85" stroke="rgba(255,167,38,0.4)" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <!-- 3: Air pollution (left) -->
+      <rect x="5" y="100" width="130" height="60" fill="rgba(189,189,189,0.1)" rx="8" stroke="rgba(189,189,189,0.25)" stroke-width="1"/>
+      <text x="70" y="114" text-anchor="middle" fill="#bdbdbd" font-size="9" font-weight="bold">🏭 Air Pollution</text>
+      <text x="70" y="126" text-anchor="middle" fill="#e0e0e0" font-size="7.5">7M deaths/yr (WHO)</text>
+      <text x="70" y="136" text-anchor="middle" fill="#e0e0e0" font-size="7.5">NOₓ, SOₓ, particulates</text>
+      <text x="70" y="146" text-anchor="middle" fill="#e0e0e0" font-size="7.5">Acid rain kills ecosystems</text>
+      <text x="70" y="156" text-anchor="middle" fill="#bdbdbd" font-size="7">smog in cities</text>
+      <line x1="135" y1="130" x2="175" y2="130" stroke="rgba(189,189,189,0.4)" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <!-- 4: Overfishing (right) -->
+      <rect x="325" y="100" width="130" height="60" fill="rgba(41,182,246,0.1)" rx="8" stroke="rgba(41,182,246,0.25)" stroke-width="1"/>
+      <text x="390" y="114" text-anchor="middle" fill="#29b6f6" font-size="9" font-weight="bold">🐟 Overfishing</text>
+      <text x="390" y="126" text-anchor="middle" fill="#b3e5fc" font-size="7.5">90% of fish stocks exploited</text>
+      <text x="390" y="136" text-anchor="middle" fill="#b3e5fc" font-size="7.5">Trophic cascades:</text>
+      <text x="390" y="146" text-anchor="middle" fill="#b3e5fc" font-size="7.5">remove top predator →</text>
+      <text x="390" y="156" text-anchor="middle" fill="#29b6f6" font-size="7">ecosystem collapse</text>
+      <line x1="325" y1="130" x2="285" y2="130" stroke="rgba(41,182,246,0.4)" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <!-- 5: Habitat loss / extinction (bottom-left) -->
+      <rect x="5" y="198" width="130" height="65" fill="rgba(102,187,106,0.1)" rx="8" stroke="rgba(102,187,106,0.25)" stroke-width="1"/>
+      <text x="70" y="212" text-anchor="middle" fill="#66bb6a" font-size="9" font-weight="bold">🦋 Habitat Loss</text>
+      <text x="70" y="224" text-anchor="middle" fill="#c8e6c9" font-size="7.5">Current extinction rate:</text>
+      <text x="70" y="234" text-anchor="middle" fill="#c8e6c9" font-size="7.5">100–1000× natural rate</text>
+      <text x="70" y="244" text-anchor="middle" fill="#c8e6c9" font-size="7.5">6th mass extinction?</text>
+      <text x="70" y="254" text-anchor="middle" fill="#66bb6a" font-size="7">biodiversity crisis</text>
+      <line x1="135" y1="220" x2="178" y2="180" stroke="rgba(102,187,106,0.4)" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <!-- 6: Solutions (bottom-right) -->
+      <rect x="325" y="198" width="130" height="65" fill="rgba(38,198,218,0.1)" rx="8" stroke="rgba(38,198,218,0.3)" stroke-width="1"/>
+      <text x="390" y="212" text-anchor="middle" fill="#26c6da" font-size="9" font-weight="bold">✅ Solutions</text>
+      <text x="390" y="224" text-anchor="middle" fill="#b2ebf2" font-size="7.5">Clean energy transition</text>
+      <text x="390" y="234" text-anchor="middle" fill="#b2ebf2" font-size="7.5">Reforestation (1T trees)</text>
+      <text x="390" y="244" text-anchor="middle" fill="#b2ebf2" font-size="7.5">Marine protected areas</text>
+      <text x="390" y="254" text-anchor="middle" fill="#26c6da" font-size="7">Circular economy</text>
+      <line x1="325" y1="220" x2="282" y2="180" stroke="rgba(38,198,218,0.4)" stroke-width="1.5" stroke-dasharray="3,2"/>
+    </svg>
+  </div>
+  <div class="key-box">
+    <div class="krow"><span class="klabel">Deforestation:</span><span>Tropical rainforests cover 6% of land but contain 50% of species. Brazil, Indonesia, DR Congo are losing forests fastest. Causes: agriculture (soy, palm oil, cattle), logging, urban expansion.</span></div>
+    <div class="krow"><span class="klabel">Trophic cascades:</span><span>Removing a keystone species causes cascading effects through the food web. Example: removing wolves from Yellowstone → deer overgrazing → riverbank erosion → changed river courses. Reintroducing wolves reversed this.</span></div>
+    <div class="krow"><span class="klabel">Bioaccumulation:</span><span>Toxins (e.g. mercury, PCBs, DDT) accumulate in body fat and become more concentrated at each trophic level (biomagnification). Top predators (tuna, eagles, polar bears, humans) accumulate highest doses.</span></div>
+    <div class="krow"><span class="klabel">Circular economy:</span><span>Moving away from "take-make-dispose" (linear) to a system where materials are kept in use as long as possible through reuse, repair, recycling, and regeneration of natural systems.</span></div>
+  </div>
+  <p class="explain">Human activity has transformed ~75% of Earth's ice-free land surface. We are in what scientists call the <strong>Anthropocene</strong> — a proposed geological epoch defined by dominant human influence on Earth's geology and ecosystems. The Planetary Boundaries framework identifies 9 Earth-system processes; we have crossed safe limits in 6, including climate change, biodiversity loss, and freshwater use.</p>
+  <div class="fact-box"><strong>Positive signs:</strong> The ozone hole is healing (thanks to banning CFCs). Some species have recovered: gray wolves, bald eagles, humpback whales. Renewable energy capacity is growing exponentially. Over 15% of Earth's land and 8% of oceans are now protected. Action works — but speed and scale need to increase dramatically.</div>
+</div>
+
+</main>
+
+<script>
+  const el = document.getElementById('ptsDisplay');
+  if(el) el.textContent = '⭐ ' + (parseInt(localStorage.getItem('kids_points')||'0'));
+</script>
+
+</body>
+</html>

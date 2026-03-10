@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📚 Learn — Kids Learning Hub</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a1a;
+    --card-border: rgba(255,255,255,0.12);
+  }
+
+  body {
+    font-family: 'Fredoka One', cursive;
+    min-height: 100dvh;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(60,40,120,0.45) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(20,60,120,0.35) 0%, transparent 50%);
+    padding: 20px 16px 48px;
+    overflow-x: hidden;
+  }
+
+  /* Floating background particles */
+  .bg-star {
+    position: fixed; font-size: 1.3rem; opacity: 0.06;
+    pointer-events: none; animation: floatStar ease-in-out infinite;
+  }
+  @keyframes floatStar {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    50%      { transform: translateY(-22px) rotate(18deg); }
+  }
+
+  /* Back link */
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: rgba(255,255,255,0.5); text-decoration: none;
+    font-size: 0.9rem; margin-bottom: 18px;
+    padding: 5px 14px; border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    transition: color 0.15s, background 0.15s;
+  }
+  .back-link:hover { color: #fff; background: rgba(255,255,255,0.12); }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  header h1 {
+    font-size: clamp(2rem, 7vw, 3rem);
+    color: #fff;
+    text-shadow: 0 4px 24px rgba(120,80,255,0.5);
+    letter-spacing: 1px;
+  }
+  header p {
+    font-size: clamp(0.95rem, 3.2vw, 1.25rem);
+    color: rgba(255,255,255,0.6);
+    margin-top: 8px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+  }
+  .pts-pill {
+    display: inline-block; margin-top: 12px;
+    font-size: 1rem; padding: 6px 20px; border-radius: 50px;
+    border: 2px solid rgba(255,215,0,0.4);
+    background: rgba(255,215,0,0.1);
+    color: #ffd700; font-weight: 700;
+    font-family: 'Fredoka One', cursive;
+  }
+
+  /* Section label */
+  .section-label {
+    font-size: clamp(0.8rem, 2.8vw, 1rem);
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin: 32px 0 14px;
+    max-width: 780px;
+    margin-left: auto; margin-right: auto;
+    padding-left: 4px;
+  }
+
+  /* Cards grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  @media (min-width: 600px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* Card base */
+  .card {
+    text-decoration: none;
+    border-radius: 22px;
+    padding: 24px 16px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s;
+    border: 2px solid var(--card-border);
+    box-shadow: 0 6px 28px rgba(0,0,0,0.35);
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 55%);
+    border-radius: 22px;
+    pointer-events: none;
+  }
+  .card:hover  { transform: translateY(-6px) scale(1.03); box-shadow: 0 18px 50px rgba(0,0,0,0.45); }
+  .card:active { transform: scale(0.97); }
+
+  .card-icon { font-size: clamp(2.4rem, 9vw, 3.4rem); line-height: 1; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35)); }
+  .card-name { font-size: clamp(1rem, 3.8vw, 1.25rem); color: #fff; text-align: center; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+  .card-desc {
+    font-size: clamp(0.72rem, 2.3vw, 0.85rem);
+    color: rgba(255,255,255,0.62);
+    text-align: center; line-height: 1.35;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+  }
+  .card-tag {
+    font-size: 0.72rem; padding: 3px 10px; border-radius: 50px;
+    background: rgba(255,255,255,0.13); color: rgba(255,255,255,0.75);
+    border: 1px solid rgba(255,255,255,0.22);
+  }
+
+  /* Card colour themes */
+  .card-math-area   { background: linear-gradient(145deg, #0a1628, #1a3a6b); border-color: rgba(96,165,250,0.4); }
+  .card-math-circ   { background: linear-gradient(145deg, #0d1f45, #1e4080); border-color: rgba(96,165,250,0.4); }
+  .card-math-vol    { background: linear-gradient(145deg, #0a1a3a, #153060); border-color: rgba(96,165,250,0.35); }
+  .card-physics     { background: linear-gradient(145deg, #0d2b6b, #1565c0); border-color: rgba(79,172,254,0.4); }
+  .card-chemistry   { background: linear-gradient(145deg, #4a0072, #7b1fa2); border-color: rgba(196,113,237,0.4); }
+  .card-biology     { background: linear-gradient(145deg, #1b4a20, #2e7d32); border-color: rgba(76,175,80,0.4); }
+  .card-earth       { background: linear-gradient(145deg, #004d5a, #00838f); border-color: rgba(38,198,218,0.4); }
+
+  /* Glow highlights on hover per theme */
+  .card-math-area:hover  { box-shadow: 0 18px 50px rgba(96,165,250,0.3); }
+  .card-math-circ:hover  { box-shadow: 0 18px 50px rgba(96,165,250,0.3); }
+  .card-math-vol:hover   { box-shadow: 0 18px 50px rgba(96,165,250,0.28); }
+  .card-physics:hover    { box-shadow: 0 18px 50px rgba(79,172,254,0.3); }
+  .card-chemistry:hover  { box-shadow: 0 18px 50px rgba(196,113,237,0.3); }
+  .card-biology:hover    { box-shadow: 0 18px 50px rgba(76,175,80,0.3); }
+  .card-earth:hover      { box-shadow: 0 18px 50px rgba(38,198,218,0.3); }
+
+  /* Coming-soon overlay */
+  .card-soon {
+    opacity: 0.55;
+    cursor: default;
+    pointer-events: none;
+  }
+  .card-soon::after {
+    content: 'Coming Soon';
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-family: 'Nunito', sans-serif; font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    background: rgba(0,0,0,0.38);
+    border-radius: 22px;
+    letter-spacing: 1px;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 48px;
+    color: rgba(255,255,255,0.2);
+    font-size: 0.78rem;
+    font-family: 'Nunito', sans-serif;
+  }
+</style>
+</head>
+<body>
+
+<!-- Floating decorative stars -->
+<div class="bg-star" style="top:4%;left:4%;animation-duration:7s">📚</div>
+<div class="bg-star" style="top:12%;right:6%;animation-duration:9s;animation-delay:1.5s">✨</div>
+<div class="bg-star" style="top:45%;left:2%;animation-duration:8s;animation-delay:2s">💡</div>
+<div class="bg-star" style="bottom:22%;right:4%;animation-duration:10s;animation-delay:0.7s">⭐</div>
+<div class="bg-star" style="bottom:7%;left:8%;animation-duration:6.5s;animation-delay:3.5s">🔬</div>
+
+<a class="back-link" href="../">← Back to Hub</a>
+
+<header>
+  <h1>📚 Learn</h1>
+  <p>Explore concepts, formulas &amp; diagrams</p>
+  <div class="pts-pill" id="ptsDisplay">⭐ 0</div>
+</header>
+
+<!-- Math section -->
+<div class="section-label">📐 Math</div>
+<div class="grid">
+
+  <a class="card card-math-area" href="math/area-2d/">
+    <div class="card-icon">📐</div>
+    <div class="card-name">Area of 2D Shapes</div>
+    <div class="card-desc">Rectangles, triangles, circles &amp; more</div>
+    <div class="card-tag">Easy → Hard</div>
+  </a>
+
+  <a class="card card-math-circ" href="math/circles/">
+    <div class="card-icon">⭕</div>
+    <div class="card-name">Circles</div>
+    <div class="card-desc">Radius, diameter, circumference &amp; area</div>
+    <div class="card-tag">Easy → Hard</div>
+  </a>
+
+  <a class="card card-math-vol" href="math/volume-3d/">
+    <div class="card-icon">📦</div>
+    <div class="card-name">Volume of 3D Shapes</div>
+    <div class="card-desc">Cubes, prisms, cylinders, cones &amp; spheres</div>
+    <div class="card-tag">Easy → Hard</div>
+  </a>
+
+</div>
+
+<!-- Science section -->
+<div class="section-label">🔬 Science</div>
+<div class="grid">
+
+  <a class="card card-physics" href="physics/">
+    <div class="card-icon">⚡</div>
+    <div class="card-name">Physics</div>
+    <div class="card-desc">Forces, motion, energy &amp; waves</div>
+    <div class="card-tag">6th Grade</div>
+  </a>
+
+  <a class="card card-chemistry" href="chemistry/">
+    <div class="card-icon">🧪</div>
+    <div class="card-name">Chemistry</div>
+    <div class="card-desc">Atoms, elements, compounds &amp; reactions</div>
+    <div class="card-tag">6th Grade</div>
+  </a>
+
+  <a class="card card-biology" href="biology/">
+    <div class="card-icon">🦠</div>
+    <div class="card-name">Biology</div>
+    <div class="card-desc">Cells, organisms, genetics &amp; ecosystems</div>
+    <div class="card-tag">6th Grade</div>
+  </a>
+
+  <a class="card card-earth" href="earth-science/">
+    <div class="card-icon">🌍</div>
+    <div class="card-name">Earth Science</div>
+    <div class="card-desc">Weather, rocks, plate tectonics &amp; space</div>
+    <div class="card-tag">6th Grade</div>
+  </a>
+
+</div>
+
+<footer>Choose a topic to start learning!</footer>
+
+<script>
+  const el = document.getElementById('ptsDisplay');
+  if(el) el.textContent = '⭐ ' + (parseInt(localStorage.getItem('kids_points')||'0'));
+</script>
+</body>
+</html>

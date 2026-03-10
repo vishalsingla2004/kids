@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📐 Area of 2D Shapes — Learn</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700;900&display=swap');
+
+  :root {
+    --c1: #0a1628;
+    --c2: #1a3a6b;
+    --acc: #60a5fa;
+    --acc-dim: rgba(96,165,250,0.25);
+    --easy: #4ade80;
+    --easy-dim: rgba(74,222,128,0.15);
+    --med: #fbbf24;
+    --med-dim: rgba(251,191,36,0.15);
+    --hard: #f87171;
+    --hard-dim: rgba(248,113,113,0.15);
+    --text: rgba(255,255,255,0.88);
+    --text-muted: rgba(255,255,255,0.55);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    background: var(--c1);
+    background-image:
+      radial-gradient(ellipse at 15% 0%, rgba(26,58,107,0.8) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 100%, rgba(10,22,40,0.9) 0%, transparent 55%);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* ─── Sticky header ─── */
+  .sticky-header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,22,40,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(96,165,250,0.2);
+    padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px;
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .back-link {
+    color: rgba(255,255,255,0.5); text-decoration: none;
+    font-size: 0.85rem; padding: 5px 12px; border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    transition: color 0.15s, background 0.15s;
+    font-family: 'Fredoka One', cursive;
+    white-space: nowrap;
+  }
+  .back-link:hover { color: #fff; background: rgba(255,255,255,0.12); }
+  .header-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1rem, 4vw, 1.4rem);
+    color: #fff;
+  }
+  .pts-pill {
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.95rem; padding: 5px 14px; border-radius: 50px;
+    border: 2px solid rgba(255,215,0,0.4);
+    background: rgba(255,215,0,0.1);
+    color: #ffd700;
+    white-space: nowrap;
+  }
+
+  /* ─── Page intro ─── */
+  .page-intro {
+    max-width: 860px;
+    margin: 32px auto 0;
+    padding: 0 16px;
+    text-align: center;
+  }
+  .page-intro h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.5rem, 5vw, 2.2rem);
+    color: var(--acc);
+    text-shadow: 0 2px 16px rgba(96,165,250,0.4);
+  }
+  .page-intro p {
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-size: clamp(0.9rem, 2.8vw, 1.05rem);
+    line-height: 1.6;
+  }
+
+  /* ─── Table of contents ─── */
+  .toc {
+    max-width: 860px;
+    margin: 24px auto 0;
+    padding: 0 16px;
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .toc a {
+    font-size: 0.8rem; text-decoration: none;
+    padding: 4px 12px; border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.6);
+    transition: color 0.15s, background 0.15s;
+  }
+  .toc a:hover { color: #fff; background: rgba(255,255,255,0.12); }
+
+  /* ─── Content wrapper ─── */
+  .content {
+    max-width: 860px;
+    margin: 36px auto 0;
+    padding: 0 16px;
+  }
+
+  /* ─── Section header ─── */
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    margin: 40px 0 20px;
+    padding: 14px 20px;
+    border-radius: 14px;
+  }
+  .section-header.easy  { background: var(--easy-dim);  border-left: 4px solid var(--easy); }
+  .section-header.med   { background: var(--med-dim);   border-left: 4px solid var(--med);  }
+  .section-header.hard  { background: var(--hard-dim);  border-left: 4px solid var(--hard); }
+  .section-header h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.2rem, 4vw, 1.6rem);
+  }
+  .section-header.easy h2 { color: var(--easy); }
+  .section-header.med  h2 { color: var(--med);  }
+  .section-header.hard h2 { color: var(--hard); }
+  .section-header p {
+    color: var(--text-muted); font-size: 0.9rem; margin-top: 2px;
+  }
+
+  /* ─── Concept card ─── */
+  .card {
+    background: var(--c2);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--acc);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .card h3 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+    color: var(--acc);
+    margin-bottom: 16px;
+  }
+
+  /* SVG diagram wrapper */
+  .diagram {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto 18px;
+    display: block;
+    background: rgba(10,22,40,0.6);
+    border-radius: 10px;
+    padding: 12px;
+    border: 1px solid rgba(96,165,250,0.15);
+  }
+  .diagram svg { width: 100%; height: auto; display: block; }
+
+  /* Formula box */
+  .formula {
+    background: #0a1628;
+    border: 2px solid var(--acc);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: clamp(1rem, 3.5vw, 1.2rem);
+    text-align: center;
+    font-weight: bold;
+    color: var(--acc);
+    font-family: 'Fredoka One', cursive;
+    margin: 14px 0;
+    letter-spacing: 0.5px;
+  }
+
+  /* Explanation text */
+  .explanation {
+    color: var(--text-muted);
+    font-size: clamp(0.88rem, 2.8vw, 1rem);
+    line-height: 1.65;
+    margin-bottom: 12px;
+  }
+  .explanation strong { color: var(--text); }
+  .explanation .note {
+    display: inline-block; margin-top: 6px;
+    padding: 4px 10px; border-radius: 6px;
+    background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.25);
+    color: var(--acc); font-size: 0.9rem;
+  }
+
+  /* Worked example box */
+  .example {
+    background: rgba(20,60,40,0.4);
+    border: 1px solid rgba(74,222,128,0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    font-size: clamp(0.88rem, 2.8vw, 0.98rem);
+    line-height: 1.7;
+    color: rgba(255,255,255,0.8);
+  }
+  .example .ex-label {
+    font-family: 'Fredoka One', cursive;
+    color: var(--easy); font-size: 0.85rem;
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 6px; display: block;
+  }
+  .example .ex-step {
+    display: block; margin-top: 4px;
+  }
+  .example .ex-answer {
+    display: inline-block; margin-top: 8px;
+    font-family: 'Fredoka One', cursive;
+    color: var(--easy); font-size: 1.05rem;
+  }
+
+  /* Medium card accent */
+  .card.med-card  { border-left-color: var(--med);  }
+  .card.med-card h3 { color: var(--med); }
+  .card.med-card .formula { border-color: var(--med); color: var(--med); }
+
+  /* Hard card accent */
+  .card.hard-card { border-left-color: var(--hard); }
+  .card.hard-card h3 { color: var(--hard); }
+  .card.hard-card .formula { border-color: var(--hard); color: var(--hard); }
+
+  /* Sub-note */
+  .sub-note {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.45);
+    margin-top: -6px;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  /* Two-column layout inside a card on wider screens */
+  .card-cols {
+    display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;
+  }
+  .card-cols .diagram { margin: 0; flex: 0 0 auto; }
+  .card-cols .card-text { flex: 1 1 220px; }
+
+  /* Step list */
+  .steps {
+    margin: 10px 0 10px 16px;
+    color: var(--text-muted);
+    font-size: clamp(0.88rem, 2.8vw, 1rem);
+    line-height: 1.7;
+  }
+  .steps li { margin-bottom: 4px; }
+  .steps li strong { color: var(--text); }
+
+  /* Responsive: stack cols on small */
+  @media (max-width: 500px) {
+    .card-cols { flex-direction: column; }
+    .card-cols .diagram { max-width: 100%; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── Sticky Header ─── -->
+<div class="sticky-header">
+  <div class="header-left">
+    <a class="back-link" href="../../">← Learn</a>
+    <span class="header-title">📐 Area of 2D Shapes</span>
+  </div>
+  <div class="pts-pill" id="ptsDisplay">⭐ 0</div>
+</div>
+
+<!-- ─── Page Intro ─── -->
+<div class="page-intro">
+  <h2>Area of 2D Shapes</h2>
+  <p>Area tells us <strong style="color:var(--acc)">how much surface a flat shape covers</strong>. It's measured in square units like cm², m², or km². Master every formula from easy rectangles all the way to tricky sectors and reverse problems!</p>
+</div>
+
+<!-- ─── Table of Contents ─── -->
+<div class="toc" role="navigation" aria-label="Jump to section">
+  <a href="#easy">🟢 Easy</a>
+  <a href="#rectangle">Rectangle</a>
+  <a href="#square">Square</a>
+  <a href="#triangle">Triangle</a>
+  <a href="#parallelogram">Parallelogram</a>
+  <a href="#counting">Counting Squares</a>
+  <a href="#units">Units</a>
+  <a href="#medium">🟡 Medium</a>
+  <a href="#trapezoid">Trapezoid</a>
+  <a href="#circle-area">Circle Area</a>
+  <a href="#composite">Composite</a>
+  <a href="#shaded">Shaded Region</a>
+  <a href="#rhombus">Rhombus</a>
+  <a href="#scale">Scale Drawings</a>
+  <a href="#hard">🔴 Hard</a>
+  <a href="#border">Path / Border</a>
+  <a href="#irregular">Irregular Polygons</a>
+  <a href="#sector">Sector</a>
+  <a href="#mixed-units">Mixed Units</a>
+  <a href="#perim-vs-area">Perimeter vs Area</a>
+  <a href="#reverse">Reverse Problems</a>
+</div>
+
+<!-- ─── MAIN CONTENT ─── -->
+<div class="content">
+
+<!-- ════════════════════════════════════════════
+     EASY SECTION
+════════════════════════════════════════════ -->
+<div class="section-header easy" id="easy">
+  <div>
+    <h2>🟢 Easy Concepts</h2>
+    <p>Build your foundation — these are the shapes you'll use most often</p>
+  </div>
+</div>
+
+<!-- 1. Rectangle -->
+<div class="card" id="rectangle">
+  <h3>1. Rectangle</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 250 130" xmlns="http://www.w3.org/2000/svg">
+        <!-- Rectangle body -->
+        <rect x="30" y="25" width="180" height="80" fill="rgba(96,165,250,0.12)" stroke="#60a5fa" stroke-width="2.5" rx="3"/>
+        <!-- Dimension arrows — length (top) -->
+        <line x1="30" y1="14" x2="210" y2="14" stroke="#60a5fa" stroke-width="1.5" marker-start="url(#arr)" marker-end="url(#arr2)"/>
+        <!-- Dimension arrows — width (right) -->
+        <line x1="224" y1="25" x2="224" y2="105" stroke="#60a5fa" stroke-width="1.5" marker-start="url(#arr)" marker-end="url(#arr2)"/>
+        <!-- Labels -->
+        <text x="120" y="10" fill="#60a5fa" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">length</text>
+        <text x="240" y="68" fill="#60a5fa" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700" transform="rotate(90,240,68)">width</text>
+        <!-- Corner square mark -->
+        <polyline points="30,32 37,32 37,25" fill="none" stroke="rgba(96,165,250,0.5)" stroke-width="1.5"/>
+        <!-- Arrowhead defs -->
+        <defs>
+          <marker id="arr"  markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M6,0 L0,3 L6,6" fill="none" stroke="#60a5fa" stroke-width="1.5"/>
+          </marker>
+          <marker id="arr2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#60a5fa" stroke-width="1.5"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Area = length × width</div>
+      <p class="explanation">Multiply the two different side lengths together. The result is in <strong>square units</strong> — because you're covering a flat surface.</p>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        A classroom is <strong>8 m long</strong> and <strong>5 m wide</strong>.
+        <span class="ex-step">Area = 8 × 5</span>
+        <span class="ex-answer">= 40 m²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Square -->
+<div class="card" id="square">
+  <h3>2. Square</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 220 140" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="sarr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M6,0 L0,3 L6,6" fill="none" stroke="#60a5fa" stroke-width="1.5"/>
+          </marker>
+          <marker id="sarr2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#60a5fa" stroke-width="1.5"/>
+          </marker>
+        </defs>
+        <!-- Square body -->
+        <rect x="40" y="20" width="110" height="110" fill="rgba(96,165,250,0.12)" stroke="#60a5fa" stroke-width="2.5" rx="3"/>
+        <!-- Side label arrow on top -->
+        <line x1="40" y1="10" x2="150" y2="10" stroke="#60a5fa" stroke-width="1.5" marker-start="url(#sarr)" marker-end="url(#sarr2)"/>
+        <text x="95" y="7" fill="#60a5fa" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">s</text>
+        <!-- Side label arrow on right -->
+        <line x1="165" y1="20" x2="165" y2="130" stroke="#60a5fa" stroke-width="1.5" marker-start="url(#sarr)" marker-end="url(#sarr2)"/>
+        <text x="177" y="78" fill="#60a5fa" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">s</text>
+        <!-- Corner marks -->
+        <polyline points="40,27 47,27 47,20" fill="none" stroke="rgba(96,165,250,0.5)" stroke-width="1.5"/>
+        <polyline points="143,27 143,20 150,20" fill="none" stroke="rgba(96,165,250,0.5)" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Area = s × s = s²</div>
+      <p class="explanation">A square has <strong>all sides equal</strong>, so multiply the side length by itself. The little ² means "squared" — multiplied by itself.</p>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        A square floor tile has side length <strong>4 cm</strong>.
+        <span class="ex-step">Area = 4 × 4 = 4²</span>
+        <span class="ex-answer">= 16 cm²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Triangle -->
+<div class="card" id="triangle">
+  <h3>3. Triangle</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 260 150" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="tarr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M6,0 L0,3 L6,6" fill="none" stroke="#60a5fa" stroke-width="1.5"/>
+          </marker>
+          <marker id="tarr2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#60a5fa" stroke-width="1.5"/>
+          </marker>
+        </defs>
+        <!-- Triangle -->
+        <polygon points="50,120 210,120 130,25" fill="rgba(96,165,250,0.12)" stroke="#60a5fa" stroke-width="2.5"/>
+        <!-- Height dashed line -->
+        <line x1="130" y1="25" x2="130" y2="120" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="6,4"/>
+        <!-- Height right-angle mark -->
+        <polyline points="122,120 122,112 130,112" fill="none" stroke="rgba(96,165,250,0.6)" stroke-width="1.5"/>
+        <!-- Base arrow -->
+        <line x1="50" y1="133" x2="210" y2="133" stroke="#60a5fa" stroke-width="1.5" marker-start="url(#tarr)" marker-end="url(#tarr2)"/>
+        <!-- Height arrow -->
+        <line x1="148" y1="25" x2="148" y2="120" stroke="#60a5fa" stroke-width="1.5" marker-start="url(#tarr)" marker-end="url(#tarr2)"/>
+        <!-- Labels -->
+        <text x="130" y="146" fill="#60a5fa" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">base</text>
+        <text x="165" y="76" fill="#60a5fa" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">height</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Area = ½ × base × height</div>
+      <p class="explanation">The <strong>height</strong> must be perpendicular (at 90°) to the base — shown by the dashed line. Think of it as half a parallelogram!</p>
+      <p class="explanation"><span class="note">Tip: ½ × base × height is the same as (base × height) ÷ 2</span></p>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        Base = <strong>6 cm</strong>, height = <strong>4 cm</strong>
+        <span class="ex-step">Area = ½ × 6 × 4 = ½ × 24</span>
+        <span class="ex-answer">= 12 cm²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Parallelogram -->
+<div class="card" id="parallelogram">
+  <h3>4. Parallelogram</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 270 150" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="parr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M6,0 L0,3 L6,6" fill="none" stroke="#60a5fa" stroke-width="1.5"/>
+          </marker>
+          <marker id="parr2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#60a5fa" stroke-width="1.5"/>
+          </marker>
+        </defs>
+        <!-- Parallelogram -->
+        <polygon points="55,120 215,120 190,30 30,30" fill="rgba(96,165,250,0.12)" stroke="#60a5fa" stroke-width="2.5"/>
+        <!-- Height dashed line -->
+        <line x1="190" y1="30" x2="190" y2="120" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="6,4"/>
+        <!-- Right-angle mark -->
+        <polyline points="182,120 182,112 190,112" fill="none" stroke="rgba(96,165,250,0.6)" stroke-width="1.5"/>
+        <!-- Base arrow -->
+        <line x1="55" y1="135" x2="215" y2="135" stroke="#60a5fa" stroke-width="1.5" marker-start="url(#parr)" marker-end="url(#parr2)"/>
+        <!-- Height arrow -->
+        <line x1="210" y1="30" x2="210" y2="120" stroke="#60a5fa" stroke-width="1.5" marker-start="url(#parr)" marker-end="url(#parr2)"/>
+        <!-- Labels -->
+        <text x="135" y="148" fill="#60a5fa" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">base</text>
+        <text x="235" y="78" fill="#60a5fa" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">h</text>
+        <!-- Slant label -->
+        <text x="55" y="70" fill="rgba(96,165,250,0.5)" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700" transform="rotate(-25,55,70)">slant</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Area = base × height</div>
+      <p class="explanation">The height is the <strong>perpendicular distance</strong> between the two parallel sides — it is NOT the slanted side length!</p>
+      <p class="explanation"><span class="note">Remember: always use the vertical height, not the slant!</span></p>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        Base = <strong>8 m</strong>, height = <strong>3 m</strong>
+        <span class="ex-step">Area = 8 × 3</span>
+        <span class="ex-answer">= 24 m²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Counting Squares -->
+<div class="card" id="counting">
+  <h3>5. Counting Squares</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 250 180" xmlns="http://www.w3.org/2000/svg">
+        <!-- Grid lines (6×5) -->
+        <g stroke="rgba(96,165,250,0.25)" stroke-width="1">
+          <line x1="20" y1="20" x2="230" y2="20"/>
+          <line x1="20" y1="55" x2="230" y2="55"/>
+          <line x1="20" y1="90" x2="230" y2="90"/>
+          <line x1="20" y1="125" x2="230" y2="125"/>
+          <line x1="20" y1="160" x2="230" y2="160"/>
+          <line x1="20"  y1="20" x2="20"  y2="160"/>
+          <line x1="55"  y1="20" x2="55"  y2="160"/>
+          <line x1="90"  y1="20" x2="90"  y2="160"/>
+          <line x1="125" y1="20" x2="125" y2="160"/>
+          <line x1="160" y1="20" x2="160" y2="160"/>
+          <line x1="195" y1="20" x2="195" y2="160"/>
+          <line x1="230" y1="20" x2="230" y2="160"/>
+        </g>
+        <!-- Shaded irregular shape: ~8 whole + 2 halves = 9 sq -->
+        <!-- Row1: col2-col4 whole (3), col1 half -->
+        <rect x="20" y="20" width="35" height="35" fill="rgba(96,165,250,0.35)"/>
+        <rect x="55" y="20" width="35" height="35" fill="rgba(96,165,250,0.35)"/>
+        <rect x="90" y="20" width="35" height="35" fill="rgba(96,165,250,0.35)"/>
+        <!-- Row2: col1-col4 whole (4) -->
+        <rect x="20" y="55" width="35" height="35" fill="rgba(96,165,250,0.35)"/>
+        <rect x="55" y="55" width="35" height="35" fill="rgba(96,165,250,0.35)"/>
+        <rect x="90" y="55" width="35" height="35" fill="rgba(96,165,250,0.35)"/>
+        <rect x="125" y="55" width="35" height="35" fill="rgba(96,165,250,0.35)"/>
+        <!-- Row3: col1-col2 whole (2), col3 half triangle -->
+        <rect x="20" y="90" width="35" height="35" fill="rgba(96,165,250,0.35)"/>
+        <rect x="55" y="90" width="35" height="35" fill="rgba(96,165,250,0.35)"/>
+        <polygon points="90,90 125,125 90,125" fill="rgba(96,165,250,0.35)"/>
+        <!-- Outline the shape border -->
+        <polyline points="20,55 20,20 125,20 125,55 160,55 160,90 125,90 125,125 90,125 90,90 20,90 20,55"
+          fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linejoin="round"/>
+        <!-- Labels -->
+        <text x="37" y="42" fill="white" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1</text>
+        <text x="72" y="42" fill="white" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1</text>
+        <text x="107" y="42" fill="white" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1</text>
+        <text x="37" y="77" fill="white" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1</text>
+        <text x="72" y="77" fill="white" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1</text>
+        <text x="107" y="77" fill="white" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1</text>
+        <text x="142" y="77" fill="white" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1</text>
+        <text x="37" y="112" fill="white" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1</text>
+        <text x="72" y="112" fill="white" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1</text>
+        <text x="103" y="120" fill="white" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">½</text>
+        <!-- 1 cm² label -->
+        <rect x="160" y="125" width="35" height="35" fill="none" stroke="rgba(96,165,250,0.4)" stroke-dasharray="4,3"/>
+        <text x="178" y="147" fill="rgba(96,165,250,0.7)" font-size="9.5" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1 cm²</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Count whole + ½ squares</div>
+      <p class="explanation">Place the shape on squared paper:</p>
+      <ul class="steps">
+        <li>Count every <strong>whole square</strong> inside the shape — each = 1 unit²</li>
+        <li>For <strong>half squares</strong> (cut diagonally), count as ½ unit²</li>
+        <li>Add them all up!</li>
+      </ul>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        Shape above: 9 whole squares + 1 half square
+        <span class="ex-step">Area = 9 + ½</span>
+        <span class="ex-answer">= 9.5 cm²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Units -->
+<div class="card" id="units">
+  <h3>6. Square Units &amp; Conversions</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer square = 1 m × 1 m -->
+        <rect x="15" y="15" width="130" height="130" fill="rgba(96,165,250,0.08)" stroke="#60a5fa" stroke-width="2.5"/>
+        <!-- Inner grid lines (10×10 = 100 cm × 100 cm = 10,000 cm²) — simplified as 5×5 grid -->
+        <g stroke="rgba(96,165,250,0.18)" stroke-width="0.8">
+          <line x1="41" y1="15" x2="41" y2="145"/>
+          <line x1="67" y1="15" x2="67" y2="145"/>
+          <line x1="93" y1="15" x2="93" y2="145"/>
+          <line x1="119" y1="15" x2="119" y2="145"/>
+          <line x1="15" y1="41" x2="145" y2="41"/>
+          <line x1="15" y1="67" x2="145" y2="67"/>
+          <line x1="15" y1="93" x2="145" y2="93"/>
+          <line x1="15" y1="119" x2="145" y2="119"/>
+        </g>
+        <!-- Labels -->
+        <text x="80" y="10" fill="#60a5fa" font-size="12" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1 m = 100 cm</text>
+        <text x="153" y="80" fill="#60a5fa" font-size="11" text-anchor="start" font-family="Nunito,sans-serif" font-weight="700">1 m</text>
+        <text x="153" y="95" fill="#60a5fa" font-size="11" text-anchor="start" font-family="Nunito,sans-serif" font-weight="700">= 100 cm</text>
+        <text x="80" y="82" fill="rgba(255,255,255,0.7)" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1 m² =</text>
+        <text x="80" y="97" fill="rgba(255,255,255,0.7)" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">10,000 cm²</text>
+        <!-- Key conversion box -->
+        <rect x="160" y="110" width="90" height="40" rx="6" fill="rgba(96,165,250,0.15)" stroke="rgba(96,165,250,0.4)"/>
+        <text x="205" y="128" fill="#60a5fa" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1 km² = 1,000,000 m²</text>
+        <text x="205" y="143" fill="rgba(96,165,250,0.7)" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">1 m² = 10,000 cm²</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">1 m² = 10,000 cm²</div>
+      <p class="explanation">Area is always measured in <strong>square units</strong>. When you convert lengths, areas change by the <strong>square of the scale factor</strong>.</p>
+      <ul class="steps">
+        <li>1 m = 100 cm, so 1 m² = 100 × 100 = <strong>10,000 cm²</strong></li>
+        <li>1 km = 1,000 m, so 1 km² = 1,000 × 1,000 = <strong>1,000,000 m²</strong></li>
+      </ul>
+      <p class="explanation" style="margin-top:8px"><span class="note">Always write the unit in your final answer!</span></p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     MEDIUM SECTION
+════════════════════════════════════════════ -->
+<div class="section-header med" id="medium">
+  <div>
+    <h2>🟡 Medium Concepts</h2>
+    <p>More complex shapes — take it one step at a time</p>
+  </div>
+</div>
+
+<!-- 7. Trapezoid -->
+<div class="card med-card" id="trapezoid">
+  <h3>7. Trapezoid</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 270 155" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="marr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M6,0 L0,3 L6,6" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+          </marker>
+          <marker id="marr2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+          </marker>
+        </defs>
+        <!-- Trapezoid -->
+        <polygon points="40,120 220,120 180,35 80,35" fill="rgba(251,191,36,0.1)" stroke="#fbbf24" stroke-width="2.5"/>
+        <!-- Height dashed -->
+        <line x1="120" y1="35" x2="120" y2="120" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="6,4"/>
+        <polyline points="112,120 112,112 120,112" fill="none" stroke="rgba(251,191,36,0.6)" stroke-width="1.5"/>
+        <!-- Top (a) arrow -->
+        <line x1="80" y1="22" x2="180" y2="22" stroke="#fbbf24" stroke-width="1.5" marker-start="url(#marr)" marker-end="url(#marr2)"/>
+        <!-- Bottom (b) arrow -->
+        <line x1="40" y1="135" x2="220" y2="135" stroke="#fbbf24" stroke-width="1.5" marker-start="url(#marr)" marker-end="url(#marr2)"/>
+        <!-- Height arrow -->
+        <line x1="145" y1="35" x2="145" y2="120" stroke="#fbbf24" stroke-width="1.5" marker-start="url(#marr)" marker-end="url(#marr2)"/>
+        <!-- Labels -->
+        <text x="130" y="18" fill="#fbbf24" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">a (top)</text>
+        <text x="130" y="149" fill="#fbbf24" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">b (bottom)</text>
+        <text x="158" y="80" fill="#fbbf24" font-size="13" text-anchor="start" font-family="Nunito,sans-serif" font-weight="700">h</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Area = ½ × (a + b) × h</div>
+      <p class="explanation">A trapezoid has <strong>two parallel sides</strong> (called a and b). The formula averages the two parallel sides and multiplies by the height.</p>
+      <p class="explanation"><span class="note">Tip: (a + b) ÷ 2 is the average width of the shape</span></p>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        a = <strong>5 cm</strong>, b = <strong>9 cm</strong>, h = <strong>4 cm</strong>
+        <span class="ex-step">Area = ½ × (5 + 9) × 4 = ½ × 14 × 4 = ½ × 56</span>
+        <span class="ex-answer">= 28 cm²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. Circle Area -->
+<div class="card med-card" id="circle-area">
+  <h3>8. Circle Area</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="carr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M6,0 L0,3 L6,6" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+          </marker>
+          <marker id="carr2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+          </marker>
+        </defs>
+        <!-- Circle -->
+        <circle cx="120" cy="82" r="65" fill="rgba(251,191,36,0.1)" stroke="#fbbf24" stroke-width="2.5"/>
+        <!-- Centre dot -->
+        <circle cx="120" cy="82" r="3.5" fill="#fbbf24"/>
+        <!-- Radius line -->
+        <line x1="120" y1="82" x2="185" y2="82" stroke="#fbbf24" stroke-width="2" marker-end="url(#carr2)"/>
+        <!-- r label -->
+        <text x="152" y="74" fill="#fbbf24" font-size="14" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">r</text>
+        <!-- Pi label -->
+        <text x="85" y="86" fill="rgba(251,191,36,0.6)" font-size="22" text-anchor="middle" font-family="serif">π</text>
+        <text x="120" y="145" fill="rgba(251,191,36,0.5)" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">π ≈ 3.14159…</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Area = π × r²   (π ≈ 3.14)</div>
+      <p class="explanation"><strong>r</strong> is the radius — the distance from the centre to the edge. Square the radius first, then multiply by π.</p>
+      <p class="explanation"><span class="note">Remember: diameter = 2r, so if given diameter, halve it first!</span></p>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        Radius = <strong>7 cm</strong>
+        <span class="ex-step">Area = π × 7² = 3.14 × 49</span>
+        <span class="ex-answer">≈ 153.86 cm²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. Composite Shapes -->
+<div class="card med-card" id="composite">
+  <h3>9. Composite Shapes</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 260 175" xmlns="http://www.w3.org/2000/svg">
+        <!-- L-Shape (two rectangles) -->
+        <!-- Full top-left rectangle: A (80×60) -->
+        <rect x="20" y="20" width="100" height="70" fill="rgba(251,191,36,0.15)" stroke="#fbbf24" stroke-width="2.5"/>
+        <!-- Bottom right rectangle: B (160×40) -->
+        <rect x="20" y="90" width="215" height="60" fill="rgba(251,191,36,0.1)" stroke="#fbbf24" stroke-width="2.5"/>
+        <!-- Split dashed line between A and B sections (inside) -->
+        <line x1="20" y1="90" x2="120" y2="90" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="5,4"/>
+        <!-- Labels -->
+        <text x="70" y="55" fill="#fbbf24" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">A</text>
+        <text x="128" y="120" fill="#fbbf24" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">B</text>
+        <!-- Dimension labels -->
+        <text x="70" y="10" fill="rgba(251,191,36,0.7)" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">100</text>
+        <text x="128" y="163" fill="rgba(251,191,36,0.7)" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">215</text>
+        <text x="8" y="55" fill="rgba(251,191,36,0.7)" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">70</text>
+        <text x="245" y="121" fill="rgba(251,191,36,0.7)" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">60</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Total Area = A + B + …</div>
+      <p class="explanation">Split the shape into <strong>simple rectangles/triangles</strong>, calculate each area separately, then <strong>add them together</strong>.</p>
+      <ul class="steps">
+        <li>Look for an L-shape, T-shape, or any irregular polygon</li>
+        <li>Draw lines to divide it into shapes you know</li>
+        <li>Find the missing dimensions from the overall size</li>
+        <li>Add all the areas</li>
+      </ul>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        Rectangle A = 100 × 70 = <strong>7,000</strong>; Rectangle B = 215 × 60 = <strong>12,900</strong>
+        <span class="ex-answer">Total = 19,900 units²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10. Shaded Region -->
+<div class="card med-card" id="shaded">
+  <h3>10. Shaded Region</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer rectangle (shaded) -->
+        <rect x="20" y="20" width="210" height="120" fill="rgba(251,191,36,0.2)" stroke="#fbbf24" stroke-width="2.5" rx="4"/>
+        <!-- Inner circle (white/cut-out) -->
+        <circle cx="125" cy="80" r="38" fill="var(--c1)" stroke="#fbbf24" stroke-width="2" stroke-dasharray="5,3"/>
+        <!-- Labels -->
+        <text x="35" y="45" fill="#fbbf24" font-size="12" font-family="Nunito,sans-serif" font-weight="700">10 cm</text>
+        <text x="125" y="8" fill="#fbbf24" font-size="12" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">8 cm (width)</text>
+        <text x="125" y="84" fill="#fbbf24" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">r = 3 cm</text>
+        <text x="37" y="100" fill="rgba(251,191,36,0.6)" font-size="11" font-family="Nunito,sans-serif" font-weight="700">shaded</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Shaded = Big Area − Small Area</div>
+      <p class="explanation">When a shape is cut out from another, find the <strong>big shape area</strong> first, then <strong>subtract</strong> the cut-out area.</p>
+      <ul class="steps">
+        <li>Find the area of the outer (big) shape</li>
+        <li>Find the area of the inner (removed) shape</li>
+        <li>Shaded area = Big − Small</li>
+      </ul>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        Rectangle 10 × 8 = <strong>80 cm²</strong>. Circle r = 3: π×9 ≈ <strong>28.26 cm²</strong>
+        <span class="ex-step">Shaded = 80 − 28.26</span>
+        <span class="ex-answer">≈ 51.74 cm²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 11. Rhombus -->
+<div class="card med-card" id="rhombus">
+  <h3>11. Rhombus</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg">
+        <!-- Rhombus -->
+        <polygon points="130,15 220,85 130,155 40,85" fill="rgba(251,191,36,0.1)" stroke="#fbbf24" stroke-width="2.5"/>
+        <!-- Diagonal d1 (horizontal) -->
+        <line x1="40" y1="85" x2="220" y2="85" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="6,4"/>
+        <!-- Diagonal d2 (vertical) -->
+        <line x1="130" y1="15" x2="130" y2="155" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="6,4"/>
+        <!-- Centre dot -->
+        <circle cx="130" cy="85" r="3.5" fill="#fbbf24"/>
+        <!-- Right angle marks at centre -->
+        <polyline points="130,85 130,78 137,78 137,85" fill="none" stroke="rgba(251,191,36,0.5)" stroke-width="1.5"/>
+        <!-- Labels -->
+        <text x="130" y="170" fill="#fbbf24" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">d₁ (horizontal diagonal)</text>
+        <text x="10" y="89" fill="#fbbf24" font-size="13" text-anchor="start" font-family="Nunito,sans-serif" font-weight="700">d₂</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Area = (d₁ × d₂) ÷ 2</div>
+      <p class="explanation">A rhombus has <strong>four equal sides</strong>. Use its two diagonals (the lines connecting opposite corners). They always cross at right angles.</p>
+      <p class="explanation"><span class="note">Diagonals of a rhombus always meet at 90°</span></p>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        d₁ = <strong>10 cm</strong>, d₂ = <strong>6 cm</strong>
+        <span class="ex-step">Area = (10 × 6) ÷ 2 = 60 ÷ 2</span>
+        <span class="ex-answer">= 30 cm²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 12. Scale Drawings -->
+<div class="card med-card" id="scale">
+  <h3>12. Scale Drawings</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg">
+        <!-- Small drawing rectangle -->
+        <rect x="30" y="40" width="60" height="40" fill="rgba(251,191,36,0.15)" stroke="#fbbf24" stroke-width="2" rx="3"/>
+        <text x="60" y="64" fill="#fbbf24" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">3 cm × 2 cm</text>
+        <text x="60" y="30" fill="rgba(251,191,36,0.6)" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">On paper</text>
+        <!-- Arrow pointing right -->
+        <line x1="100" y1="60" x2="135" y2="60" stroke="#fbbf24" stroke-width="2"/>
+        <polygon points="135,56 145,60 135,64" fill="#fbbf24"/>
+        <text x="120" y="52" fill="rgba(251,191,36,0.7)" font-size="9" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">Scale 1:100</text>
+        <!-- Large real rectangle -->
+        <rect x="150" y="15" width="90" height="90" fill="rgba(251,191,36,0.08)" stroke="#fbbf24" stroke-width="2" rx="4"/>
+        <text x="195" y="60" fill="#fbbf24" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">300 m × 200 m</text>
+        <text x="195" y="120" fill="rgba(251,191,36,0.6)" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">In real life</text>
+        <!-- Formula line -->
+        <text x="130" y="150" fill="rgba(251,191,36,0.7)" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">Area on paper × scale² = Real area</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Real Area = Drawing Area × scale²</div>
+      <p class="explanation">In scale drawings, <strong>lengths</strong> are multiplied by the scale factor, but <strong>areas</strong> are multiplied by the scale factor <em>squared</em>.</p>
+      <ul class="steps">
+        <li>Find the area in the drawing using normal formulae</li>
+        <li>Multiply by scale² (not just scale)</li>
+      </ul>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        Scale 1 : 100. Drawing shows 3 cm × 2 cm = 6 cm².
+        <span class="ex-step">Real area = 6 × 100² = 6 × 10,000</span>
+        <span class="ex-answer">= 60,000 cm² = 6 m²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     HARD SECTION
+════════════════════════════════════════════ -->
+<div class="section-header hard" id="hard">
+  <div>
+    <h2>🔴 Hard Concepts</h2>
+    <p>Challenge yourself — these need careful multi-step thinking</p>
+  </div>
+</div>
+
+<!-- 13. Path / Border -->
+<div class="card hard-card" id="border">
+  <h3>13. Path / Border Problems</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 270 170" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer rectangle -->
+        <rect x="20" y="20" width="220" height="130" fill="rgba(248,113,113,0.15)" stroke="#f87171" stroke-width="2.5" rx="4"/>
+        <!-- Inner rectangle (cut out) -->
+        <rect x="44" y="42" width="172" height="86" fill="var(--c1)" stroke="#f87171" stroke-width="2" stroke-dasharray="5,3"/>
+        <!-- Path width arrows -->
+        <line x1="20" y1="8" x2="44" y2="8" stroke="#f87171" stroke-width="1.5"/>
+        <line x1="20" y1="5" x2="20" y2="11" stroke="#f87171" stroke-width="1.5"/>
+        <line x1="44" y1="5" x2="44" y2="11" stroke="#f87171" stroke-width="1.5"/>
+        <text x="32" y="5" fill="#f87171" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">w</text>
+        <!-- Outer dimensions -->
+        <text x="130" y="165" fill="#f87171" font-size="12" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">Outer: 12 m wide</text>
+        <text x="258" y="88" fill="#f87171" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700" transform="rotate(90,258,88)">8 m tall</text>
+        <!-- Labels inside -->
+        <text x="130" y="84" fill="rgba(248,113,113,0.5)" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">Inner area</text>
+        <text x="55" y="75" fill="#f87171" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700" transform="rotate(-90,55,75)">path width w</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Path Area = Outer Area − Inner Area</div>
+      <p class="explanation">A border (path) runs around the inside of a shape. To find its area:</p>
+      <ul class="steps">
+        <li>Find the <strong>outer rectangle</strong> area</li>
+        <li>Find the <strong>inner rectangle</strong> dimensions: subtract <strong>2 × path width</strong> from each outer dimension</li>
+        <li>Inner area = inner length × inner width</li>
+        <li>Path area = Outer − Inner</li>
+      </ul>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        Outer = 12 × 8 = <strong>96 m²</strong>. Path width = 2 m.
+        <span class="ex-step">Inner = (12−4) × (8−4) = 8 × 4 = <strong>32 m²</strong></span>
+        <span class="ex-answer">Path = 96 − 32 = 64 m²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 14. Irregular Polygons / Shoelace -->
+<div class="card hard-card" id="irregular">
+  <h3>14. Irregular Polygons on a Coordinate Grid</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 260 175" xmlns="http://www.w3.org/2000/svg">
+        <!-- Grid -->
+        <g stroke="rgba(248,113,113,0.18)" stroke-width="0.8">
+          <line x1="20" y1="20" x2="240" y2="20"/>
+          <line x1="20" y1="55" x2="240" y2="55"/>
+          <line x1="20" y1="90" x2="240" y2="90"/>
+          <line x1="20" y1="125" x2="240" y2="125"/>
+          <line x1="20" y1="160" x2="240" y2="160"/>
+          <line x1="20"  y1="20" x2="20"  y2="160"/>
+          <line x1="55"  y1="20" x2="55"  y2="160"/>
+          <line x1="90"  y1="20" x2="90"  y2="160"/>
+          <line x1="125" y1="20" x2="125" y2="160"/>
+          <line x1="160" y1="20" x2="160" y2="160"/>
+          <line x1="195" y1="20" x2="195" y2="160"/>
+          <line x1="230" y1="20" x2="230" y2="160"/>
+        </g>
+        <!-- Axis labels -->
+        <text x="20" y="170" fill="rgba(248,113,113,0.5)" font-size="9" font-family="Nunito,sans-serif" font-weight="700">0</text>
+        <text x="55" y="170" fill="rgba(248,113,113,0.5)" font-size="9" font-family="Nunito,sans-serif" font-weight="700">1</text>
+        <text x="90" y="170" fill="rgba(248,113,113,0.5)" font-size="9" font-family="Nunito,sans-serif" font-weight="700">2</text>
+        <text x="125" y="170" fill="rgba(248,113,113,0.5)" font-size="9" font-family="Nunito,sans-serif" font-weight="700">3</text>
+        <text x="160" y="170" fill="rgba(248,113,113,0.5)" font-size="9" font-family="Nunito,sans-serif" font-weight="700">4</text>
+        <text x="195" y="170" fill="rgba(248,113,113,0.5)" font-size="9" font-family="Nunito,sans-serif" font-weight="700">5</text>
+        <!-- Irregular polygon A(0,3) B(2,4) C(5,3) D(4,1) E(1,1) — mapped to grid (each cell=35px, origin at 20,160) -->
+        <!-- A=(20,55), B=(90,20), C=(195,55), D=(160,125), E=(55,125) -->
+        <polygon points="20,55 90,20 195,55 160,125 55,125"
+          fill="rgba(248,113,113,0.18)" stroke="#f87171" stroke-width="2.5" stroke-linejoin="round"/>
+        <!-- Vertex dots and labels -->
+        <circle cx="20"  cy="55"  r="4" fill="#f87171"/>
+        <circle cx="90"  cy="20"  r="4" fill="#f87171"/>
+        <circle cx="195" cy="55"  r="4" fill="#f87171"/>
+        <circle cx="160" cy="125" r="4" fill="#f87171"/>
+        <circle cx="55"  cy="125" r="4" fill="#f87171"/>
+        <text x="5"   y="52"  fill="#f87171" font-size="10" font-family="Nunito,sans-serif" font-weight="700">A</text>
+        <text x="86"  y="14"  fill="#f87171" font-size="10" font-family="Nunito,sans-serif" font-weight="700">B</text>
+        <text x="198" y="52"  fill="#f87171" font-size="10" font-family="Nunito,sans-serif" font-weight="700">C</text>
+        <text x="162" y="138" fill="#f87171" font-size="10" font-family="Nunito,sans-serif" font-weight="700">D</text>
+        <text x="40"  y="138" fill="#f87171" font-size="10" font-family="Nunito,sans-serif" font-weight="700">E</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Shoelace: A = ½|Σ(xᵢyᵢ₊₁ − xᵢ₊₁yᵢ)|</div>
+      <p class="sub-note">Or: decompose into triangles and rectangles</p>
+      <p class="explanation">For polygons with vertices listed as coordinates, the <strong>Shoelace Formula</strong> gives the exact area.</p>
+      <ul class="steps">
+        <li>List all vertices in order: (x₁,y₁), (x₂,y₂), …</li>
+        <li>Multiply diagonally: each x by the next y</li>
+        <li>Subtract: each y by the next x</li>
+        <li>Take half the absolute value of the total</li>
+      </ul>
+      <p class="explanation" style="margin-top:8px"><strong>Alternative:</strong> enclose in a rectangle and subtract the surrounding triangles/rectangles.</p>
+      <div class="example">
+        <span class="ex-label">Simpler Method — Enclosing Rectangle</span>
+        Draw a bounding rectangle. Find its area. Subtract each triangle in the corners.
+        <span class="ex-answer">Area of polygon = Rectangle − corner triangles</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 15. Sector of Circle -->
+<div class="card hard-card" id="sector">
+  <h3>15. Sector of a Circle</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 240 175" xmlns="http://www.w3.org/2000/svg">
+        <!-- Full circle outline (faint) -->
+        <circle cx="110" cy="100" r="80" fill="none" stroke="rgba(248,113,113,0.2)" stroke-width="1.5" stroke-dasharray="5,4"/>
+        <!-- Sector (90° = quarter circle) -->
+        <path d="M110,100 L110,20 A80,80 0 0,1 190,100 Z" fill="rgba(248,113,113,0.2)" stroke="#f87171" stroke-width="2.5"/>
+        <!-- Radius lines labels -->
+        <text x="147" y="60" fill="#f87171" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">r</text>
+        <text x="152" y="93" fill="#f87171" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">r</text>
+        <!-- Centre dot -->
+        <circle cx="110" cy="100" r="3.5" fill="#f87171"/>
+        <!-- Angle arc -->
+        <path d="M110,70 A30,30 0 0,1 140,100" fill="none" stroke="#f87171" stroke-width="1.5"/>
+        <text x="128" y="80" fill="#f87171" font-size="12" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">θ = 90°</text>
+        <!-- "pie slice" label -->
+        <text x="145" y="52" fill="rgba(248,113,113,0.5)" font-size="10" font-family="Nunito,sans-serif" font-weight="700">sector</text>
+        <text x="110" y="162" fill="rgba(248,113,113,0.7)" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">Like a pizza slice!</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Area = (θ ÷ 360) × π × r²</div>
+      <p class="explanation">A sector is a "pizza slice" cut from a circle. <strong>θ (theta)</strong> is the angle at the centre in degrees. The fraction θ/360 tells you what fraction of the full circle you have.</p>
+      <ul class="steps">
+        <li>Find the full circle area: π × r²</li>
+        <li>Multiply by the fraction of the circle: θ ÷ 360</li>
+      </ul>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        θ = <strong>90°</strong>, r = <strong>6 cm</strong>
+        <span class="ex-step">Area = (90 ÷ 360) × π × 36 = ¼ × 3.14 × 36</span>
+        <span class="ex-step">= ¼ × 113.04</span>
+        <span class="ex-answer">≈ 28.26 cm²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 16. Mixed Unit Problems -->
+<div class="card hard-card" id="mixed-units">
+  <h3>16. Mixed Unit Problems</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 250 160" xmlns="http://www.w3.org/2000/svg">
+        <!-- Rectangle with mixed units -->
+        <rect x="30" y="30" width="180" height="100" fill="rgba(248,113,113,0.12)" stroke="#f87171" stroke-width="2.5" rx="4"/>
+        <!-- Length label (metres) -->
+        <text x="120" y="20" fill="#f87171" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">length = 2 m</text>
+        <!-- Width label (cm) -->
+        <text x="230" y="84" fill="#f87171" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700" transform="rotate(90,230,84)">width = 50 cm</text>
+        <!-- Warning cross -->
+        <text x="120" y="74" fill="rgba(248,113,113,0.5)" font-size="26" text-anchor="middle" font-family="serif">⚠</text>
+        <text x="120" y="100" fill="rgba(248,113,113,0.65)" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">Convert first!</text>
+        <!-- Conversion note -->
+        <rect x="20" y="140" width="210" height="16" rx="4" fill="rgba(248,113,113,0.15)"/>
+        <text x="125" y="152" fill="#f87171" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">2 m = 200 cm   OR   50 cm = 0.5 m</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Convert → then Calculate</div>
+      <p class="explanation">When measurements are in <strong>different units</strong>, you must convert them all to the same unit before using any area formula.</p>
+      <ul class="steps">
+        <li><strong>1 m = 100 cm</strong>, so 1 m² = 10,000 cm²</li>
+        <li><strong>1 km = 1,000 m</strong>, so 1 km² = 1,000,000 m²</li>
+        <li>Choose the most convenient unit (usually the one already given for most measurements)</li>
+        <li>Convert, calculate, then state the unit clearly</li>
+      </ul>
+      <div class="example">
+        <span class="ex-label">Worked Example</span>
+        Rectangle: length = <strong>2 m</strong>, width = <strong>50 cm</strong>
+        <span class="ex-step">Convert: 2 m = 200 cm</span>
+        <span class="ex-step">Area = 200 × 50 = 10,000 cm²</span>
+        <span class="ex-answer">= 10,000 cm² = 1 m²</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 17. Perimeter vs Area -->
+<div class="card hard-card" id="perim-vs-area">
+  <h3>17. Perimeter vs Area</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 270 165" xmlns="http://www.w3.org/2000/svg">
+        <!-- Shape 1: Square 5×5 (P=20, A=25) -->
+        <rect x="15" y="40" width="70" height="70" fill="rgba(248,113,113,0.15)" stroke="#f87171" stroke-width="2.5" rx="3"/>
+        <text x="50" y="75" fill="white" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">5×5</text>
+        <text x="50" y="90" fill="#f87171" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">A = 25</text>
+        <text x="50" y="125" fill="rgba(248,113,113,0.6)" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">P = 20</text>
+        <!-- Shape 2: Rectangle 1×9 (P=20, A=9) -->
+        <rect x="100" y="72" width="126" height="16" fill="rgba(248,113,113,0.1)" stroke="#f87171" stroke-width="2.5" rx="3"/>
+        <text x="163" y="84" fill="white" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">9 × 1</text>
+        <text x="163" y="103" fill="#f87171" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">A = 9</text>
+        <text x="163" y="118" fill="rgba(248,113,113,0.6)" font-size="10" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">P = 20</text>
+        <!-- Same perimeter label -->
+        <text x="135" y="145" fill="rgba(248,113,113,0.7)" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">Both have P = 20 units</text>
+        <text x="135" y="160" fill="#f87171" font-size="11" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">But very different areas!</text>
+        <!-- "Not equal" sign -->
+        <text x="135" y="30" fill="#f87171" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">Same perimeter ≠ Same area</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Same P ≠ Same Area</div>
+      <p class="explanation"><strong>Perimeter</strong> is the total length around the outside of a shape. <strong>Area</strong> is the surface covered inside. These are independent — same perimeter can give very different areas.</p>
+      <p class="explanation" style="margin-top:8px"><span class="note">Key insight: for a fixed perimeter, a <strong>square</strong> always gives the maximum possible area!</span></p>
+      <div class="example">
+        <span class="ex-label">Key Fact</span>
+        Both shapes have perimeter = 20 units.
+        <span class="ex-step">Square 5×5: Area = <strong>25 units²</strong></span>
+        <span class="ex-step">Rectangle 9×1: Area = <strong>9 units²</strong></span>
+        <span class="ex-answer">Square wins every time for max area!</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 18. Reverse Problems -->
+<div class="card hard-card" id="reverse">
+  <h3>18. Reverse Problems — Find a Missing Dimension</h3>
+  <div class="card-cols">
+    <div class="diagram">
+      <svg viewBox="0 0 250 155" xmlns="http://www.w3.org/2000/svg">
+        <!-- Rectangle with question mark -->
+        <rect x="25" y="25" width="185" height="90" fill="rgba(248,113,113,0.12)" stroke="#f87171" stroke-width="2.5" rx="4"/>
+        <!-- Known side (length) -->
+        <text x="118" y="17" fill="#f87171" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">length = 8 cm</text>
+        <!-- Unknown width -->
+        <text x="222" y="74" fill="#f87171" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700" transform="rotate(90,222,74)">width = ?</text>
+        <!-- Area inside -->
+        <text x="118" y="62" fill="rgba(255,255,255,0.7)" font-size="13" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">Area = 48 cm²</text>
+        <!-- Formula rearranged -->
+        <rect x="25" y="125" width="185" height="24" rx="5" fill="rgba(248,113,113,0.15)"/>
+        <text x="118" y="141" fill="#f87171" font-size="12" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="700">width = Area ÷ length = 48 ÷ 8 = 6</text>
+      </svg>
+    </div>
+    <div class="card-text">
+      <div class="formula">Missing side = Area ÷ known side</div>
+      <p class="explanation">Sometimes you're given the <strong>area and one dimension</strong>, and asked to find the other. Rearrange the formula algebraically.</p>
+      <ul class="steps">
+        <li>Write out the area formula</li>
+        <li>Substitute in what you know</li>
+        <li>Solve for the unknown using division (or square root for a square)</li>
+      </ul>
+      <div class="example">
+        <span class="ex-label">Worked Example 1 — Rectangle</span>
+        Area = <strong>48 cm²</strong>, length = <strong>8 cm</strong>. Find width.
+        <span class="ex-step">48 = 8 × width → width = 48 ÷ 8</span>
+        <span class="ex-answer">width = 6 cm</span>
+      </div>
+      <div class="example" style="margin-top:10px">
+        <span class="ex-label">Worked Example 2 — Square</span>
+        Area = <strong>81 cm²</strong>. Find the side.
+        <span class="ex-step">s² = 81 → s = √81</span>
+        <span class="ex-answer">s = 9 cm</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .content -->
+
+<!-- ─── Points script ─── -->
+<script>
+  const el = document.getElementById('ptsDisplay');
+  if(el) el.textContent = '⭐ ' + (parseInt(localStorage.getItem('kids_points')||'0'));
+</script>
+
+</body>
+</html>
