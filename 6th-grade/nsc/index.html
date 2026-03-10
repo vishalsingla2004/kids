@@ -86,6 +86,11 @@
   .confetti-piece { position:fixed; border-radius:2px; animation:confettiFall linear forwards; pointer-events:none; z-index:300; }
   @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
   @keyframes slideUp { from{opacity:1;transform:translateY(0) scale(1)} to{opacity:0;transform:translateY(-40px) scale(0.85)} }
+  .nav-arrow{position:fixed;top:50%;transform:translateY(-50%);width:44px;height:88px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.18);border-radius:12px;color:rgba(255,255,255,0.7);font-size:2.4rem;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:20;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background 0.15s;}
+  .nav-arrow:active{background:rgba(255,255,255,0.18);}
+  #navPrev{left:4px;}
+  #navNext{right:4px;}
+  .review-banner{font-size:0.85rem;color:rgba(255,255,255,0.75);text-align:center;padding:5px 12px;margin-bottom:6px;background:rgba(255,255,255,0.1);border-radius:10px;}
 </style>
 </head>
 <body>
@@ -95,7 +100,7 @@
 <div class="bg-deco" style="top:60%;right:5%;animation-duration:5.5s;animation-delay:0.5s;">🧬</div>
 <div class="bg-deco" style="top:78%;left:12%;animation-duration:7.5s;animation-delay:1.5s;">🌍</div>
 <div class="bg-deco" style="top:30%;right:15%;animation-duration:6.5s;animation-delay:3s;">⚡</div>
-<a class="back-btn" href="../../">← Home</a>
+<a class="back-btn" href="../../">← Home</a><button class="nav-arrow" id="navPrev" onclick="navBack()">\u2039</button><button class="nav-arrow" id="navNext" onclick="navForward()">\u203a</button>
 <div class="screen" id="gameScreen">
   <div class="top">
     <div class="title">🏆 NSC Science Bowl</div>
@@ -107,7 +112,7 @@
     <div class="question-text" id="questionText"></div>
   </div>
   <div class="bottom">
-    <div class="choices" id="choices"></div>
+    <div class="review-banner" id="reviewBanner" style="display:none"></div><div class="choices" id="choices"></div>
     <div class="progress-dots" id="progressDots"></div>
   </div>
 </div>
@@ -457,7 +462,7 @@ const ALL_QUESTIONS = [
   { level:2, visual:'🧬', question:'What are the main differences between B cells and T cells in the adaptive immune system?', options:['B cells produce antibodies; T cells include cytotoxic cells (kill infected cells) and helper cells (coordinate immune response)','B cells kill viruses directly; T cells produce antibodies','B cells mature in the thymus; T cells mature in bone marrow'], answer:'B cells produce antibodies; T cells include cytotoxic cells (kill infected cells) and helper cells (coordinate immune response)', fact:'🛡️ Both develop from bone marrow stem cells. B cells mature in bone marrow; T cells mature in the Thymus (hence "T" cell). Helper T cells (CD4+) are the cells targeted by HIV — their depletion leads to AIDS and collapse of the entire adaptive immune response. Cytotoxic T cells (CD8+) recognise and kill body cells displaying foreign antigens (virus-infected or cancerous cells).' },
   { level:2, visual:'📐', question:'What is the period of a simple pendulum of length L in terms of g?', options:['T = 2π√(L/g)','T = 2π√(g/L)','T = L/(2πg)'], answer:'T = 2π√(L/g)', fact:'⚙️ Period depends only on length and gravity — NOT on the mass of the bob or the amplitude (for small swings). This is why pendulum clocks work! Double the length → period increases by √2 ≈ 1.41×. On the Moon (g = 1.62 m/s²), a 1-m pendulum would swing about 2.5× slower than on Earth. Galileo discovered isochronism of pendulums around 1602 from watching a swinging lamp in Pisa Cathedral.' },
   { level:2, visual:'🌍', question:'What is ocean acidification, and what causes it?', options:['Increasing CO₂ dissolves in seawater forming carbonic acid, lowering ocean pH; threatens marine organisms with calcium carbonate shells','Acid rain from industrial SO₂ emissions directly acidifying ocean surfaces','Volcanic CO₂ from submarine volcanic activity acidifying deep ocean water'], answer:'Increasing CO₂ dissolves in seawater forming carbonic acid, lowering ocean pH; threatens marine organisms with calcium carbonate shells', fact:'🌊 CO₂ + H₂O → H₂CO₃ → H⁺ + HCO₃⁻. Since the Industrial Revolution, ocean pH has dropped from ~8.2 to ~8.1 — a 30% increase in [H⁺]! More acidic water dissolves the calcium carbonate (CaCO₃) shells of corals, oysters, and plankton. This disrupts marine food webs and threatens the reef ecosystems that protect coastlines.' },
-  { level:2, visual:'🔬', question:'What is a control variable (controlled variable) in a scientific experiment?', options:['A variable kept constant to ensure that only the independent variable affects the dependent variable','The variable being measured as the outcome','The variable deliberately changed by the experimenter'], answer:'A variable kept constant to ensure that only the independent variable affects the outcome dependent variable', fact:'🔬 In a drug trial: independent variable (IV) = drug dose; dependent variable (DV) = patient recovery; control variables = age, sex, diet, exercise, other medications. Control groups receive a placebo. Without controls, you cannot determine whether an observed effect was truly caused by the IV. This is the foundation of valid experimental design!' },
+  { level:2, visual:'🔬', question:'What is a control variable (controlled variable) in a scientific experiment?', options:['A variable kept constant to ensure that only the independent variable affects the dependent variable','The variable being measured as the outcome','The variable deliberately changed by the experimenter'], answer:'A variable kept constant to ensure that only the independent variable affects the dependent variable', fact:'🔬 In a drug trial: independent variable (IV) = drug dose; dependent variable (DV) = patient recovery; control variables = age, sex, diet, exercise, other medications. Control groups receive a placebo. Without controls, you cannot determine whether an observed effect was truly caused by the IV. This is the foundation of valid experimental design!' },
   { level:2, visual:'🧪', question:'What is a galvanic (voltaic) cell?', options:['An electrochemical cell that converts chemical energy to electrical energy via spontaneous redox reactions','An electrolytic cell that uses electricity to drive a non-spontaneous redox reaction','A fuel cell that combines hydrogen and oxygen to produce electricity and water'], answer:'An electrochemical cell that converts chemical energy to electrical energy via spontaneous redox reactions', fact:'⚡ The classic Daniell cell: zinc anode (Zn → Zn²⁺ + 2e⁻; oxidation) and copper cathode (Cu²⁺ + 2e⁻ → Cu; reduction). E°cell = +1.10 V. Electrons flow through the external wire from anode to cathode. All batteries are galvanic cells. An electrolytic cell (used for electroplating) is the opposite — it requires an external voltage to force non-spontaneous reactions.' },
   { level:2, visual:'🌿', question:'What is eutrophication?', options:['Excessive nutrient (especially nitrogen and phosphorus) enrichment of a water body, causing algal blooms and oxygen depletion','The natural aging process of a lake as it fills with sediment over thousands of years','The introduction of invasive species that consume all aquatic vegetation'], answer:'Excessive nutrient (especially nitrogen and phosphorus) enrichment of a water body, causing algal blooms and oxygen depletion', fact:'🌊 Fertiliser runoff and sewage add excess N and P to waterways. Algae bloom massively, die, and decompose — bacteria consume so much O₂ that fish and other aerobic organisms suffocate (hypoxic "dead zones"). The Gulf of Mexico hypoxic zone (from Mississippi River nutrient runoff) can reach the size of New Jersey every summer.' },
   { level:2, visual:'⚛️', question:'What is atomic radius, and how does it trend across and down the periodic table?', options:['Atomic radius decreases across a period (more protons pull electrons in) and increases down a group (more electron shells)','Atomic radius increases across a period and decreases down a group','Atomic radius is constant within a period but varies between periods'], answer:'Atomic radius decreases across a period (more protons pull electrons in) and increases down a group (more electron shells)', fact:'⚛️ Moving right across a period, nuclear charge increases (more protons) but electrons are added to the same shell — greater attraction shrinks the atom. Moving down a group, electrons occupy higher shells that are further from the nucleus. Cesium (Cs) is the largest naturally occurring element; helium is the smallest. These trends explain chemical reactivity!' },
@@ -667,6 +672,7 @@ function addPoints(n){localStorage.setItem(POINTS_KEY,getPoints()+n);}
 function updatePtsDisplay(){const el=document.getElementById('ptsDisplay');if(el)el.textContent='⭐ '+getPoints();}
 
 let current = 0, score = 0, dotResults = [], sessionQ = [];
+let sessionAnswers=[],sessionShuffled=[],viewingIdx=null;
 let audioCtx = null;
 function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
 function note(ctx, type, freq, time, dur, vol) {
@@ -717,8 +723,12 @@ function playLevelUp() {
 function getMastered(){try{return new Set(JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]'));}catch{return new Set();}}
 function markMastered(idx){try{const m=JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]');if(!m.includes(idx)){m.push(idx);localStorage.setItem(QUIZ_KEY,JSON.stringify(m));}}catch{}}
 function pickSession(){const mastered=getMastered();const byLevel=[[],[],[]];ALL_QUESTIONS.forEach((q,i)=>byLevel[q.level-1].push(i));const session=[];byLevel.forEach(pool=>{const notDone=shuffle(pool.filter(i=>!mastered.has(i)));const done=shuffle(pool.filter(i=>mastered.has(i)));session.push(...[...notDone,...done].slice(0,5));});return session.map(i=>({...ALL_QUESTIONS[i],_idx:i}));}
+function updateNavArrows(){const p=document.getElementById('navPrev'),n=document.getElementById('navNext');if(!p)return;const idx=viewingIdx!==null?viewingIdx:current;p.style.display=idx>0?'flex':'none';n.style.display=(viewingIdx!==null&&viewingIdx<current)?'flex':'none';}
+function navBack(){const idx=viewingIdx!==null?viewingIdx:current;if(idx>0)showPastQuestion(idx-1);}
+function navForward(){if(viewingIdx===null)return;if(viewingIdx<current-1)showPastQuestion(viewingIdx+1);else{viewingIdx=null;showQuestion();}}
+function showPastQuestion(idx){viewingIdx=idx;const q=sessionQ[idx];const badge=document.getElementById('levelBadge');if(q.level===1){badge.className='level-badge easy';badge.textContent='\u2b50 Easy';}if(q.level===2){badge.className='level-badge medium';badge.textContent='\u2b50\u2b50 Medium';}if(q.level===3){badge.className='level-badge hard';badge.textContent='\u2b50\u2b50\u2b50 Hard';}document.getElementById('visualCard').innerHTML='<span class="visual-emoji">'+q.visual+'</span>';document.getElementById('questionText').textContent=q.question;const shuffled=sessionShuffled[idx]||[...q.options];const chosen=sessionAnswers[idx];const correct=q.answer;const choicesEl=document.getElementById('choices');choicesEl.innerHTML='';['A','B','C'].forEach((letter,i)=>{const opt=shuffled[i];const btn=document.createElement('button');btn.className='choice-btn';btn.disabled=true;btn.style.cursor='default';if(opt===correct)btn.classList.add('correct');if(opt===chosen&&opt!==correct)btn.classList.add('wrong');btn.innerHTML='<span class="choice-letter">'+letter+'</span>'+opt;choicesEl.appendChild(btn);});const rb=document.getElementById('reviewBanner');if(rb){rb.style.display='';rb.textContent=dotResults[idx]==='correct'?'\u2705 Q'+(idx+1)+' \u00b7 Correct':'\u274c Q'+(idx+1)+' \u00b7 Incorrect';}document.getElementById('gameScreen').classList.remove('shake');updateNavArrows();}
 function init() {
-  current = 0; score = 0; dotResults = Array(15).fill(null);
+  current = 0; score = 0; dotResults = Array(15).fill(null);sessionAnswers=Array(15).fill(null);sessionShuffled=Array(15).fill(null);viewingIdx=null;
   sessionQ = pickSession();
   if (!document.getElementById('visualCard')) {
     document.getElementById('gameScreen').innerHTML = `
@@ -753,7 +763,7 @@ function updateDot(idx, result) {
   d.classList.remove('current'); d.classList.add('answered', result==='correct'?'correct-dot':'wrong-dot');
   const next = document.getElementById(`dot-${idx+1}`); if(next) next.classList.add('current');
 }
-function showQuestion() {
+function showQuestion() {viewingIdx=null;const rb=document.getElementById('reviewBanner');if(rb)rb.style.display='none';
   const q = sessionQ[current];
   const badge = document.getElementById('levelBadge');
   if(q.level===1){badge.className='level-badge easy';badge.textContent='⭐ Easy';}
@@ -763,18 +773,18 @@ function showQuestion() {
   document.getElementById('score').textContent=score;
   document.getElementById('visualCard').innerHTML=`<span class="visual-emoji">${q.visual}</span>`;
   document.getElementById('questionText').textContent=q.question;
-  const shuffled=shuffle([...q.options]);
+  const shuffled=shuffle([...q.options]);sessionShuffled[current]=shuffled;
   const choicesEl=document.getElementById('choices'); choicesEl.innerHTML='';
   ['A','B','C'].forEach((letter,i) => {
     const btn=document.createElement('button'); btn.className='choice-btn'; btn.dataset.value=shuffled[i];
     btn.innerHTML=`<span class="choice-letter">${letter}</span>${shuffled[i]}`;
     btn.onclick=()=>handleAnswer(shuffled[i],q.answer,btn,q.fact,q._idx); choicesEl.appendChild(btn);
   });
-  document.getElementById('gameScreen').classList.remove('shake');
+  document.getElementById('gameScreen').classList.remove('shake');updateNavArrows();
 }
 function handleAnswer(chosen, correct, btn, fact, qIdx) {
   document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
-  const isCorrect = chosen===correct;
+  const isCorrect = chosen===correct;sessionAnswers[current]=chosen;
   if(isCorrect){
     score++; markMastered(qIdx); btn.classList.add('correct'); dotResults[current]='correct'; updateDot(current,'correct');
     document.getElementById('score').textContent=score; playCorrect(); spawnConfetti(35);

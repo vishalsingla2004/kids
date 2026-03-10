@@ -107,8 +107,8 @@ Populated in `showFeedback()` wrong branch; hidden in correct branch.
 
 ### Mastery tracking
 ```js
-function getMastered() { return new Set(JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]')); }
-function markMastered(idx) { /* appends idx to QUIZ_KEY array */ }
+function getMastered(){try{return new Set(JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]'));}catch{return new Set();}}
+function markMastered(idx){try{const m=JSON.parse(localStorage.getItem(QUIZ_KEY)||'[]');if(!m.includes(idx)){m.push(idx);localStorage.setItem(QUIZ_KEY,JSON.stringify(m));}}catch{}}
 ```
 `idx` is the index into `ALL_QUESTIONS`. Mastered questions are shown last in `pickSession()`.
 
@@ -117,6 +117,12 @@ Each quiz sets `--c1` (dark bg), `--c2` (mid bg), `--acc` (accent color):
 - SBA Math / mastery topics: `#0a1628 / #1a3a6b / #60a5fa` (blue)
 - SBA ELA: `#1a0a2e / #4a1a6b / #c084fc` (purple)
 - SBA Science: `#0d2818 / #1a4a2e / #4ade80` (green)
+- Chemistry: `#1a003d / #4a0080 / #c471ed` (purple-violet)
+- Physics: `#001a33 / #003580 / #4facfe` (blue)
+- Maths (6th): `#2d1000 / #7a3200 / #f39c12` (orange)
+- Environmental: `#001426 / #00354f / #26c6da` (teal)
+- Biology: `#001a0d / #004d28 / #4caf50` (green)
+- NSC: `#060d1f / #0d2560 / #38bdf8` (sky blue)
 
 ## Hub & Report
 
@@ -139,6 +145,14 @@ Every card `<a>` has a `data-tile="<id>"` attribute. IDs: `princess`, `soccer`, 
 - Mastery stats per subject (`SUBJECTS` array drives cards)
 - Points box: total `⭐` + dollar value (10 pts = $1.00) — dollar amount shown here only, never in kid UI
 - **Manage Tiles** panel: toggle switches to hide/show each hub card. State stored in `kids_hidden_tiles` (JSON array of hidden tile IDs). `initToggles()` reads current state on load.
+
+## gen_dump.py
+
+Dumps all quiz questions to `questions_dump.txt` for review. Run with:
+```bash
+python gen_dump.py
+```
+Add new quiz files to the `files` list inside the script when adding a new quiz.
 
 ## Adding a New Quiz
 
