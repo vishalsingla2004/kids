@@ -931,6 +931,7 @@ function spawnConfetti(count=35){
     document.body.appendChild(el); setTimeout(()=>el.remove(),(dur+0.6)*1000);
   },i*20);}
 }
+document.addEventListener('keydown',function(e){if(e.key==='ArrowLeft'||e.key==='<')navBack();if(e.key==='ArrowRight'||e.key==='>')navForward();});
 init();
 </script>
 </body>
