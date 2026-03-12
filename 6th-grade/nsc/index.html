@@ -668,7 +668,7 @@ const ALL_QUESTIONS = [
 const QUIZ_KEY = 'kids_q_nsc';
 const POINTS_KEY='kids_points';
 function getPoints(){return parseInt(localStorage.getItem(POINTS_KEY)||'0');}
-function addPoints(n){localStorage.setItem(POINTS_KEY,getPoints()+n);}
+function addPoints(n){const today=new Date().toISOString().slice(0,10);const dayKey='kids_pts_date',todayKey='kids_pts_today';let todayPts=parseInt(localStorage.getItem(todayKey)||'0');if(localStorage.getItem(dayKey)!==today){todayPts=0;localStorage.setItem(dayKey,today);}const canAdd=Math.max(0,Math.min(n,100-todayPts));if(canAdd>0){localStorage.setItem(POINTS_KEY,getPoints()+canAdd);localStorage.setItem(todayKey,todayPts+canAdd);}}
 function updatePtsDisplay(){const el=document.getElementById('ptsDisplay');if(el)el.textContent='⭐ '+getPoints();}
 
 let current = 0, score = 0, dotResults = [], sessionQ = [];

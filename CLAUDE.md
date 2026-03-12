@@ -100,6 +100,7 @@ Points awarded in `showEndScreen()`:
 - All 5 medium correct (`m===5`) → +3 pts
 - All 5 hard correct (`h===5`) → +6 pts
 - Max per session: 10 pts. Points accumulate across all quiz sections.
+- **Daily cap: 100 pts/day.** `addPoints` tracks `kids_pts_date` (YYYY-MM-DD) and `kids_pts_today` (running daily total) in localStorage. Resets automatically at midnight. Points beyond 100/day are silently dropped.
 
 Header shows live `⭐ N` pill (`id="ptsDisplay"`, class `pts-pill`). Call `updatePtsDisplay()` at end of `init()`.
 
