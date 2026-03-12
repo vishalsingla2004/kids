@@ -260,7 +260,7 @@ function render() {
 
   // Points
   const totalPts = parseInt(localStorage.getItem('kids_points')||'0');
-  const dollars  = (totalPts / 10).toFixed(2);
+  const dollars  = (totalPts / 20).toFixed(2);
 
   // Summary
   document.getElementById('summaryBox').innerHTML = `
@@ -273,7 +273,7 @@ function render() {
     <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center;">
       <div class="summary-stat"><div class="num" style="color:#ffd700">⭐ ${totalPts}</div><div class="lbl">Points Earned</div></div>
       <div class="summary-stat"><div class="num" style="color:#4ade80">$${dollars}</div><div class="lbl">Reward Value</div></div>
-      <div style="font-size:0.8rem;color:rgba(255,255,255,0.4);max-width:220px;text-align:center;">10 pts = $1.00 &nbsp;·&nbsp; Perfect 15/15 game earns 10 pts</div>
+      <div style="font-size:0.8rem;color:rgba(255,255,255,0.4);max-width:220px;text-align:center;">10 pts = $0.50 &nbsp;·&nbsp; Perfect 15/15 game earns 10 pts</div>
     </div>
   `;
 

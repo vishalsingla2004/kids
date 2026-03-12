@@ -173,15 +173,17 @@ Every card `<a>` has a `data-tile="<id>"` attribute. IDs: `princess`, `soccer`, 
 
 **`report.html`** — parent-only view. Contains:
 - Mastery stats per subject (`SUBJECTS` array drives cards)
-- Points box: total `⭐` + dollar value (10 pts = $1.00) — dollar amount shown here only, never in kid UI
+- Points box: total `⭐` + dollar value (10 pts = $0.50) — dollar amount shown here only, never in kid UI
 - **Manage Tiles** panel: toggle switches to hide/show each hub card. State stored in `kids_hidden_tiles` (JSON array of hidden tile IDs). `initToggles()` reads current state on load.
 
 ## Learn Section Architecture
 
 Each Learn page is a **scrollable concept reference** (not a quiz). Structure:
-- Sticky header: subject title, back link, `⭐ N` points pill
+- Sticky header: subject title, back link, `⭐ N` points pill, 🖨️ Print button
 - Three `<section>` blocks: 🟢 Easy, 🟡 Medium, 🔴 Hard (6 concept cards each = 18 total)
 - Points pill updated by inline `<script>` at bottom reading `localStorage.getItem('kids_points')`
+
+**Print button** — every concept page has `<button class="print-btn" onclick="window.print()">🖨️ Print</button>` as the last item in the sticky header. Each page also has an `@media print` block that: hides the header chrome (back-link, pts-pill, print-btn), forces `body` to white/black at 8.5pt, caps SVGs at 80px height, and uses multi-column layout (3-col grid for physics/volume-3d via `.cards-grid`; CSS `columns:2` for chemistry/biology/earth-science/circles/area-2d). Section headings get `column-span: all`.
 
 **Concept card structure:**
 ```html
@@ -230,3 +232,4 @@ Add new quiz files to the `files` list inside the script when adding a new quiz.
 1. Create `learn/<subject>/index.html` — copy nearest existing learn page, change title, theme colors (`--c1`, `--c2`, `--acc`), and concept cards.
 2. Add a card in `learn/index.html` linking to the new page.
 3. If it's a new top-level subject (not under `learn/math/`), back link is `../`. For `learn/math/<topic>/`, back link is `../../`.
+4. Ensure the `@media print` block and `.print-btn` are present (copy from an existing page). Update the header selector and column layout class to match the new page's structure.
