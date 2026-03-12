@@ -173,6 +173,35 @@
     .card { padding: 16px; }
     .key-box .klabel { min-width: 85px; }
   }
+
+  .print-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: rgba(255,255,255,0.6);
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.88rem;
+    padding: 5px 13px;
+    border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.07);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, background 0.15s;
+  }
+  .print-btn:hover { color: #fff; background: rgba(255,255,255,0.14); }
+
+  @media print {
+    .site-header { position: static !important; background: none !important; backdrop-filter: none !important; border: none !important; }
+    .back-link, .pts-pill, .print-btn { display: none !important; }
+    body { background: white !important; color: #000 !important; }
+    .concept-card { break-inside: avoid; box-shadow: none !important; background: #fff !important; border-color: #ccc !important; }
+    .card-title-bar { background: #f0f0f0 !important; border-color: #ccc !important; }
+    .card-body { color: #000 !important; }
+    .formula-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; }
+    .example-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; }
+    .section-heading { background: #f0f0f0 !important; color: #333 !important; border-color: #ccc !important; }
+    .cards-grid { grid-template-columns: 1fr 1fr !important; }
+    svg text { fill: #000 !important; }
+  }
 </style>
 </head>
 <body>
@@ -181,6 +210,7 @@
   <a href="../" class="back-link">← Back</a>
   <h1>🌍 Earth Science</h1>
   <div class="pts-pill" id="ptsDisplay">⭐ 0</div>
+  <button class="print-btn" onclick="window.print()">🖨️ Print</button>
 </header>
 
 <main>
