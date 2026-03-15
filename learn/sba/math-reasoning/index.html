@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💬 Communicating Reasoning — SBA Math</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+  :root { --c1: #0a1628; --c2: #1e3a5f; --acc: #60a5fa; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; font-weight: 700; background: linear-gradient(160deg, var(--c1) 0%, var(--c2) 60%, var(--c1) 100%); background-attachment: fixed; min-height: 100dvh; color: #fff; overflow-x: hidden; }
+  .site-header { position: sticky; top: 0; z-index: 100; background: rgba(10,22,40,0.93); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(96,165,250,0.25); display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; gap: 12px; }
+  .back-link { display: inline-flex; align-items: center; gap: 5px; color: rgba(255,255,255,0.6); text-decoration: none; font-family: 'Fredoka One', cursive; font-size: 0.88rem; padding: 5px 13px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.07); white-space: nowrap; transition: color 0.15s, background 0.15s; }
+  .back-link:hover { color: #fff; background: rgba(255,255,255,0.14); }
+  .header-title { font-family: 'Fredoka One', cursive; font-size: clamp(1rem, 4vw, 1.5rem); color: var(--acc); text-shadow: 0 2px 10px rgba(96,165,250,0.4); text-align: center; flex: 1; }
+  .pts-pill { background: rgba(255,215,0,0.12); border: 2px solid rgba(255,215,0,0.4); border-radius: 50px; padding: 4px 13px; color: #ffd700; font-family: 'Fredoka One', cursive; font-size: 0.95rem; white-space: nowrap; }
+  .print-btn { display: inline-flex; align-items: center; gap: 5px; color: rgba(255,255,255,0.6); font-family: 'Fredoka One', cursive; font-size: 0.88rem; padding: 5px 13px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.07); cursor: pointer; white-space: nowrap; transition: color 0.15s, background 0.15s; }
+  .print-btn:hover { color: #fff; background: rgba(255,255,255,0.14); }
+  .page-wrap { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
+  .section-heading { font-family: 'Fredoka One', cursive; font-size: clamp(1.2rem, 4vw, 1.7rem); margin: 40px 0 18px; padding: 10px 20px; border-radius: 14px; display: inline-flex; align-items: center; gap: 10px; }
+  .section-easy { background: rgba(46,204,113,0.15); color: #2ecc71; border: 2px solid rgba(46,204,113,0.35); }
+  .section-medium { background: rgba(230,126,34,0.15); color: #e67e22; border: 2px solid rgba(230,126,34,0.35); }
+  .section-hard { background: rgba(231,76,60,0.15); color: #e74c3c; border: 2px solid rgba(231,76,60,0.35); }
+  .cards-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 620px) { .cards-grid { grid-template-columns: 1fr 1fr; } }
+  .concept-card { background: rgba(255,255,255,0.04); border: 1.5px solid rgba(96,165,250,0.2); border-radius: 20px; overflow: hidden; box-shadow: 0 6px 28px rgba(0,0,0,0.35); transition: transform 0.18s, box-shadow 0.18s; }
+  .concept-card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(96,165,250,0.18); }
+  .card-title-bar { background: rgba(96,165,250,0.12); border-bottom: 1px solid rgba(96,165,250,0.2); padding: 12px 16px; font-family: 'Fredoka One', cursive; font-size: clamp(1rem, 3.5vw, 1.2rem); color: var(--acc); }
+  .card-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .diagram-wrap { background: rgba(0,0,0,0.35); border-radius: 12px; border: 1px solid rgba(96,165,250,0.15); display: flex; align-items: center; justify-content: center; padding: 8px; overflow: hidden; }
+  .diagram-wrap svg { width: 100%; max-width: 280px; height: auto; display: block; }
+  .formula-box { background: rgba(10,22,40,0.8); border: 2px solid var(--acc); border-radius: 12px; padding: 12px 16px; font-family: 'Fredoka One', cursive; font-size: clamp(0.95rem, 3vw, 1.15rem); color: #fff; text-align: center; line-height: 1.5; }
+  .formula-label { font-size: 0.78rem; color: var(--acc); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; font-family: 'Nunito', sans-serif; }
+  .formula-highlight { color: var(--acc); font-size: 1.1em; }
+  .explanation { font-size: clamp(0.85rem, 2.8vw, 0.97rem); color: rgba(255,255,255,0.82); line-height: 1.6; }
+  .explanation strong { color: #fff; }
+  .example-box { background: rgba(46,204,113,0.07); border-left: 3px solid #2ecc71; border-radius: 0 10px 10px 0; padding: 10px 14px; font-size: clamp(0.82rem, 2.6vw, 0.93rem); color: rgba(255,255,255,0.85); line-height: 1.6; }
+  .ex-label { font-family: 'Fredoka One', cursive; color: #2ecc71; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px; }
+  .example-box strong { color: #4ade80; }
+  footer { text-align: center; margin-top: 56px; color: rgba(255,255,255,0.2); font-size: 0.78rem; font-family: 'Nunito', sans-serif; }
+  @media print {
+    @page { margin: 1cm; }
+    body { background: white !important; color: #000 !important; font-size: 8.5pt !important; }
+    .site-header { position: static !important; background: none !important; backdrop-filter: none !important; border: none !important; box-shadow: none !important; padding: 4px 0 !important; }
+    .back-link, .pts-pill, .print-btn { display: none !important; }
+    .header-title { color: #000 !important; font-size: 12pt !important; }
+    .page-wrap { max-width: 100% !important; padding: 4px 0 !important; }
+    .cards-grid { columns: 2; display: block; }
+    .cards-grid .concept-card { break-inside: avoid; display: inline-block; width: 100%; margin-bottom: 6px; }
+    .section-heading { background: #f0f0f0 !important; color: #333 !important; border-color: #ccc !important; font-size: 9pt !important; padding: 4px 10px !important; margin: 8px 0 4px !important; column-span: all; }
+    .concept-card { box-shadow: none !important; background: #fff !important; border-color: #ccc !important; border-radius: 4px !important; }
+    .card-title-bar { background: #f0f0f0 !important; border-color: #ccc !important; color: #000 !important; padding: 4px 8px !important; font-size: 8pt !important; }
+    .card-body { color: #000 !important; padding: 6px !important; gap: 4px !important; }
+    .formula-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; padding: 4px 6px !important; font-size: 8pt !important; }
+    .example-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; padding: 4px 6px !important; font-size: 7.5pt !important; }
+    svg { max-width: 100% !important; max-height: 80px !important; display: block !important; }
+    svg text { fill: #000 !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="back-link" href="../">← SBA Hub</a>
+  <span class="header-title">💬 Communicating Reasoning</span>
+  <span class="pts-pill" id="ptsDisplay">⭐ 0</span>
+  <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+</header>
+
+<div class="page-wrap">
+
+<div class="section-heading section-easy">🟢 Easy</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">1. Always / Sometimes / Never</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="20" width="70" height="110" rx="6" fill="rgba(46,204,113,0.15)" stroke="#2ecc71" stroke-width="1.5"/>
+          <text x="40" y="40" text-anchor="middle" fill="#2ecc71" font-size="10" font-family="Fredoka One,cursive">ALWAYS</text>
+          <text x="40" y="80" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">Square is a rectangle</text>
+          <rect x="90" y="20" width="70" height="110" rx="6" fill="rgba(230,126,34,0.15)" stroke="#e67e22" stroke-width="1.5"/>
+          <text x="125" y="40" text-anchor="middle" fill="#e67e22" font-size="10" font-family="Fredoka One,cursive">SOMETIMES</text>
+          <text x="125" y="80" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">Rectangle is a square</text>
+          <rect x="175" y="20" width="70" height="110" rx="6" fill="rgba(231,76,60,0.15)" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="210" y="40" text-anchor="middle" fill="#e74c3c" font-size="10" font-family="Fredoka One,cursive">NEVER</text>
+          <text x="210" y="80" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">Triangle is a rectangle</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Classification Rule</div><span class="formula-highlight">Test with examples AND counterexamples</span></div>
+      <div class="explanation">To classify a statement, test it with many examples. If it's true for all cases: "always." If true for some but not all: "sometimes." If never true: "never." One counterexample disproves "always."</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"A square is a rectangle" → <strong>Always</strong> (all squares have 4 right angles)<br>"A rectangle is a square" → <strong>Sometimes</strong> (only when sides are equal)</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">2. True or False Equations</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Balance scale for equal equation -->
+          <line x1="125" y1="20" x2="125" y2="60" stroke="var(--acc)" stroke-width="2"/>
+          <line x1="50" y1="60" x2="200" y2="60" stroke="var(--acc)" stroke-width="2"/>
+          <line x1="80" y1="60" x2="80" y2="80" stroke="var(--acc)" stroke-width="1.5"/>
+          <rect x="40" y="80" width="80" height="30" rx="4" fill="rgba(96,165,250,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="80" y="100" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">4×(3+2)=20</text>
+          <line x1="170" y1="60" x2="170" y2="80" stroke="var(--acc)" stroke-width="1.5"/>
+          <rect x="130" y="80" width="80" height="30" rx="4" fill="rgba(96,165,250,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="170" y="100" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">4×3+4×2=20</text>
+          <text x="125" y="130" text-anchor="middle" fill="#4ade80" font-size="14" font-family="Fredoka One,cursive">TRUE ✓</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Verification Method</div><span class="formula-highlight">Evaluate both sides separately</span></div>
+      <div class="explanation">To verify an equation, calculate each side independently. If both sides equal the same number, the equation is true. Don't assume — always show your work for each side.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Is 4 × (3 + 2) = 4×3 + 4×2?<br>LHS = 4 × 5 = 20. RHS = 12 + 8 = 20.<br><strong>TRUE ✓</strong> (Distributive Property)</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">3. Showing Your Work</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" width="230" height="130" rx="6" fill="rgba(0,0,0,0.2)" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+          <text x="20" y="32" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">Problem: 1/2 + 1/3 = ?</text>
+          <line x1="10" y1="40" x2="240" y2="40" stroke="rgba(96,165,250,0.2)" stroke-width="1"/>
+          <text x="20" y="58" fill="white" font-size="10" font-family="Fredoka One,cursive">Step 1: LCD of 2,3 = 6</text>
+          <text x="20" y="78" fill="white" font-size="10" font-family="Fredoka One,cursive">Step 2: 1/2 = 3/6, 1/3 = 2/6</text>
+          <text x="20" y="98" fill="white" font-size="10" font-family="Fredoka One,cursive">Step 3: 3/6 + 2/6 = 5/6</text>
+          <line x1="10" y1="108" x2="240" y2="108" stroke="rgba(96,165,250,0.2)" stroke-width="1"/>
+          <text x="20" y="128" fill="#4ade80" font-size="12" font-family="Fredoka One,cursive">Answer: 5/6</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Work Format</div><span class="formula-highlight">Write each step on its own line</span></div>
+      <div class="explanation">Clear work means every step is visible and labeled. Write the problem, then show each calculation on a new line, and end with a clearly labeled answer. This makes it easy to find any errors.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Problem → Step 1: find LCD → Step 2: convert → Step 3: add → <strong>Answer with label</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">4. Finding Errors</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" width="230" height="130" rx="6" fill="rgba(0,0,0,0.2)" stroke="rgba(231,76,60,0.3)" stroke-width="1"/>
+          <text x="20" y="32" fill="rgba(255,255,255,0.7)" font-size="10" font-family="Fredoka One,cursive">Student work:</text>
+          <text x="20" y="52" fill="white" font-size="10" font-family="Fredoka One,cursive">5/6 + 1/3 = ?</text>
+          <text x="20" y="72" fill="white" font-size="10" font-family="Fredoka One,cursive">= 6/9 = 2/3  ← ERROR HERE</text>
+          <!-- Circle the error -->
+          <ellipse cx="120" cy="70" rx="60" ry="12" fill="none" stroke="#e74c3c" stroke-width="2"/>
+          <text x="20" y="100" fill="#e74c3c" font-size="10" font-family="Fredoka One,cursive">Error: didn't use LCD first!</text>
+          <text x="20" y="118" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">Fix: 5/6 + 2/6 = 7/6 = 1⅙</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Error-Finding Strategy</div><span class="formula-highlight">Check each step against the rules</span></div>
+      <div class="explanation">When reviewing work, check every step. Look for skipped steps, wrong operations, or arithmetic mistakes. Explain exactly what rule was violated and how to fix it.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"5/6 + 1/3 = 6/9 = 2/3" — Error: added numerators AND denominators directly.<br>Fix: LCD = 6, so 1/3 = 2/6, then 5/6 + 2/6 = <strong>7/6 = 1⅙</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">5. Using Counterexamples</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Claim box -->
+          <rect x="10" y="10" width="230" height="35" rx="6" fill="rgba(231,76,60,0.1)" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="125" y="32" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">Claim: "All rectangles are squares"</text>
+          <!-- Arrow down -->
+          <line x1="125" y1="45" x2="125" y2="60" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="121,60 125,68 129,60" fill="var(--acc)"/>
+          <!-- Counterexample box -->
+          <rect x="10" y="68" width="230" height="40" rx="6" fill="rgba(96,165,250,0.1)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="86" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">Counterexample: 4×2 rectangle</text>
+          <text x="125" y="100" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">4 sides, all 90°, but sides NOT equal</text>
+          <!-- Result -->
+          <text x="125" y="135" text-anchor="middle" fill="#e74c3c" font-size="13" font-family="Fredoka One,cursive">CLAIM DISPROVED ✗</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Counterexample Rule</div><span class="formula-highlight">One counterexample disproves "always"</span></div>
+      <div class="explanation">A counterexample is a single case where a claim fails. You only need to find one to show a statement is false. Counterexamples must be valid examples that clearly break the rule.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"All rectangles are squares" → counterexample: a 4×2 rectangle has unequal sides → <strong>claim is FALSE</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">6. Multiple Representations</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Four representations of 3/4 -->
+          <rect x="10" y="10" width="52" height="55" rx="6" fill="rgba(96,165,250,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <!-- Bar model -->
+          <rect x="15" y="25" width="42" height="15" rx="2" fill="rgba(96,165,250,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <rect x="15" y="25" width="31" height="15" rx="2" fill="rgba(96,165,250,0.6)"/>
+          <line x1="25" y1="25" x2="25" y2="40" stroke="var(--acc)" stroke-width="0.8"/>
+          <line x1="36" y1="25" x2="36" y2="40" stroke="var(--acc)" stroke-width="0.8"/>
+          <line x1="46" y1="25" x2="46" y2="40" stroke="var(--acc)" stroke-width="0.8"/>
+          <text x="36" y="55" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Fredoka One,cursive">Bar</text>
+          <!-- Number line -->
+          <rect x="70" y="10" width="52" height="55" rx="6" fill="rgba(96,165,250,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="75" y1="37" x2="117" y2="37" stroke="var(--acc)" stroke-width="1.5"/>
+          <circle cx="75" cy="37" r="3" fill="var(--acc)"/>
+          <circle cx="117" cy="37" r="3" fill="var(--acc)"/>
+          <circle cx="106" cy="37" r="4" fill="white" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="96" y="55" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Fredoka One,cursive">Number Line</text>
+          <!-- Decimal -->
+          <rect x="130" y="10" width="52" height="55" rx="6" fill="rgba(96,165,250,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="156" y="40" text-anchor="middle" fill="white" font-size="16" font-family="Fredoka One,cursive">0.75</text>
+          <text x="156" y="55" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Fredoka One,cursive">Decimal</text>
+          <!-- Percent -->
+          <rect x="190" y="10" width="52" height="55" rx="6" fill="rgba(96,165,250,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="216" y="40" text-anchor="middle" fill="white" font-size="16" font-family="Fredoka One,cursive">75%</text>
+          <text x="216" y="55" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Fredoka One,cursive">Percent</text>
+          <!-- Center label -->
+          <text x="125" y="95" text-anchor="middle" fill="var(--acc)" font-size="14" font-family="Fredoka One,cursive">3/4 = 0.75 = 75%</text>
+          <text x="125" y="118" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">Same value, four different forms</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Representations</div><span class="formula-highlight">words ↔ picture ↔ number ↔ equation</span></div>
+      <div class="explanation">The same mathematical idea can be shown in many ways. Being able to switch between representations shows deep understanding. All forms of 3/4 represent the same amount.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>3/4 = 0.75 = 75% = "three-fourths" = shaded bar (3 of 4 parts) — <strong>all the same value</strong></div>
+    </div>
+  </div>
+
+</div><!-- end easy -->
+
+<div class="section-heading section-medium">🟡 Medium</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">7. Constructing Arguments</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="10" width="240" height="38" rx="6" fill="rgba(96,165,250,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="26" text-anchor="middle" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">CLAIM</text>
+          <text x="125" y="42" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">3/8 is less than 1/2</text>
+          <line x1="125" y1="48" x2="125" y2="60" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="121,60 125,67 129,60" fill="var(--acc)"/>
+          <rect x="5" y="67" width="240" height="32" rx="6" fill="rgba(255,215,0,0.1)" stroke="#ffd700" stroke-width="1.5"/>
+          <text x="125" y="81" text-anchor="middle" fill="#ffd700" font-size="11" font-family="Fredoka One,cursive">EVIDENCE</text>
+          <text x="125" y="94" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">3/8 = 3/8 and 1/2 = 4/8; 3 &lt; 4</text>
+          <line x1="125" y1="99" x2="125" y2="111" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="121,111 125,118 129,111" fill="var(--acc)"/>
+          <rect x="5" y="118" width="240" height="25" rx="6" fill="rgba(46,204,113,0.15)" stroke="#2ecc71" stroke-width="1.5"/>
+          <text x="125" y="134" text-anchor="middle" fill="#4ade80" font-size="10" font-family="Fredoka One,cursive">REASONING: So 3/8 &lt; 1/2 ✓</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Argument Structure</div><span class="formula-highlight">Claim → Evidence → Reasoning</span></div>
+      <div class="explanation">A complete mathematical argument has three parts: a clear claim (what you believe), evidence (numbers or examples proving it), and reasoning (why the evidence supports the claim).</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Claim: "3/8 &lt; 1/2"<br>Evidence: 3/8 = 3/8; 1/2 = 4/8<br>Reasoning: <strong>3 &lt; 4, so 3/8 &lt; 4/8 = 1/2 ✓</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">8. Justifying Fraction Ordering</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="20" y1="80" x2="230" y2="80" stroke="white" stroke-width="1.5"/>
+          <!-- Mark 0 and 1 -->
+          <line x1="20" y1="74" x2="20" y2="86" stroke="white" stroke-width="1.5"/>
+          <line x1="230" y1="74" x2="230" y2="86" stroke="white" stroke-width="1.5"/>
+          <text x="20" y="98" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">0</text>
+          <text x="230" y="98" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">1</text>
+          <!-- 1/3 ≈ 70, 3/8 ≈ 77 -->
+          <circle cx="72" cy="80" r="6" fill="var(--acc)"/>
+          <text x="72" y="68" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">1/3</text>
+          <circle cx="93" cy="80" r="6" fill="#f97316"/>
+          <text x="93" y="55" text-anchor="middle" fill="#f97316" font-size="10" font-family="Fredoka One,cursive">3/8</text>
+          <!-- Gap arrow -->
+          <line x1="72" y1="80" x2="93" y2="80" stroke="white" stroke-width="2"/>
+          <text x="83" y="120" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">gap shows 1/3 &lt; 3/8</text>
+          <!-- Conversion shown -->
+          <text x="160" y="48" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="Fredoka One,cursive">1/3 = 8/24</text>
+          <text x="160" y="65" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="Fredoka One,cursive">3/8 = 9/24</text>
+          <text x="160" y="82" text-anchor="middle" fill="#4ade80" font-size="10" font-family="Fredoka One,cursive">8 &lt; 9 ✓</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Fraction Comparison</div><span class="formula-highlight">Use common denominators or benchmarks</span></div>
+      <div class="explanation">To compare fractions, convert both to the same denominator, then compare numerators. You can also use benchmark fractions (0, 1/2, 1) to estimate relative size.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Is 1/3 &lt; 3/8?<br>LCD = 24: 1/3 = 8/24, 3/8 = 9/24<br><strong>8/24 &lt; 9/24, so 1/3 &lt; 3/8 ✓</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">9. Generalizing Patterns</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="10" width="240" height="100" rx="6" fill="rgba(0,0,0,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <rect x="5" y="10" width="240" height="22" rx="6" fill="rgba(96,165,250,0.2)"/>
+          <text x="75" y="25" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">Examples</text>
+          <text x="185" y="25" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">Pattern?</text>
+          <line x1="130" y1="10" x2="130" y2="110" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+          <text x="75" y="47" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">2 + 4 = 6</text>
+          <text x="185" y="47" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">even</text>
+          <line x1="5" y1="53" x2="245" y2="53" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="75" y="72" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">3 + 5 = 8</text>
+          <text x="185" y="72" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">even</text>
+          <line x1="5" y1="78" x2="245" y2="78" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="75" y="97" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">10 + 12 = 22</text>
+          <text x="185" y="97" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">even</text>
+          <text x="125" y="130" text-anchor="middle" fill="#4ade80" font-size="12" font-family="Fredoka One,cursive">Rule: even + even = even ✓</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Generalization Method</div><span class="formula-highlight">Test rule on multiple examples</span></div>
+      <div class="explanation">After noticing a pattern, write it as a general rule. Test the rule with many different examples. The more examples that work, the more confident you can be in the rule.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>2+4=6, 3+5=8, 10+12=22 → all even<br>Rule: <strong>"even + even = even" ✓</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">10. Comparing Methods</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Two methods side by side -->
+          <rect x="5" y="10" width="115" height="130" rx="6" fill="rgba(96,165,250,0.07)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="62" y="28" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Method A: LCM</text>
+          <text x="62" y="48" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">1/2 + 1/3</text>
+          <text x="62" y="66" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">LCD = 6</text>
+          <text x="62" y="84" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">3/6 + 2/6</text>
+          <text x="62" y="102" text-anchor="middle" fill="#4ade80" font-size="11" font-family="Fredoka One,cursive">= 5/6 ✓</text>
+          <text x="62" y="125" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7.5" font-family="Nunito,sans-serif">Smaller numbers</text>
+          <rect x="130" y="10" width="115" height="130" rx="6" fill="rgba(255,165,0,0.07)" stroke="#f97316" stroke-width="1.5"/>
+          <text x="188" y="28" text-anchor="middle" fill="#f97316" font-size="9" font-family="Fredoka One,cursive">Method B: Mult.</text>
+          <text x="188" y="48" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">1/2 + 1/3</text>
+          <text x="188" y="66" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">LCD = 2×3 = 6</text>
+          <text x="188" y="84" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">3/6 + 2/6</text>
+          <text x="188" y="102" text-anchor="middle" fill="#4ade80" font-size="11" font-family="Fredoka One,cursive">= 5/6 ✓</text>
+          <text x="188" y="125" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7.5" font-family="Nunito,sans-serif">More steps sometimes</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Comparison Rule</div><span class="formula-highlight">Both can be correct; explain trade-offs</span></div>
+      <div class="explanation">Different methods can lead to the same correct answer. When comparing, explain what makes each efficient or inefficient. Neither is wrong; one may be more practical in certain situations.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Finding LCD vs multiplying denominators: both give the right answer. <strong>LCM gives smaller numbers</strong>; multiplying works but may need simplifying at the end.</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">11. Logical Chains</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="15" width="80" height="40" rx="6" fill="rgba(96,165,250,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="45" y="30" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">4 equal sides</text>
+          <text x="45" y="46" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">AND 4 right angles</text>
+          <line x1="85" y1="35" x2="100" y2="35" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="100,32 108,35 100,38" fill="var(--acc)"/>
+          <rect x="108" y="15" width="70" height="40" rx="6" fill="rgba(96,165,250,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="143" y="30" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">It is a</text>
+          <text x="143" y="46" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">Square</text>
+          <text x="125" y="80" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-family="Fredoka One,cursive">If A → B → C, then A → C</text>
+          <text x="125" y="100" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">Square → Rectangle → Parallelogram</text>
+          <text x="125" y="120" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Nunito,sans-serif">Square must also be a Parallelogram</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Logical Chain</div><span class="formula-highlight">If A → B → C, then A → C</span></div>
+      <div class="explanation">In logical chains, each step follows from the previous one. If you can show A leads to B and B leads to C, you've proven A leads to C. This is how shape hierarchies work.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"If a shape has 4 equal sides AND 4 right angles, THEN it's a square."<br>Square → Rectangle → Parallelogram: so <strong>squares are always parallelograms</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">12. Explaining Volume</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- One layer visualization -->
+          <polygon points="20,100 120,100 145,75 45,75" fill="rgba(96,165,250,0.35)" stroke="var(--acc)" stroke-width="1.5"/>
+          <!-- Stacked layers -->
+          <polygon points="20,85 120,85 145,60 45,60" fill="rgba(96,165,250,0.25)" stroke="var(--acc)" stroke-width="1"/>
+          <polygon points="20,70 120,70 145,45 45,45" fill="rgba(96,165,250,0.15)" stroke="var(--acc)" stroke-width="1"/>
+          <!-- Side face -->
+          <polygon points="120,100 145,75 145,45 120,70" fill="rgba(96,165,250,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <!-- Labels -->
+          <text x="80" y="118" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">B = l × w (base area)</text>
+          <text x="165" y="75" fill="white" font-size="10" font-family="Fredoka One,cursive">h</text>
+          <line x1="155" y1="100" x2="155" y2="45" stroke="white" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="125" y="138" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">V = B × h layers</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Volume Explained</div><span class="formula-highlight">V = B × h (B = base area)</span><br><span style="font-size:0.85em;color:rgba(255,255,255,0.7)">Each layer = l×w cubes; h layers total</span></div>
+      <div class="explanation">The base area (B = l × w) counts the cubes in one layer. Multiplying by height (h) stacks those layers. This is WHY V = l × w × h — it's not just a formula, it describes physical stacking.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Box 4 × 3 × 2: base has 4×3 = 12 cubes per layer. 2 layers → 12 × 2 = <strong>24 cubic units ✓</strong></div>
+    </div>
+  </div>
+
+</div><!-- end medium -->
+
+<div class="section-heading section-hard">🔴 Hard</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">13. Complete Proofs</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="8" width="73" height="134" rx="6" fill="rgba(96,165,250,0.1)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="41" y="26" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">CLAIM</text>
+          <text x="41" y="80" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">×1/2 same</text>
+          <text x="41" y="94" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">as ÷ 2</text>
+          <rect x="88" y="8" width="73" height="134" rx="6" fill="rgba(255,215,0,0.1)" stroke="#ffd700" stroke-width="1.5"/>
+          <text x="124" y="26" text-anchor="middle" fill="#ffd700" font-size="9" font-family="Fredoka One,cursive">EVIDENCE</text>
+          <text x="124" y="60" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">8×(1/2)=4</text>
+          <text x="124" y="78" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">8÷2=4 ✓</text>
+          <text x="124" y="96" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">10×(1/2)=5</text>
+          <text x="124" y="112" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">10÷2=5 ✓</text>
+          <rect x="171" y="8" width="73" height="134" rx="6" fill="rgba(46,204,113,0.1)" stroke="#2ecc71" stroke-width="1.5"/>
+          <text x="207" y="26" text-anchor="middle" fill="#2ecc71" font-size="9" font-family="Fredoka One,cursive">CONCLUSION</text>
+          <text x="207" y="80" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">Always equal</text>
+          <text x="207" y="96" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">for any number</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Complete Proof Format</div><span class="formula-highlight">Claim → Evidence → General Conclusion</span></div>
+      <div class="explanation">A full proof makes a claim, proves it with at least 2–3 numerical examples, and then states a general conclusion. The conclusion should explain why it always works, not just that it worked for these examples.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Claim: "×1/2 = ÷2"<br>Evidence: 8×(1/2)=4 and 8÷2=4; 10×(1/2)=5 and 10÷2=5<br>Conclusion: <strong>always equal for any whole number</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">14. Critique Arguments</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="10" width="240" height="50" rx="6" fill="rgba(0,0,0,0.3)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+          <text x="15" y="28" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Nunito,sans-serif">Student: "0.5 &gt; 0.49 because 5 &gt; 49"</text>
+          <text x="15" y="47" fill="rgba(255,255,255,0.5)" font-size="8.5" font-family="Nunito,sans-serif">(comparing without matching decimal places)</text>
+          <!-- Analysis boxes -->
+          <rect x="5" y="70" width="75" height="40" rx="4" fill="rgba(46,204,113,0.1)" stroke="#2ecc71" stroke-width="1"/>
+          <text x="42" y="86" text-anchor="middle" fill="#2ecc71" font-size="8" font-family="Fredoka One,cursive">RIGHT</text>
+          <text x="42" y="100" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">Answer correct</text>
+          <rect x="88" y="70" width="75" height="40" rx="4" fill="rgba(231,76,60,0.1)" stroke="#e74c3c" stroke-width="1"/>
+          <text x="125" y="86" text-anchor="middle" fill="#e74c3c" font-size="8" font-family="Fredoka One,cursive">WRONG</text>
+          <text x="125" y="100" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">Wrong reasoning</text>
+          <rect x="171" y="70" width="74" height="40" rx="4" fill="rgba(255,165,0,0.1)" stroke="#f97316" stroke-width="1"/>
+          <text x="208" y="86" text-anchor="middle" fill="#f97316" font-size="8" font-family="Fredoka One,cursive">MISSING</text>
+          <text x="208" y="100" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">Decimal rule</text>
+          <text x="125" y="135" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Fix: 0.50 &gt; 0.49 — compare same place</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Critique Framework</div><span class="formula-highlight">Find what's right, wrong, and missing</span></div>
+      <div class="explanation">When critiquing someone's math, find what they did correctly, identify the specific error, and explain what rule or step is missing. A good critique is constructive and precise.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"0.5 &gt; 0.49 because 5 &gt; 49" — right answer, wrong reasoning.<br>Fix: Compare as 0.50 &gt; 0.49 (same decimal places). <strong>The reasoning needs to match decimal place values.</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">15. Abstract Justification</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Area model for distributive property -->
+          <rect x="20" y="25" width="180" height="80" rx="4" fill="rgba(96,165,250,0.1)" stroke="var(--acc)" stroke-width="1.5"/>
+          <!-- Divide into a and b columns -->
+          <line x1="100" y1="25" x2="100" y2="105" stroke="var(--acc)" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <text x="60" y="17" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">a</text>
+          <text x="140" y="17" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">b</text>
+          <text x="8" y="70" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive" transform="rotate(-90,8,70)">c</text>
+          <text x="60" y="70" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">a × c</text>
+          <text x="140" y="70" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">b × c</text>
+          <text x="125" y="125" text-anchor="middle" fill="#4ade80" font-size="11" font-family="Fredoka One,cursive">(a + b) × c = a×c + b×c</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Algebraic Justification</div><span class="formula-highlight">Use variables to show patterns hold for all numbers</span></div>
+      <div class="explanation">Using variables (letters) instead of specific numbers allows you to show a rule works for ALL values, not just one example. The area model proves the distributive property for any rectangle dimensions.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Why does (a+b)×c = a×c + b×c?<br>Area model: total area = left part + right part<br><strong>Works for ANY values of a, b, and c</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">16. Multiple Strategies</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Venn diagram -->
+          <circle cx="85" cy="75" r="55" fill="rgba(96,165,250,0.1)" stroke="var(--acc)" stroke-width="1.5"/>
+          <circle cx="165" cy="75" r="55" fill="rgba(255,165,0,0.1)" stroke="#f97316" stroke-width="1.5"/>
+          <text x="50" y="65" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Nunito,sans-serif">Method A</text>
+          <text x="50" y="78" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Nunito,sans-serif">Draw it</text>
+          <text x="50" y="91" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Nunito,sans-serif">(visual)</text>
+          <text x="200" y="65" text-anchor="middle" fill="#f97316" font-size="8" font-family="Nunito,sans-serif">Method B</text>
+          <text x="200" y="78" text-anchor="middle" fill="#f97316" font-size="8" font-family="Nunito,sans-serif">Reciprocal</text>
+          <text x="200" y="91" text-anchor="middle" fill="#f97316" font-size="8" font-family="Nunito,sans-serif">(formula)</text>
+          <text x="125" y="65" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">Both</text>
+          <text x="125" y="78" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">give</text>
+          <text x="125" y="91" text-anchor="middle" fill="#4ade80" font-size="8" font-family="Fredoka One,cursive">1½</text>
+          <text x="125" y="130" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Nunito,sans-serif">3/4 ÷ 1/2 = 1½ by both methods</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Multiple Paths</div><span class="formula-highlight">Different paths to same answer confirm correctness</span></div>
+      <div class="explanation">Solving the same problem two different ways and getting the same answer confirms your answer is correct. Show both methods clearly and identify where they connect.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>3/4 ÷ 1/2:<br>Draw: 3/4 has 1½ halves (visual)<br>Formula: 3/4 × 2/1 = 6/4 = <strong>1½ ✓ (both methods agree)</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">17. Edge Cases</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="20" y1="80" x2="230" y2="80" stroke="white" stroke-width="1.5"/>
+          <circle cx="125" cy="80" r="5" fill="white"/>
+          <text x="125" y="70" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">1</text>
+          <!-- Fractions < 1 shrink -->
+          <circle cx="65" cy="80" r="5" fill="var(--acc)"/>
+          <text x="65" y="98" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Fredoka One,cursive">1/2 × 1/2 = 1/4</text>
+          <text x="65" y="112" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Nunito,sans-serif">smaller ✓</text>
+          <!-- Fractions > 1 grow -->
+          <circle cx="185" cy="80" r="5" fill="#f97316"/>
+          <text x="185" y="98" text-anchor="middle" fill="#f97316" font-size="8" font-family="Fredoka One,cursive">3/2 × 3/2 = 9/4</text>
+          <text x="185" y="112" text-anchor="middle" fill="#f97316" font-size="8" font-family="Nunito,sans-serif">larger!</text>
+          <text x="125" y="135" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Rule only holds for fractions &lt; 1</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Testing Edge Cases</div><span class="formula-highlight">Test 0, extremes, and values &gt; 1</span></div>
+      <div class="explanation">Before declaring a rule always true, test edge cases: 0, 1, fractions greater than 1, and very large or small numbers. Many rules only hold within certain constraints.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"Product of two fractions is always smaller" →<br>1/2 × 1/2 = 1/4 ✓ smaller<br>BUT 3/2 × 3/2 = 9/4 &gt; 1 ✗<br><strong>Only true for fractions &lt; 1</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">18. Polygon Hierarchy Proof</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="8" width="240" height="134" rx="6" fill="rgba(96,165,250,0.06)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="24" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Fredoka One,cursive">Quadrilateral</text>
+          <rect x="20" y="30" width="210" height="108" rx="6" fill="rgba(96,165,250,0.08)" stroke="rgba(96,165,250,0.4)" stroke-width="1"/>
+          <text x="125" y="44" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Fredoka One,cursive">Trapezoid</text>
+          <rect x="35" y="50" width="180" height="82" rx="6" fill="rgba(96,165,250,0.1)" stroke="rgba(96,165,250,0.5)" stroke-width="1"/>
+          <text x="125" y="64" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Fredoka One,cursive">Parallelogram</text>
+          <rect x="55" y="70" width="140" height="56" rx="6" fill="rgba(96,165,250,0.14)" stroke="rgba(96,165,250,0.6)" stroke-width="1"/>
+          <text x="125" y="85" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="9" font-family="Fredoka One,cursive">Rectangle</text>
+          <rect x="80" y="92" width="90" height="28" rx="6" fill="rgba(96,165,250,0.22)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="110" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">Square</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Hierarchy Rule</div><span class="formula-highlight">More specific shape inherits all parent properties</span></div>
+      <div class="explanation">Each level inherits all properties of the level above. A square is inside the Rectangle set, which is inside Parallelogram, etc. This means squares have ALL properties of all outer categories.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>A rhombus has 4 equal sides, variable angles.<br>A square has 4 equal sides AND 4 right angles.<br><strong>Squares are always rhombuses, but rhombuses aren't always squares.</strong></div>
+    </div>
+  </div>
+
+</div><!-- end hard -->
+
+<footer>SBA Math — Communicating Reasoning · 5th Grade</footer>
+</div>
+
+<script>
+  const el = document.getElementById('ptsDisplay');
+  if(el) el.textContent = '⭐ ' + (parseInt(localStorage.getItem('kids_points')||'0'));
+</script>
+</body>
+</html>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✏️ Writing — SBA ELA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+  :root { --c1: #1a0a2e; --c2: #4a1a6b; --acc: #c084fc; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; font-weight: 700; background: linear-gradient(160deg, var(--c1) 0%, var(--c2) 60%, var(--c1) 100%); background-attachment: fixed; min-height: 100dvh; color: #fff; overflow-x: hidden; }
+  .site-header { position: sticky; top: 0; z-index: 100; background: rgba(26,10,46,0.93); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(192,132,252,0.25); display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; gap: 12px; }
+  .back-link { display: inline-flex; align-items: center; gap: 5px; color: rgba(255,255,255,0.6); text-decoration: none; font-family: 'Fredoka One', cursive; font-size: 0.88rem; padding: 5px 13px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.07); white-space: nowrap; transition: color 0.15s, background 0.15s; }
+  .back-link:hover { color: #fff; background: rgba(255,255,255,0.14); }
+  .header-title { font-family: 'Fredoka One', cursive; font-size: clamp(1rem, 4vw, 1.5rem); color: var(--acc); text-shadow: 0 2px 10px rgba(192,132,252,0.4); text-align: center; flex: 1; }
+  .pts-pill { background: rgba(255,215,0,0.12); border: 2px solid rgba(255,215,0,0.4); border-radius: 50px; padding: 4px 13px; color: #ffd700; font-family: 'Fredoka One', cursive; font-size: 0.95rem; white-space: nowrap; }
+  .print-btn { display: inline-flex; align-items: center; gap: 5px; color: rgba(255,255,255,0.6); font-family: 'Fredoka One', cursive; font-size: 0.88rem; padding: 5px 13px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.07); cursor: pointer; white-space: nowrap; transition: color 0.15s, background 0.15s; }
+  .print-btn:hover { color: #fff; background: rgba(255,255,255,0.14); }
+  .page-wrap { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
+  .section-heading { font-family: 'Fredoka One', cursive; font-size: clamp(1.2rem, 4vw, 1.7rem); margin: 40px 0 18px; padding: 10px 20px; border-radius: 14px; display: inline-flex; align-items: center; gap: 10px; }
+  .section-easy { background: rgba(46,204,113,0.15); color: #2ecc71; border: 2px solid rgba(46,204,113,0.35); }
+  .section-medium { background: rgba(230,126,34,0.15); color: #e67e22; border: 2px solid rgba(230,126,34,0.35); }
+  .section-hard { background: rgba(231,76,60,0.15); color: #e74c3c; border: 2px solid rgba(231,76,60,0.35); }
+  .cards-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 620px) { .cards-grid { grid-template-columns: 1fr 1fr; } }
+  .concept-card { background: rgba(255,255,255,0.04); border: 1.5px solid rgba(192,132,252,0.2); border-radius: 20px; overflow: hidden; box-shadow: 0 6px 28px rgba(0,0,0,0.35); transition: transform 0.18s, box-shadow 0.18s; }
+  .concept-card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(192,132,252,0.18); }
+  .card-title-bar { background: rgba(192,132,252,0.12); border-bottom: 1px solid rgba(192,132,252,0.2); padding: 12px 16px; font-family: 'Fredoka One', cursive; font-size: clamp(1rem, 3.5vw, 1.2rem); color: var(--acc); }
+  .card-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .diagram-wrap { background: rgba(0,0,0,0.35); border-radius: 12px; border: 1px solid rgba(192,132,252,0.15); display: flex; align-items: center; justify-content: center; padding: 8px; overflow: hidden; }
+  .diagram-wrap svg { width: 100%; max-width: 280px; height: auto; display: block; }
+  .formula-box { background: rgba(26,10,46,0.8); border: 2px solid var(--acc); border-radius: 12px; padding: 12px 16px; font-family: 'Fredoka One', cursive; font-size: clamp(0.95rem, 3vw, 1.15rem); color: #fff; text-align: center; line-height: 1.5; }
+  .formula-label { font-size: 0.78rem; color: var(--acc); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; font-family: 'Nunito', sans-serif; }
+  .formula-highlight { color: var(--acc); font-size: 1.1em; }
+  .explanation { font-size: clamp(0.85rem, 2.8vw, 0.97rem); color: rgba(255,255,255,0.82); line-height: 1.6; }
+  .explanation strong { color: #fff; }
+  .example-box { background: rgba(46,204,113,0.07); border-left: 3px solid #2ecc71; border-radius: 0 10px 10px 0; padding: 10px 14px; font-size: clamp(0.82rem, 2.6vw, 0.93rem); color: rgba(255,255,255,0.85); line-height: 1.6; }
+  .ex-label { font-family: 'Fredoka One', cursive; color: #2ecc71; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px; }
+  .example-box strong { color: #4ade80; }
+  footer { text-align: center; margin-top: 56px; color: rgba(255,255,255,0.2); font-size: 0.78rem; font-family: 'Nunito', sans-serif; }
+  @media print {
+    @page { margin: 1cm; }
+    body { background: white !important; color: #000 !important; font-size: 8.5pt !important; }
+    .site-header { position: static !important; background: none !important; backdrop-filter: none !important; border: none !important; box-shadow: none !important; padding: 4px 0 !important; }
+    .back-link, .pts-pill, .print-btn { display: none !important; }
+    .header-title { color: #000 !important; font-size: 12pt !important; }
+    .page-wrap { max-width: 100% !important; padding: 4px 0 !important; }
+    .cards-grid { columns: 2; display: block; }
+    .cards-grid .concept-card { break-inside: avoid; display: inline-block; width: 100%; margin-bottom: 6px; }
+    .section-heading { background: #f0f0f0 !important; color: #333 !important; border-color: #ccc !important; font-size: 9pt !important; padding: 4px 10px !important; margin: 8px 0 4px !important; column-span: all; }
+    .concept-card { box-shadow: none !important; background: #fff !important; border-color: #ccc !important; border-radius: 4px !important; }
+    .card-title-bar { background: #f0f0f0 !important; border-color: #ccc !important; color: #000 !important; padding: 4px 8px !important; font-size: 8pt !important; }
+    .card-body { color: #000 !important; padding: 6px !important; gap: 4px !important; }
+    .formula-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; padding: 4px 6px !important; font-size: 8pt !important; }
+    .example-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; padding: 4px 6px !important; font-size: 7.5pt !important; }
+    svg { max-width: 100% !important; max-height: 80px !important; display: block !important; }
+    svg text { fill: #000 !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="back-link" href="../">← SBA Hub</a>
+  <span class="header-title">✏️ Writing</span>
+  <span class="pts-pill" id="ptsDisplay">⭐ 0</span>
+  <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+</header>
+
+<div class="page-wrap">
+
+<div class="section-heading section-easy">🟢 Easy</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">1. Capitalization (5.L.2)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="15" width="240" height="50" rx="6" fill="rgba(231,76,60,0.1)" stroke="#e74c3c" stroke-width="1"/>
+          <text x="125" y="35" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="Nunito,sans-serif">my friend sarah lives on maple street</text>
+          <text x="20" y="55" fill="#e74c3c" font-size="9" font-family="Fredoka One,cursive">✗ Incorrect</text>
+          <line x1="125" y1="65" x2="125" y2="80" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="121,80 125,88 129,80" fill="var(--acc)"/>
+          <rect x="5" y="88" width="240" height="50" rx="6" fill="rgba(46,204,113,0.1)" stroke="#2ecc71" stroke-width="1"/>
+          <text x="125" y="108" text-anchor="middle" fill="white" font-size="10" font-family="Nunito,sans-serif">
+            <tspan fill="var(--acc)">M</tspan>y friend <tspan fill="var(--acc)">S</tspan>arah lives on <tspan fill="var(--acc)">M</tspan>aple <tspan fill="var(--acc)">S</tspan>treet
+          </text>
+          <text x="20" y="128" fill="#4ade80" font-size="9" font-family="Fredoka One,cursive">✓ Correct</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Capitalize</div><span class="formula-highlight">First word · Proper nouns · "I" · Titles</span></div>
+      <div class="explanation">Capital letters mark the start of sentences, show that something is a specific named person, place, or thing (proper noun), and are always used for the pronoun "I." Days, months, and titles are also capitalized.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"my friend sarah lives on maple street" →<br><strong>"My friend Sarah lives on Maple Street"</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">2. Punctuation (5.L.2d)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Three punctuation marks -->
+          <rect x="10" y="10" width="68" height="110" rx="6" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="44" y="40" text-anchor="middle" fill="var(--acc)" font-size="28" font-family="Fredoka One,cursive">,</text>
+          <text x="44" y="62" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">Comma</text>
+          <text x="44" y="76" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="7" font-family="Nunito,sans-serif">lists, FANBOYS,</text>
+          <text x="44" y="87" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="7" font-family="Nunito,sans-serif">intro phrases</text>
+          <rect x="91" y="10" width="68" height="110" rx="6" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="40" text-anchor="middle" fill="var(--acc)" font-size="28" font-family="Fredoka One,cursive">.</text>
+          <text x="125" y="62" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">Period</text>
+          <text x="125" y="76" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="7" font-family="Nunito,sans-serif">ends statements</text>
+          <rect x="172" y="10" width="68" height="110" rx="6" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="206" y="38" text-anchor="middle" fill="var(--acc)" font-size="24" font-family="Fredoka One,cursive">'</text>
+          <text x="206" y="62" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">Apostrophe</text>
+          <text x="206" y="76" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="7" font-family="Nunito,sans-serif">contractions</text>
+          <text x="206" y="87" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="7" font-family="Nunito,sans-serif">&amp; possession</text>
+          <text x="125" y="138" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8.5" font-family="Fredoka One,cursive">FANBOYS: For And Nor But Or Yet So</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Punctuation Rules</div><span class="formula-highlight">Comma: lists, FANBOYS, intro phrase · Apostrophe: contractions &amp; possession</span></div>
+      <div class="explanation">Commas separate items in lists, join independent clauses before FANBOYS conjunctions, and follow introductory phrases. Apostrophes show possession (Sarah's book) or mark missing letters in contractions (it's = it is).</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"It's Sarah's book, and it belongs to her."<br>(contraction + possessive + comma before "and")</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">3. Complete Sentences</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Sentence split into subject/predicate -->
+          <rect x="10" y="30" width="105" height="50" rx="6" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="62" y="50" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">SUBJECT</text>
+          <text x="62" y="65" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">The hungry cat</text>
+          <text x="62" y="92" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">who/what</text>
+          <rect x="125" y="30" width="115" height="50" rx="6" fill="rgba(192,132,252,0.2)" stroke="#f97316" stroke-width="1.5"/>
+          <text x="182" y="50" text-anchor="middle" fill="#f97316" font-size="9" font-family="Fredoka One,cursive">PREDICATE</text>
+          <text x="182" y="65" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">sat on the warm mat</text>
+          <text x="182" y="92" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">what they do</text>
+          <!-- Fragments vs complete -->
+          <rect x="5" y="108" width="115" height="32" rx="4" fill="rgba(231,76,60,0.1)" stroke="#e74c3c" stroke-width="1"/>
+          <text x="62" y="124" text-anchor="middle" fill="#e74c3c" font-size="8.5" font-family="Fredoka One,cursive">✗ "The hungry cat."</text>
+          <rect x="127" y="108" width="117" height="32" rx="4" fill="rgba(46,204,113,0.1)" stroke="#2ecc71" stroke-width="1"/>
+          <text x="186" y="120" text-anchor="middle" fill="#4ade80" font-size="7.5" font-family="Fredoka One,cursive">✓ "The hungry cat</text>
+          <text x="186" y="133" text-anchor="middle" fill="#4ade80" font-size="7.5" font-family="Fredoka One,cursive">sat on the mat."</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Complete Sentence</div><span class="formula-highlight">Subject (who/what) + Predicate (what they do)</span></div>
+      <div class="explanation">A complete sentence has both a subject (who or what the sentence is about) and a predicate (what the subject does or is). A fragment is missing one of these parts. Run-on sentences join two complete sentences without proper punctuation.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Fragment: "The hungry cat." (no predicate)<br>Complete: <strong>"The hungry cat sat on the warm mat."</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">4. Transitions (5.W.1d)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Three transition boxes -->
+          <rect x="5" y="15" width="73" height="105" rx="6" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="41" y="38" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">ADD</text>
+          <text x="41" y="56" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">also,</text>
+          <text x="41" y="70" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">furthermore,</text>
+          <text x="41" y="84" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">in addition</text>
+          <rect x="88" y="15" width="74" height="105" rx="6" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="38" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">CONTRAST</text>
+          <text x="125" y="56" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">however,</text>
+          <text x="125" y="70" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">on the other</text>
+          <text x="125" y="84" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">hand, yet</text>
+          <rect x="172" y="15" width="73" height="105" rx="6" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="208" y="38" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">SEQUENCE</text>
+          <text x="208" y="56" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">first, next,</text>
+          <text x="208" y="70" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">then, last,</text>
+          <text x="208" y="84" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">finally</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Transition Use</div><span class="formula-highlight">Use transitions to show relationships between ideas</span></div>
+      <div class="explanation">Transitions are words or phrases that connect ideas and show how they relate. They create flow between sentences and paragraphs. Choosing the right type shows whether you're adding, contrasting, or sequencing ideas.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"I love reading. <strong>However,</strong> math is my favorite subject."<br>("However" = contrast — showing these two ideas are different)</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">5. Precise Word Choice (5.W.2d)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Word upgrade ladder -->
+          <rect x="10" y="120" width="230" height="22" rx="4" fill="rgba(192,132,252,0.1)" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <text x="125" y="135" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">walked → strolled / trudged / strutted / shuffled</text>
+          <line x1="125" y1="118" x2="125" y2="105" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="121,105 125,97 129,105" fill="var(--acc)"/>
+          <rect x="10" y="70" width="230" height="26" rx="4" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="87" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">said → whispered / shouted / announced</text>
+          <line x1="125" y1="68" x2="125" y2="55" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="121,55 125,47 129,55" fill="var(--acc)"/>
+          <rect x="10" y="22" width="230" height="26" rx="4" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="39" text-anchor="middle" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">nice → brilliant / stunning / delightful</text>
+          <text x="20" y="17" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Fredoka One,cursive">More vivid</text>
+          <text x="20" y="117" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Fredoka One,cursive">More vague</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Word Choice Rule</div><span class="formula-highlight">Replace said/went/nice/bad with vivid, specific words</span></div>
+      <div class="explanation">Precise word choice makes writing more interesting and clearer. Replace overused words like "said," "nice," "went," and "big" with specific words that capture the exact meaning and feeling you intend.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"He walked slowly" → <strong>"He shuffled"</strong> or <strong>"He trudged"</strong><br>(trudged = walked wearily through difficulty — much more vivid)</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">6. Sentence Types</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Simple -->
+          <rect x="5" y="10" width="240" height="32" rx="4" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="50" y="24" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Simple:</text>
+          <text x="95" y="24" fill="white" font-size="9" font-family="Nunito,sans-serif">1 independent clause. "I like cats."</text>
+          <!-- Compound -->
+          <rect x="5" y="50" width="240" height="35" rx="4" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="55" y="63" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Compound:</text>
+          <text x="55" y="78" fill="white" font-size="8.5" font-family="Nunito,sans-serif">2 independent clauses + FANBOYS. "I like cats, but she likes dogs."</text>
+          <!-- Complex -->
+          <rect x="5" y="93" width="240" height="35" rx="4" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="50" y="106" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Complex:</text>
+          <text x="50" y="121" fill="white" font-size="8.5" font-family="Nunito,sans-serif">1 independent + 1 dependent clause (subordinator)</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Sentence Types</div><span class="formula-highlight">Simple = 1 clause · Compound = 2 independent · Complex = independent + dependent</span></div>
+      <div class="explanation">Varying sentence types makes writing more interesting. Simple sentences are direct. Compound sentences join two equal ideas. Complex sentences show relationships using subordinating conjunctions like "although," "because," "when."</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Complex: <strong>"Although it rained, we played outside."</strong><br>("Although" = subordinating conjunction; first clause is dependent)</div>
+    </div>
+  </div>
+
+</div><!-- end easy -->
+
+<div class="section-heading section-medium">🟡 Medium</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">7. Informative Writing (5.W.2b)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Essay structure -->
+          <rect x="30" y="10" width="190" height="28" rx="4" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="28" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">Introduction</text>
+          <line x1="125" y1="38" x2="125" y2="48" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="30" y="48" width="190" height="22" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="63" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">Body Paragraph 1</text>
+          <line x1="125" y1="70" x2="125" y2="80" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="30" y="80" width="190" height="22" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="95" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">Body Paragraph 2</text>
+          <line x1="125" y1="102" x2="125" y2="112" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="30" y="112" width="190" height="22" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="127" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">Conclusion</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Informative Structure</div><span class="formula-highlight">Topic sentence + details + examples + concluding sentence</span></div>
+      <div class="explanation">Informative writing explains or teaches. Each body paragraph begins with a topic sentence, provides facts and details, and ends with a closing sentence. Use domain-specific vocabulary and evidence, not opinions.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"Bees are important pollinators. They transfer pollen between flowers, helping plants reproduce. Without bees, many crops would not grow."</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">8. Narrative Writing (5.W.3a)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Story arc mountain -->
+          <polyline points="10,130 60,90 110,50 160,30 210,60 240,130" stroke="var(--acc)" stroke-width="2" fill="none"/>
+          <!-- Labels -->
+          <text x="10" y="148" fill="rgba(255,255,255,0.6)" font-size="7.5" font-family="Fredoka One,cursive">Setup</text>
+          <text x="40" y="83" fill="white" font-size="7.5" font-family="Fredoka One,cursive">Rising action</text>
+          <text x="150" y="24" fill="var(--acc)" font-size="8" font-family="Fredoka One,cursive">Climax</text>
+          <text x="185" y="55" fill="white" font-size="7.5" font-family="Fredoka One,cursive">Falling</text>
+          <text x="220" y="148" fill="rgba(255,255,255,0.6)" font-size="7.5" font-family="Fredoka One,cursive">Resolution</text>
+          <!-- Climax dot -->
+          <circle cx="160" cy="30" r="5" fill="var(--acc)"/>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Narrative Structure</div><span class="formula-highlight">Orient reader → complication → resolution</span></div>
+      <div class="explanation">Narratives tell a story with a clear beginning, middle, and end. Orient the reader first (who, where, when). Build tension through the middle. Resolve the conflict at the end. Use dialogue and description for vivid storytelling.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Opening: <strong>"On a foggy morning, I heard an unusual sound in the backyard…"</strong><br>(establishes setting, character, and hooks the reader)</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">9. Grammar: Verb Tense (5.L.1)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Timeline -->
+          <line x1="15" y1="75" x2="235" y2="75" stroke="white" stroke-width="1.5"/>
+          <polygon points="235,72 243,75 235,78" fill="white"/>
+          <!-- Past marker -->
+          <line x1="60" y1="68" x2="60" y2="82" stroke="var(--acc)" stroke-width="2"/>
+          <text x="60" y="60" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Past</text>
+          <text x="60" y="100" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">ran, ate, was</text>
+          <!-- Present marker -->
+          <line x1="125" y1="68" x2="125" y2="82" stroke="var(--acc)" stroke-width="2"/>
+          <text x="125" y="60" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Present</text>
+          <text x="125" y="100" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">run, eat, is</text>
+          <!-- Future marker -->
+          <line x1="195" y1="68" x2="195" y2="82" stroke="var(--acc)" stroke-width="2"/>
+          <text x="195" y="60" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Future</text>
+          <text x="195" y="100" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">will run, will eat</text>
+          <text x="125" y="130" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8.5" font-family="Fredoka One,cursive">Perfect: has/have + past participle</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Verb Tense</div><span class="formula-highlight">Past: -ed or irregular · Perfect: has/have + past participle</span></div>
+      <div class="explanation">Use consistent verb tense throughout a piece of writing. Past tense uses -ed for regular verbs and irregular forms (ran, ate) for others. Perfect tense shows completed actions: "has run," "have eaten." Avoid shifting tenses without reason.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Error: "I runned fast." Fix: <strong>"I ran fast."</strong><br>Perfect: "I have run three miles every day this week."</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">10. Subject-Verb Agreement (5.L.1b)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Two columns: singular vs plural -->
+          <rect x="5" y="15" width="115" height="115" rx="6" fill="rgba(192,132,252,0.08)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="62" y="33" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">Singular → verb+s</text>
+          <text x="62" y="58" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">The dog runs.</text>
+          <text x="62" y="78" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">She eats lunch.</text>
+          <text x="62" y="98" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">It makes sense.</text>
+          <rect x="130" y="15" width="115" height="115" rx="6" fill="rgba(192,132,252,0.08)" stroke="#f97316" stroke-width="1.5"/>
+          <text x="187" y="33" text-anchor="middle" fill="#f97316" font-size="10" font-family="Fredoka One,cursive">Plural → base verb</text>
+          <text x="187" y="58" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">The dogs run.</text>
+          <text x="187" y="78" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">They eat lunch.</text>
+          <text x="187" y="98" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">We make plans.</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Agreement Rule</div><span class="formula-highlight">She/he/it/singular → verb+s · They/we/I/plural → base verb</span></div>
+      <div class="explanation">The subject and verb must agree in number. Singular subjects use verbs with -s (she runs). Plural subjects use the base verb (they run). This rule applies even when other words come between the subject and verb.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Error: "The dogs runs fast." Fix: <strong>"The dogs run fast."</strong><br>(dogs = plural → base verb "run")</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">11. Opinion Writing (5.W.1b)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Opinion essay structure with opinion word highlighted -->
+          <rect x="10" y="10" width="230" height="28" rx="4" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="28" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Claim/Opinion</text>
+          <line x1="125" y1="38" x2="125" y2="48" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="10" y="48" width="230" height="22" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="63" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Reason 1 + Evidence</text>
+          <line x1="125" y1="70" x2="125" y2="80" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="10" y="80" width="230" height="22" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="95" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Reason 2 + Evidence</text>
+          <line x1="125" y1="102" x2="125" y2="112" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="10" y="112" width="230" height="28" rx="4" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="130" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Conclusion (restate &amp; call to action)</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Opinion Structure</div><span class="formula-highlight">State opinion → reason → evidence → repeat × 2-3</span></div>
+      <div class="explanation">Opinion writing argues for a point of view. State your opinion clearly first. Give 2-3 reasons. Support each reason with evidence. Use signal words: "because," "for example," "therefore." End with a strong conclusion.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"School should start later <strong>because</strong> students need more sleep. Studies show that teenagers need 9 hours…"</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">12. Domain-Specific Vocabulary (5.L.6)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Topic bubble with domain words -->
+          <circle cx="125" cy="75" r="30" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="2"/>
+          <text x="125" y="71" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">Science</text>
+          <text x="125" y="85" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">writing</text>
+          <!-- Domain words radiating out -->
+          <line x1="95" y1="55" x2="55" y2="30" stroke="var(--acc)" stroke-width="1"/>
+          <text x="35" y="25" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">hypothesis</text>
+          <line x1="155" y1="55" x2="195" y2="30" stroke="var(--acc)" stroke-width="1"/>
+          <text x="215" y="25" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">organism</text>
+          <line x1="95" y1="95" x2="45" y2="115" stroke="var(--acc)" stroke-width="1"/>
+          <text x="25" y="112" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">ecosystem</text>
+          <line x1="155" y1="95" x2="205" y2="115" stroke="var(--acc)" stroke-width="1"/>
+          <text x="225" y="112" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">adaptation</text>
+          <line x1="125" y1="105" x2="125" y2="130" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="145" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">precipitation</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Domain Vocabulary</div><span class="formula-highlight">Use precise terms from the subject you're writing about</span></div>
+      <div class="explanation">Domain-specific vocabulary shows expertise and communicates more precisely. In science writing, use "precipitation" instead of "water stuff from clouds." In math, use "perpendicular" instead of "straight up-down line."</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Vague: "the water stuff in clouds"<br>Precise: <strong>"precipitation"</strong> or <strong>"condensation"</strong><br>(domain vocabulary = more precise and professional)</div>
+    </div>
+  </div>
+
+</div><!-- end medium -->
+
+<div class="section-heading section-hard">🔴 Hard</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">13. Strong Conclusions (5.W.1d, 5.W.2e)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Conclusion types -->
+          <rect x="5" y="10" width="115" height="55" rx="6" fill="rgba(231,76,60,0.1)" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="62" y="28" text-anchor="middle" fill="#e74c3c" font-size="9" font-family="Fredoka One,cursive">✗ Weak Ending</text>
+          <text x="62" y="45" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="8" font-family="Nunito,sans-serif">"So those are</text>
+          <text x="62" y="57" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="8" font-family="Nunito,sans-serif">my reasons."</text>
+          <rect x="130" y="10" width="115" height="55" rx="6" fill="rgba(46,204,113,0.1)" stroke="#2ecc71" stroke-width="1.5"/>
+          <text x="187" y="28" text-anchor="middle" fill="#2ecc71" font-size="9" font-family="Fredoka One,cursive">✓ Strong Ending</text>
+          <text x="187" y="45" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">Synthesize +</text>
+          <text x="187" y="57" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">call to action</text>
+          <!-- Types row -->
+          <text x="125" y="82" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">Types: restate · call to action · look to future · reflection</text>
+          <rect x="5" y="95" width="240" height="48" rx="4" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="112" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">"Changing school start times would help every</text>
+          <text x="125" y="126" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">student perform better and live healthier."</text>
+          <text x="125" y="138" text-anchor="middle" fill="#4ade80" font-size="8" font-family="Fredoka One,cursive">← synthesis + call to action</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Conclusion Formula</div><span class="formula-highlight">Don't just repeat — synthesize or extend the idea</span></div>
+      <div class="explanation">A strong conclusion does more than restate the intro. It synthesizes the argument, makes a broader statement, issues a call to action, or looks to the future. Leave the reader with a lasting impression.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Weak: "So those are my three reasons."<br>Strong: <strong>"Changing school start times would help every student perform better and live healthier."</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">14. Logical Organization (5.W.4)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Correct order: history essay -->
+          <rect x="5" y="10" width="240" height="28" rx="4" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="28" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">1. Background (Who/What/When)</text>
+          <line x1="125" y1="38" x2="125" y2="48" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="5" y="48" width="240" height="28" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="66" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">2. Event (What happened)</text>
+          <line x1="125" y1="76" x2="125" y2="86" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="5" y="86" width="240" height="28" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="104" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">3. Impact (Why it mattered)</text>
+          <text x="125" y="140" text-anchor="middle" fill="#4ade80" font-size="9" font-family="Fredoka One,cursive">Logical: cause before effect</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Organization Rule</div><span class="formula-highlight">Order = logical progression (cause before effect)</span></div>
+      <div class="explanation">Paragraphs should follow a logical order where each idea builds on the previous one. For history: background before event, event before impact. For arguments: weakest to strongest reason. Disorganized writing confuses readers.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>History essay: background → event → impact ✓<br>NOT: impact → background → event ✗<br><strong>Order must mirror how things actually happened or logically connect.</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">15. Citing Evidence from Text (5.W.8)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Three-part quote integration -->
+          <rect x="5" y="10" width="72" height="50" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="41" y="28" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Fredoka One,cursive">Introduce</text>
+          <text x="41" y="45" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">"According to the article,"</text>
+          <line x1="77" y1="35" x2="90" y2="35" stroke="var(--acc)" stroke-width="1.2"/>
+          <polygon points="90,32 98,35 90,38" fill="var(--acc)"/>
+          <rect x="98" y="10" width="72" height="50" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="134" y="28" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Fredoka One,cursive">Quote</text>
+          <text x="134" y="42" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">"direct quote</text>
+          <text x="134" y="53" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">here"</text>
+          <line x1="170" y1="35" x2="183" y2="35" stroke="var(--acc)" stroke-width="1.2"/>
+          <polygon points="183,32 191,35 183,38" fill="var(--acc)"/>
+          <rect x="191" y="10" width="54" height="50" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="218" y="28" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Fredoka One,cursive">Explain</text>
+          <text x="218" y="43" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">This shows</text>
+          <text x="218" y="54" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">that...</text>
+          <!-- Example at bottom -->
+          <rect x="5" y="70" width="240" height="72" rx="4" fill="rgba(0,0,0,0.3)" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <text x="15" y="90" fill="rgba(255,255,255,0.7)" font-size="8.5" font-family="Nunito,sans-serif">According to the article, "cement mixed with rocks</text>
+          <text x="15" y="106" fill="rgba(255,255,255,0.7)" font-size="8.5" font-family="Nunito,sans-serif">forms concrete" (source). This shows that concrete</text>
+          <text x="15" y="122" fill="rgba(255,255,255,0.7)" font-size="8.5" font-family="Nunito,sans-serif">requires two materials combined together.</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Quote Integration</div><span class="formula-highlight">Introduce + "Direct quote" + Explain how it supports your point</span></div>
+      <div class="explanation">Never drop a quote into your writing without introduction and explanation. Introduce who said it or where it came from. Provide the quote in quotation marks. Then explain how it proves your point.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"According to the article, 'cement mixed with rocks forms concrete' (source). <strong>This shows that concrete requires combining two materials.</strong>"</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">16. Argumentative Writing (5.W.1)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Argument structure with counterclaim -->
+          <rect x="5" y="8" width="240" height="24" rx="4" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="24" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">CLAIM: e-bikes are safe</text>
+          <line x1="125" y1="32" x2="125" y2="42" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="5" y="42" width="240" height="22" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="57" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">EVIDENCE: "studies show helmet use is higher"</text>
+          <line x1="125" y1="64" x2="125" y2="74" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="5" y="74" width="240" height="26" rx="4" fill="rgba(231,76,60,0.1)" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="125" y="90" text-anchor="middle" fill="#e74c3c" font-size="9" font-family="Fredoka One,cursive">COUNTERCLAIM: "Some say e-bikes are dangerous"</text>
+          <line x1="125" y1="100" x2="125" y2="110" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="5" y="110" width="240" height="28" rx="4" fill="rgba(46,204,113,0.1)" stroke="#2ecc71" stroke-width="1.5"/>
+          <text x="125" y="128" text-anchor="middle" fill="#4ade80" font-size="9" font-family="Fredoka One,cursive">REBUTTAL: "but studies show riders are safer"</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Argument Structure</div><span class="formula-highlight">Claim → evidence → address counterclaim → reinforce claim</span></div>
+      <div class="explanation">Strong argumentative writing acknowledges the opposing view (counterclaim) and then refutes it. This shows you have considered all sides and makes your argument more credible and convincing.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"Some say e-bikes are dangerous, <strong>but</strong> studies show riders wear helmets more often than regular cyclists…"<br>(counterclaim acknowledged + rebutted)</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">17. Formal vs. Informal Style (5.L.3)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Two speech bubbles -->
+          <path d="M 5 20 Q 5 10 15 10 L 105 10 Q 115 10 115 20 L 115 55 Q 115 65 105 65 L 65 65 L 55 80 L 58 65 L 15 65 Q 5 65 5 55 Z" fill="rgba(255,165,0,0.15)" stroke="#f97316" stroke-width="1.5"/>
+          <text x="60" y="28" text-anchor="middle" fill="#f97316" font-size="8.5" font-family="Fredoka One,cursive">Informal</text>
+          <text x="60" y="44" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">"You shouldn't litter</text>
+          <text x="60" y="56" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">cause it's bad."</text>
+          <path d="M 135 20 Q 135 10 145 10 L 240 10 Q 250 10 250 20 L 250 65 Q 250 65 245 65 L 190 65 L 180 80 L 183 65 L 145 65 Q 135 65 135 55 Z" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="190" y="28" text-anchor="middle" fill="var(--acc)" font-size="8.5" font-family="Fredoka One,cursive">Formal</text>
+          <text x="190" y="44" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">"Littering damages</text>
+          <text x="190" y="56" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">ecosystems and</text>
+          <text x="190" y="67" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">should be prohibited."</text>
+          <text x="125" y="115" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Fredoka One,cursive">Academic writing = formal register</text>
+          <text x="125" y="135" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8.5" font-family="Nunito,sans-serif">No contractions · No slang · No "you"</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Academic Writing</div><span class="formula-highlight">Avoid contractions, slang, and second person "you"</span></div>
+      <div class="explanation">Academic writing uses formal language. Avoid contractions (use "it is" not "it's"), slang ("cause" → "because"), and second person address ("you should" → "one should" or rephrase). Write as if addressing a professional audience.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Informal: "You shouldn't litter cause it's bad."<br>Formal: <strong>"Littering damages ecosystems and should be prohibited."</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">18. Revising for Clarity (5.W.5)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Draft with revision marks -->
+          <rect x="5" y="10" width="240" height="100" rx="6" fill="rgba(0,0,0,0.3)" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <!-- Strikethrough weak text -->
+          <text x="15" y="36" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">It was good.</text>
+          <line x1="15" y1="34" x2="100" y2="34" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="15" y="36" fill="#e74c3c" font-size="8" font-family="Fredoka One,cursive">✗</text>
+          <!-- Insertion arrow with better text -->
+          <line x1="40" y1="40" x2="40" y2="55" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="36,55 40,63 44,55" fill="var(--acc)"/>
+          <text x="15" y="80" fill="white" font-size="8.5" font-family="Nunito,sans-serif">"The program successfully protected both</text>
+          <text x="15" y="96" fill="white" font-size="8.5" font-family="Nunito,sans-serif">bears and visitors by separating activities."</text>
+          <text x="240" y="96" text-anchor="end" fill="#4ade80" font-size="8" font-family="Fredoka One,cursive">✓</text>
+          <!-- Revision checklist -->
+          <text x="125" y="125" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8.5" font-family="Fredoka One,cursive">Checklist: Clear? Ordered? Evidence? Precise?</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Revision Checklist</div><span class="formula-highlight">Is each sentence clear? Ideas in order? Evidence used?</span></div>
+      <div class="explanation">Revision means improving writing, not just fixing spelling. Check that every sentence is clear and specific. Make sure ideas flow logically. Replace vague words with precise ones. Add or cut details as needed for clarity and strength.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Weak: "It was good."<br>Revised: <strong>"The program successfully protected both bears and visitors by separating their activities."</strong></div>
+    </div>
+  </div>
+
+</div><!-- end hard -->
+
+<footer>SBA ELA — Writing · 5th Grade</footer>
+</div>
+
+<script>
+  const el = document.getElementById('ptsDisplay');
+  if(el) el.textContent = '⭐ ' + (parseInt(localStorage.getItem('kids_points')||'0'));
+</script>
+</body>
+</html>

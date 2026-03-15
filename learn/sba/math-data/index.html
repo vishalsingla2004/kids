@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 Data Analysis — SBA Math</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+  :root { --c1: #0a1628; --c2: #1a3a6b; --acc: #60a5fa; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; font-weight: 700; background: linear-gradient(160deg, var(--c1) 0%, var(--c2) 60%, var(--c1) 100%); background-attachment: fixed; min-height: 100dvh; color: #fff; overflow-x: hidden; }
+  .site-header { position: sticky; top: 0; z-index: 100; background: rgba(10,22,40,0.93); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(96,165,250,0.25); display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; gap: 12px; }
+  .back-link { display: inline-flex; align-items: center; gap: 5px; color: rgba(255,255,255,0.6); text-decoration: none; font-family: 'Fredoka One', cursive; font-size: 0.88rem; padding: 5px 13px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.07); white-space: nowrap; transition: color 0.15s, background 0.15s; }
+  .back-link:hover { color: #fff; background: rgba(255,255,255,0.14); }
+  .header-title { font-family: 'Fredoka One', cursive; font-size: clamp(1rem, 4vw, 1.5rem); color: var(--acc); text-shadow: 0 2px 10px rgba(96,165,250,0.4); text-align: center; flex: 1; }
+  .pts-pill { background: rgba(255,215,0,0.12); border: 2px solid rgba(255,215,0,0.4); border-radius: 50px; padding: 4px 13px; color: #ffd700; font-family: 'Fredoka One', cursive; font-size: 0.95rem; white-space: nowrap; }
+  .print-btn { display: inline-flex; align-items: center; gap: 5px; color: rgba(255,255,255,0.6); font-family: 'Fredoka One', cursive; font-size: 0.88rem; padding: 5px 13px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.07); cursor: pointer; white-space: nowrap; transition: color 0.15s, background 0.15s; }
+  .print-btn:hover { color: #fff; background: rgba(255,255,255,0.14); }
+  .page-wrap { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
+  .section-heading { font-family: 'Fredoka One', cursive; font-size: clamp(1.2rem, 4vw, 1.7rem); margin: 40px 0 18px; padding: 10px 20px; border-radius: 14px; display: inline-flex; align-items: center; gap: 10px; }
+  .section-easy { background: rgba(46,204,113,0.15); color: #2ecc71; border: 2px solid rgba(46,204,113,0.35); }
+  .section-medium { background: rgba(230,126,34,0.15); color: #e67e22; border: 2px solid rgba(230,126,34,0.35); }
+  .section-hard { background: rgba(231,76,60,0.15); color: #e74c3c; border: 2px solid rgba(231,76,60,0.35); }
+  .cards-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 620px) { .cards-grid { grid-template-columns: 1fr 1fr; } }
+  .concept-card { background: rgba(255,255,255,0.04); border: 1.5px solid rgba(96,165,250,0.2); border-radius: 20px; overflow: hidden; box-shadow: 0 6px 28px rgba(0,0,0,0.35); transition: transform 0.18s, box-shadow 0.18s; }
+  .concept-card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(96,165,250,0.18); }
+  .card-title-bar { background: rgba(96,165,250,0.12); border-bottom: 1px solid rgba(96,165,250,0.2); padding: 12px 16px; font-family: 'Fredoka One', cursive; font-size: clamp(1rem, 3.5vw, 1.2rem); color: var(--acc); }
+  .card-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .diagram-wrap { background: rgba(0,0,0,0.35); border-radius: 12px; border: 1px solid rgba(96,165,250,0.15); display: flex; align-items: center; justify-content: center; padding: 8px; overflow: hidden; }
+  .diagram-wrap svg { width: 100%; max-width: 280px; height: auto; display: block; }
+  .formula-box { background: rgba(10,22,40,0.8); border: 2px solid var(--acc); border-radius: 12px; padding: 12px 16px; font-family: 'Fredoka One', cursive; font-size: clamp(0.95rem, 3vw, 1.15rem); color: #fff; text-align: center; line-height: 1.5; }
+  .formula-label { font-size: 0.78rem; color: var(--acc); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; font-family: 'Nunito', sans-serif; }
+  .formula-highlight { color: var(--acc); font-size: 1.1em; }
+  .explanation { font-size: clamp(0.85rem, 2.8vw, 0.97rem); color: rgba(255,255,255,0.82); line-height: 1.6; }
+  .explanation strong { color: #fff; }
+  .example-box { background: rgba(46,204,113,0.07); border-left: 3px solid #2ecc71; border-radius: 0 10px 10px 0; padding: 10px 14px; font-size: clamp(0.82rem, 2.6vw, 0.93rem); color: rgba(255,255,255,0.85); line-height: 1.6; }
+  .ex-label { font-family: 'Fredoka One', cursive; color: #2ecc71; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px; }
+  .example-box strong { color: #4ade80; }
+  footer { text-align: center; margin-top: 56px; color: rgba(255,255,255,0.2); font-size: 0.78rem; font-family: 'Nunito', sans-serif; }
+  @media print {
+    @page { margin: 1cm; }
+    body { background: white !important; color: #000 !important; font-size: 8.5pt !important; }
+    .site-header { position: static !important; background: none !important; backdrop-filter: none !important; border: none !important; box-shadow: none !important; padding: 4px 0 !important; }
+    .back-link, .pts-pill, .print-btn { display: none !important; }
+    .header-title { color: #000 !important; font-size: 12pt !important; }
+    .page-wrap { max-width: 100% !important; padding: 4px 0 !important; }
+    .cards-grid { columns: 2; display: block; }
+    .cards-grid .concept-card { break-inside: avoid; display: inline-block; width: 100%; margin-bottom: 6px; }
+    .section-heading { background: #f0f0f0 !important; color: #333 !important; border-color: #ccc !important; font-size: 9pt !important; padding: 4px 10px !important; margin: 8px 0 4px !important; column-span: all; }
+    .concept-card { box-shadow: none !important; background: #fff !important; border-color: #ccc !important; border-radius: 4px !important; }
+    .card-title-bar { background: #f0f0f0 !important; border-color: #ccc !important; color: #000 !important; padding: 4px 8px !important; font-size: 8pt !important; }
+    .card-body { color: #000 !important; padding: 6px !important; gap: 4px !important; }
+    .formula-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; padding: 4px 6px !important; font-size: 8pt !important; }
+    .example-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; padding: 4px 6px !important; font-size: 7.5pt !important; }
+    svg { max-width: 100% !important; max-height: 80px !important; display: block !important; }
+    svg text { fill: #000 !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="back-link" href="../">← SBA Hub</a>
+  <span class="header-title">📊 Data Analysis</span>
+  <span class="pts-pill" id="ptsDisplay">⭐ 0</span>
+  <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+</header>
+
+<div class="page-wrap">
+
+<div class="section-heading section-easy">🟢 Easy</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">1. Reading Bar Graphs</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Axes -->
+          <line x1="30" y1="120" x2="230" y2="120" stroke="white" stroke-width="1.5"/>
+          <line x1="30" y1="10" x2="30" y2="120" stroke="white" stroke-width="1.5"/>
+          <!-- Y axis labels -->
+          <text x="22" y="122" text-anchor="end" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">0</text>
+          <line x1="27" y1="93" x2="33" y2="93" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <text x="22" y="96" text-anchor="end" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">3</text>
+          <line x1="27" y1="66" x2="33" y2="66" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <text x="22" y="69" text-anchor="end" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">5</text>
+          <line x1="27" y1="39" x2="33" y2="39" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <text x="22" y="42" text-anchor="end" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">7</text>
+          <!-- Bars -->
+          <rect x="43" y="93" width="30" height="27" fill="var(--acc)" rx="2"/>
+          <text x="58" y="134" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">Jan</text>
+          <rect x="93" y="66" width="30" height="54" fill="var(--acc)" rx="2"/>
+          <text x="108" y="134" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">Feb</text>
+          <rect x="143" y="39" width="30" height="81" fill="#f97316" rx="2"/>
+          <text x="158" y="134" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">Mar</text>
+          <rect x="193" y="66" width="30" height="54" fill="var(--acc)" rx="2"/>
+          <text x="208" y="134" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">Apr</text>
+          <text x="125" y="15" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Fredoka One,cursive">Rainfall by Month</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Reading Rule</div><span class="formula-highlight">Read top of bar → find value on y-axis</span></div>
+      <div class="explanation">Bar graphs use bar height to show quantity. The y-axis (vertical) shows the scale. Find the top of each bar and trace left to the y-axis to read its value. The tallest bar shows the most.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"Which month had most rain?" → Find the tallest bar → <strong>March (7 inches)</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">2. Frequency Tables</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Tally chart on left -->
+          <text x="10" y="20" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">Tallies →</text>
+          <text x="10" y="50" fill="white" font-size="10" font-family="Fredoka One,cursive">Dogs: IIII</text>
+          <text x="10" y="75" fill="white" font-size="10" font-family="Fredoka One,cursive">Cats: IIII I</text>
+          <text x="10" y="100" fill="white" font-size="10" font-family="Fredoka One,cursive">Fish: II</text>
+          <!-- Arrow -->
+          <line x1="100" y1="75" x2="120" y2="75" stroke="var(--acc)" stroke-width="2"/>
+          <polygon points="120,72 128,75 120,78" fill="var(--acc)"/>
+          <!-- Frequency table on right -->
+          <rect x="130" y="25" width="110" height="100" rx="4" fill="rgba(0,0,0,0.3)" stroke="var(--acc)" stroke-width="1"/>
+          <rect x="130" y="25" width="110" height="22" rx="4" fill="rgba(96,165,250,0.2)"/>
+          <text x="165" y="40" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Pet</text>
+          <text x="210" y="40" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Count</text>
+          <line x1="185" y1="25" x2="185" y2="125" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+          <text x="157" y="62" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">Dogs</text>
+          <text x="210" y="62" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">4</text>
+          <line x1="130" y1="68" x2="240" y2="68" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="157" y="88" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">Cats</text>
+          <text x="210" y="88" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">5</text>
+          <line x1="130" y1="94" x2="240" y2="94" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="157" y="115" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">Fish</text>
+          <text x="210" y="115" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">2</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Frequency Rule</div><span class="formula-highlight">Count tallies for each category</span></div>
+      <div class="explanation">A frequency table organizes data by category and count. Tally marks group counts in fives (four vertical + one diagonal). Count up all tallies in each row to get the frequency.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Pets: IIII = 4 dogs, IIII I = 5 cats, II = 2 fish<br>Total: <strong>4 + 5 + 2 = 11 pets</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">3. Number Lines</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Number line 0 to 2 -->
+          <line x1="20" y1="80" x2="230" y2="80" stroke="white" stroke-width="1.5"/>
+          <!-- Main ticks at 0, 1, 2 -->
+          <line x1="20" y1="73" x2="20" y2="87" stroke="white" stroke-width="2"/>
+          <line x1="125" y1="73" x2="125" y2="87" stroke="white" stroke-width="2"/>
+          <line x1="230" y1="73" x2="230" y2="87" stroke="white" stroke-width="2"/>
+          <text x="20" y="100" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">0</text>
+          <text x="125" y="100" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">1</text>
+          <text x="230" y="100" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">2</text>
+          <!-- Half ticks -->
+          <line x1="72" y1="76" x2="72" y2="84" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+          <line x1="178" y1="76" x2="178" y2="84" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+          <!-- Marked points -->
+          <circle cx="62" cy="80" r="6" fill="var(--acc)" stroke="white" stroke-width="1.5"/>
+          <text x="62" y="63" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">1/2</text>
+          <circle cx="92" cy="80" r="6" fill="var(--acc)" stroke="white" stroke-width="1.5"/>
+          <text x="92" y="63" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">3/4</text>
+          <circle cx="178" cy="80" r="6" fill="#f97316" stroke="white" stroke-width="1.5"/>
+          <text x="178" y="63" text-anchor="middle" fill="#f97316" font-size="9" font-family="Fredoka One,cursive">1.5</text>
+          <text x="125" y="130" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">Divide segment into equal parts to place fractions</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Number Line Rule</div><span class="formula-highlight">Divide segment into equal parts</span></div>
+      <div class="explanation">To place fractions on a number line, divide the distance between whole numbers into equal parts matching the denominator. The numerator tells you which tick mark to use.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Place 3/4: split 0-1 into 4 equal parts, mark the <strong>3rd tick</strong><br>1.5 is halfway between 1 and 2</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">4. Mean (Average)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Stacks before evening -->
+          <rect x="15" y="60" width="28" height="60" fill="rgba(96,165,250,0.3)" stroke="var(--acc)" stroke-width="1" rx="2"/>
+          <text x="29" y="55" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">80</text>
+          <rect x="53" y="30" width="28" height="90" fill="rgba(96,165,250,0.3)" stroke="var(--acc)" stroke-width="1" rx="2"/>
+          <text x="67" y="25" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">90</text>
+          <rect x="91" y="90" width="28" height="30" fill="rgba(96,165,250,0.3)" stroke="var(--acc)" stroke-width="1" rx="2"/>
+          <text x="105" y="85" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">70</text>
+          <rect x="129" y="0" width="28" height="120" fill="rgba(96,165,250,0.3)" stroke="var(--acc)" stroke-width="1" rx="2"/>
+          <text x="143" y="0" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">100</text>
+          <!-- Baseline -->
+          <line x1="10" y1="120" x2="180" y2="120" stroke="white" stroke-width="1.5"/>
+          <!-- Mean line -->
+          <line x1="10" y1="75" x2="180" y2="75" stroke="#4ade80" stroke-width="2" stroke-dasharray="5,3"/>
+          <text x="190" y="79" fill="#4ade80" font-size="9" font-family="Fredoka One,cursive">mean=85</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Mean Formula</div><span class="formula-highlight">mean = sum ÷ count</span></div>
+      <div class="explanation">The mean (average) is found by adding all values and dividing by how many values there are. It represents the "fair share" if all values were evened out. Think of leveling out stacks of blocks.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Scores: 80, 90, 70, 100<br>Sum = 340, Count = 4<br>Mean = 340 ÷ 4 = <strong>85</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">5. Pictographs</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Pictograph -->
+          <text x="10" y="30" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">Mon:</text>
+          <text x="55" y="30" fill="white" font-size="16" font-family="Fredoka One,cursive">☀ ☀ ☀</text>
+          <text x="10" y="60" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">Tue:</text>
+          <text x="55" y="60" fill="white" font-size="16" font-family="Fredoka One,cursive">☀ ☀</text>
+          <text x="10" y="90" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">Wed:</text>
+          <text x="55" y="90" fill="white" font-size="16" font-family="Fredoka One,cursive">☀ ☀ ☀ ½</text>
+          <!-- Key -->
+          <rect x="5" y="110" width="240" height="35" rx="4" fill="rgba(0,0,0,0.3)" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+          <text x="20" y="132" fill="white" font-size="10" font-family="Fredoka One,cursive">Key: ☀ = 2 sunny days</text>
+          <text x="165" y="132" fill="var(--acc)" font-size="9" font-family="Nunito,sans-serif">½ = 1 day</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Pictograph Formula</div><span class="formula-highlight">Count symbols × key value = total</span></div>
+      <div class="explanation">A pictograph uses symbols to represent data. The key tells you what each symbol equals. Multiply the number of symbols by the key value. Half symbols represent half the key value.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Mon: 3 suns × 2 = <strong>6 sunny days</strong><br>Wed: 3½ suns × 2 = 3×2 + 1 = <strong>7 sunny days</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">6. Dot Plots</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Number line -->
+          <line x1="20" y1="120" x2="230" y2="120" stroke="white" stroke-width="1.5"/>
+          <!-- Ticks -->
+          <line x1="35" y1="115" x2="35" y2="125" stroke="white" stroke-width="1.5"/>
+          <line x1="70" y1="115" x2="70" y2="125" stroke="white" stroke-width="1.5"/>
+          <line x1="105" y1="115" x2="105" y2="125" stroke="white" stroke-width="1.5"/>
+          <line x1="140" y1="115" x2="140" y2="125" stroke="white" stroke-width="1.5"/>
+          <line x1="175" y1="115" x2="175" y2="125" stroke="white" stroke-width="1.5"/>
+          <line x1="210" y1="115" x2="210" y2="125" stroke="white" stroke-width="1.5"/>
+          <!-- Labels -->
+          <text x="35" y="138" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">1</text>
+          <text x="70" y="138" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">2</text>
+          <text x="105" y="138" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">3</text>
+          <text x="140" y="138" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">4</text>
+          <text x="175" y="138" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">5</text>
+          <text x="210" y="138" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">6</text>
+          <!-- Dots stacked -->
+          <circle cx="70" cy="103" r="7" fill="var(--acc)"/>
+          <circle cx="105" cy="103" r="7" fill="var(--acc)"/>
+          <circle cx="105" cy="84" r="7" fill="var(--acc)"/>
+          <circle cx="105" cy="65" r="7" fill="var(--acc)"/>
+          <circle cx="140" cy="103" r="7" fill="var(--acc)"/>
+          <circle cx="140" cy="84" r="7" fill="var(--acc)"/>
+          <circle cx="175" cy="103" r="7" fill="var(--acc)"/>
+          <circle cx="175" cy="84" r="7" fill="var(--acc)"/>
+          <circle cx="210" cy="103" r="7" fill="var(--acc)"/>
+          <!-- Mode indicator -->
+          <text x="105" y="48" text-anchor="middle" fill="#4ade80" font-size="9" font-family="Fredoka One,cursive">mode = 3</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Dot Plot Rule</div><span class="formula-highlight">Each dot = one data point; mode = tallest stack</span></div>
+      <div class="explanation">Dot plots show each individual data value as a dot. Stack dots above a value when multiple data points share it. The tallest stack shows the mode (most common value).</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Value 3 has 3 dots (tallest stack) → <strong>mode = 3</strong><br>Total data points = count all dots</div>
+    </div>
+  </div>
+
+</div><!-- end easy -->
+
+<div class="section-heading section-medium">🟡 Medium</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">7. Line Plots with Fractions (5.MD.2)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="20" y1="110" x2="230" y2="110" stroke="white" stroke-width="1.5"/>
+          <line x1="20" y1="104" x2="20" y2="116" stroke="white" stroke-width="1.5"/>
+          <line x1="72" y1="104" x2="72" y2="116" stroke="white" stroke-width="1.5"/>
+          <line x1="124" y1="104" x2="124" y2="116" stroke="white" stroke-width="1.5"/>
+          <line x1="176" y1="104" x2="176" y2="116" stroke="white" stroke-width="1.5"/>
+          <line x1="228" y1="104" x2="228" y2="116" stroke="white" stroke-width="1.5"/>
+          <text x="20" y="128" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">1/4</text>
+          <text x="72" y="128" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">1/2</text>
+          <text x="124" y="128" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">3/4</text>
+          <text x="176" y="128" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">1</text>
+          <!-- X marks -->
+          <text x="20" y="97" text-anchor="middle" fill="var(--acc)" font-size="13" font-family="Fredoka One,cursive">X</text>
+          <text x="72" y="97" text-anchor="middle" fill="var(--acc)" font-size="13" font-family="Fredoka One,cursive">X</text>
+          <text x="72" y="81" text-anchor="middle" fill="var(--acc)" font-size="13" font-family="Fredoka One,cursive">X</text>
+          <text x="72" y="65" text-anchor="middle" fill="var(--acc)" font-size="13" font-family="Fredoka One,cursive">X</text>
+          <text x="124" y="97" text-anchor="middle" fill="var(--acc)" font-size="13" font-family="Fredoka One,cursive">X</text>
+          <text x="124" y="81" text-anchor="middle" fill="var(--acc)" font-size="13" font-family="Fredoka One,cursive">X</text>
+          <text x="176" y="97" text-anchor="middle" fill="var(--acc)" font-size="13" font-family="Fredoka One,cursive">X</text>
+          <text x="125" y="18" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Fredoka One,cursive">Measurements in 1/4-inch increments</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Line Plot Rule</div><span class="formula-highlight">Mark each data value with X above number</span></div>
+      <div class="explanation">Fractional line plots are used for measurement data (like lengths). Place an X above the number line at each measured value. Use fractions for the tick marks based on the smallest measurement unit.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Heights measured in 1/4-inch: mark X above each value.<br>3 X's above 1/2 means 3 students measured <strong>exactly 1/2 inch</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">8. Writing Equations from Patterns</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Input-output table -->
+          <rect x="5" y="10" width="150" height="120" rx="6" fill="rgba(0,0,0,0.3)" stroke="var(--acc)" stroke-width="1"/>
+          <rect x="5" y="10" width="150" height="22" rx="6" fill="rgba(96,165,250,0.2)"/>
+          <text x="45" y="25" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">x (in)</text>
+          <text x="110" y="25" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">y (out)</text>
+          <line x1="75" y1="10" x2="75" y2="130" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+          <text x="45" y="50" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">1</text>
+          <text x="110" y="50" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">3</text>
+          <line x1="5" y1="56" x2="155" y2="56" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="45" y="76" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">2</text>
+          <text x="110" y="76" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">6</text>
+          <line x1="5" y1="82" x2="155" y2="82" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="45" y="102" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">3</text>
+          <text x="110" y="102" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">9</text>
+          <line x1="5" y1="108" x2="155" y2="108" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="45" y="126" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">4</text>
+          <text x="110" y="126" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">12</text>
+          <!-- Equation -->
+          <text x="195" y="75" text-anchor="middle" fill="var(--acc)" font-size="14" font-family="Fredoka One,cursive">y = 3x</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Equation from Table</div><span class="formula-highlight">Find the rule: y = mx</span></div>
+      <div class="explanation">Look at how y changes as x increases. If y = x × constant, the equation is y = mx. Check: does the rule work for every row? If yes, you've found the equation for the pattern.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Pattern: multiply by 3 each time.<br>Equation: <strong>y = 3x</strong><br>Check: x=4 → y = 3×4 = 12 ✓</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">9. Data Story Problems</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Bar graph with two bars highlighted -->
+          <line x1="30" y1="120" x2="220" y2="120" stroke="white" stroke-width="1.5"/>
+          <line x1="30" y1="10" x2="30" y2="120" stroke="white" stroke-width="1.5"/>
+          <rect x="50" y="50" width="40" height="70" fill="var(--acc)" rx="2"/>
+          <rect x="110" y="20" width="40" height="100" fill="#f97316" rx="2"/>
+          <rect x="170" y="70" width="40" height="50" fill="var(--acc)" rx="2"/>
+          <text x="70" y="138" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">Red</text>
+          <text x="130" y="138" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">Blue</text>
+          <text x="190" y="138" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">Green</text>
+          <!-- Value labels -->
+          <text x="70" y="45" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">7</text>
+          <text x="130" y="15" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">10</text>
+          <text x="190" y="65" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">5</text>
+          <!-- Arrow pointing to difference -->
+          <line x1="70" y1="50" x2="130" y2="20" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="170" y="105" text-anchor="end" fill="#4ade80" font-size="8" font-family="Fredoka One,cursive">10−7 = 3 more</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Data Story Strategy</div><span class="formula-highlight">Read all values → answer specific question</span></div>
+      <div class="explanation">When solving data story problems, first read all values carefully. Identify what the question is asking (total, difference, most, least). Then perform the correct operation on the right values.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"How many more chose blue vs. red?"<br>Blue = 10, Red = 7<br>10 − 7 = <strong>3 more chose blue</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">10. Comparing Two Data Sets</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Two dot plots -->
+          <text x="10" y="22" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Class A:</text>
+          <line x1="60" y1="20" x2="230" y2="20" stroke="rgba(255,255,255,0.4)" stroke-width="1.2"/>
+          <circle cx="80" cy="20" r="5" fill="var(--acc)"/>
+          <circle cx="110" cy="20" r="5" fill="var(--acc)"/>
+          <circle cx="110" cy="7" r="5" fill="var(--acc)"/>
+          <circle cx="140" cy="20" r="5" fill="var(--acc)"/>
+          <circle cx="170" cy="20" r="5" fill="var(--acc)"/>
+          <text x="145" y="40" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Nunito,sans-serif">mean ≈ 72</text>
+
+          <text x="10" y="90" fill="#f97316" font-size="9" font-family="Fredoka One,cursive">Class B:</text>
+          <line x1="60" y1="88" x2="230" y2="88" stroke="rgba(255,255,255,0.4)" stroke-width="1.2"/>
+          <circle cx="120" cy="88" r="5" fill="#f97316"/>
+          <circle cx="150" cy="88" r="5" fill="#f97316"/>
+          <circle cx="150" cy="75" r="5" fill="#f97316"/>
+          <circle cx="180" cy="88" r="5" fill="#f97316"/>
+          <circle cx="200" cy="88" r="5" fill="#f97316"/>
+          <text x="165" y="108" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Nunito,sans-serif">mean ≈ 81</text>
+          <text x="125" y="135" text-anchor="middle" fill="#4ade80" font-size="10" font-family="Fredoka One,cursive">Class B scored higher overall</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Comparison Method</div><span class="formula-highlight">Compare means, ranges, modes</span></div>
+      <div class="explanation">To compare two data sets, calculate the mean of each. A higher mean means a higher typical value. Also compare ranges (spread) and modes. Two data sets can look different but have similar means.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Class A mean = 72, Class B mean = 81<br>Conclusion: <strong>Class B scored higher overall</strong> by 9 points on average</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">11. Plotting Ordered Pairs (5.G.1)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Grid and axes -->
+          <line x1="30" y1="130" x2="230" y2="130" stroke="white" stroke-width="1.5"/>
+          <line x1="30" y1="10" x2="30" y2="130" stroke="white" stroke-width="1.5"/>
+          <line x1="80" y1="10" x2="80" y2="130" stroke="rgba(255,255,255,0.1)" stroke-width="0.8"/>
+          <line x1="130" y1="10" x2="130" y2="130" stroke="rgba(255,255,255,0.1)" stroke-width="0.8"/>
+          <line x1="180" y1="10" x2="180" y2="130" stroke="rgba(255,255,255,0.1)" stroke-width="0.8"/>
+          <line x1="30" y1="80" x2="230" y2="80" stroke="rgba(255,255,255,0.1)" stroke-width="0.8"/>
+          <line x1="30" y1="30" x2="230" y2="30" stroke="rgba(255,255,255,0.1)" stroke-width="0.8"/>
+          <!-- Points (1,5) (2,10) (3,15) — scaled -->
+          <circle cx="80" cy="105" r="5" fill="var(--acc)"/>
+          <circle cx="130" cy="80" r="5" fill="var(--acc)"/>
+          <circle cx="180" cy="55" r="5" fill="var(--acc)"/>
+          <!-- Line through points -->
+          <line x1="30" y1="130" x2="230" y2="30" stroke="var(--acc)" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <!-- Labels -->
+          <text x="92" y="100" fill="white" font-size="7.5" font-family="Fredoka One,cursive">(1,5)</text>
+          <text x="142" y="75" fill="white" font-size="7.5" font-family="Fredoka One,cursive">(2,10)</text>
+          <text x="188" y="50" fill="white" font-size="7.5" font-family="Fredoka One,cursive">(3,15)</text>
+          <text x="80" y="143" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Fredoka One,cursive">1</text>
+          <text x="130" y="143" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Fredoka One,cursive">2</text>
+          <text x="180" y="143" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Fredoka One,cursive">3</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Coordinate Rule</div><span class="formula-highlight">(x, y) → right x, up y</span></div>
+      <div class="explanation">Graph data as coordinate points to see patterns visually. If points form a straight line, there's a constant relationship between x and y. The pattern shows a proportional relationship.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Time vs. distance: (1,5), (2,10), (3,15)<br>Plot each point → they form a <strong>straight line</strong> (proportional!)</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">12. Sum/Difference from Graphs</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Stacked bar -->
+          <line x1="30" y1="120" x2="220" y2="120" stroke="white" stroke-width="1.5"/>
+          <line x1="30" y1="10" x2="30" y2="120" stroke="white" stroke-width="1.5"/>
+          <!-- Jan bar stacked -->
+          <rect x="50" y="72" width="50" height="48" fill="var(--acc)" rx="2"/>
+          <rect x="50" y="48" width="50" height="24" fill="#60d3fa" rx="2"/>
+          <text x="75" y="138" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Fredoka One,cursive">Jan</text>
+          <text x="75" y="100" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">16</text>
+          <text x="75" y="63" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">8</text>
+          <!-- Feb bar stacked -->
+          <rect x="130" y="80" width="50" height="40" fill="var(--acc)" rx="2"/>
+          <rect x="130" y="60" width="50" height="20" fill="#60d3fa" rx="2"/>
+          <text x="155" y="138" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Fredoka One,cursive">Feb</text>
+          <text x="155" y="103" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">13</text>
+          <text x="155" y="73" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">7</text>
+          <!-- Total annotation -->
+          <text x="75" y="40" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Jan = 24</text>
+          <text x="155" y="50" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Feb = 20</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Graph Calculation</div><span class="formula-highlight">Add bar segments for total; subtract for difference</span></div>
+      <div class="explanation">Stacked bar charts show two categories per bar. Add the segments to find the total for that group. Subtract corresponding bars to find differences between groups.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Jan = 16 + 8 = 24, Feb = 13 + 7 = 20<br>Total for two months = 24 + 20 = <strong>44</strong><br>Difference = 24 − 20 = <strong>4</strong></div>
+    </div>
+  </div>
+
+</div><!-- end medium -->
+
+<div class="section-heading section-hard">🔴 Hard</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">13. Multi-Step Fraction Line Plots</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="10" y1="110" x2="240" y2="110" stroke="white" stroke-width="1.5"/>
+          <line x1="15" y1="104" x2="15" y2="116" stroke="white" stroke-width="1.5"/>
+          <line x1="68" y1="104" x2="68" y2="116" stroke="white" stroke-width="1.5"/>
+          <line x1="121" y1="104" x2="121" y2="116" stroke="white" stroke-width="1.5"/>
+          <line x1="174" y1="104" x2="174" y2="116" stroke="white" stroke-width="1.5"/>
+          <line x1="227" y1="104" x2="227" y2="116" stroke="white" stroke-width="1.5"/>
+          <text x="15" y="128" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">1/4</text>
+          <text x="68" y="128" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">1/2</text>
+          <text x="121" y="128" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">3/4</text>
+          <text x="174" y="128" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">1</text>
+          <text x="227" y="128" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">5/4</text>
+          <!-- X marks with varying counts -->
+          <text x="15" y="97" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="15" y="81" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="68" y="97" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="68" y="81" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="68" y="65" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="121" y="97" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="174" y="97" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="174" y="81" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="125" y="20" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Fredoka One,cursive">Fabric measurements (yards)</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Line Plot Calculations</div><span class="formula-highlight">Sum all values; find differences</span></div>
+      <div class="explanation">To find the total from a line plot, add up all data values, multiplying each value by the number of X marks above it. To find differences, subtract one sum from another.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>2×(1/4) + 3×(1/2) + 1×(3/4) + 2×(1) =<br>1/2 + 3/2 + 3/4 + 2 = <strong>19/4 = 4¾ yards total</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">14. Variable Equations from Data (5.OA)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="10" width="240" height="120" rx="6" fill="rgba(0,0,0,0.3)" stroke="var(--acc)" stroke-width="1"/>
+          <rect x="5" y="10" width="240" height="22" rx="6" fill="rgba(96,165,250,0.2)"/>
+          <text x="80" y="25" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">Value</text>
+          <text x="175" y="25" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">Known</text>
+          <line x1="125" y1="10" x2="125" y2="130" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+          <text x="80" y="52" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">p = ?</text>
+          <text x="175" y="52" text-anchor="middle" fill="white" font-size="10" font-family="Nunito,sans-serif">missing</text>
+          <line x1="5" y1="58" x2="245" y2="58" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="80" y="78" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">8/5</text>
+          <text x="175" y="78" text-anchor="middle" fill="white" font-size="10" font-family="Nunito,sans-serif">subtract</text>
+          <line x1="5" y1="84" x2="245" y2="84" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="80" y="104" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">35/7</text>
+          <text x="175" y="104" text-anchor="middle" fill="white" font-size="10" font-family="Nunito,sans-serif">total</text>
+          <line x1="5" y1="110" x2="245" y2="110" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="125" y="128" text-anchor="middle" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">p − 8/5 = 35/7</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Data Equation</div><span class="formula-highlight">known + x = total → x = total − known</span></div>
+      <div class="explanation">When data shows a total and some known values with a missing piece, write an equation. Isolate the variable by using the inverse operation (if subtracted, add; if added, subtract).</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>p − 8/5 = 35/7<br>p = 35/7 + 8/5 = 175/35 + 56/35 = <strong>231/35 = 33/5</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">15. Interpreting Trends</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Line graph going up -->
+          <line x1="30" y1="130" x2="230" y2="130" stroke="white" stroke-width="1.5"/>
+          <line x1="30" y1="10" x2="30" y2="130" stroke="white" stroke-width="1.5"/>
+          <!-- Data points -->
+          <circle cx="60" cy="115" r="4" fill="var(--acc)"/>
+          <circle cx="95" cy="100" r="4" fill="var(--acc)"/>
+          <circle cx="130" cy="80" r="4" fill="var(--acc)"/>
+          <circle cx="165" cy="58" r="4" fill="var(--acc)"/>
+          <circle cx="200" cy="35" r="4" fill="var(--acc)"/>
+          <!-- Connect line -->
+          <polyline points="60,115 95,100 130,80 165,58 200,35" stroke="var(--acc)" stroke-width="2" fill="none"/>
+          <!-- Trend arrow -->
+          <line x1="60" y1="115" x2="210" y2="30" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <polygon points="206,27 214,28 210,36" fill="#4ade80"/>
+          <text x="220" y="30" fill="#4ade80" font-size="9" font-family="Fredoka One,cursive">↑ trend</text>
+          <!-- Axis labels -->
+          <text x="130" y="148" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Fredoka One,cursive">Study hours →</text>
+          <text x="15" y="75" fill="rgba(255,255,255,0.5)" font-size="7" font-family="Fredoka One,cursive" transform="rotate(-90,15,75)">Score →</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Trend Analysis</div><span class="formula-highlight">Increasing pattern → positive relationship</span></div>
+      <div class="explanation">A trend shows the general direction data moves. An upward trend means as x increases, y increases (positive relationship). Use the trend to make predictions beyond the given data points.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>More study hours → higher scores (upward trend).<br>Based on the trend: 5 study hours would predict a <strong>high score ≈ 95+</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">16. Statistical Questions</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Two question boxes -->
+          <rect x="5" y="10" width="240" height="55" rx="6" fill="rgba(231,76,60,0.1)" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="20" y="30" fill="#e74c3c" font-size="10" font-family="Fredoka One,cursive">✗ Not Statistical:</text>
+          <text x="15" y="50" fill="white" font-size="9" font-family="Nunito,sans-serif">"How old is my teacher?" → one answer</text>
+          <rect x="5" y="80" width="240" height="62" rx="6" fill="rgba(46,204,113,0.1)" stroke="#2ecc71" stroke-width="1.5"/>
+          <text x="20" y="100" fill="#2ecc71" font-size="10" font-family="Fredoka One,cursive">✓ Statistical:</text>
+          <text x="15" y="118" fill="white" font-size="9" font-family="Nunito,sans-serif">"How old are students in our class?"</text>
+          <text x="15" y="134" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Nunito,sans-serif">→ many answers that vary</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Statistical Question</div><span class="formula-highlight">Expects variability in answers</span></div>
+      <div class="explanation">A statistical question anticipates answers that vary across individuals. Non-statistical questions have a single definite answer. Statistical questions are the kind that can be answered by collecting data from a group.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"How old is my teacher?" ✗ (one answer)<br>"How old are students in our class?" ✓ (varied)<br>"What is 2 + 2?" ✗ vs "How many pets do students have?" ✓</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">17. Data-Supported Arguments</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Pie chart -->
+          <circle cx="80" cy="75" r="55" fill="rgba(0,0,0,0.3)" stroke="var(--acc)" stroke-width="1"/>
+          <!-- 60% slice for math -->
+          <path d="M 80 75 L 80 20 A 55 55 0 1 1 27 107 Z" fill="rgba(96,165,250,0.5)" stroke="var(--acc)" stroke-width="1.5"/>
+          <path d="M 80 75 L 27 107 A 55 55 0 0 1 80 20 Z" fill="rgba(255,255,255,0.1)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="70" y="70" fill="white" font-size="10" font-family="Fredoka One,cursive">60%</text>
+          <text x="70" y="83" fill="white" font-size="8" font-family="Fredoka One,cursive">Math</text>
+          <text x="110" y="105" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">40%</text>
+          <text x="110" y="118" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">Other</text>
+          <!-- Claim box -->
+          <rect x="155" y="20" width="90" height="50" rx="6" fill="rgba(96,165,250,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="200" y="38" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Fredoka One,cursive">CLAIM:</text>
+          <text x="200" y="53" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">Most students</text>
+          <text x="200" y="64" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">prefer math</text>
+          <line x1="155" y1="45" x2="135" y2="65" stroke="var(--acc)" stroke-width="1" stroke-dasharray="3,2"/>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Data Argument</div><span class="formula-highlight">Claim → Data Evidence → Conclusion</span></div>
+      <div class="explanation">When making claims from data, always cite specific numbers. State your claim, point to the specific data that supports it (exact percentage or value), and explain what it means in context.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Claim: "Most students prefer math"<br>Evidence: pie chart shows 60% chose math<br>Conclusion: <strong>60% &gt; 50%, so math is the majority preference ✓</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">18. Complex Comparison Problems</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Two tables side by side -->
+          <rect x="5" y="10" width="115" height="110" rx="4" fill="rgba(0,0,0,0.3)" stroke="var(--acc)" stroke-width="1"/>
+          <rect x="5" y="10" width="115" height="22" rx="4" fill="rgba(96,165,250,0.2)"/>
+          <text x="62" y="25" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Option A</text>
+          <text x="62" y="46" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">$12 for 4 items</text>
+          <text x="62" y="63" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">= $3.00/item</text>
+          <rect x="130" y="10" width="115" height="110" rx="4" fill="rgba(0,0,0,0.3)" stroke="#f97316" stroke-width="1"/>
+          <rect x="130" y="10" width="115" height="22" rx="4" fill="rgba(255,165,0,0.15)"/>
+          <text x="187" y="25" text-anchor="middle" fill="#f97316" font-size="9" font-family="Fredoka One,cursive">Option B</text>
+          <text x="187" y="46" text-anchor="middle" fill="white" font-size="9" font-family="Nunito,sans-serif">$15 for 6 items</text>
+          <text x="187" y="63" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">= $2.50/item</text>
+          <!-- Winner -->
+          <text x="187" y="88" text-anchor="middle" fill="#4ade80" font-size="11" font-family="Fredoka One,cursive">BETTER DEAL!</text>
+          <text x="125" y="135" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">$2.50 &lt; $3.00 per item</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Unit Price Comparison</div><span class="formula-highlight">Divide total by quantity for each option</span></div>
+      <div class="explanation">To compare value, find the unit rate (price per item, cost per ounce, etc.) for each option. Calculate by dividing total cost by quantity. The lower unit rate gives the better value.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Option A: $12 ÷ 4 = $3.00/item<br>Option B: $15 ÷ 6 = $2.50/item<br><strong>Option B is cheaper per item</strong></div>
+    </div>
+  </div>
+
+</div><!-- end hard -->
+
+<footer>SBA Math — Data Analysis · 5th Grade</footer>
+</div>
+
+<script>
+  const el = document.getElementById('ptsDisplay');
+  if(el) el.textContent = '⭐ ' + (parseInt(localStorage.getItem('kids_points')||'0'));
+</script>
+</body>
+</html>

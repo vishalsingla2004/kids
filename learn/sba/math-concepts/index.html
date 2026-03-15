@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔢 Concepts &amp; Procedures — SBA Math</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+
+  :root {
+    --c1: #0a1628;
+    --c2: #1a3a6b;
+    --acc: #60a5fa;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    background: linear-gradient(160deg, var(--c1) 0%, var(--c2) 60%, var(--c1) 100%);
+    background-attachment: fixed;
+    min-height: 100dvh;
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  .site-header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,22,40,0.93);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(96,165,250,0.25);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 18px; gap: 12px;
+  }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: rgba(255,255,255,0.6); text-decoration: none;
+    font-family: 'Fredoka One', cursive; font-size: 0.88rem;
+    padding: 5px 13px; border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.07); white-space: nowrap;
+    transition: color 0.15s, background 0.15s;
+  }
+  .back-link:hover { color: #fff; background: rgba(255,255,255,0.14); }
+
+  .header-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1rem, 4vw, 1.5rem);
+    color: var(--acc);
+    text-shadow: 0 2px 10px rgba(96,165,250,0.4);
+    text-align: center; flex: 1;
+  }
+
+  .pts-pill {
+    background: rgba(255,215,0,0.12);
+    border: 2px solid rgba(255,215,0,0.4);
+    border-radius: 50px; padding: 4px 13px;
+    color: #ffd700; font-family: 'Fredoka One', cursive;
+    font-size: 0.95rem; white-space: nowrap;
+  }
+
+  .print-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: rgba(255,255,255,0.6); font-family: 'Fredoka One', cursive;
+    font-size: 0.88rem; padding: 5px 13px; border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.07); cursor: pointer; white-space: nowrap;
+    transition: color 0.15s, background 0.15s;
+  }
+  .print-btn:hover { color: #fff; background: rgba(255,255,255,0.14); }
+
+  .page-wrap { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
+
+  .section-heading {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.2rem, 4vw, 1.7rem);
+    margin: 40px 0 18px; padding: 10px 20px;
+    border-radius: 14px; display: inline-flex; align-items: center; gap: 10px;
+  }
+  .section-easy   { background: rgba(46,204,113,0.15); color: #2ecc71; border: 2px solid rgba(46,204,113,0.35); }
+  .section-medium { background: rgba(230,126,34,0.15); color: #e67e22; border: 2px solid rgba(230,126,34,0.35); }
+  .section-hard   { background: rgba(231,76,60,0.15);  color: #e74c3c; border: 2px solid rgba(231,76,60,0.35); }
+
+  .cards-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 620px) { .cards-grid { grid-template-columns: 1fr 1fr; } }
+
+  .concept-card {
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(96,165,250,0.2);
+    border-radius: 20px; overflow: hidden;
+    box-shadow: 0 6px 28px rgba(0,0,0,0.35);
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .concept-card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(96,165,250,0.18); }
+
+  .card-title-bar {
+    background: rgba(96,165,250,0.12);
+    border-bottom: 1px solid rgba(96,165,250,0.2);
+    padding: 12px 16px; font-family: 'Fredoka One', cursive;
+    font-size: clamp(1rem, 3.5vw, 1.2rem); color: var(--acc);
+  }
+
+  .card-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+  .diagram-wrap {
+    background: rgba(0,0,0,0.35); border-radius: 12px;
+    border: 1px solid rgba(96,165,250,0.15);
+    display: flex; align-items: center; justify-content: center;
+    padding: 8px; overflow: hidden;
+  }
+  .diagram-wrap svg { width: 100%; max-width: 280px; height: auto; display: block; }
+
+  .formula-box {
+    background: rgba(10,22,40,0.8);
+    border: 2px solid var(--acc); border-radius: 12px;
+    padding: 12px 16px; font-family: 'Fredoka One', cursive;
+    font-size: clamp(0.95rem, 3vw, 1.15rem); color: #fff;
+    text-align: center; line-height: 1.5;
+  }
+  .formula-label { font-size: 0.78rem; color: var(--acc); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; font-family: 'Nunito', sans-serif; }
+  .formula-highlight { color: var(--acc); font-size: 1.1em; }
+
+  .explanation { font-size: clamp(0.85rem, 2.8vw, 0.97rem); color: rgba(255,255,255,0.82); line-height: 1.6; }
+  .explanation strong { color: #fff; }
+
+  .example-box {
+    background: rgba(46,204,113,0.07); border-left: 3px solid #2ecc71;
+    border-radius: 0 10px 10px 0; padding: 10px 14px;
+    font-size: clamp(0.82rem, 2.6vw, 0.93rem);
+    color: rgba(255,255,255,0.85); line-height: 1.6;
+  }
+  .ex-label { font-family: 'Fredoka One', cursive; color: #2ecc71; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px; }
+  .example-box strong { color: #4ade80; }
+
+  footer { text-align: center; margin-top: 56px; color: rgba(255,255,255,0.2); font-size: 0.78rem; font-family: 'Nunito', sans-serif; }
+
+  @media print {
+    @page { margin: 1cm; }
+    body { background: white !important; color: #000 !important; font-size: 8.5pt !important; }
+    .site-header { position: static !important; background: none !important; backdrop-filter: none !important; border: none !important; box-shadow: none !important; padding: 4px 0 !important; }
+    .back-link, .pts-pill, .print-btn { display: none !important; }
+    .header-title { color: #000 !important; font-size: 12pt !important; }
+    .page-wrap { max-width: 100% !important; padding: 4px 0 !important; }
+    .cards-grid { columns: 2; display: block; gap: 0; }
+    .cards-grid .concept-card { break-inside: avoid; display: inline-block; width: 100%; margin-bottom: 6px; }
+    .section-heading { background: #f0f0f0 !important; color: #333 !important; border-color: #ccc !important; font-size: 9pt !important; padding: 4px 10px !important; margin: 8px 0 4px !important; column-span: all; }
+    .concept-card { box-shadow: none !important; background: #fff !important; border-color: #ccc !important; border-radius: 4px !important; }
+    .card-title-bar { background: #f0f0f0 !important; border-color: #ccc !important; color: #000 !important; padding: 4px 8px !important; font-size: 8pt !important; }
+    .card-body { color: #000 !important; padding: 6px !important; gap: 4px !important; }
+    .formula-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; padding: 4px 6px !important; font-size: 8pt !important; }
+    .example-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; padding: 4px 6px !important; font-size: 7.5pt !important; }
+    svg { max-width: 100% !important; max-height: 80px !important; display: block !important; }
+    svg text { fill: #000 !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="back-link" href="../">← SBA Hub</a>
+  <span class="header-title">🔢 Concepts &amp; Procedures</span>
+  <span class="pts-pill" id="ptsDisplay">⭐ 0</span>
+  <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+</header>
+
+<div class="page-wrap">
+
+<!-- EASY -->
+<div class="section-heading section-easy">🟢 Easy</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">1. Reading Decimals (5.NBT.3a)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Column headers -->
+          <rect x="5" y="10" width="55" height="24" rx="4" fill="rgba(96,165,250,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <rect x="65" y="10" width="55" height="24" rx="4" fill="rgba(96,165,250,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <rect x="125" y="10" width="55" height="24" rx="4" fill="rgba(96,165,250,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <rect x="185" y="10" width="55" height="24" rx="4" fill="rgba(96,165,250,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="32" y="27" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Ones</text>
+          <text x="92" y="27" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Tenths</text>
+          <text x="152" y="27" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">Hundredths</text>
+          <text x="212" y="27" text-anchor="middle" fill="white" font-size="7.5" font-family="Fredoka One,cursive">Thousandths</text>
+          <!-- Values row -->
+          <rect x="5" y="40" width="55" height="32" rx="4" fill="rgba(255,255,255,0.06)" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+          <rect x="65" y="40" width="55" height="32" rx="4" fill="rgba(255,255,255,0.06)" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+          <rect x="125" y="40" width="55" height="32" rx="4" fill="rgba(255,255,255,0.06)" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+          <rect x="185" y="40" width="55" height="32" rx="4" fill="rgba(255,255,255,0.06)" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+          <text x="32" y="62" text-anchor="middle" fill="var(--acc)" font-size="18" font-family="Fredoka One,cursive">3</text>
+          <text x="92" y="62" text-anchor="middle" fill="var(--acc)" font-size="18" font-family="Fredoka One,cursive">1</text>
+          <text x="152" y="62" text-anchor="middle" fill="var(--acc)" font-size="18" font-family="Fredoka One,cursive">4</text>
+          <text x="212" y="62" text-anchor="middle" fill="var(--acc)" font-size="18" font-family="Fredoka One,cursive">2</text>
+          <!-- Decimal point -->
+          <circle cx="62" cy="68" r="3" fill="white"/>
+          <!-- Expanded form -->
+          <text x="125" y="105" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">3.142 = 3 + 0.1 + 0.04 + 0.002</text>
+          <line x1="10" y1="115" x2="240" y2="115" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+          <text x="125" y="135" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9.5" font-family="Nunito,sans-serif">Decimal point separates ones from tenths</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Place Value</div>
+        <span class="formula-highlight">3.142 = 3 + 0.1 + 0.04 + 0.002</span>
+      </div>
+      <div class="explanation">Each digit has a place value. The decimal point separates the whole number from the fractional part. Read the decimal as "and" when speaking: 3.142 = "three and one hundred forty-two thousandths."</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        Write 4.075 in words → <strong>"four and seventy-five thousandths"</strong><br>
+        4 = ones, 0 = tenths, 7 = hundredths, 5 = thousandths
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">2. Multiply Whole Numbers (5.NBT.5)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Stacked multiplication -->
+          <text x="125" y="30" text-anchor="middle" fill="white" font-size="18" font-family="Fredoka One,cursive">346</text>
+          <text x="125" y="52" text-anchor="middle" fill="white" font-size="18" font-family="Fredoka One,cursive">× 27</text>
+          <line x1="60" y1="58" x2="190" y2="58" stroke="var(--acc)" stroke-width="1.5"/>
+          <!-- Partial products -->
+          <text x="125" y="78" text-anchor="middle" fill="var(--acc)" font-size="15" font-family="Fredoka One,cursive">2,422</text>
+          <text x="50" y="78" text-anchor="end" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">346×7</text>
+          <text x="125" y="98" text-anchor="middle" fill="var(--acc)" font-size="15" font-family="Fredoka One,cursive">6,920</text>
+          <text x="50" y="98" text-anchor="end" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Nunito,sans-serif">346×20</text>
+          <line x1="60" y1="105" x2="190" y2="105" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="128" text-anchor="middle" fill="white" font-size="18" font-family="Fredoka One,cursive">9,342</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Standard Algorithm</div>
+        <span class="formula-highlight">2,684 × 24 = 64,416</span>
+      </div>
+      <div class="explanation">Multiply by each digit separately, shifting left for tens. Then add all partial products together. Always line up digits by place value.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        346 × 27:<br>
+        346 × 7 = <strong>2,422</strong><br>
+        346 × 20 = <strong>6,920</strong><br>
+        Total = <strong>9,342</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">3. Add/Subtract Fractions (5.NF.1)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Fraction bar 1/3 -->
+          <rect x="10" y="40" width="100" height="30" rx="4" fill="rgba(96,165,250,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <rect x="10" y="40" width="33" height="30" rx="4" fill="rgba(96,165,250,0.5)" stroke="var(--acc)" stroke-width="1.5"/>
+          <line x1="43" y1="40" x2="43" y2="70" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="76" y1="40" x2="76" y2="70" stroke="var(--acc)" stroke-width="1"/>
+          <text x="60" y="90" text-anchor="middle" fill="white" font-size="13" font-family="Fredoka One,cursive">1/3</text>
+          <!-- Fraction bar 1/4 -->
+          <rect x="130" y="40" width="108" height="30" rx="4" fill="rgba(96,165,250,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <rect x="130" y="40" width="27" height="30" rx="4" fill="rgba(96,165,250,0.5)" stroke="var(--acc)" stroke-width="1.5"/>
+          <line x1="157" y1="40" x2="157" y2="70" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="184" y1="40" x2="184" y2="70" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="211" y1="40" x2="211" y2="70" stroke="var(--acc)" stroke-width="1"/>
+          <text x="184" y="90" text-anchor="middle" fill="white" font-size="13" font-family="Fredoka One,cursive">1/4</text>
+          <!-- Plus sign -->
+          <text x="122" y="60" text-anchor="middle" fill="white" font-size="18" font-family="Fredoka One,cursive">+</text>
+          <!-- Common denom explanation -->
+          <text x="125" y="120" text-anchor="middle" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">LCD = 12</text>
+          <text x="125" y="140" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="Fredoka One,cursive">4/12 + 3/12 = 7/12</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Common Denominators</div>
+        <span class="formula-highlight">a/b + c/d = (ad + bc) / bd</span>
+      </div>
+      <div class="explanation">To add or subtract fractions, they must have the same denominator (bottom number). Find the Least Common Denominator (LCD), then convert both fractions before adding.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        1/3 + 1/4 → LCD = 12<br>
+        = <strong>4/12 + 3/12 = 7/12</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">4. Fraction = Division (5.NF.3)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 3 pizzas -->
+          <circle cx="45" cy="65" r="28" fill="rgba(230,126,34,0.3)" stroke="#e67e22" stroke-width="1.5"/>
+          <circle cx="125" cy="65" r="28" fill="rgba(230,126,34,0.3)" stroke="#e67e22" stroke-width="1.5"/>
+          <circle cx="205" cy="65" r="28" fill="rgba(230,126,34,0.3)" stroke="#e67e22" stroke-width="1.5"/>
+          <text x="45" y="70" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">Pizza 1</text>
+          <text x="125" y="70" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">Pizza 2</text>
+          <text x="205" y="70" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">Pizza 3</text>
+          <!-- Label -->
+          <text x="125" y="115" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">3 pizzas ÷ 4 people</text>
+          <text x="125" y="135" text-anchor="middle" fill="var(--acc)" font-size="14" font-family="Fredoka One,cursive">= 3/4 per person</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Key Relationship</div>
+        <span class="formula-highlight">a ÷ b = a/b</span>
+      </div>
+      <div class="explanation">Any fraction can be read as a division problem. The numerator (top) is divided by the denominator (bottom). This helps understand what fractions mean in real life.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        5 sandwiches shared by 6 people:<br>
+        5 ÷ 6 = <strong>5/6</strong> — each person gets 5/6 of a sandwich
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">5. Patterns (5.OA.3)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Rule A number line -->
+          <text x="10" y="40" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">Rule A: +3</text>
+          <line x1="10" y1="55" x2="240" y2="55" stroke="var(--acc)" stroke-width="1.5"/>
+          <circle cx="30" cy="55" r="5" fill="var(--acc)"/><text x="30" y="74" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">0</text>
+          <circle cx="88" cy="55" r="5" fill="var(--acc)"/><text x="88" y="74" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">3</text>
+          <circle cx="146" cy="55" r="5" fill="var(--acc)"/><text x="146" y="74" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">6</text>
+          <circle cx="204" cy="55" r="5" fill="var(--acc)"/><text x="204" y="74" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">9</text>
+          <!-- Rule B number line -->
+          <text x="10" y="100" fill="#f97316" font-size="11" font-family="Fredoka One,cursive">Rule B: +6</text>
+          <line x1="10" y1="115" x2="240" y2="115" stroke="#f97316" stroke-width="1.5"/>
+          <circle cx="30" cy="115" r="5" fill="#f97316"/><text x="30" y="134" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">0</text>
+          <circle cx="88" cy="115" r="5" fill="#f97316"/><text x="88" y="134" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">6</text>
+          <circle cx="146" cy="115" r="5" fill="#f97316"/><text x="146" y="134" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">12</text>
+          <circle cx="204" cy="115" r="5" fill="#f97316"/><text x="204" y="134" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">18</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Pattern Relationship</div>
+        <span class="formula-highlight">If Rule A gives x, Rule B gives 2x</span>
+      </div>
+      <div class="explanation">Two patterns can be generated from different rules starting at the same point. Compare them to find the relationship. Rule B always produces numbers twice as large as Rule A.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        Rule A (+3): <strong>0, 3, 6, 9, 12…</strong><br>
+        Rule B (+6): <strong>0, 6, 12, 18, 24…</strong><br>
+        Each Rule B term = 2 × Rule A term
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">6. Plot Coordinates (5.G.1)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Grid -->
+          <line x1="30" y1="130" x2="230" y2="130" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+          <line x1="30" y1="97" x2="230" y2="97" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+          <line x1="30" y1="64" x2="230" y2="64" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+          <line x1="30" y1="31" x2="230" y2="31" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+          <line x1="30" y1="10" x2="30" y2="130" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+          <line x1="63" y1="10" x2="63" y2="130" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+          <line x1="96" y1="10" x2="96" y2="130" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+          <line x1="129" y1="10" x2="129" y2="130" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+          <line x1="162" y1="10" x2="162" y2="130" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+          <!-- Axes arrows -->
+          <polygon points="230,127 238,130 230,133" fill="var(--acc)"/>
+          <polygon points="27,10 30,2 33,10" fill="var(--acc)"/>
+          <!-- Axis labels -->
+          <text x="230" y="145" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">x</text>
+          <text x="14" y="14" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">y</text>
+          <!-- Tick labels -->
+          <text x="63" y="143" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">1</text>
+          <text x="96" y="143" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">2</text>
+          <text x="129" y="143" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">3</text>
+          <text x="162" y="143" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">4</text>
+          <text x="20" y="133" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">0</text>
+          <text x="20" y="100" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">1</text>
+          <text x="20" y="67" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">2</text>
+          <text x="20" y="34" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Fredoka One,cursive">3</text>
+          <!-- Point (3,2) -->
+          <circle cx="129" cy="64" r="6" fill="var(--acc)" stroke="white" stroke-width="1.5"/>
+          <!-- Dashed guide lines -->
+          <line x1="129" y1="130" x2="129" y2="64" stroke="rgba(96,165,250,0.4)" stroke-width="1" stroke-dasharray="4,3"/>
+          <line x1="30" y1="64" x2="129" y2="64" stroke="rgba(96,165,250,0.4)" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="140" y="58" fill="white" font-size="10" font-family="Fredoka One,cursive">(3,2)</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Coordinate Rules</div>
+        <span class="formula-highlight">Point (x, y): x = right, y = up</span>
+      </div>
+      <div class="explanation">In the first quadrant, both x and y are positive. Always start at (0,0), go right x units, then go up y units. The x-axis is horizontal; the y-axis is vertical.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        Plot (3, 4): go <strong>right 3</strong>, then <strong>up 4</strong><br>
+        Plot (0, 2): stay at x=0, go up 2
+      </div>
+    </div>
+  </div>
+
+</div><!-- end easy cards-grid -->
+
+<!-- MEDIUM -->
+<div class="section-heading section-medium">🟡 Medium</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">7. Multiply Fractions (5.NF.4)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Area model rectangle for 2/3 × 3/4 -->
+          <rect x="20" y="20" width="120" height="90" rx="4" fill="rgba(96,165,250,0.1)" stroke="var(--acc)" stroke-width="1.5"/>
+          <!-- Divide into thirds vertically -->
+          <line x1="20" y1="50" x2="140" y2="50" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="20" y1="80" x2="140" y2="80" stroke="var(--acc)" stroke-width="1"/>
+          <!-- Divide into quarters horizontally -->
+          <line x1="50" y1="20" x2="50" y2="110" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="80" y1="20" x2="80" y2="110" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="110" y1="20" x2="110" y2="110" stroke="var(--acc)" stroke-width="1"/>
+          <!-- Shaded region 2/3 × 3/4 = 6/12 -->
+          <rect x="20" y="20" width="90" height="60" fill="rgba(96,165,250,0.4)"/>
+          <!-- Labels -->
+          <text x="80" y="130" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">← 3/4 →</text>
+          <text x="8" y="65" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive" transform="rotate(-90,8,65)">2/3</text>
+          <text x="190" y="65" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">6 of 12</text>
+          <text x="190" y="85" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">cells = 1/2</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Fraction Multiplication</div>
+        <span class="formula-highlight">a/b × c/d = ac / bd</span>
+      </div>
+      <div class="explanation">Multiply numerators together and denominators together. Use an area model: divide a rectangle into rows for one fraction and columns for the other. The shaded overlap is the product.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        2/3 × 3/4 = (2×3)/(3×4) = <strong>6/12 = 1/2</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">8. Compare Fractions by Scaling (5.NF.5a)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Number line -->
+          <line x1="20" y1="75" x2="230" y2="75" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+          <!-- 6 marked -->
+          <circle cx="125" cy="75" r="5" fill="white"/>
+          <text x="125" y="68" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">6</text>
+          <!-- 6 × 1/3 = 2 -->
+          <circle cx="62" cy="75" r="5" fill="var(--acc)"/>
+          <text x="62" y="95" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">6 × 1/3 = 2</text>
+          <line x1="62" y1="75" x2="125" y2="75" stroke="var(--acc)" stroke-width="2" stroke-dasharray="4,3"/>
+          <text x="93" y="65" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Fredoka One,cursive">shrinks</text>
+          <!-- 6 × 4/3 = 8 -->
+          <circle cx="188" cy="75" r="5" fill="#f97316"/>
+          <text x="188" y="95" text-anchor="middle" fill="#f97316" font-size="9" font-family="Fredoka One,cursive">6 × 4/3 = 8</text>
+          <line x1="125" y1="75" x2="188" y2="75" stroke="#f97316" stroke-width="2" stroke-dasharray="4,3"/>
+          <text x="158" y="65" text-anchor="middle" fill="#f97316" font-size="8" font-family="Fredoka One,cursive">grows</text>
+          <!-- Annotations -->
+          <text x="125" y="130" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="Fredoka One,cursive">× (fraction &lt; 1) → smaller</text>
+          <text x="125" y="145" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="Fredoka One,cursive">× (fraction &gt; 1) → larger</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Scaling Rule</div>
+        <span class="formula-highlight">If n &gt; 1, then a × n &gt; a</span><br>
+        <span style="font-size:0.85em;color:rgba(255,255,255,0.7)">If n &lt; 1, then a × n &lt; a</span>
+      </div>
+      <div class="explanation">Multiplying by a fraction less than 1 makes the result smaller. Multiplying by a fraction greater than 1 makes it larger. Use this to predict whether a product is bigger or smaller without calculating.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        8 × 3/4 = <strong>6</strong> (smaller than 8, because 3/4 &lt; 1)<br>
+        8 × 5/4 = <strong>10</strong> (larger than 8, because 5/4 &gt; 1)
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">9. Divide Unit Fractions (5.NF.7)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 3 bars representing 3 wholes -->
+          <rect x="10" y="30" width="230" height="28" rx="4" fill="rgba(96,165,250,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <!-- Divide into 12 quarters -->
+          <rect x="10" y="30" width="19" height="28" fill="rgba(96,165,250,0.45)"/>
+          <line x1="29" y1="30" x2="29" y2="58" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="48" y1="30" x2="48" y2="58" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="67" y1="30" x2="67" y2="58" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="86" y1="30" x2="86" y2="58" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="105" y1="30" x2="105" y2="58" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="124" y1="30" x2="124" y2="58" stroke="white" stroke-width="1.5"/>
+          <line x1="143" y1="30" x2="143" y2="58" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="162" y1="30" x2="162" y2="58" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="181" y1="30" x2="181" y2="58" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="200" y1="30" x2="200" y2="58" stroke="var(--acc)" stroke-width="1"/>
+          <line x1="219" y1="30" x2="219" y2="58" stroke="white" stroke-width="1.5"/>
+          <text x="125" y="80" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">3 ÷ 1/4 = 12 sections</text>
+          <text x="10" y="110" fill="rgba(255,255,255,0.6)" font-size="10" font-family="Fredoka One,cursive">|— whole 1 —|— whole 2 —|— whole 3 —|</text>
+          <text x="125" y="140" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">3 × 4 = 12 (flip and multiply)</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Unit Fraction Division</div>
+        <span class="formula-highlight">a ÷ (1/n) = a × n</span>
+      </div>
+      <div class="explanation">To divide by a unit fraction, multiply by its reciprocal. Think: "How many 1/4s fit inside 3?" Each whole has 4 quarters, so 3 wholes have 12 quarters.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        3 ÷ 1/4 = 3 × 4 = <strong>12</strong><br>
+        1/4 ÷ 3 = 1/4 × 1/3 = <strong>1/12</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">10. Volume Formula (5.MD.5)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 3D box isometric -->
+          <!-- Front face -->
+          <polygon points="50,110 150,110 150,50 50,50" fill="rgba(96,165,250,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <!-- Top face -->
+          <polygon points="50,50 150,50 180,20 80,20" fill="rgba(96,165,250,0.35)" stroke="var(--acc)" stroke-width="1.5"/>
+          <!-- Right face -->
+          <polygon points="150,110 180,80 180,20 150,50" fill="rgba(96,165,250,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <!-- Dimension labels -->
+          <line x1="50" y1="118" x2="150" y2="118" stroke="white" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="100" y="130" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">l = 7</text>
+          <line x1="158" y1="110" x2="188" y2="80" stroke="white" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="195" y="100" fill="white" font-size="11" font-family="Fredoka One,cursive">w = 2</text>
+          <line x1="155" y1="50" x2="155" y2="110" stroke="white" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="162" y="85" fill="white" font-size="11" font-family="Fredoka One,cursive">h = 4</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Volume Formulas</div>
+        <span class="formula-highlight">V = l × w × h</span><br>
+        <span style="font-size:0.85em;color:rgba(255,255,255,0.7)">or V = B × h (B = base area)</span>
+      </div>
+      <div class="explanation">Volume measures the space inside a 3D shape in cubic units. Multiply length × width to get the base area (B), then multiply by height to stack the layers.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        Box 7 × 2 × 4:<br>
+        V = 7 × 2 × 4 = <strong>56 cubic units</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">11. Line Plots with Fractions (5.MD.2)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Number line -->
+          <line x1="20" y1="110" x2="230" y2="110" stroke="white" stroke-width="1.5"/>
+          <!-- Tick marks -->
+          <line x1="40" y1="105" x2="40" y2="115" stroke="white" stroke-width="1.5"/>
+          <line x1="88" y1="105" x2="88" y2="115" stroke="white" stroke-width="1.5"/>
+          <line x1="136" y1="105" x2="136" y2="115" stroke="white" stroke-width="1.5"/>
+          <line x1="184" y1="105" x2="184" y2="115" stroke="white" stroke-width="1.5"/>
+          <line x1="232" y1="105" x2="232" y2="115" stroke="white" stroke-width="1.5"/>
+          <!-- Labels -->
+          <text x="40" y="128" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">1/4</text>
+          <text x="88" y="128" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">1/2</text>
+          <text x="136" y="128" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">3/4</text>
+          <text x="184" y="128" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">1</text>
+          <!-- X marks stacked -->
+          <text x="40" y="97" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="88" y="97" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="88" y="83" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="88" y="69" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="136" y="97" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="136" y="83" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="184" y="97" text-anchor="middle" fill="var(--acc)" font-size="12" font-family="Fredoka One,cursive">X</text>
+          <text x="125" y="20" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="Fredoka One,cursive">Cups of water measured</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Line Plot Rule</div>
+        <span class="formula-highlight">total = sum of all data values</span>
+      </div>
+      <div class="explanation">A line plot displays data along a number line. Each X mark represents one data point. Stack X marks above a value when multiple data points share the same value. Use fractions for measurements.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        3 students measured 1/2 cup, 2 measured 3/4 cup.<br>
+        Plot <strong>3 X's above 1/2</strong> and <strong>2 X's above 3/4</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">12. Powers of 10 (5.NBT.2)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Table -->
+          <rect x="10" y="15" width="230" height="120" rx="6" fill="rgba(0,0,0,0.3)" stroke="var(--acc)" stroke-width="1"/>
+          <!-- Header row -->
+          <rect x="10" y="15" width="230" height="25" rx="6" fill="rgba(96,165,250,0.2)"/>
+          <text x="75" y="32" text-anchor="middle" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">Power</text>
+          <text x="175" y="32" text-anchor="middle" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">Value</text>
+          <line x1="125" y1="15" x2="125" y2="135" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+          <!-- Data rows -->
+          <text x="75" y="57" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">10¹</text>
+          <text x="175" y="57" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">10</text>
+          <line x1="10" y1="65" x2="240" y2="65" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="75" y="85" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">10²</text>
+          <text x="175" y="85" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">100</text>
+          <line x1="10" y1="93" x2="240" y2="93" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="75" y="113" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">10³</text>
+          <text x="175" y="113" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">1,000</text>
+          <line x1="10" y1="121" x2="240" y2="121" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="75" y="134" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">10⁴</text>
+          <text x="175" y="134" text-anchor="middle" fill="white" font-size="12" font-family="Fredoka One,cursive">10,000</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Place Value Shift</div>
+        <span class="formula-highlight">n × 10ᵖ shifts decimal p places right</span>
+      </div>
+      <div class="explanation">Each power of 10 moves the decimal point one place to the right when multiplying (or left when dividing). The exponent tells you how many zeros follow the 1.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        4.5 × 10³ = <strong>4,500</strong> (move decimal 3 right)<br>
+        4.5 ÷ 10² = <strong>0.045</strong> (move decimal 2 left)
+      </div>
+    </div>
+  </div>
+
+</div><!-- end medium cards-grid -->
+
+<!-- HARD -->
+<div class="section-heading section-hard">🔴 Hard</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">13. Decimal Operations (5.NBT.7)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Decimal multiplication layout -->
+          <text x="120" y="35" text-anchor="middle" fill="white" font-size="18" font-family="Fredoka One,cursive">2.4</text>
+          <text x="120" y="58" text-anchor="middle" fill="white" font-size="18" font-family="Fredoka One,cursive">× 1.5</text>
+          <line x1="50" y1="65" x2="190" y2="65" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="120" y="85" text-anchor="middle" fill="var(--acc)" font-size="14" font-family="Fredoka One,cursive">1.20 (2.4 × 0.5)</text>
+          <text x="120" y="105" text-anchor="middle" fill="var(--acc)" font-size="14" font-family="Fredoka One,cursive">2.40 (2.4 × 1.0)</text>
+          <line x1="50" y1="112" x2="190" y2="112" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="120" y="133" text-anchor="middle" fill="white" font-size="16" font-family="Fredoka One,cursive">= 3.60</text>
+          <!-- Decimal place count annotation -->
+          <text x="205" y="35" fill="rgba(255,215,0,0.8)" font-size="9" font-family="Fredoka One,cursive">1 dp</text>
+          <text x="205" y="58" fill="rgba(255,215,0,0.8)" font-size="9" font-family="Fredoka One,cursive">1 dp</text>
+          <text x="195" y="133" fill="rgba(255,215,0,0.8)" font-size="9" font-family="Fredoka One,cursive">2 dp</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Decimal Operations</div>
+        <span class="formula-highlight">+/−: Line up decimal points</span><br>
+        <span style="font-size:0.85em;color:rgba(255,255,255,0.7)">×: Count total decimal places</span>
+      </div>
+      <div class="explanation">For addition and subtraction, always line up decimal points before computing. For multiplication, count the total decimal places in both factors — the product has that many decimal places.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        2.4 × 1.5: 24 × 15 = 360, then 2 decimal places → <strong>3.60</strong><br>
+        3.75 + 1.5 = <strong>5.25</strong> (line up decimal points)
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">14. Real-World Fraction Multiplication (5.NF.6)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Rectangle garden -->
+          <rect x="30" y="30" width="110" height="90" rx="4" fill="rgba(46,204,113,0.15)" stroke="#4ade80" stroke-width="1.5"/>
+          <!-- Dimension labels -->
+          <text x="85" y="140" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">2½ ft</text>
+          <text x="15" y="78" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive" transform="rotate(-90,15,78)">1⅓ ft</text>
+          <!-- Conversion annotation -->
+          <text x="180" y="55" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">2½ = 5/2</text>
+          <text x="180" y="73" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">1⅓ = 4/3</text>
+          <line x1="170" y1="82" x2="230" y2="82" stroke="rgba(96,165,250,0.4)" stroke-width="1"/>
+          <text x="200" y="98" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">5/2 × 4/3</text>
+          <text x="200" y="115" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">= 20/6</text>
+          <text x="200" y="132" text-anchor="middle" fill="#4ade80" font-size="10" font-family="Fredoka One,cursive">= 3⅓ sq ft</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Mixed Number Multiplication</div>
+        <span class="formula-highlight">Convert to improper fractions first</span><br>
+        <span style="font-size:0.85em;color:rgba(255,255,255,0.7)">5/2 × 4/3 = 20/6 = 3⅓</span>
+      </div>
+      <div class="explanation">To multiply mixed numbers, first convert each to an improper fraction. Then multiply numerators together and denominators together. Simplify the result back to a mixed number if needed.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        Garden 2½ ft × 1⅓ ft:<br>
+        5/2 × 4/3 = 20/6 = <strong>3⅓ sq ft</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">15. Classify 2D Shapes (5.G.3/4)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Nested hierarchy boxes -->
+          <rect x="5" y="10" width="240" height="130" rx="8" fill="rgba(96,165,250,0.08)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="28" text-anchor="middle" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">Quadrilaterals (4 sides)</text>
+          <rect x="20" y="35" width="210" height="95" rx="6" fill="rgba(96,165,250,0.1)" stroke="rgba(96,165,250,0.5)" stroke-width="1.2"/>
+          <text x="125" y="52" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10" font-family="Fredoka One,cursive">Parallelograms (2 pairs parallel sides)</text>
+          <rect x="35" y="58" width="180" height="62" rx="6" fill="rgba(96,165,250,0.12)" stroke="rgba(96,165,250,0.4)" stroke-width="1.2"/>
+          <text x="125" y="74" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10" font-family="Fredoka One,cursive">Rectangles (4 right angles)</text>
+          <rect x="65" y="80" width="120" height="32" rx="6" fill="rgba(96,165,250,0.2)" stroke="rgba(96,165,250,0.6)" stroke-width="1.2"/>
+          <text x="125" y="100" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">Squares (4 equal sides)</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Shape Hierarchy</div>
+        <span class="formula-highlight">A square is always a rectangle</span><br>
+        <span style="font-size:0.85em;color:rgba(255,255,255,0.7)">A rectangle is sometimes a square</span>
+      </div>
+      <div class="explanation">Shapes fit in a hierarchy. A more specific shape inherits all properties of the broader category. Every square has 4 right angles AND 4 equal sides, so it qualifies as both a rectangle and a rhombus.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        "Is a square always a rectangle?" <strong>YES</strong><br>
+        All 4 angles are 90° — that's what makes it a rectangle.<br>
+        "Is a rectangle always a square?" <strong>NO</strong> — sides may be unequal.
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">16. Composite Volume (5.MD.5c)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- L-shaped solid - box 1 (larger) -->
+          <polygon points="20,130 100,130 100,80 20,80" fill="rgba(96,165,250,0.25)" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="20,80 60,50 140,50 100,80" fill="rgba(96,165,250,0.35)" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="100,130 140,100 140,50 100,80" fill="rgba(96,165,250,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <!-- Box 2 (smaller, stacked) -->
+          <polygon points="100,80 160,80 160,55 100,55" fill="rgba(255,165,0,0.25)" stroke="#f97316" stroke-width="1.5"/>
+          <polygon points="100,55 130,35 190,35 160,55" fill="rgba(255,165,0,0.35)" stroke="#f97316" stroke-width="1.5"/>
+          <polygon points="160,80 190,60 190,35 160,55" fill="rgba(255,165,0,0.15)" stroke="#f97316" stroke-width="1.5"/>
+          <!-- Labels -->
+          <text x="55" y="115" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">V₁ = 3×3×4</text>
+          <text x="145" y="72" text-anchor="middle" fill="#f97316" font-size="10" font-family="Fredoka One,cursive">V₂ = 2×2×3</text>
+          <text x="200" y="130" fill="white" font-size="10" font-family="Fredoka One,cursive">Total = 36+12</text>
+          <text x="200" y="145" fill="white" font-size="10" font-family="Fredoka One,cursive">= 48 cu</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Composite Volume</div>
+        <span class="formula-highlight">V_total = V₁ + V₂</span>
+      </div>
+      <div class="explanation">For irregular 3D shapes, split them into rectangular prisms (boxes) that don't overlap. Calculate each box's volume separately, then add them together for the total volume.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        Box 1: 3×3×4 = 36 cubic units<br>
+        Box 2: 2×2×3 = 12 cubic units<br>
+        Total: <strong>36 + 12 = 48 cubic units</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">17. Order of Operations (5.OA.1/2)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Two expression trees side by side -->
+          <!-- Left: (8+4)×3 = 36 -->
+          <rect x="5" y="10" width="115" height="130" rx="6" fill="rgba(96,165,250,0.07)" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+          <text x="62" y="28" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">(8+4) × 3</text>
+          <text x="62" y="50" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Nunito,sans-serif">Step 1: (8+4) = 12</text>
+          <text x="62" y="68" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Nunito,sans-serif">Step 2: 12 × 3</text>
+          <text x="62" y="90" text-anchor="middle" fill="#4ade80" font-size="16" font-family="Fredoka One,cursive">= 36</text>
+          <text x="62" y="110" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">Parentheses first</text>
+          <!-- Right: 8+4×3 = 20 -->
+          <rect x="130" y="10" width="115" height="130" rx="6" fill="rgba(231,76,60,0.07)" stroke="rgba(231,76,60,0.3)" stroke-width="1"/>
+          <text x="188" y="28" text-anchor="middle" fill="#e74c3c" font-size="10" font-family="Fredoka One,cursive">8 + 4 × 3</text>
+          <text x="188" y="50" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Nunito,sans-serif">Step 1: 4 × 3 = 12</text>
+          <text x="188" y="68" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Nunito,sans-serif">Step 2: 8 + 12</text>
+          <text x="188" y="90" text-anchor="middle" fill="#4ade80" font-size="16" font-family="Fredoka One,cursive">= 20</text>
+          <text x="188" y="110" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">Multiply before add</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Order of Operations</div>
+        <span class="formula-highlight">( ) → × ÷ → + −</span><br>
+        <span style="font-size:0.85em;color:rgba(255,255,255,0.7)">Parentheses → Multiply/Divide → Add/Subtract</span>
+      </div>
+      <div class="explanation">Always work inside parentheses first. Then do multiplication and division left to right. Finally do addition and subtraction left to right. Parentheses change the order and the answer!</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        (8+4) × 3 = 12 × 3 = <strong>36</strong><br>
+        8 + 4 × 3 = 8 + 12 = <strong>20</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">18. Measurement Conversion (5.MD.1)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Conversion chart -->
+          <!-- Length row -->
+          <text x="15" y="35" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">km</text>
+          <line x1="38" y1="30" x2="80" y2="30" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="80,27 88,30 80,33" fill="var(--acc)"/>
+          <text x="95" y="35" fill="white" font-size="11" font-family="Fredoka One,cursive">m</text>
+          <line x1="108" y1="30" x2="150" y2="30" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="150,27 158,30 150,33" fill="var(--acc)"/>
+          <text x="162" y="35" fill="white" font-size="11" font-family="Fredoka One,cursive">cm</text>
+          <text x="57" y="24" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">×1000</text>
+          <text x="126" y="24" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">×100</text>
+          <!-- Mass row -->
+          <text x="15" y="75" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">kg</text>
+          <line x1="38" y1="70" x2="100" y2="70" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="100,67 108,70 100,73" fill="var(--acc)"/>
+          <text x="115" y="75" fill="white" font-size="11" font-family="Fredoka One,cursive">g</text>
+          <text x="70" y="62" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">×1000</text>
+          <!-- Time row -->
+          <text x="15" y="115" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">hr</text>
+          <line x1="38" y1="110" x2="80" y2="110" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="80,107 88,110 80,113" fill="var(--acc)"/>
+          <text x="95" y="115" fill="white" font-size="11" font-family="Fredoka One,cursive">min</text>
+          <line x1="120" y1="110" x2="162" y2="110" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="162,107 170,110 162,113" fill="var(--acc)"/>
+          <text x="175" y="115" fill="white" font-size="11" font-family="Fredoka One,cursive">sec</text>
+          <text x="57" y="102" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">×60</text>
+          <text x="140" y="102" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Nunito,sans-serif">×60</text>
+          <!-- Rule -->
+          <text x="125" y="142" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Fredoka One,cursive">→ larger: multiply  |  ← smaller: divide</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Conversion Rule</div>
+        <span class="formula-highlight">Multiply to go smaller unit</span><br>
+        <span style="font-size:0.85em;color:rgba(255,255,255,0.7)">Divide to go larger unit</span>
+      </div>
+      <div class="explanation">To convert to a smaller unit (like km to m), multiply. To convert to a larger unit (like cm to m), divide. Always multiply by the conversion factor that links the two units.</div>
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        3.5 kg → g: 3.5 × 1000 = <strong>3,500 g</strong><br>
+        250 cm → m: 250 ÷ 100 = <strong>2.5 m</strong>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end hard cards-grid -->
+
+<footer>SBA Math — Concepts &amp; Procedures · 5th Grade</footer>
+</div><!-- end page-wrap -->
+
+<script>
+  const el = document.getElementById('ptsDisplay');
+  if(el) el.textContent = '⭐ ' + (parseInt(localStorage.getItem('kids_points')||'0'));
+</script>
+</body>
+</html>

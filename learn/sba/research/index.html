@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔍 Research &amp; Inquiry — SBA ELA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+  :root { --c1: #1a0a2e; --c2: #4a1a6b; --acc: #c084fc; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; font-weight: 700; background: linear-gradient(160deg, var(--c1) 0%, var(--c2) 60%, var(--c1) 100%); background-attachment: fixed; min-height: 100dvh; color: #fff; overflow-x: hidden; }
+  .site-header { position: sticky; top: 0; z-index: 100; background: rgba(26,10,46,0.93); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(192,132,252,0.25); display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; gap: 12px; }
+  .back-link { display: inline-flex; align-items: center; gap: 5px; color: rgba(255,255,255,0.6); text-decoration: none; font-family: 'Fredoka One', cursive; font-size: 0.88rem; padding: 5px 13px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.07); white-space: nowrap; transition: color 0.15s, background 0.15s; }
+  .back-link:hover { color: #fff; background: rgba(255,255,255,0.14); }
+  .header-title { font-family: 'Fredoka One', cursive; font-size: clamp(1rem, 4vw, 1.5rem); color: var(--acc); text-shadow: 0 2px 10px rgba(192,132,252,0.4); text-align: center; flex: 1; }
+  .pts-pill { background: rgba(255,215,0,0.12); border: 2px solid rgba(255,215,0,0.4); border-radius: 50px; padding: 4px 13px; color: #ffd700; font-family: 'Fredoka One', cursive; font-size: 0.95rem; white-space: nowrap; }
+  .print-btn { display: inline-flex; align-items: center; gap: 5px; color: rgba(255,255,255,0.6); font-family: 'Fredoka One', cursive; font-size: 0.88rem; padding: 5px 13px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.07); cursor: pointer; white-space: nowrap; transition: color 0.15s, background 0.15s; }
+  .print-btn:hover { color: #fff; background: rgba(255,255,255,0.14); }
+  .page-wrap { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
+  .section-heading { font-family: 'Fredoka One', cursive; font-size: clamp(1.2rem, 4vw, 1.7rem); margin: 40px 0 18px; padding: 10px 20px; border-radius: 14px; display: inline-flex; align-items: center; gap: 10px; }
+  .section-easy { background: rgba(46,204,113,0.15); color: #2ecc71; border: 2px solid rgba(46,204,113,0.35); }
+  .section-medium { background: rgba(230,126,34,0.15); color: #e67e22; border: 2px solid rgba(230,126,34,0.35); }
+  .section-hard { background: rgba(231,76,60,0.15); color: #e74c3c; border: 2px solid rgba(231,76,60,0.35); }
+  .cards-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 620px) { .cards-grid { grid-template-columns: 1fr 1fr; } }
+  .concept-card { background: rgba(255,255,255,0.04); border: 1.5px solid rgba(192,132,252,0.2); border-radius: 20px; overflow: hidden; box-shadow: 0 6px 28px rgba(0,0,0,0.35); transition: transform 0.18s, box-shadow 0.18s; }
+  .concept-card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(192,132,252,0.18); }
+  .card-title-bar { background: rgba(192,132,252,0.12); border-bottom: 1px solid rgba(192,132,252,0.2); padding: 12px 16px; font-family: 'Fredoka One', cursive; font-size: clamp(1rem, 3.5vw, 1.2rem); color: var(--acc); }
+  .card-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .diagram-wrap { background: rgba(0,0,0,0.35); border-radius: 12px; border: 1px solid rgba(192,132,252,0.15); display: flex; align-items: center; justify-content: center; padding: 8px; overflow: hidden; }
+  .diagram-wrap svg { width: 100%; max-width: 280px; height: auto; display: block; }
+  .formula-box { background: rgba(26,10,46,0.8); border: 2px solid var(--acc); border-radius: 12px; padding: 12px 16px; font-family: 'Fredoka One', cursive; font-size: clamp(0.95rem, 3vw, 1.15rem); color: #fff; text-align: center; line-height: 1.5; }
+  .formula-label { font-size: 0.78rem; color: var(--acc); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; font-family: 'Nunito', sans-serif; }
+  .formula-highlight { color: var(--acc); font-size: 1.1em; }
+  .explanation { font-size: clamp(0.85rem, 2.8vw, 0.97rem); color: rgba(255,255,255,0.82); line-height: 1.6; }
+  .explanation strong { color: #fff; }
+  .example-box { background: rgba(46,204,113,0.07); border-left: 3px solid #2ecc71; border-radius: 0 10px 10px 0; padding: 10px 14px; font-size: clamp(0.82rem, 2.6vw, 0.93rem); color: rgba(255,255,255,0.85); line-height: 1.6; }
+  .ex-label { font-family: 'Fredoka One', cursive; color: #2ecc71; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px; }
+  .example-box strong { color: #4ade80; }
+  footer { text-align: center; margin-top: 56px; color: rgba(255,255,255,0.2); font-size: 0.78rem; font-family: 'Nunito', sans-serif; }
+  @media print {
+    @page { margin: 1cm; }
+    body { background: white !important; color: #000 !important; font-size: 8.5pt !important; }
+    .site-header { position: static !important; background: none !important; backdrop-filter: none !important; border: none !important; box-shadow: none !important; padding: 4px 0 !important; }
+    .back-link, .pts-pill, .print-btn { display: none !important; }
+    .header-title { color: #000 !important; font-size: 12pt !important; }
+    .page-wrap { max-width: 100% !important; padding: 4px 0 !important; }
+    .cards-grid { columns: 2; display: block; }
+    .cards-grid .concept-card { break-inside: avoid; display: inline-block; width: 100%; margin-bottom: 6px; }
+    .section-heading { background: #f0f0f0 !important; color: #333 !important; border-color: #ccc !important; font-size: 9pt !important; padding: 4px 10px !important; margin: 8px 0 4px !important; column-span: all; }
+    .concept-card { box-shadow: none !important; background: #fff !important; border-color: #ccc !important; border-radius: 4px !important; }
+    .card-title-bar { background: #f0f0f0 !important; border-color: #ccc !important; color: #000 !important; padding: 4px 8px !important; font-size: 8pt !important; }
+    .card-body { color: #000 !important; padding: 6px !important; gap: 4px !important; }
+    .formula-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; padding: 4px 6px !important; font-size: 8pt !important; }
+    .example-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; padding: 4px 6px !important; font-size: 7.5pt !important; }
+    svg { max-width: 100% !important; max-height: 80px !important; display: block !important; }
+    svg text { fill: #000 !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="back-link" href="../">← SBA Hub</a>
+  <span class="header-title">🔍 Research &amp; Inquiry</span>
+  <span class="pts-pill" id="ptsDisplay">⭐ 0</span>
+  <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+</header>
+
+<div class="page-wrap">
+
+<div class="section-heading section-easy">🟢 Easy</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">1. Research Question (W.5.7)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Two boxes: too broad vs. focused -->
+          <rect x="8" y="25" width="100" height="90" rx="8" fill="rgba(231,76,60,0.08)" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="58" y="44" text-anchor="middle" fill="#e74c3c" font-size="8" font-weight="bold">Too Broad ✗</text>
+          <text x="58" y="60" text-anchor="middle" fill="white" font-size="7">"Tell me about</text>
+          <text x="58" y="72" text-anchor="middle" fill="white" font-size="7">animals."</text>
+          <text x="58" y="90" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7">Impossible to</text>
+          <text x="58" y="102" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7">answer fully</text>
+          <rect x="142" y="25" width="100" height="90" rx="8" fill="rgba(46,204,113,0.08)" stroke="#2ecc71" stroke-width="1.5"/>
+          <text x="192" y="44" text-anchor="middle" fill="#2ecc71" font-size="8" font-weight="bold">Focused ✓</text>
+          <text x="192" y="60" text-anchor="middle" fill="white" font-size="7">"How do dolphins</text>
+          <text x="192" y="72" text-anchor="middle" fill="white" font-size="7">communicate?"</text>
+          <text x="192" y="90" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7">Specific +</text>
+          <text x="192" y="102" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7">answerable</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Good Research Question</div>
+        <span class="formula-highlight">Focused · Answerable · Interesting · Researchable</span>
+      </div>
+      <p class="explanation">A good research question is <strong>specific</strong> enough to answer in a project but important enough to be worth researching. Avoid questions answerable with yes/no or a single fact.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Too broad: "What is pollution?" Better: "How does plastic pollution affect sea turtle populations in the Pacific?" <strong>Specific topic + specific angle = researchable question.</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">2. Types of Sources (W.5.8)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Source type grid -->
+          <rect x="8" y="15" width="55" height="50" rx="5" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="35" y="35" text-anchor="middle" fill="var(--acc)" font-size="18">📚</text>
+          <text x="35" y="55" text-anchor="middle" fill="white" font-size="7">Books</text>
+          <rect x="73" y="15" width="55" height="50" rx="5" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="100" y="35" text-anchor="middle" fill="var(--acc)" font-size="18">🌐</text>
+          <text x="100" y="55" text-anchor="middle" fill="white" font-size="7">Websites</text>
+          <rect x="138" y="15" width="55" height="50" rx="5" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="165" y="35" text-anchor="middle" fill="var(--acc)" font-size="18">📰</text>
+          <text x="165" y="55" text-anchor="middle" fill="white" font-size="7">Articles</text>
+          <rect x="203" y="15" width="42" height="50" rx="5" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="224" y="35" text-anchor="middle" fill="var(--acc)" font-size="18">🎬</text>
+          <text x="224" y="55" text-anchor="middle" fill="white" font-size="7">Videos</text>
+          <!-- Primary vs Secondary -->
+          <rect x="8" y="80" width="115" height="45" rx="5" fill="rgba(192,132,252,0.07)" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <text x="65" y="97" text-anchor="middle" fill="white" font-size="8" font-weight="bold">Primary Source</text>
+          <text x="65" y="112" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="7">Firsthand (diary, interview)</text>
+          <rect x="133" y="80" width="112" height="45" rx="5" fill="rgba(192,132,252,0.07)" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <text x="189" y="97" text-anchor="middle" fill="white" font-size="8" font-weight="bold">Secondary Source</text>
+          <text x="189" y="112" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="7">Analysis of primary (textbook)</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Source Types</div>
+        <span class="formula-highlight">Primary = firsthand · Secondary = analysis</span>
+      </div>
+      <p class="explanation"><strong>Primary sources</strong> are original (diaries, interviews, photographs, data). <strong>Secondary sources</strong> analyze or describe primary sources (textbooks, encyclopedia articles). Both are valuable for research.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Researching MLK Jr.: his "I Have a Dream" speech = primary source. A textbook chapter about the Civil Rights Movement = secondary source.
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">3. Reliable vs. Unreliable Sources (W.5.8)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- CRAAP checklist -->
+          <rect x="15" y="10" width="220" height="120" rx="8" fill="rgba(192,132,252,0.05)" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <text x="125" y="28" text-anchor="middle" fill="var(--acc)" font-size="9" font-weight="bold">Source Reliability Checklist</text>
+          <line x1="25" y1="34" x2="225" y2="34" stroke="rgba(192,132,252,0.2)" stroke-width="0.5"/>
+          <text x="30" y="50" fill="white" font-size="8">C — Currency: Is it recent enough?</text>
+          <text x="30" y="65" fill="white" font-size="8">R — Relevance: Does it fit my topic?</text>
+          <text x="30" y="80" fill="white" font-size="8">A — Authority: Is the author an expert?</text>
+          <text x="30" y="95" fill="white" font-size="8">A — Accuracy: Are facts cited?</text>
+          <text x="30" y="110" fill="white" font-size="8">P — Purpose: Inform or sell/persuade?</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">CRAAP Test</div>
+        <span class="formula-highlight">Currency · Relevance · Authority · Accuracy · Purpose</span>
+      </div>
+      <p class="explanation">Use the <strong>CRAAP test</strong> to evaluate sources. Ask: Is it recent? Does it match your topic? Is the author qualified? Are facts supported? Does it inform or try to sell something?</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        A 2009 website with no author selling a health product fails Authority, Currency, and Purpose tests. A NASA.gov article from 2023 passes all five. <strong>Always prefer credible, current, expert sources.</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">4. Taking Notes (W.5.8)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Source text → notes -->
+          <rect x="5" y="20" width="110" height="100" rx="6" fill="rgba(255,255,255,0.03)" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <text x="60" y="36" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8">Source Text</text>
+          <line x1="12" y1="42" x2="108" y2="42" stroke="rgba(192,132,252,0.2)" stroke-width="0.5"/>
+          <text x="60" y="57" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="7">The blue whale is</text>
+          <text x="60" y="68" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="7">the largest animal</text>
+          <text x="60" y="79" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="7">ever known to exist</text>
+          <text x="60" y="90" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="7">on Earth. It can reach</text>
+          <text x="60" y="101" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="7">100 feet long and</text>
+          <text x="60" y="112" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="7">weigh 200 tons.</text>
+          <!-- Arrow -->
+          <line x1="118" y1="70" x2="138" y2="70" stroke="var(--acc)" stroke-width="2" marker-end="url(#a6)"/>
+          <!-- Notes -->
+          <rect x="141" y="20" width="103" height="100" rx="6" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="192" y="36" text-anchor="middle" fill="var(--acc)" font-size="8" font-weight="bold">My Notes</text>
+          <line x1="150" y1="42" x2="236" y2="42" stroke="rgba(192,132,252,0.3)" stroke-width="0.5"/>
+          <text x="155" y="57" fill="white" font-size="7">• Blue whale =</text>
+          <text x="155" y="68" fill="white" font-size="7">  largest animal</text>
+          <text x="155" y="82" fill="white" font-size="7">• Up to 100 ft,</text>
+          <text x="155" y="93" fill="white" font-size="7">  200 tons</text>
+          <text x="155" y="107" fill="var(--acc)" font-size="6">Source: NatGeo p.14</text>
+          <defs><marker id="a6" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--acc)"/></marker></defs>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Note-Taking Rules</div>
+        <span class="formula-highlight">Key facts only · Your own words · Record the source</span>
+      </div>
+      <p class="explanation">Good notes capture <strong>key facts</strong> in your own words (paraphrase) and always include the source so you can cite it later. Avoid copying entire sentences — that leads to unintentional plagiarism.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Source: "Blue whales can produce sounds louder than a jet engine." Note: "Blue whale sounds = louder than jet (NatGeo, p. 22)." <strong>Paraphrase + source = good note.</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">5. Paraphrase vs. Plagiarism (W.5.8)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Three columns: original, plagiarism, paraphrase -->
+          <rect x="5" y="15" width="75" height="110" rx="5" fill="rgba(255,255,255,0.03)" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <text x="42" y="30" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7">Original</text>
+          <line x1="10" y1="35" x2="75" y2="35" stroke="rgba(192,132,252,0.2)" stroke-width="0.5"/>
+          <text x="42" y="52" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">"Coral reefs</text>
+          <text x="42" y="64" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">support 25%</text>
+          <text x="42" y="76" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">of all marine</text>
+          <text x="42" y="88" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">species."</text>
+          <rect x="88" y="15" width="75" height="110" rx="5" fill="rgba(231,76,60,0.08)" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="125" y="30" text-anchor="middle" fill="#e74c3c" font-size="7">Plagiarism ✗</text>
+          <line x1="93" y1="35" x2="158" y2="35" stroke="rgba(231,76,60,0.3)" stroke-width="0.5"/>
+          <text x="125" y="52" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">"Coral reefs</text>
+          <text x="125" y="64" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">support 25%</text>
+          <text x="125" y="76" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">of all marine</text>
+          <text x="125" y="88" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">species."</text>
+          <text x="125" y="112" text-anchor="middle" fill="#e74c3c" font-size="6">Copied!</text>
+          <rect x="171" y="15" width="75" height="110" rx="5" fill="rgba(46,204,113,0.08)" stroke="#2ecc71" stroke-width="1.5"/>
+          <text x="208" y="30" text-anchor="middle" fill="#2ecc71" font-size="7">Paraphrase ✓</text>
+          <line x1="176" y1="35" x2="241" y2="35" stroke="rgba(46,204,113,0.3)" stroke-width="0.5"/>
+          <text x="208" y="50" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">A quarter of all</text>
+          <text x="208" y="62" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">ocean creatures</text>
+          <text x="208" y="74" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">depend on coral</text>
+          <text x="208" y="86" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">reefs to survive.</text>
+          <text x="208" y="112" text-anchor="middle" fill="#2ecc71" font-size="6">Own words!</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Paraphrase = Own Words + Source</div>
+        <span class="formula-highlight">Change structure AND vocabulary · Cite the source</span>
+      </div>
+      <p class="explanation"><strong>Plagiarism</strong> is copying someone's words without credit. <strong>Paraphrasing</strong> means restating an idea in completely new wording AND citing the source. Changing only a few words is still plagiarism.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Original: "Rainforests cover only 6% of Earth's surface." Plagiarism: same sentence. Paraphrase: "Although rainforests take up just 6% of our planet, they play a vital role in global climate (Smith, 2022)."
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">6. Using Quotations (W.5.8)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Quote sandwich -->
+          <rect x="20" y="10" width="210" height="30" rx="5" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="30" text-anchor="middle" fill="white" font-size="8">1. Introduce: "According to Dr. Chen…"</text>
+          <rect x="20" y="48" width="210" height="32" rx="5" fill="rgba(46,204,113,0.12)" stroke="#2ecc71" stroke-width="1.5"/>
+          <text x="125" y="62" text-anchor="middle" fill="white" font-size="8">2. Quote: "Rainforests absorb</text>
+          <text x="125" y="74" text-anchor="middle" fill="white" font-size="8">2 billion tons of CO₂ each year."</text>
+          <rect x="20" y="88" width="210" height="30" rx="5" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="108" text-anchor="middle" fill="white" font-size="8">3. Explain: "This shows that forests…"</text>
+          <!-- Arrows -->
+          <line x1="125" y1="40" x2="125" y2="48" stroke="var(--acc)" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="125" y1="80" x2="125" y2="88" stroke="var(--acc)" stroke-width="1" stroke-dasharray="3,2"/>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Quote Sandwich</div>
+        <span class="formula-highlight">Introduce → Quote → Explain</span>
+      </div>
+      <p class="explanation">Direct quotations use the <strong>author's exact words</strong> in quotation marks. Always introduce the quote, include it in quotes, then explain how it supports your point. Never drop a quote in without context.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Introduce: "Scientist Jane Goodall explains," Quote: "Chimpanzees show empathy much like humans." Explain: "This shows that complex emotions are not unique to people."
+      </div>
+    </div>
+  </div>
+
+</div><!-- end easy -->
+
+<div class="section-heading section-medium">🟡 Medium</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">7. Organizing Research (W.5.7)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Research Q at top -->
+          <rect x="75" y="5" width="100" height="25" rx="5" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="22" text-anchor="middle" fill="white" font-size="8">Research Question</text>
+          <!-- Three sub-topics -->
+          <line x1="125" y1="30" x2="55" y2="55" stroke="var(--acc)" stroke-width="1.5"/>
+          <line x1="125" y1="30" x2="125" y2="55" stroke="var(--acc)" stroke-width="1.5"/>
+          <line x1="125" y1="30" x2="195" y2="55" stroke="var(--acc)" stroke-width="1.5"/>
+          <rect x="15" y="55" width="80" height="22" rx="4" fill="rgba(192,132,252,0.1)" stroke="rgba(192,132,252,0.4)" stroke-width="1"/>
+          <text x="55" y="70" text-anchor="middle" fill="white" font-size="7">Subtopic 1</text>
+          <rect x="85" y="55" width="80" height="22" rx="4" fill="rgba(192,132,252,0.1)" stroke="rgba(192,132,252,0.4)" stroke-width="1"/>
+          <text x="125" y="70" text-anchor="middle" fill="white" font-size="7">Subtopic 2</text>
+          <rect x="155" y="55" width="80" height="22" rx="4" fill="rgba(192,132,252,0.1)" stroke="rgba(192,132,252,0.4)" stroke-width="1"/>
+          <text x="195" y="70" text-anchor="middle" fill="white" font-size="7">Subtopic 3</text>
+          <!-- Sources under each -->
+          <rect x="20" y="88" width="70" height="18" rx="3" fill="rgba(255,255,255,0.04)" stroke="rgba(192,132,252,0.2)" stroke-width="1"/>
+          <text x="55" y="101" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">Sources A, B</text>
+          <rect x="90" y="88" width="70" height="18" rx="3" fill="rgba(255,255,255,0.04)" stroke="rgba(192,132,252,0.2)" stroke-width="1"/>
+          <text x="125" y="101" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">Sources C, D</text>
+          <rect x="160" y="88" width="70" height="18" rx="3" fill="rgba(255,255,255,0.04)" stroke="rgba(192,132,252,0.2)" stroke-width="1"/>
+          <text x="195" y="101" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="6">Sources E, F</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Research Organization</div>
+        <span class="formula-highlight">Question → Subtopics → Sources per subtopic</span>
+      </div>
+      <p class="explanation">Break your research question into <strong>subtopics</strong>. Gather at least 2 sources per subtopic. Group your notes by subtopic so writing flows logically from one idea to the next.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Research Q: "How does ocean pollution affect marine life?" Subtopics: (1) plastic effects on fish, (2) chemical runoff, (3) solutions. Each subtopic gets its own set of sources and notes.
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">8. Comparing Sources (W.5.9)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Venn diagram -->
+          <circle cx="85" cy="70" r="52" fill="rgba(192,132,252,0.08)" stroke="var(--acc)" stroke-width="1.5"/>
+          <circle cx="165" cy="70" r="52" fill="rgba(231,76,60,0.08)" stroke="rgba(231,76,60,0.4)" stroke-width="1.5"/>
+          <!-- Labels -->
+          <text x="55" y="52" text-anchor="middle" fill="var(--acc)" font-size="7">Source A</text>
+          <text x="55" y="65" text-anchor="middle" fill="white" font-size="6">Only in A</text>
+          <text x="125" y="52" text-anchor="middle" fill="white" font-size="7">Both</text>
+          <text x="125" y="64" text-anchor="middle" fill="white" font-size="6">agree on</text>
+          <text x="125" y="76" text-anchor="middle" fill="white" font-size="6">main facts</text>
+          <text x="195" y="52" text-anchor="middle" fill="#e67e22" font-size="7">Source B</text>
+          <text x="195" y="65" text-anchor="middle" fill="white" font-size="6">Only in B</text>
+          <text x="125" y="110" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="7">Overlap = strongest claims</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Source Comparison</div>
+        <span class="formula-highlight">Agree on facts = strong claim · Disagree = investigate</span>
+      </div>
+      <p class="explanation">When multiple sources <strong>agree</strong> on a fact, that fact is more reliable. When sources <strong>disagree</strong>, look for a third source to resolve the conflict or acknowledge the disagreement in your writing.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Source A and B both say rainforests hold 50% of species (agree → use it confidently). They disagree on deforestation rate: look for a third, more current source to resolve it.
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">9. Drawing Conclusions (RI.5.9)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Evidence ladder to conclusion -->
+          <rect x="10" y="100" width="100" height="25" rx="4" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="60" y="117" text-anchor="middle" fill="white" font-size="8">Evidence 1</text>
+          <rect x="10" y="68" width="100" height="25" rx="4" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="60" y="85" text-anchor="middle" fill="white" font-size="8">Evidence 2</text>
+          <rect x="10" y="36" width="100" height="25" rx="4" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="60" y="53" text-anchor="middle" fill="white" font-size="8">Evidence 3</text>
+          <!-- Arrow to conclusion -->
+          <line x1="118" y1="70" x2="142" y2="70" stroke="var(--acc)" stroke-width="2" marker-end="url(#a7)"/>
+          <rect x="145" y="45" width="98" height="50" rx="8" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="2"/>
+          <text x="194" y="65" text-anchor="middle" fill="white" font-size="8" font-weight="bold">Conclusion</text>
+          <text x="194" y="80" text-anchor="middle" fill="var(--acc)" font-size="7">(logical inference</text>
+          <text x="194" y="90" text-anchor="middle" fill="var(--acc)" font-size="7">from all evidence)</text>
+          <defs><marker id="a7" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--acc)"/></marker></defs>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Conclusion = Inference</div>
+        <span class="formula-highlight">What do ALL the evidence pieces suggest together?</span>
+      </div>
+      <p class="explanation">A research conclusion is a <strong>logical inference</strong> drawn from multiple pieces of evidence. It goes beyond restating facts — it synthesizes them to answer your research question.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Evidence: coral bleaching rising, ocean temps rising, CO₂ levels rising. Conclusion: "Human-caused climate change is the primary driver of coral reef decline." — <strong>Synthesizes all three pieces.</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">10. Citations &amp; Bibliography (W.5.8)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Citation format breakdown -->
+          <rect x="10" y="15" width="230" height="110" rx="8" fill="rgba(192,132,252,0.05)" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <text x="125" y="32" text-anchor="middle" fill="var(--acc)" font-size="9" font-weight="bold">Citation Format (MLA-style)</text>
+          <line x1="20" y1="38" x2="230" y2="38" stroke="rgba(192,132,252,0.2)" stroke-width="0.5"/>
+          <!-- Book -->
+          <text x="24" y="54" fill="white" font-size="7" font-weight="bold">Book:</text>
+          <text x="24" y="66" fill="rgba(255,255,255,0.7)" font-size="7">Last, First. Title. Publisher, Year.</text>
+          <!-- Website -->
+          <text x="24" y="82" fill="white" font-size="7" font-weight="bold">Website:</text>
+          <text x="24" y="94" fill="rgba(255,255,255,0.7)" font-size="7">Author. "Title." Site, Date. URL.</text>
+          <!-- Article -->
+          <text x="24" y="110" fill="white" font-size="7" font-weight="bold">Article:</text>
+          <text x="24" y="122" fill="rgba(255,255,255,0.7)" font-size="7">Last, First. "Title." Magazine, Date.</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Why Cite?</div>
+        <span class="formula-highlight">Credit authors · Avoid plagiarism · Let readers verify</span>
+      </div>
+      <p class="explanation">Citations give credit to the original author, prevent plagiarism, and allow readers to find your sources. A <strong>bibliography</strong> (or Works Cited) lists all sources used at the end of a project.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Book citation: Smith, Jane. <em>Oceans in Danger.</em> National Geographic Press, 2022. Website: "Coral Reefs." NOAA.gov, 15 Jan. 2024. <strong>Always alphabetize by author's last name.</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">11. Fact vs. Opinion (RI.5.8)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Two-column table -->
+          <rect x="10" y="15" width="110" height="110" rx="6" fill="rgba(46,204,113,0.08)" stroke="#2ecc71" stroke-width="1.5"/>
+          <text x="65" y="33" text-anchor="middle" fill="#2ecc71" font-size="9" font-weight="bold">FACT ✓</text>
+          <line x1="15" y1="38" x2="115" y2="38" stroke="rgba(46,204,113,0.3)" stroke-width="0.5"/>
+          <text x="65" y="54" text-anchor="middle" fill="white" font-size="7">Can be verified</text>
+          <text x="65" y="66" text-anchor="middle" fill="white" font-size="7">"The sun is a star."</text>
+          <text x="65" y="82" text-anchor="middle" fill="white" font-size="7">"Water boils at</text>
+          <text x="65" y="94" text-anchor="middle" fill="white" font-size="7">100°C at sea level."</text>
+          <text x="65" y="112" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="6">Data/evidence backs it</text>
+          <rect x="130" y="15" width="110" height="110" rx="6" fill="rgba(231,76,60,0.08)" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="185" y="33" text-anchor="middle" fill="#e74c3c" font-size="9" font-weight="bold">OPINION ✗</text>
+          <line x1="135" y1="38" x2="235" y2="38" stroke="rgba(231,76,60,0.3)" stroke-width="0.5"/>
+          <text x="185" y="54" text-anchor="middle" fill="white" font-size="7">Belief / judgment</text>
+          <text x="185" y="66" text-anchor="middle" fill="white" font-size="7">"The sun is the</text>
+          <text x="185" y="78" text-anchor="middle" fill="white" font-size="7">most beautiful star."</text>
+          <text x="185" y="95" text-anchor="middle" fill="white" font-size="7">"Math is boring."</text>
+          <text x="185" y="112" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="6">Clue words: best, should, think</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Clue Words for Opinion</div>
+        <span class="formula-highlight">Best · Worst · Should · Believe · Think · Feel</span>
+      </div>
+      <p class="explanation">A <strong>fact</strong> can be verified with evidence. An <strong>opinion</strong> expresses a judgment or belief. In research, use facts as evidence; recognize when sources state opinions rather than facts.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Fact: "Deforestation decreased by 12% in 2022." Opinion: "We must stop deforestation immediately." The opinion might be supported by facts, but it is still a judgment — not a fact itself.
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">12. Logical Fallacies (RI.5.8)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Fallacy examples in boxes -->
+          <rect x="8" y="15" width="110" height="50" rx="6" fill="rgba(231,76,60,0.08)" stroke="#e74c3c" stroke-width="1"/>
+          <text x="63" y="30" text-anchor="middle" fill="#e74c3c" font-size="8" font-weight="bold">Ad Hominem</text>
+          <text x="63" y="44" text-anchor="middle" fill="white" font-size="7">"Don't listen to him —</text>
+          <text x="63" y="56" text-anchor="middle" fill="white" font-size="7">he failed the test!"</text>
+          <rect x="132" y="15" width="110" height="50" rx="6" fill="rgba(231,76,60,0.08)" stroke="#e74c3c" stroke-width="1"/>
+          <text x="187" y="30" text-anchor="middle" fill="#e74c3c" font-size="8" font-weight="bold">Bandwagon</text>
+          <text x="187" y="44" text-anchor="middle" fill="white" font-size="7">"Everyone is doing it,</text>
+          <text x="187" y="56" text-anchor="middle" fill="white" font-size="7">so it must be right."</text>
+          <rect x="8" y="80" width="110" height="50" rx="6" fill="rgba(231,76,60,0.08)" stroke="#e74c3c" stroke-width="1"/>
+          <text x="63" y="95" text-anchor="middle" fill="#e74c3c" font-size="8" font-weight="bold">False Cause</text>
+          <text x="63" y="109" text-anchor="middle" fill="white" font-size="7">"I wore lucky socks</text>
+          <text x="63" y="121" text-anchor="middle" fill="white" font-size="7">→ we won the game."</text>
+          <rect x="132" y="80" width="110" height="50" rx="6" fill="rgba(231,76,60,0.08)" stroke="#e74c3c" stroke-width="1"/>
+          <text x="187" y="95" text-anchor="middle" fill="#e74c3c" font-size="8" font-weight="bold">Either/Or</text>
+          <text x="187" y="109" text-anchor="middle" fill="white" font-size="7">"You're either with</text>
+          <text x="187" y="121" text-anchor="middle" fill="white" font-size="7">us or against us."</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Common Fallacies</div>
+        <span class="formula-highlight">Ad hominem · Bandwagon · False cause · Either/Or</span>
+      </div>
+      <p class="explanation">A <strong>logical fallacy</strong> is a flaw in reasoning. Recognizing fallacies helps you evaluate arguments critically. Sources that use fallacies instead of evidence are less trustworthy.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        A commercial: "9 out of 10 kids prefer our juice!" (bandwagon). Ask: What's the sample size? Who conducted the study? Paid by the company? <strong>Question the reasoning behind every claim.</strong>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end medium -->
+
+<div class="section-heading section-hard">🔴 Hard</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">13. Synthesizing Multiple Sources (W.5.9)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Weaving metaphor: three strands into one -->
+          <path d="M10,30 Q60,20 110,50 Q160,80 210,70" stroke="var(--acc)" stroke-width="2" fill="none"/>
+          <path d="M10,70 Q60,80 110,50 Q160,20 210,50" stroke="rgba(192,132,252,0.6)" stroke-width="2" fill="none"/>
+          <path d="M10,110 Q60,120 110,80 Q160,40 210,90" stroke="rgba(192,132,252,0.3)" stroke-width="2" fill="none"/>
+          <!-- Labels -->
+          <text x="5" y="26" fill="white" font-size="7">Src A</text>
+          <text x="5" y="66" fill="white" font-size="7">Src B</text>
+          <text x="5" y="106" fill="white" font-size="7">Src C</text>
+          <!-- Result box -->
+          <rect x="215" y="45" width="30" height="50" rx="5" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="230" y="67" text-anchor="middle" fill="white" font-size="6">New</text>
+          <text x="230" y="78" text-anchor="middle" fill="white" font-size="6">Under-</text>
+          <text x="230" y="89" text-anchor="middle" fill="white" font-size="6">standing</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Synthesis ≠ Summary</div>
+        <span class="formula-highlight">Weave sources together to create a new insight</span>
+      </div>
+      <p class="explanation"><strong>Synthesis</strong> goes beyond summarizing each source separately. You weave information from multiple sources together to build a new, unified understanding. Sources should talk to each other in your writing.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Instead of: "Source A says X. Source B says Y." Write: "Both Source A and B confirm that deforestation accelerates climate change; however, Source B adds that local communities are also disproportionately harmed (Source B, p.12)."
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">14. Evaluating Argument Strength (RI.5.8)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Argument evaluation grid -->
+          <rect x="10" y="10" width="230" height="120" rx="8" fill="rgba(192,132,252,0.05)" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <text x="125" y="27" text-anchor="middle" fill="var(--acc)" font-size="9" font-weight="bold">Argument Strength Rubric</text>
+          <line x1="20" y1="33" x2="230" y2="33" stroke="rgba(192,132,252,0.2)" stroke-width="0.5"/>
+          <text x="25" y="50" fill="#2ecc71" font-size="8">✓ Claim is clear and specific</text>
+          <text x="25" y="65" fill="#2ecc71" font-size="8">✓ Evidence is relevant and credible</text>
+          <text x="25" y="80" fill="#2ecc71" font-size="8">✓ Reasoning links evidence to claim</text>
+          <text x="25" y="95" fill="#e74c3c" font-size="8">✗ No counter-argument addressed</text>
+          <text x="25" y="110" fill="#e74c3c" font-size="8">✗ Only emotional appeals used</text>
+          <text x="25" y="123" fill="#e67e22" font-size="8">~ Mixed: some evidence, some opinion</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Strong Argument = C + E + R</div>
+        <span class="formula-highlight">Clear Claim + Credible Evidence + Sound Reasoning</span>
+      </div>
+      <p class="explanation">A strong argument has: (1) a clear <strong>claim</strong>, (2) credible, relevant <strong>evidence</strong>, (3) logical <strong>reasoning</strong> connecting them, and ideally addresses the <strong>counterargument</strong>. Check all four.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Weak: "Recess is important because kids like it." (no evidence, vague) Strong: "30 minutes of recess improves focus by 20% according to a 2021 CDC study, demonstrating that physical breaks enhance learning." C + E + R ✓
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">15. Research Report Structure (W.5.7)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Report layers -->
+          <rect x="30" y="10" width="190" height="25" rx="5" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="27" text-anchor="middle" fill="white" font-size="8" font-weight="bold">Introduction + Research Q + Thesis</text>
+          <rect x="30" y="43" width="190" height="22" rx="4" fill="rgba(192,132,252,0.12)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="58" text-anchor="middle" fill="white" font-size="8">Body ¶1: Subtopic 1 + Evidence</text>
+          <rect x="30" y="73" width="190" height="22" rx="4" fill="rgba(192,132,252,0.12)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="88" text-anchor="middle" fill="white" font-size="8">Body ¶2: Subtopic 2 + Evidence</text>
+          <rect x="30" y="103" width="190" height="22" rx="4" fill="rgba(192,132,252,0.12)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="118" text-anchor="middle" fill="white" font-size="8">Conclusion + Broader Significance</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Report Blueprint</div>
+        <span class="formula-highlight">Intro (thesis) → Body (subtopics + evidence) → Conclusion</span>
+      </div>
+      <p class="explanation">A research report has a clear <strong>thesis</strong> (your answer to the research question) in the intro, <strong>body paragraphs</strong> organized by subtopic each with evidence, and a <strong>conclusion</strong> that explains the broader significance.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Thesis: "Ocean plastic pollution is the greatest threat to marine ecosystems." Body P1: effects on fish. Body P2: effects on birds. Body P3: effects on food chains. Conclusion: why action is urgent.
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">16. Counterarguments in Research (W.5.1)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Claim → Counter → Rebuttal -->
+          <rect x="5" y="20" width="70" height="40" rx="5" fill="rgba(192,132,252,0.12)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="40" y="38" text-anchor="middle" fill="white" font-size="8">Your</text>
+          <text x="40" y="50" text-anchor="middle" fill="var(--acc)" font-size="8">Claim</text>
+          <line x1="75" y1="40" x2="95" y2="40" stroke="var(--acc)" stroke-width="1.5" marker-end="url(#a8)"/>
+          <rect x="97" y="20" width="75" height="40" rx="5" fill="rgba(231,76,60,0.1)" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="134" y="35" text-anchor="middle" fill="white" font-size="7">Counter-</text>
+          <text x="134" y="47" text-anchor="middle" fill="#e74c3c" font-size="7">argument</text>
+          <text x="134" y="59" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="6">"But some say…"</text>
+          <line x1="172" y1="40" x2="192" y2="40" stroke="var(--acc)" stroke-width="1.5" marker-end="url(#a8)"/>
+          <rect x="194" y="20" width="52" height="40" rx="5" fill="rgba(46,204,113,0.1)" stroke="#2ecc71" stroke-width="1.5"/>
+          <text x="220" y="35" text-anchor="middle" fill="white" font-size="7">Rebuttal</text>
+          <text x="220" y="50" text-anchor="middle" fill="#2ecc71" font-size="7">"However…"</text>
+          <!-- Note -->
+          <rect x="5" y="80" width="240" height="45" rx="6" fill="rgba(255,255,255,0.03)" stroke="rgba(192,132,252,0.2)" stroke-width="1"/>
+          <text x="125" y="97" text-anchor="middle" fill="white" font-size="7">Addressing a counterargument shows</text>
+          <text x="125" y="110" text-anchor="middle" fill="var(--acc)" font-size="7">you've considered multiple perspectives</text>
+          <text x="125" y="120" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="6">= stronger, more credible argument</text>
+          <defs><marker id="a8" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--acc)"/></marker></defs>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Counterclaim Structure</div>
+        <span class="formula-highlight">Acknowledge opponent's view → Rebut with evidence</span>
+      </div>
+      <p class="explanation">Strong research acknowledges <strong>counterarguments</strong> — opposing viewpoints. By addressing them and providing a rebuttal with evidence, you show intellectual honesty and strengthen your own position.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        "Some argue that zoos are harmful to animals. However, the World Wildlife Fund reports that 800 species have been saved from extinction through zoo breeding programs, outweighing the concern." — Acknowledge + Rebuttal with evidence.
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">17. Digital Literacy (W.5.8)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- URL trust indicators -->
+          <rect x="10" y="15" width="230" height="110" rx="8" fill="rgba(192,132,252,0.05)" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <text x="125" y="32" text-anchor="middle" fill="var(--acc)" font-size="9" font-weight="bold">Evaluating Websites</text>
+          <line x1="20" y1="38" x2="230" y2="38" stroke="rgba(192,132,252,0.2)" stroke-width="0.5"/>
+          <text x="28" y="53" fill="#2ecc71" font-size="7">✓ .gov / .edu / .org = often reliable</text>
+          <text x="28" y="68" fill="#2ecc71" font-size="7">✓ Author listed + credentials shown</text>
+          <text x="28" y="83" fill="#2ecc71" font-size="7">✓ Sources/references cited on page</text>
+          <text x="28" y="98" fill="#e74c3c" font-size="7">✗ No author, no date, no sources</text>
+          <text x="28" y="113" fill="#e74c3c" font-size="7">✗ Sensational headlines, pop-up ads</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">URL Trust Signals</div>
+        <span class="formula-highlight">.gov/.edu = usually trustworthy · .com = verify carefully</span>
+      </div>
+      <p class="explanation">Not all websites are equally reliable. Look for: known author with credentials, publication date, cited sources, and a domain that suggests authority (.gov, .edu). Cross-check claims with a second credible source.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        "climatetruth.xyz" with no author, flashy ads, and no citations = red flags. "climate.nasa.gov" with credited scientists and cited data = trustworthy. <strong>Always cross-reference with a second reliable source.</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">18. Research Presentation (SL.5.4 + W.5.7)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Presentation checklist split -->
+          <rect x="8" y="10" width="115" height="120" rx="8" fill="rgba(192,132,252,0.07)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="65" y="26" text-anchor="middle" fill="var(--acc)" font-size="8" font-weight="bold">Written Report</text>
+          <line x1="16" y1="32" x2="116" y2="32" stroke="rgba(192,132,252,0.2)" stroke-width="0.5"/>
+          <text x="20" y="47" fill="white" font-size="7">• Clear thesis</text>
+          <text x="20" y="60" fill="white" font-size="7">• Cited sources</text>
+          <text x="20" y="73" fill="white" font-size="7">• Paraphrase + quotes</text>
+          <text x="20" y="86" fill="white" font-size="7">• Bibliography</text>
+          <text x="20" y="99" fill="white" font-size="7">• Formal language</text>
+          <text x="20" y="112" fill="white" font-size="7">• Logical structure</text>
+          <rect x="133" y="10" width="112" height="120" rx="8" fill="rgba(192,132,252,0.07)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="189" y="26" text-anchor="middle" fill="var(--acc)" font-size="8" font-weight="bold">Oral Presentation</text>
+          <line x1="140" y1="32" x2="238" y2="32" stroke="rgba(192,132,252,0.2)" stroke-width="0.5"/>
+          <text x="142" y="47" fill="white" font-size="7">• Clear speaking</text>
+          <text x="142" y="60" fill="white" font-size="7">• Eye contact</text>
+          <text x="142" y="73" fill="white" font-size="7">• Visual aids used</text>
+          <text x="142" y="86" fill="white" font-size="7">• Answers questions</text>
+          <text x="142" y="99" fill="white" font-size="7">• Stays on topic</text>
+          <text x="142" y="112" fill="white" font-size="7">• Appropriate pace</text>
+        </svg>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">Research Culminating Task</div>
+        <span class="formula-highlight">Write + present findings with evidence and citations</span>
+      </div>
+      <p class="explanation">Research projects often end in both a <strong>written report</strong> and an <strong>oral presentation</strong>. Apply all research skills: credible sources, paraphrase + quotation, synthesis, logical argument, proper citations, and adapted delivery.</p>
+      <div class="example-box">
+        <div class="ex-label">Example</div>
+        Final SBA-style task: "Using at least 3 sources, write a 5-paragraph report on climate change and present your findings to the class, including one chart or diagram." — Tests all research and communication skills simultaneously.
+      </div>
+    </div>
+  </div>
+
+</div><!-- end hard -->
+
+<footer>SBA ELA · Research &amp; Inquiry · 18 concepts</footer>
+</div><!-- page-wrap -->
+
+<script>
+  const el = document.getElementById('ptsDisplay');
+  if (el) el.textContent = '⭐ ' + (parseInt(localStorage.getItem('kids_points') || '0'));
+</script>
+</body>
+</html>

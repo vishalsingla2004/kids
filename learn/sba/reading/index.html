@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📖 Reading — SBA ELA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+  :root { --c1: #1a0a2e; --c2: #4a1a6b; --acc: #c084fc; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; font-weight: 700; background: linear-gradient(160deg, var(--c1) 0%, var(--c2) 60%, var(--c1) 100%); background-attachment: fixed; min-height: 100dvh; color: #fff; overflow-x: hidden; }
+  .site-header { position: sticky; top: 0; z-index: 100; background: rgba(26,10,46,0.93); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(192,132,252,0.25); display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; gap: 12px; }
+  .back-link { display: inline-flex; align-items: center; gap: 5px; color: rgba(255,255,255,0.6); text-decoration: none; font-family: 'Fredoka One', cursive; font-size: 0.88rem; padding: 5px 13px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.07); white-space: nowrap; transition: color 0.15s, background 0.15s; }
+  .back-link:hover { color: #fff; background: rgba(255,255,255,0.14); }
+  .header-title { font-family: 'Fredoka One', cursive; font-size: clamp(1rem, 4vw, 1.5rem); color: var(--acc); text-shadow: 0 2px 10px rgba(192,132,252,0.4); text-align: center; flex: 1; }
+  .pts-pill { background: rgba(255,215,0,0.12); border: 2px solid rgba(255,215,0,0.4); border-radius: 50px; padding: 4px 13px; color: #ffd700; font-family: 'Fredoka One', cursive; font-size: 0.95rem; white-space: nowrap; }
+  .print-btn { display: inline-flex; align-items: center; gap: 5px; color: rgba(255,255,255,0.6); font-family: 'Fredoka One', cursive; font-size: 0.88rem; padding: 5px 13px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.07); cursor: pointer; white-space: nowrap; transition: color 0.15s, background 0.15s; }
+  .print-btn:hover { color: #fff; background: rgba(255,255,255,0.14); }
+  .page-wrap { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
+  .section-heading { font-family: 'Fredoka One', cursive; font-size: clamp(1.2rem, 4vw, 1.7rem); margin: 40px 0 18px; padding: 10px 20px; border-radius: 14px; display: inline-flex; align-items: center; gap: 10px; }
+  .section-easy { background: rgba(46,204,113,0.15); color: #2ecc71; border: 2px solid rgba(46,204,113,0.35); }
+  .section-medium { background: rgba(230,126,34,0.15); color: #e67e22; border: 2px solid rgba(230,126,34,0.35); }
+  .section-hard { background: rgba(231,76,60,0.15); color: #e74c3c; border: 2px solid rgba(231,76,60,0.35); }
+  .cards-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 620px) { .cards-grid { grid-template-columns: 1fr 1fr; } }
+  .concept-card { background: rgba(255,255,255,0.04); border: 1.5px solid rgba(192,132,252,0.2); border-radius: 20px; overflow: hidden; box-shadow: 0 6px 28px rgba(0,0,0,0.35); transition: transform 0.18s, box-shadow 0.18s; }
+  .concept-card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(192,132,252,0.18); }
+  .card-title-bar { background: rgba(192,132,252,0.12); border-bottom: 1px solid rgba(192,132,252,0.2); padding: 12px 16px; font-family: 'Fredoka One', cursive; font-size: clamp(1rem, 3.5vw, 1.2rem); color: var(--acc); }
+  .card-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .diagram-wrap { background: rgba(0,0,0,0.35); border-radius: 12px; border: 1px solid rgba(192,132,252,0.15); display: flex; align-items: center; justify-content: center; padding: 8px; overflow: hidden; }
+  .diagram-wrap svg { width: 100%; max-width: 280px; height: auto; display: block; }
+  .formula-box { background: rgba(26,10,46,0.8); border: 2px solid var(--acc); border-radius: 12px; padding: 12px 16px; font-family: 'Fredoka One', cursive; font-size: clamp(0.95rem, 3vw, 1.15rem); color: #fff; text-align: center; line-height: 1.5; }
+  .formula-label { font-size: 0.78rem; color: var(--acc); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; font-family: 'Nunito', sans-serif; }
+  .formula-highlight { color: var(--acc); font-size: 1.1em; }
+  .explanation { font-size: clamp(0.85rem, 2.8vw, 0.97rem); color: rgba(255,255,255,0.82); line-height: 1.6; }
+  .explanation strong { color: #fff; }
+  .example-box { background: rgba(46,204,113,0.07); border-left: 3px solid #2ecc71; border-radius: 0 10px 10px 0; padding: 10px 14px; font-size: clamp(0.82rem, 2.6vw, 0.93rem); color: rgba(255,255,255,0.85); line-height: 1.6; }
+  .ex-label { font-family: 'Fredoka One', cursive; color: #2ecc71; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px; }
+  .example-box strong { color: #4ade80; }
+  footer { text-align: center; margin-top: 56px; color: rgba(255,255,255,0.2); font-size: 0.78rem; font-family: 'Nunito', sans-serif; }
+  @media print {
+    @page { margin: 1cm; }
+    body { background: white !important; color: #000 !important; font-size: 8.5pt !important; }
+    .site-header { position: static !important; background: none !important; backdrop-filter: none !important; border: none !important; box-shadow: none !important; padding: 4px 0 !important; }
+    .back-link, .pts-pill, .print-btn { display: none !important; }
+    .header-title { color: #000 !important; font-size: 12pt !important; }
+    .page-wrap { max-width: 100% !important; padding: 4px 0 !important; }
+    .cards-grid { columns: 2; display: block; }
+    .cards-grid .concept-card { break-inside: avoid; display: inline-block; width: 100%; margin-bottom: 6px; }
+    .section-heading { background: #f0f0f0 !important; color: #333 !important; border-color: #ccc !important; font-size: 9pt !important; padding: 4px 10px !important; margin: 8px 0 4px !important; column-span: all; }
+    .concept-card { box-shadow: none !important; background: #fff !important; border-color: #ccc !important; border-radius: 4px !important; }
+    .card-title-bar { background: #f0f0f0 !important; border-color: #ccc !important; color: #000 !important; padding: 4px 8px !important; font-size: 8pt !important; }
+    .card-body { color: #000 !important; padding: 6px !important; gap: 4px !important; }
+    .formula-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; padding: 4px 6px !important; font-size: 8pt !important; }
+    .example-box { background: #f5f5f5 !important; color: #000 !important; border-color: #aaa !important; padding: 4px 6px !important; font-size: 7.5pt !important; }
+    svg { max-width: 100% !important; max-height: 80px !important; display: block !important; }
+    svg text { fill: #000 !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="back-link" href="../">← SBA Hub</a>
+  <span class="header-title">📖 Reading</span>
+  <span class="pts-pill" id="ptsDisplay">⭐ 0</span>
+  <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+</header>
+
+<div class="page-wrap">
+
+<div class="section-heading section-easy">🟢 Easy</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">1. Main Idea (5.RI.2)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Umbrella with main idea -->
+          <path d="M 125 30 Q 50 30 50 85 L 125 85 L 200 85 Q 200 30 125 30 Z" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="2"/>
+          <line x1="125" y1="85" x2="125" y2="130" stroke="var(--acc)" stroke-width="2"/>
+          <text x="125" y="60" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">MAIN IDEA</text>
+          <text x="125" y="75" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Nunito,sans-serif">Bees produce honey</text>
+          <!-- Raindrops = details -->
+          <ellipse cx="65" cy="115" rx="22" ry="12" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="65" y="118" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">Detail 1</text>
+          <ellipse cx="125" cy="120" rx="22" ry="12" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="123" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">Detail 2</text>
+          <ellipse cx="185" cy="115" rx="22" ry="12" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="185" y="118" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">Detail 3</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Main Idea Formula</div><span class="formula-highlight">Main idea = central message + most important point</span></div>
+      <div class="explanation">The main idea is what the entire text is mostly about — not just one paragraph. It is broader than any single detail. Ask: "If I had to sum up this text in one sentence, what would I say?"</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"A passage about bees making honey" →<br>Main idea: <strong>"Bees produce honey through a complex process."</strong><br>(Not just "bees fly" — that's a detail)</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">2. Key Details &amp; Evidence (5.RI.1)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Paragraph block -->
+          <rect x="10" y="15" width="230" height="80" rx="6" fill="rgba(0,0,0,0.3)" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <!-- Text lines (fake) -->
+          <rect x="20" y="28" width="200" height="7" rx="2" fill="rgba(255,255,255,0.15)"/>
+          <rect x="20" y="42" width="180" height="7" rx="2" fill="rgba(255,255,255,0.15)"/>
+          <!-- Highlighted evidence line -->
+          <rect x="20" y="56" width="210" height="10" rx="2" fill="rgba(192,132,252,0.4)"/>
+          <text x="125" y="65" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">"The program allows bears to fish safely..."</text>
+          <rect x="20" y="72" width="170" height="7" rx="2" fill="rgba(255,255,255,0.15)"/>
+          <!-- Magnifying glass -->
+          <circle cx="215" cy="45" r="18" fill="none" stroke="var(--acc)" stroke-width="2"/>
+          <line x1="228" y1="58" x2="240" y2="70" stroke="var(--acc)" stroke-width="2.5"/>
+          <!-- Arrow pointing to evidence -->
+          <line x1="215" y1="63" x2="180" y2="62" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="180,59 172,62 180,65" fill="var(--acc)"/>
+          <text x="125" y="115" text-anchor="middle" fill="var(--acc)" font-size="10" font-family="Fredoka One,cursive">"The text says…" / "According to…"</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Evidence Starters</div><span class="formula-highlight">"The text says…" or "According to the author…"</span></div>
+      <div class="explanation">Evidence is a direct quote or specific detail from the text that proves your point. Always cite where the evidence comes from. Look for specific names, dates, numbers, and quoted speech.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"What evidence shows the Forest Service protected bears?"<br>→ Cite: <strong>"The program allows bears to fish safely away from crowds"</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">3. Story Theme (5.RL.2)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Book -->
+          <rect x="30" y="20" width="85" height="100" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <rect x="115" y="20" width="85" height="100" rx="4" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <line x1="113" y1="20" x2="117" y2="120" stroke="var(--acc)" stroke-width="2"/>
+          <!-- Events listed in book -->
+          <text x="72" y="48" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">Event 1</text>
+          <text x="72" y="66" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">Event 2</text>
+          <text x="72" y="84" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">Event 3</text>
+          <!-- Arrow to theme bubble -->
+          <line x1="200" y1="60" x2="220" y2="60" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="220,57 228,60 220,63" fill="var(--acc)"/>
+          <!-- Theme bubble -->
+          <ellipse cx="240" cy="60" rx="0" ry="0"/> <!-- placeholder -->
+          <text x="157" y="65" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Theme:</text>
+          <text x="157" y="80" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">True friends</text>
+          <text x="157" y="92" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">support each other</text>
+          <!-- Topic vs theme label -->
+          <text x="125" y="135" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Fredoka One,cursive">Topic: friendship → Theme: life lesson</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Theme Formula</div><span class="formula-highlight">Theme ≠ topic; Theme = life lesson from the whole story</span></div>
+      <div class="explanation">The theme is the universal message or lesson the author wants readers to take away. The topic is what the story is about (one word or phrase); the theme is the deeper meaning (a full sentence about life).</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Topic: "friendship"<br>Theme: <strong>"True friends support each other in hard times."</strong><br>(Always write theme as a complete sentence)</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">4. Vocabulary in Context (5.RL.4)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Sentence with unknown word -->
+          <rect x="5" y="20" width="240" height="50" rx="6" fill="rgba(0,0,0,0.3)" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <text x="125" y="40" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9" font-family="Nunito,sans-serif">"The barren desert had no</text>
+          <text x="125" y="56" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9" font-family="Nunito,sans-serif">plants, trees, or life at all."</text>
+          <!-- Target word -->
+          <rect x="20" y="80" width="60" height="24" rx="4" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="50" y="96" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">barren</text>
+          <!-- Context clues arrows -->
+          <line x1="80" y1="92" x2="115" y2="55" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="130" y="80" fill="var(--acc)" font-size="8" font-family="Nunito,sans-serif">clue: "no plants"</text>
+          <text x="130" y="95" fill="var(--acc)" font-size="8" font-family="Nunito,sans-serif">clue: "no life at all"</text>
+          <!-- Meaning -->
+          <rect x="5" y="120" width="240" height="25" rx="4" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="136" text-anchor="middle" fill="white" font-size="10" font-family="Fredoka One,cursive">barren = empty, without life</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Context Clue Strategy</div><span class="formula-highlight">Look at words BEFORE and AFTER the unknown word</span></div>
+      <div class="explanation">Context clues are words, phrases, and sentences near the unfamiliar word that help you figure out its meaning. Look for definitions, synonyms, examples, or descriptions the author provides nearby.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"The barren desert had no plants." →<br>Clues: "no plants," "no life" → barren means <strong>empty, without life</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">5. Author's Purpose (5.RI.8)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Three boxes -->
+          <rect x="10" y="20" width="68" height="100" rx="8" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="44" y="50" text-anchor="middle" fill="var(--acc)" font-size="22" font-family="Fredoka One,cursive">P</text>
+          <text x="44" y="70" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Persuade</text>
+          <text x="44" y="85" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">opinion +</text>
+          <text x="44" y="96" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">argument</text>
+          <rect x="91" y="20" width="68" height="100" rx="8" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="50" text-anchor="middle" fill="var(--acc)" font-size="22" font-family="Fredoka One,cursive">I</text>
+          <text x="125" y="70" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Inform</text>
+          <text x="125" y="85" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">facts +</text>
+          <text x="125" y="96" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">details</text>
+          <rect x="172" y="20" width="68" height="100" rx="8" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="206" y="50" text-anchor="middle" fill="var(--acc)" font-size="22" font-family="Fredoka One,cursive">E</text>
+          <text x="206" y="70" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Entertain</text>
+          <text x="206" y="85" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">story +</text>
+          <text x="206" y="96" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">humor</text>
+          <text x="125" y="136" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Fredoka One,cursive">PIE — Persuade, Inform, Entertain</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Author's Purpose</div><span class="formula-highlight">PIE — Persuade, Inform, Entertain</span></div>
+      <div class="explanation">Every text has a purpose. Informational texts share facts. Persuasive texts try to change your thinking. Entertaining texts tell stories or make you feel something. A text can have more than one purpose.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Recipe article → <strong>Inform</strong> (how to make something)<br>Editorial about pollution → <strong>Persuade</strong> (change behavior)</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">6. Story Elements (5.RL.3)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Story map 5 boxes -->
+          <rect x="80" y="8" width="90" height="24" rx="4" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="24" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Character / Setting</text>
+          <line x1="125" y1="32" x2="125" y2="44" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="80" y="44" width="90" height="24" rx="4" fill="rgba(192,132,252,0.25)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="60" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Problem</text>
+          <line x1="125" y1="68" x2="125" y2="80" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="80" y="80" width="90" height="24" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="96" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Events</text>
+          <line x1="125" y1="104" x2="125" y2="116" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="80" y="116" width="90" height="24" rx="4" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="132" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Solution</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Story Elements</div><span class="formula-highlight">Character · Setting · Problem · Events · Solution</span></div>
+      <div class="explanation">Every story has basic elements. Characters are the people or animals in the story. Setting is where and when it happens. The plot includes the problem, events that build tension, and the solution.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"In a snowy village (setting), a young girl (character) discovers her missing dog (problem) by following pawprints (event) and finds him safe (solution)."</div>
+    </div>
+  </div>
+
+</div><!-- end easy -->
+
+<div class="section-heading section-medium">🟡 Medium</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">7. Text Structure (5.RI.5)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Five structure icons in a row -->
+          <rect x="5" y="20" width="44" height="110" rx="6" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="27" y="45" text-anchor="middle" fill="var(--acc)" font-size="18" font-family="Fredoka One,cursive">⚡</text>
+          <text x="27" y="65" text-anchor="middle" fill="white" font-size="7" font-family="Nunito,sans-serif">Cause-</text>
+          <text x="27" y="75" text-anchor="middle" fill="white" font-size="7" font-family="Nunito,sans-serif">Effect</text>
+          <text x="27" y="95" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="6" font-family="Nunito,sans-serif">because</text>
+          <rect x="54" y="20" width="44" height="110" rx="6" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="76" y="45" text-anchor="middle" fill="var(--acc)" font-size="18" font-family="Fredoka One,cursive">↔</text>
+          <text x="76" y="65" text-anchor="middle" fill="white" font-size="7" font-family="Nunito,sans-serif">Compare-</text>
+          <text x="76" y="75" text-anchor="middle" fill="white" font-size="7" font-family="Nunito,sans-serif">Contrast</text>
+          <text x="76" y="95" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="6" font-family="Nunito,sans-serif">however</text>
+          <rect x="103" y="20" width="44" height="110" rx="6" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="125" y="45" text-anchor="middle" fill="var(--acc)" font-size="18" font-family="Fredoka One,cursive">1→</text>
+          <text x="125" y="65" text-anchor="middle" fill="white" font-size="7" font-family="Nunito,sans-serif">Sequence</text>
+          <text x="125" y="95" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="6" font-family="Nunito,sans-serif">first/then</text>
+          <rect x="152" y="20" width="44" height="110" rx="6" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="174" y="45" text-anchor="middle" fill="var(--acc)" font-size="18" font-family="Fredoka One,cursive">❓</text>
+          <text x="174" y="65" text-anchor="middle" fill="white" font-size="7" font-family="Nunito,sans-serif">Problem-</text>
+          <text x="174" y="75" text-anchor="middle" fill="white" font-size="7" font-family="Nunito,sans-serif">Solution</text>
+          <text x="174" y="95" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="6" font-family="Nunito,sans-serif">as a result</text>
+          <rect x="201" y="20" width="44" height="110" rx="6" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="223" y="45" text-anchor="middle" fill="var(--acc)" font-size="18" font-family="Fredoka One,cursive">📝</text>
+          <text x="223" y="65" text-anchor="middle" fill="white" font-size="7" font-family="Nunito,sans-serif">Description</text>
+          <text x="223" y="95" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="6" font-family="Nunito,sans-serif">for example</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Signal Words</div><span class="formula-highlight">"because" = cause-effect · "however" = contrast · "first/next" = sequence</span></div>
+      <div class="explanation">Authors organize their writing using specific structures. Signal words help you identify which structure is being used. Recognizing text structure helps you understand how ideas are related.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"Floods cause damage <strong>because</strong> rivers overflow" → cause-effect structure<br>"<strong>However,</strong> e-bikes are popular" → compare-contrast</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">8. Character Motivation (5.RL.3)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Character silhouette -->
+          <circle cx="75" cy="50" r="20" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="1.5"/>
+          <rect x="60" y="70" width="30" height="40" rx="4" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="75" y="55" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Jack</text>
+          <!-- Thought bubble -->
+          <ellipse cx="155" cy="40" rx="70" ry="35" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <circle cx="103" cy="60" r="5" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="1"/>
+          <circle cx="115" cy="55" r="4" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="155" y="30" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Motivation:</text>
+          <text x="155" y="46" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">Curious + wants to</text>
+          <text x="155" y="58" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">help his family</text>
+          <!-- Formula -->
+          <text x="125" y="115" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Fredoka One,cursive">Action + Evidence + Reason = Motivation</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Motivation Formula</div><span class="formula-highlight">Action + Evidence + Reason = Motivation</span></div>
+      <div class="explanation">Character motivation explains WHY a character does what they do. Look at their actions, the text evidence that supports your thinking, and reason through what drives those actions based on emotions, goals, or circumstances.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"Why did Jack climb the beanstalk?"<br>He was <strong>curious</strong> AND wanted to <strong>help his family</strong> who was poor — text evidence: he had already traded their cow.</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">9. Figurative Language (5.RL.4)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Grid table -->
+          <rect x="5" y="10" width="240" height="130" rx="4" fill="rgba(0,0,0,0.3)" stroke="var(--acc)" stroke-width="1"/>
+          <rect x="5" y="10" width="240" height="22" rx="4" fill="rgba(192,132,252,0.2)"/>
+          <text x="50" y="25" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Type</text>
+          <text x="130" y="25" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Example</text>
+          <text x="215" y="25" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Meaning</text>
+          <line x1="85" y1="10" x2="85" y2="140" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <line x1="170" y1="10" x2="170" y2="140" stroke="rgba(192,132,252,0.3)" stroke-width="1"/>
+          <text x="45" y="47" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">Simile</text>
+          <text x="127" y="47" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">fast like a cheetah</text>
+          <text x="210" y="47" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">very fast</text>
+          <line x1="5" y1="56" x2="245" y2="56" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="45" y="75" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">Metaphor</text>
+          <text x="127" y="75" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">smile was sunshine</text>
+          <text x="210" y="75" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">warm, bright</text>
+          <line x1="5" y1="84" x2="245" y2="84" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="45" y="103" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">Idiom</text>
+          <text x="127" y="103" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">raining cats and dogs</text>
+          <text x="210" y="103" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">heavy rain</text>
+          <line x1="5" y1="112" x2="245" y2="112" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="45" y="130" text-anchor="middle" fill="white" font-size="8.5" font-family="Fredoka One,cursive">Personification</text>
+          <text x="127" y="130" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">wind whispered</text>
+          <text x="210" y="130" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">blew softly</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Figurative Language</div><span class="formula-highlight">Simile = like/as · Metaphor = is/was · Idiom = non-literal</span></div>
+      <div class="explanation">Figurative language adds meaning beyond the literal words. Similes compare using "like" or "as." Metaphors say one thing IS another. Idioms are phrases whose meaning differs from their literal words.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"Her smile was a ray of sunshine" (metaphor) →<br>Meaning: <strong>her smile was warm and bright</strong> (not literally sunlight)</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">10. Compare and Contrast (5.RI.3)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Venn diagram -->
+          <circle cx="85" cy="75" r="60" fill="rgba(192,132,252,0.12)" stroke="var(--acc)" stroke-width="1.5"/>
+          <circle cx="165" cy="75" r="60" fill="rgba(192,132,252,0.12)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="45" y="60" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Only A</text>
+          <text x="45" y="75" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">e-bikes</text>
+          <text x="45" y="87" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">are e-powered</text>
+          <text x="125" y="65" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">BOTH</text>
+          <text x="125" y="78" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">save gas</text>
+          <text x="125" y="90" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">2 wheels</text>
+          <text x="205" y="60" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Only B</text>
+          <text x="205" y="75" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">regular</text>
+          <text x="205" y="87" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">bikes cheaper</text>
+          <text x="85" y="145" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Fredoka One,cursive">Article A</text>
+          <text x="165" y="145" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Fredoka One,cursive">Article B</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Venn Diagram Formula</div><span class="formula-highlight">Overlap = same · Outer circles = different</span></div>
+      <div class="explanation">When comparing two texts or ideas, use a Venn diagram to organize similarities and differences. The overlap shows what both have in common. The outer sections show what is unique to each.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Two e-bike articles: <strong>both agree</strong> e-bikes save gas; <strong>disagree</strong> on safety → use Venn to organize comparison</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">11. Making Inferences (5.RI.1, 5.RL.1)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Inference equation -->
+          <rect x="5" y="30" width="95" height="60" rx="6" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="52" y="52" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Text Clue</text>
+          <text x="52" y="67" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">"She grabbed her</text>
+          <text x="52" y="78" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">umbrella"</text>
+          <text x="106" y="62" text-anchor="middle" fill="var(--acc)" font-size="20" font-family="Fredoka One,cursive">+</text>
+          <rect x="115" y="30" width="95" height="60" rx="6" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="162" y="52" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Background Knowledge</text>
+          <text x="162" y="67" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">umbrellas used</text>
+          <text x="162" y="78" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">in rain</text>
+          <line x1="125" y1="90" x2="125" y2="103" stroke="var(--acc)" stroke-width="1.5"/>
+          <polygon points="121,103 125,110 129,103" fill="var(--acc)"/>
+          <text x="125" y="130" text-anchor="middle" fill="#4ade80" font-size="11" font-family="Fredoka One,cursive">Inference: it might rain</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Inference Formula</div><span class="formula-highlight">Inference = text clue + what you already know</span></div>
+      <div class="explanation">An inference is a conclusion drawn from evidence plus your background knowledge. The author doesn't directly state it, but the clues in the text lead you there. Always support inferences with text evidence.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"She grabbed her umbrella before leaving." →<br>Clue: umbrella + knowledge: umbrellas block rain<br>Inference: <strong>it's raining or might rain outside</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">12. Point of View (5.RL.5)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Three narrator boxes -->
+          <rect x="5" y="20" width="72" height="100" rx="6" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="41" y="38" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">1st Person</text>
+          <text x="41" y="55" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">I, we</text>
+          <text x="41" y="75" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="7.5" font-family="Nunito,sans-serif">"I saw</text>
+          <text x="41" y="86" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="7.5" font-family="Nunito,sans-serif">the sunset"</text>
+          <text x="41" y="103" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7" font-family="Nunito,sans-serif">narrator = character</text>
+          <rect x="88" y="20" width="72" height="100" rx="6" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="124" y="38" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Fredoka One,cursive">3rd Limited</text>
+          <text x="124" y="55" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">he, she</text>
+          <text x="124" y="75" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="7.5" font-family="Nunito,sans-serif">"She saw</text>
+          <text x="124" y="86" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="7.5" font-family="Nunito,sans-serif">the sunset"</text>
+          <text x="124" y="103" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7" font-family="Nunito,sans-serif">one character's thoughts</text>
+          <rect x="172" y="20" width="73" height="100" rx="6" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="208" y="38" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="Fredoka One,cursive">3rd Omniscient</text>
+          <text x="208" y="55" text-anchor="middle" fill="white" font-size="11" font-family="Fredoka One,cursive">he, she</text>
+          <text x="208" y="75" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="7.5" font-family="Nunito,sans-serif">all characters'</text>
+          <text x="208" y="86" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="7.5" font-family="Nunito,sans-serif">thoughts known</text>
+          <text x="208" y="103" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7" font-family="Nunito,sans-serif">"all-knowing"</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Point of View</div><span class="formula-highlight">1st = I/we · 3rd limited = he/she (one character) · 3rd omniscient = all characters</span></div>
+      <div class="explanation">Point of view affects what information readers get. First person lets us inside the narrator's mind but limits what we know. Third person omniscient gives access to all characters' thoughts.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"I saw the sunset" = <strong>1st person</strong> (narrator is in the story)<br>"She saw the sunset" = <strong>3rd person</strong> (narrator outside the story)</div>
+    </div>
+  </div>
+
+</div><!-- end medium -->
+
+<div class="section-heading section-hard">🔴 Hard</div>
+<div class="cards-grid">
+
+  <div class="concept-card">
+    <div class="card-title-bar">13. Summarizing (5.RI.2)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Funnel -->
+          <polygon points="20,15 230,15 180,80 70,80" fill="rgba(192,132,252,0.15)" stroke="var(--acc)" stroke-width="1.5"/>
+          <!-- Details entering funnel -->
+          <text x="60" y="40" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Nunito,sans-serif">detail 1</text>
+          <text x="125" y="35" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Nunito,sans-serif">detail 2</text>
+          <text x="185" y="40" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Nunito,sans-serif">detail 3</text>
+          <!-- Funnel neck -->
+          <rect x="100" y="80" width="50" height="35" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <!-- Output box -->
+          <rect x="55" y="120" width="140" height="28" rx="4" fill="rgba(192,132,252,0.25)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="138" text-anchor="middle" fill="white" font-size="8" font-family="Fredoka One,cursive">Who + did what + why + result</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Summary Formula</div><span class="formula-highlight">Who + did what + why + result (no opinions)</span></div>
+      <div class="explanation">A summary is a short, objective retelling of the main events. Include only the most important information: who, what they did, and why. Leave out minor details, opinions, and personal reactions.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"Passage about Space Probes" → Summary:<br><strong>"Scientists launched probes starting in 1957 to explore space and study planets."</strong><br>(Not: "I think space is cool and…")</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">14. Text Evidence for Arguments (5.RI.8)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Argument diagram -->
+          <rect x="5" y="10" width="240" height="32" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="30" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">CLAIM: Forest Service cared about bears' safety</text>
+          <line x1="125" y1="42" x2="125" y2="54" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="5" y="54" width="240" height="38" rx="4" fill="rgba(255,215,0,0.1)" stroke="#ffd700" stroke-width="1.5"/>
+          <text x="125" y="70" text-anchor="middle" fill="#ffd700" font-size="9" font-family="Fredoka One,cursive">EVIDENCE (direct quote):</text>
+          <text x="125" y="84" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">"The program allows bears to fish safely away from crowds"</text>
+          <line x1="125" y1="92" x2="125" y2="104" stroke="var(--acc)" stroke-width="1.2"/>
+          <rect x="5" y="104" width="240" height="38" rx="4" fill="rgba(46,204,113,0.1)" stroke="#2ecc71" stroke-width="1.5"/>
+          <text x="125" y="120" text-anchor="middle" fill="#2ecc71" font-size="9" font-family="Fredoka One,cursive">REASONING:</text>
+          <text x="125" y="134" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">This shows they planned for bears, not just humans.</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Evidence Argument</div><span class="formula-highlight">Claim + Direct Quote + Explanation = supported argument</span></div>
+      <div class="explanation">Strong textual arguments use direct quotes from the text as evidence. Introduce the quote, provide it in quotation marks, and then explain how it supports your claim. Never let a quote speak for itself.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Claim → Evidence: "The program allows bears to fish safely away from crowds" → Explanation: <strong>This shows they planned specifically for bears' wellbeing.</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">15. Synthesizing Two Texts (5.RI.9)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Two book icons -->
+          <rect x="15" y="20" width="70" height="80" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="50" y="55" text-anchor="middle" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">Text 1</text>
+          <text x="50" y="72" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">service animals</text>
+          <text x="50" y="84" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">help people</text>
+          <rect x="165" y="20" width="70" height="80" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="200" y="55" text-anchor="middle" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">Text 2</text>
+          <text x="200" y="72" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">monkeys assist</text>
+          <text x="200" y="84" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">with fine tasks</text>
+          <!-- Arrows merging -->
+          <line x1="85" y1="60" x2="105" y2="75" stroke="var(--acc)" stroke-width="1.5"/>
+          <line x1="165" y1="60" x2="145" y2="75" stroke="var(--acc)" stroke-width="1.5"/>
+          <!-- Insight bubble -->
+          <ellipse cx="125" cy="110" rx="60" ry="28" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="105" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">New Insight:</text>
+          <text x="125" y="119" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">Animals help but differ on which are best</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Synthesis Formula</div><span class="formula-highlight">What do BOTH say? What does each say alone? New idea?</span></div>
+      <div class="explanation">Synthesis goes beyond comparison — you take ideas from multiple sources and combine them to form a new, deeper understanding. Ask: what do both agree on, what is unique to each, and what new conclusion can you draw?</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Two articles on service animals → Synthesis:<br><strong>"Both suggest animals help people, but they differ on which animals are best for specific tasks."</strong></div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">16. Connotation &amp; Denotation (5.L.5a)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Word in center -->
+          <rect x="80" y="55" width="90" height="30" rx="6" fill="rgba(192,132,252,0.3)" stroke="var(--acc)" stroke-width="2"/>
+          <text x="125" y="75" text-anchor="middle" fill="white" font-size="16" font-family="Fredoka One,cursive">"cheap"</text>
+          <!-- Denotation arrow left -->
+          <line x1="80" y1="70" x2="45" y2="45" stroke="var(--acc)" stroke-width="1.5"/>
+          <rect x="5" y="25" width="80" height="38" rx="4" fill="rgba(96,165,250,0.1)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="45" y="38" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Denotation</text>
+          <text x="45" y="52" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">low cost</text>
+          <!-- Connotation arrow right -->
+          <line x1="170" y1="70" x2="205" y2="45" stroke="#f97316" stroke-width="1.5"/>
+          <rect x="165" y="25" width="80" height="38" rx="4" fill="rgba(255,165,0,0.1)" stroke="#f97316" stroke-width="1"/>
+          <text x="205" y="38" text-anchor="middle" fill="#f97316" font-size="9" font-family="Fredoka One,cursive">Connotation</text>
+          <text x="205" y="52" text-anchor="middle" fill="white" font-size="8" font-family="Nunito,sans-serif">low quality</text>
+          <!-- Comparison row -->
+          <text x="125" y="110" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Fredoka One,cursive">"slender" vs "skinny" — both thin</text>
+          <text x="125" y="127" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="8.5" font-family="Nunito,sans-serif">slender = positive · skinny = sometimes negative</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Word Tone</div><span class="formula-highlight">Denotation = dictionary meaning · Connotation = emotional tone</span></div>
+      <div class="explanation">Words have dictionary meanings (denotation) and emotional associations (connotation). Authors carefully choose words for their connotations to influence how readers feel about characters, events, or ideas.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>"Slender" vs "skinny" — both mean thin.<br><strong>"Slender" is positive/elegant; "skinny" can sound negative.</strong><br>Authors use these to shape reader perception.</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">17. Structure's Effect on Meaning (5.RI.5)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Two paragraph versions with different impact -->
+          <rect x="5" y="10" width="112" height="120" rx="6" fill="rgba(192,132,252,0.08)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="61" y="28" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="Fredoka One,cursive">Chronological</text>
+          <rect x="12" y="35" width="98" height="12" rx="2" fill="rgba(255,255,255,0.1)"/>
+          <text x="61" y="45" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">1. Event happened</text>
+          <rect x="12" y="52" width="98" height="12" rx="2" fill="rgba(255,255,255,0.1)"/>
+          <text x="61" y="62" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">2. Result followed</text>
+          <rect x="12" y="69" width="98" height="12" rx="2" fill="rgba(255,255,255,0.1)"/>
+          <text x="61" y="79" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">3. Impact felt</text>
+          <text x="61" y="115" text-anchor="middle" fill="#4ade80" font-size="8" font-family="Fredoka One,cursive">Easy to follow</text>
+          <rect x="128" y="10" width="117" height="120" rx="6" fill="rgba(192,132,252,0.08)" stroke="#f97316" stroke-width="1.5"/>
+          <text x="186" y="28" text-anchor="middle" fill="#f97316" font-size="9" font-family="Fredoka One,cursive">Cause-Effect</text>
+          <rect x="135" y="35" width="103" height="12" rx="2" fill="rgba(255,255,255,0.1)"/>
+          <text x="186" y="45" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">Because X happened,</text>
+          <rect x="135" y="52" width="103" height="12" rx="2" fill="rgba(255,255,255,0.1)"/>
+          <text x="186" y="62" text-anchor="middle" fill="white" font-size="7.5" font-family="Nunito,sans-serif">Y resulted</text>
+          <text x="186" y="115" text-anchor="middle" fill="#4ade80" font-size="8" font-family="Fredoka One,cursive">Shows consequences</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Structure's Effect</div><span class="formula-highlight">Cause-effect = shows consequences · Chronological = follows events in time</span></div>
+      <div class="explanation">The same content organized differently creates a different reading experience. Chronological order helps readers follow events. Cause-effect structure emphasizes consequences and relationships between events.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>History essay in chronological order: background → event → impact.<br><strong>Readers can follow the timeline clearly.</strong> If written cause-effect: emphasizes WHY events matter.</div>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="card-title-bar">18. Author's Craft (5.RL.5)</div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Toolbox -->
+          <rect x="20" y="30" width="210" height="90" rx="6" fill="rgba(192,132,252,0.1)" stroke="var(--acc)" stroke-width="1.5"/>
+          <text x="125" y="22" text-anchor="middle" fill="var(--acc)" font-size="11" font-family="Fredoka One,cursive">Author's Toolbox</text>
+          <!-- Tools as mini cards -->
+          <rect x="28" y="40" width="90" height="30" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="73" y="58" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Foreshadowing</text>
+          <rect x="130" y="40" width="90" height="30" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="175" y="58" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Flashback</text>
+          <rect x="28" y="80" width="90" height="30" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="73" y="98" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Dialogue</text>
+          <rect x="130" y="80" width="90" height="30" rx="4" fill="rgba(192,132,252,0.2)" stroke="var(--acc)" stroke-width="1"/>
+          <text x="175" y="98" text-anchor="middle" fill="white" font-size="9" font-family="Fredoka One,cursive">Description</text>
+          <text x="125" y="140" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Nunito,sans-serif">Identify technique → explain effect on reader</text>
+        </svg>
+      </div>
+      <div class="formula-box"><div class="formula-label">Author's Craft</div><span class="formula-highlight">Identify technique → explain effect on reader</span></div>
+      <div class="explanation">Authors use craft techniques intentionally to create effects. Foreshadowing hints at what's to come. Flashbacks provide backstory. Dialogue reveals character. Description sets mood. Always explain the effect, not just the technique.</div>
+      <div class="example-box"><div class="ex-label">Worked Example</div>Dialogue: "I'll never give up!" → Effect: <strong>shows the character is determined and resilient</strong><br>(Don't just say "it's dialogue" — explain WHY the author used it)</div>
+    </div>
+  </div>
+
+</div><!-- end hard -->
+
+<footer>SBA ELA — Reading · 5th Grade</footer>
+</div>
+
+<script>
+  const el = document.getElementById('ptsDisplay');
+  if(el) el.textContent = '⭐ ' + (parseInt(localStorage.getItem('kids_points')||'0'));
+</script>
+</body>
+</html>
