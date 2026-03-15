@@ -46,6 +46,19 @@ learn/
   chemistry/            ← Concept page: Chemistry
   biology/              ← Concept page: Biology
   earth-science/        ← Concept page: Earth Science
+  sba/
+    index.html          ← SBA sub-hub (links to all 8 claim pages)
+    math-concepts/      ← Claim 1: Concepts & Procedures (5.NBT, 5.NF, 5.MD, 5.OA, 5.G)
+    math-problem-solving/ ← Claim 2: Problem Solving
+    math-reasoning/     ← Claim 3: Communicating Reasoning
+    math-data/          ← Claim 4: Data Analysis
+    reading/            ← ELA Claim 1: Reading (5.RL, 5.RI, 5.L)
+    writing/            ← ELA Claim 2: Writing (5.W, 5.L)
+    listening/          ← ELA Claim 3: Listening & Speaking (5.SL)
+    research/           ← ELA Claim 4: Research & Inquiry (5.W.8/9, 5.RI.7/9)
+
+data/
+  sba/                  ← Source PDFs: SBA answer key printouts (8 files, one per claim)
 
 validate.py             ← Structural validator for all quiz files (requires Node.js)
 ```
@@ -135,6 +148,8 @@ let sessionAnswers=[], sessionShuffled=[], viewingIdx=null;
 - Learn hub (`learn/index.html`): `href="../"`
 - Learn depth-2 subject pages (`learn/physics/` etc.): `href="../"`
 - Learn depth-3 math topic pages (`learn/math/area-2d/` etc.): `href="../../"`
+- SBA sub-hub (`learn/sba/index.html`): `href="../"` (back to learn hub)
+- SBA claim pages (`learn/sba/reading/` etc.): `href="../"` (back to SBA sub-hub)
 
 ### Mastery tracking
 ```js
@@ -154,6 +169,8 @@ Each quiz sets `--c1` (dark bg), `--c2` (mid bg), `--acc` (accent color):
 - Environmental / Learn earth-science: `#001426 / #00354f / #26c6da` (teal)
 - Biology / Learn biology: `#001a0d / #004d28 / #4caf50` (green)
 - NSC: `#060d1f / #0d2560 / #38bdf8` (sky blue)
+- SBA Math learn pages: `#0a1628 / #1a3a6b / #60a5fa` (blue — same as SBA Math quiz)
+- SBA ELA learn pages: `#1a0a2e / #4a1a6b / #c084fc` (purple — same as SBA ELA quiz)
 
 ## Hub & Report
 
@@ -234,3 +251,6 @@ Add new quiz files to the `files` list inside the script when adding a new quiz.
 2. Add a card in `learn/index.html` linking to the new page.
 3. If it's a new top-level subject (not under `learn/math/`), back link is `../`. For `learn/math/<topic>/`, back link is `../../`.
 4. Ensure the `@media print` block and `.print-btn` are present (copy from an existing page). Update the header selector and column layout class to match the new page's structure.
+
+### Sub-hub pattern (e.g. learn/sba/)
+When a learn section has many pages, use a sub-hub: `learn/<group>/index.html` lists tiles for each sub-page. Sub-hub back link → `../` (learn hub). Each sub-page back link → `../` (sub-hub). Add one tile in `learn/index.html` pointing to the sub-hub, not individual pages.
