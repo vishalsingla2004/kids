@@ -2479,6 +2479,1477 @@ GEORADIUS drivers {user_lng} {user_lat} 5 km ASC COUNT 10</code></pre>
 `
       }
     ]
+  },
+
+  // ── System 11: Distributed Message Queue ─────────────────────────────────
+  {
+    id: 'message-queue',
+    title: 'Design a Distributed Message Queue (Kafka-style)',
+    icon: '📨',
+    difficulty: 'hard',
+    readTime: '24 min read',
+    teaser: 'Design a durable, high-throughput message queue like Apache Kafka. Covers log-structured storage, partitioning, consumer groups, and exactly-once delivery.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Pub/sub or point-to-point?</strong> → Both (like Kafka topics). Multiple consumers can read the same topic independently.</li>
+  <li><strong>Persistent?</strong> → Yes, retain messages 7 days by default.</li>
+  <li><strong>Throughput target?</strong> → 1 million messages/sec.</li>
+  <li><strong>Ordering guarantees?</strong> → Ordered within a partition; no global ordering across partitions.</li>
+  <li><strong>Delivery semantics?</strong> → At-least-once default; exactly-once as a configurable extension.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>1 million messages/sec write throughput</li>
+  <li>Messages retained for 7 days</li>
+  <li>Delivery latency &lt;100ms P99</li>
+  <li>99.99% durability (no message loss)</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Write throughput</span><span class="cap-val">1M msg/sec × 1 KB avg = 1 GB/sec</span></div>
+  <div class="cap-row"><span class="cap-label">7-day retention (raw)</span><span class="cap-val">1 GB/s × 86,400 s × 7 days = 604 TB</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">With 3× replication</span><span class="cap-val">~1.8 PB total storage</span></div>
+  <div class="cap-row"><span class="cap-label">Per-partition load</span><span class="cap-val">1M msg/sec ÷ 100 partitions = 10K msg/sec/partition (manageable)</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Core Concepts</h3>
+<ul>
+  <li><strong>Topic:</strong> A logical channel (e.g., <em>user-clicks</em>). Producers write to a topic; consumers read from it.</li>
+  <li><strong>Partition:</strong> A physical subdivision of a topic. Messages are append-only and strictly ordered within a partition. A topic can have many partitions for parallelism.</li>
+  <li><strong>Producer:</strong> Writes messages to a topic. Chooses partition by key hash (same key always lands in same partition) or round-robin.</li>
+  <li><strong>Consumer Group:</strong> A set of consumers that collectively read all partitions of a topic. Each partition is assigned to exactly one consumer in the group at any time, ensuring no message is processed twice within the group.</li>
+  <li><strong>Offset:</strong> An integer identifying a message's position within a partition. Consumers track their own offset — they decide when they have "consumed" a message.</li>
+</ul>
+
+<pre class="diagram">
+  Producers                Topics / Partitions                 Consumer Groups
+  ─────────                ───────────────────                 ───────────────
+  Producer A ──►  Topic: user-clicks                   Consumer Group A
+  Producer B ──►  ├── Partition 0 [0,1,2,3,4]  ──►   Consumer A1 (reads P0, P1)
+  Producer C ──►  ├── Partition 1 [0,1,2,3  ]  ──►   Consumer A2 (reads P2, P3)
+                  ├── Partition 2 [0,1,2    ]  ──┘
+                  └── Partition 3 [0,1      ]
+
+                                                       Consumer Group B (independent)
+                                                       Consumer B1 (reads P0–P3 alone)
+
+  ZooKeeper / Controller Node
+  └─ Partition leader election, consumer group coordination, broker health
+</pre>
+
+<h3>Message Data Model</h3>
+<p>Each message stored in a partition contains:</p>
+<pre><code>Message {
+  offset     : Long      // position in this partition (monotonically increasing)
+  timestamp  : Long      // producer-set or broker-set epoch millis
+  key        : Bytes     // optional; used for partition routing and compaction
+  value      : Bytes     // payload (schema-free; consumers interpret content)
+  headers    : Map       // optional metadata (e.g., trace-id, content-type)
+}</code></pre>
+<p>The broker enforces no schema — it is a dumb pipe for bytes. Schema enforcement (Avro, Protobuf) is the producer/consumer's responsibility, typically via a separate Schema Registry service.</p>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Log-Structured Storage (The Core Insight)</div>
+<p>Each partition is physically stored as an <strong>append-only log file</strong> on disk:</p>
+<ul>
+  <li>Writes are always sequential — the OS writes to the end of the file, never seeks.</li>
+  <li>Sequential disk writes on spinning HDDs reach ~500 MB/s. Random writes: ~50 MB/s. On NVMe SSDs: sequential ~3 GB/s vs. random ~500 MB/s. Sequential wins by 10–100×.</li>
+  <li>No in-place updates, no B-tree rebalancing — the simplest possible write path.</li>
+</ul>
+
+<p><strong>Segment files:</strong> Rather than one enormous log file, each partition is split into 1 GB segment files. Old segments are deleted (or compacted) when they exceed the retention period. Active segment is the only one being written to.</p>
+
+<pre><code>partition-0/
+  00000000000000000000.log    ← segment 1 (offsets 0–99,999), read-only
+  00000000000000000000.index  ← maps offset → byte position in .log
+  00000000000000100000.log    ← segment 2 (offsets 100,000–199,999)
+  00000000000000100000.index
+  00000000000000200000.log    ← active segment (currently being written)</code></pre>
+
+<p>The <strong>index file</strong> maps offset → byte position in the .log file, enabling O(1) seeks to any offset without scanning the entire log.</p>
+
+<div class="callout insight">
+  <div class="callout-icon">💡</div>
+  <div class="callout-body"><strong>The Append-Only Log is Kafka's Most Important Decision</strong><br>
+  Sequential disk writes are ~100× faster than random writes. This single design choice is why Kafka achieves 1M+ messages/sec on commodity hardware with spinning disks. It never seeks — it only appends. The OS page cache also works optimally with sequential access patterns, effectively making reads as fast as RAM for recently written data.</div>
+</div>
+
+<div class="step-badge">Step 3b — Replication for Durability</div>
+<p>Each partition has <strong>1 leader + N−1 follower replicas</strong> on different broker nodes (configurable replication factor, default 3):</p>
+<ul>
+  <li>Producers always write to the <strong>leader</strong>. Followers pull from the leader asynchronously.</li>
+  <li><strong>ISR (In-Sync Replicas):</strong> The set of replicas that are caught up to within <code>replica.lag.time.max.ms</code> (default 10s). Only ISR replicas are eligible for leader election.</li>
+</ul>
+
+<p><strong>Producer acknowledgment modes (<code>acks</code> setting):</strong></p>
+<table>
+  <thead><tr><th>acks value</th><th>Behavior</th><th>Risk</th></tr></thead>
+  <tbody>
+    <tr><td><code>0</code></td><td>Fire and forget — no acknowledgment</td><td>Message loss on any failure</td></tr>
+    <tr><td><code>1</code></td><td>Leader acknowledges before replicating</td><td>Loss if leader crashes before followers catch up</td></tr>
+    <tr><td><code>all</code></td><td>All ISR replicas acknowledge</td><td>No loss; highest latency (+20–50ms)</td></tr>
+  </tbody>
+</table>
+
+<p>On leader failure: ZooKeeper (or KRaft in newer Kafka) detects the broker outage → the Controller elects a new leader from the ISR → producers and consumers reconnect to the new leader automatically.</p>
+
+<div class="callout tradeoff">
+  <div class="callout-icon">⚖️</div>
+  <div class="callout-body"><strong>acks=all vs. acks=1</strong><br>
+  <code>acks=all</code> gives zero-loss durability but adds 20–50ms per message (ISR round-trip). <code>acks=1</code> halves latency but risks losing the most recent message on broker crash. Financial systems and audit logs use <code>acks=all</code> with <code>min.insync.replicas=2</code>. High-throughput analytics pipelines often accept <code>acks=1</code>.</div>
+</div>
+
+<div class="step-badge">Step 3c — Consumer Groups &amp; Offset Management</div>
+<p>Consumer offsets are stored in an internal Kafka topic <code>__consumer_offsets</code> — eliminating the ZooKeeper dependency for offset tracking (ZooKeeper was used for this in older Kafka versions).</p>
+
+<ul>
+  <li><strong>Auto-commit:</strong> Consumer commits its offset every 5 seconds. If the consumer crashes between commits, messages since the last commit are re-processed → <strong>at-least-once</strong> delivery.</li>
+  <li><strong>Manual commit:</strong> Application commits offset only after successfully processing the message → stronger guarantee, but requires idempotent processing logic.</li>
+  <li><strong>Rebalancing:</strong> When a consumer joins or leaves a group, Kafka triggers a rebalance — partitions are reassigned across remaining consumers. During rebalancing, consumption pauses. Kafka 2.4+ introduced incremental cooperative rebalancing to minimize pause duration.</li>
+  <li><strong>Max parallelism:</strong> Partition count is the ceiling. With 10 partitions, at most 10 consumers in a group can work in parallel. The 11th consumer is idle (no partition to assign to it).</li>
+</ul>
+
+<div class="step-badge">Step 3d — Exactly-Once Delivery</div>
+<p>This is the hardest part. Two mechanisms are required together:</p>
+
+<p><strong>1. Idempotent Producer:</strong></p>
+<ul>
+  <li>Each producer is assigned a <code>producer_id</code> by the broker at startup.</li>
+  <li>Each message is assigned a monotonically increasing <code>sequence_number</code> per partition.</li>
+  <li>If the producer retries a failed send, the broker detects the duplicate (same producer_id + sequence_number) and silently discards it — no double write.</li>
+</ul>
+
+<p><strong>2. Transactions:</strong></p>
+<pre><code>producer.initTransactions();
+producer.beginTransaction();
+producer.send("orders", orderMsg);
+producer.send("inventory", inventoryMsg);
+producer.commitTransaction();   // atomic across both topics</code></pre>
+<ul>
+  <li>Consumers set <code>isolation.level=read_committed</code> to skip messages from in-flight or aborted transactions.</li>
+  <li>Cost: ~20% throughput reduction. Use exactly-once only where billing or correctness requires it.</li>
+</ul>
+
+<div class="step-badge">Step 3e — Consumer Lag &amp; Backpressure</div>
+<p><strong>Consumer lag</strong> = (latest partition offset) − (consumer's last committed offset). A growing lag means the consumer is slower than the producer.</p>
+<ul>
+  <li><strong>Fix options:</strong> Add more consumers (up to partition count), scale consumer processing horizontally, batch-consume larger chunks, or optimize handler logic.</li>
+  <li><strong>Kafka does not apply backpressure to producers</strong> when consumers fall behind — lag simply accumulates. Configure retention period long enough that slow consumers can catch up before messages expire.</li>
+  <li><strong>Monitoring:</strong> Alert on lag &gt; 100K messages (tune per use case). Export consumer lag metrics to Prometheus/Datadog via JMX or Kafka consumer group API.</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<h3>Key Design Decisions</h3>
+<table>
+  <thead><tr><th>Decision</th><th>Choice Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Storage engine</td><td>Append-only log files</td><td>B-tree / relational DB</td><td>100× sequential write speed; no seek overhead</td></tr>
+    <tr><td>Ordering guarantee</td><td>Within partition only</td><td>Global ordering (one partition)</td><td>Global = single bottleneck = no parallelism or scalability</td></tr>
+    <tr><td>Durability</td><td>acks=all + ISR replication</td><td>acks=1</td><td>Configurable per producer and per topic based on use case</td></tr>
+    <tr><td>Offset storage</td><td>Internal Kafka topic</td><td>ZooKeeper</td><td>Removes ZooKeeper dependency; scales with Kafka itself</td></tr>
+    <tr><td>Exactly-once</td><td>Idempotent producer + transactions</td><td>At-least-once + app-level dedup</td><td>Native guarantee; higher overhead — use only when required</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Log compaction:</strong> Instead of time-based retention, Kafka can retain only the latest value per key (useful for change-data-capture and event sourcing). The compaction thread runs in the background and merges old segments, keeping only the most recent message per key.</li>
+  <li><strong>Tiered storage:</strong> Older segments offloaded to S3/GCS. Brokers serve hot recent data from local disk; cold data fetched from object store on demand. Reduces broker disk requirements dramatically.</li>
+  <li><strong>KRaft mode:</strong> Kafka 3.x+ eliminates ZooKeeper entirely. Metadata (broker registry, topic configs, partition assignments) stored in a Kafka log managed by a quorum of Controller nodes — the same append-only log abstraction applied to metadata.</li>
+</ul>
+`
+      },
+    ]
+  },
+
+  // ── System 12: Metrics Monitoring & Alerting ──────────────────────────────
+  {
+    id: 'metrics-monitoring',
+    title: 'Design a Metrics Monitoring &amp; Alerting System (Datadog-style)',
+    icon: '📊',
+    difficulty: 'hard',
+    readTime: '22 min read',
+    teaser: 'Design a system that ingests millions of metrics per second, stores them efficiently, queries them in real-time, and fires alerts when thresholds are breached. Covers time-series DBs, downsampling, and alert evaluation.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Infrastructure metrics or business metrics?</strong> → Both (CPU, memory, request rate, conversion rate, revenue).</li>
+  <li><strong>Cardinality?</strong> → Up to 1 million unique metric series (metric_name + tag combinations).</li>
+  <li><strong>Write volume?</strong> → 10 million data points/sec across all agents.</li>
+  <li><strong>Query latency?</strong> → &lt;1 second for dashboards (interactive).</li>
+  <li><strong>Alert evaluation frequency?</strong> → Every 60 seconds for most rules.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>10 million writes/sec ingestion</li>
+  <li>15-month data retention (regulatory requirement)</li>
+  <li>Dashboard queries return in &lt;1 second</li>
+  <li>Alert delivery within 5 minutes of threshold breach</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Raw write throughput</span><span class="cap-val">10M points/sec × 16 bytes = 160 MB/sec</span></div>
+  <div class="cap-row"><span class="cap-label">Raw storage (15 months)</span><span class="cap-val">160 MB/s × 86,400 × 457 days ≈ 6.3 PB</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">After downsampling</span><span class="cap-val">~200 TB (97% reduction)</span></div>
+  <div class="cap-row"><span class="cap-label">In-memory (1-hr window)</span><span class="cap-val">1M series × 16 bytes × 360 points ≈ 5.8 GB</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Components</h3>
+<ul>
+  <li><strong>Metric Agents:</strong> Lightweight processes on every host that collect OS/app metrics every 10 seconds and push to the ingestion tier.</li>
+  <li><strong>Kafka:</strong> Ingestion buffer. Decouples agent pushes from storage writes; absorbs traffic bursts.</li>
+  <li><strong>Stream Processor:</strong> Consumes from Kafka, performs pre-aggregation and downsampling, writes to TSDB.</li>
+  <li><strong>Time-Series DB (TSDB):</strong> Stores compressed metric data. Examples: InfluxDB, VictoriaMetrics, custom columnar store.</li>
+  <li><strong>Alert Engine:</strong> Periodically queries TSDB for each active rule; manages alert state machine.</li>
+  <li><strong>Query Engine:</strong> Backs dashboards (Grafana or custom). Routes queries to appropriate resolution tier.</li>
+  <li><strong>Notification Service:</strong> Sends emails, PagerDuty, Slack on alert firing/resolution.</li>
+</ul>
+
+<pre class="diagram">
+  Hosts / Services
+  └─ Agent (collects metrics every 10s)
+       │  push
+       ▼
+  Kafka (ingestion buffer, 7-day retention)
+       │
+       ├────────────────────────────────────► Stream Processor
+       │                                      (pre-aggregate, downsample)
+       │                                             │
+       │                                             ▼
+       │                                    Time-Series DB (TSDB)
+       │                                      (tiered storage)
+       │                                        ▲       ▲
+       │                                        │       │
+       │                               Alert Engine   Query Engine
+       │                               (eval every     (dashboards,
+       │                                60s)            API)
+       │                                    │
+       ▼                                    ▼
+  Raw Storage (S3)               Notification Service
+  (audit / backfill)             (email, PagerDuty, Slack)
+</pre>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Time-Series Database Design</div>
+<p>A data point has the shape: <code>{ metric_name, tags: {host, region, service, ...}, timestamp, value }</code></p>
+
+<p><strong>Tag cardinality problem:</strong> Each unique combination of tag values is a <em>series</em>. With 1,000 hosts × 100 endpoints × 10 status codes, a single metric has 1 billion series. Most TSDBs degrade badly above ~10 million series. Solutions: limit tag value cardinality, reject high-cardinality tags at ingestion, pre-aggregate them.</p>
+
+<p><strong>Columnar storage:</strong> For each series, store timestamps and values in separate compressed arrays:</p>
+<pre><code>Series: cpu.usage{host=web-01, region=us-east-1}
+  timestamps: [1704067200, 1704067210, 1704067220, ...]   ← delta-encoded
+  values:     [42.1, 42.3, 43.0, 42.8, ...]               ← XOR (Gorilla) encoded</code></pre>
+
+<div class="callout insight">
+  <div class="callout-icon">💡</div>
+  <div class="callout-body"><strong>Gorilla Compression (Facebook, 2015)</strong><br>
+  Time-series values change slowly: 42.1% → 42.3% → 43.0%. XOR-encoding adjacent float64 values exploits this: most high bits are identical, leaving only a small diff. Combined with delta-encoding timestamps (store only the difference), typical compression is 12 bytes/point down to 1.4 bytes/point — an 8× reduction. This paper is the foundation of modern TSDB storage engines.</div>
+</div>
+
+<div class="step-badge">Step 3b — Downsampling &amp; Tiered Retention</div>
+<p>Raw data at 10-second resolution is only kept for 15 days. A background rollup job periodically aggregates into coarser buckets and deletes fine-grained data:</p>
+<table>
+  <thead><tr><th>Resolution</th><th>Retention</th><th>Aggregates stored</th></tr></thead>
+  <tbody>
+    <tr><td>10-second (raw)</td><td>15 days</td><td>raw values</td></tr>
+    <tr><td>1-minute</td><td>30 days</td><td>min, max, avg, p99, count</td></tr>
+    <tr><td>5-minute</td><td>6 months</td><td>min, max, avg, p99, count</td></tr>
+    <tr><td>1-hour</td><td>15 months</td><td>min, max, avg, p99, count</td></tr>
+  </tbody>
+</table>
+<p>The Query Engine automatically selects the appropriate resolution tier based on the requested time range and granularity. A query for "last 1 year, hourly" reads from the 1-hour tier; "last 2 hours, per-minute" reads from raw or 1-minute tier.</p>
+
+<div class="step-badge">Step 3c — Alert Engine</div>
+<p>Alert rule example: <em>"Alert if avg(cpu.usage{service='payments'}) &gt; 80% for 5 minutes"</em></p>
+
+<p>Every 60 seconds, the Alert Engine evaluates all active rules:</p>
+<ol>
+  <li>Query TSDB for the metric over the last N minutes</li>
+  <li>Evaluate the condition (threshold, anomaly, rate-of-change)</li>
+  <li>If breached: check whether the condition has held for the full <code>for</code> duration (avoids alerting on transient 1-second spikes)</li>
+  <li>If sustained: transition to FIRING → publish to notification queue</li>
+</ol>
+
+<p><strong>Alert state machine:</strong></p>
+<pre class="diagram">
+  OK ──► PENDING (breaching but &lt; 'for' duration)
+            └──► FIRING (breach sustained)
+                    └──► RESOLVED (condition no longer met)
+          (also: OK if condition clears during PENDING)
+</pre>
+
+<p><strong>Deduplication &amp; grouping:</strong> When 500 hosts all breach the same CPU rule simultaneously, the alert engine groups them into a single alert with a "500 instances affected" summary — not 500 separate pages.</p>
+
+<div class="step-badge">Step 3d — Metric Collection Agent Design</div>
+<p><strong>Pull model (Prometheus-style):</strong> A central scraper calls <code>/metrics</code> on each host every 15s. Simple but creates a single scraping bottleneck; doesn't work for ephemeral containers.</p>
+<p><strong>Push model (Datadog/StatsD):</strong> Agents push to a regional collector. Scales to millions of dynamic hosts; no scraper to coordinate.</p>
+<p><strong>Hybrid (recommended at scale):</strong> Agents push to a local aggregator on each machine → aggregator batches and compresses → pushes to Kafka. Reduces connection count from N×servers to N×racks.</p>
+<p><strong>Pre-aggregation:</strong> Agent computes local avg/p99 over a 10-second window before sending — transmits 1 point instead of 100 raw measurements. 100× write volume reduction before data even reaches Kafka.</p>
+
+<div class="step-badge">Step 3e — High Cardinality Problem</div>
+<p>Consider: <code>http.requests{status=200, endpoint=/api/users/{id}, region=us-east-1}</code>. If <code>{id}</code> leaks into a tag (a common mistake), cardinality explodes to millions of series per minute. The TSDB runs out of memory maintaining the series index.</p>
+<ul>
+  <li><strong>Prevention:</strong> Validate tags at ingestion — reject any tag with &gt;10,000 unique values.</li>
+  <li><strong>Pre-aggregation:</strong> Aggregate high-cardinality dimensions at agent or stream processor level before storing.</li>
+  <li><strong>Sampling:</strong> For very high-volume event streams, store 1% of raw events and scale counts mathematically.</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<h3>Key Design Decisions</h3>
+<table>
+  <thead><tr><th>Decision</th><th>Choice Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Storage format</td><td>Time-series DB (columnar, compressed)</td><td>MySQL / PostgreSQL</td><td>8× compression; fast time-range scans without full table reads</td></tr>
+    <tr><td>Ingestion buffer</td><td>Kafka</td><td>Direct TSDB write</td><td>Absorbs write spikes; decouples agent reliability from storage availability</td></tr>
+    <tr><td>Retention strategy</td><td>Tiered downsampling (15d → 30d → 6m → 15m)</td><td>Keep all raw data</td><td>97% storage reduction; dashboards still accurate at appropriate granularity</td></tr>
+    <tr><td>Alert evaluation</td><td>Periodic pull from TSDB every 60s</td><td>Per-point streaming evaluation</td><td>Simpler; sufficient latency for 5-min alert SLA; avoids stateful stream complexity</td></tr>
+    <tr><td>Collection model</td><td>Push (agent → Kafka)</td><td>Pull (Prometheus scrape)</td><td>Better for dynamic/containerized environments; no scraper to scale</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Anomaly detection:</strong> Beyond static thresholds, use statistical models (3-sigma, EWMA) or ML to detect anomalies that have no obvious threshold (e.g., a metric that spikes every Monday morning is normal).</li>
+  <li><strong>Metric correlation:</strong> When an alert fires, automatically surface correlated metrics that changed at the same time (useful for root cause analysis). Requires a correlation engine scanning metric deltas around alert timestamps.</li>
+  <li><strong>SLO tracking:</strong> Model Service Level Objectives as error-budget burn rates. Alert when the burn rate exceeds a multiple of the budget (multi-window alerting as described in Google's SRE workbook).</li>
+</ul>
+`
+      },
+    ]
+  },
+
+  // ── System 13: Ride-Sharing Service ──────────────────────────────────────
+  {
+    id: 'ride-sharing',
+    title: 'Design a Ride-Sharing Service (Uber)',
+    icon: '🚗',
+    difficulty: 'hard',
+    readTime: '25 min read',
+    teaser: 'Match riders to nearby drivers in real time, track location at scale, and compute dynamic pricing. Covers geospatial indexing for moving objects, matching algorithms, and the supply-demand pricing model.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Global or single city?</strong> → Global marketplace (multiple cities, sharded by region).</li>
+  <li><strong>Ride types?</strong> → Standard rides only (not food delivery or freight).</li>
+  <li><strong>Estimated wait time?</strong> → Yes, show ETA before booking.</li>
+  <li><strong>Dynamic pricing?</strong> → Yes — surge pricing based on local supply/demand.</li>
+  <li><strong>Driver location update frequency?</strong> → Every 4 seconds while the app is open.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Driver location update every 4 seconds → 1M+ location writes/sec at scale</li>
+  <li>Match found within 10 seconds of ride request</li>
+  <li>99.99% uptime for the matching service (direct revenue impact)</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Active drivers globally</span><span class="cap-val">10 million</span></div>
+  <div class="cap-row"><span class="cap-label">Location updates/sec</span><span class="cap-val">10M drivers ÷ 4s = 2.5M updates/sec</span></div>
+  <div class="cap-row"><span class="cap-label">Driver location in memory</span><span class="cap-val">10M × 50 bytes = 500 MB (fits in Redis)</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Ride requests/sec</span><span class="cap-val">1M rides/day ÷ 86,400 ≈ 12/sec (latency-critical, not volume-critical)</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Two Core Flows</h3>
+<p><strong>Flow 1: Continuous driver location updates</strong> — drivers send GPS coordinates every 4 seconds. System must ingest 2.5M updates/sec and maintain a queryable real-time location index.</p>
+<p><strong>Flow 2: Ride request → match → dispatch</strong> — rider requests a ride; system finds the best nearby available driver and dispatches. Latency &lt;10 seconds end-to-end.</p>
+
+<pre class="diagram">
+  ┌────────────┐  GPS every 4s   ┌──────────────────────┐
+  │ Driver App │────────────────►│   Location Service   │
+  └────────────┘                 │  (Redis GEO + async  │
+                                 │   Cassandra writes)  │
+                                 └──────────┬───────────┘
+                                            │
+  ┌────────────┐  request ride   ┌──────────▼───────────┐   find drivers   ┌────────────────┐
+  │ Rider App  │────────────────►│  Ride Request Svc    │─────────────────►│ Matching Svc   │
+  └─────┬──────┘                 └──────────┬───────────┘                  │(radius search, │
+        │                                   │                               │ scoring)       │
+        │ confirm + ETA                     ▼                               └───────┬────────┘
+        └────────────────────────    Trip Service                                   │ offer trip
+                                    (state machine,                        ┌────────▼────────┐
+                                     billing trigger)                      │   Driver App    │
+                                            │                              └─────────────────┘
+                                            ▼
+                                    Payment Service
+</pre>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Driver Location at 2.5M Updates/Sec</div>
+<p>A relational database cannot absorb 2.5M writes/sec. Use <strong>Redis</strong> as the real-time location store:</p>
+<ul>
+  <li><code>GEOADD active_drivers {lng} {lat} {driver_id}</code> — Redis GEO sorted set using geohash encoding internally.</li>
+  <li><code>GEORADIUS active_drivers {lng} {lat} 3 km ASC COUNT 50</code> — returns nearby drivers sorted by distance. O(N+log M) where N = results, M = members in radius.</li>
+  <li>Additional hash: <code>HSET driver:{id} lat {lat} lng {lng} status available heading 270</code> for richer driver state.</li>
+</ul>
+
+<div class="callout insight">
+  <div class="callout-icon">💡</div>
+  <div class="callout-body"><strong>Durability vs. Speed Tradeoff for Location Data</strong><br>
+  Driver location is write-heavy but not durability-critical. If Redis loses 30 seconds of location history during a restart, the driver simply sends the next GPS update in 4 seconds. Use Redis as the authoritative real-time store and write to Cassandra asynchronously every 30 seconds for historical records (billing disputes, safety investigations).</div>
+</div>
+
+<div class="step-badge">Step 3b — Matching Algorithm</div>
+<p>When a rider requests a ride:</p>
+<ol>
+  <li>Compute rider's geohash (precision 6 ≈ 1.2 km × 0.6 km cell)</li>
+  <li>Query Redis GEO: <code>GEORADIUS active_drivers {lng} {lat} 3 km ASC COUNT 50</code></li>
+  <li>Filter candidates: status = <em>available</em> (not on active trip), vehicle type match, heading plausibly toward pickup</li>
+  <li>Score remaining candidates: distance to pickup × 0.6 + driver rating × 0.2 + acceptance rate × 0.2</li>
+  <li>Offer trip to top-scored driver with a 10-second acceptance window</li>
+  <li>If declined or timeout → offer to next driver in ranked list</li>
+</ol>
+<p><strong>Progressive radius expansion:</strong> If no available drivers within 3 km → expand to 5 km → 8 km → 15 km → return "no drivers available" to rider.</p>
+
+<div class="step-badge">Step 3c — Trip State Machine</div>
+<pre class="diagram">
+  REQUESTED
+      │
+      ├──► NO_DRIVER_FOUND (radius exhausted)
+      │
+      ▼
+  DRIVER_FOUND ──► CANCELLED (rider cancels before pickup)
+      │
+      ▼
+  EN_ROUTE_TO_PICKUP
+      │
+      ▼
+  ARRIVED_AT_PICKUP
+      │
+      ▼
+  IN_TRIP
+      │
+      ▼
+  COMPLETED ──► (triggers billing, driver payout, rating prompt)
+</pre>
+<p>Active trip state lives in Redis (fast access during trip). All transitions are also written to Cassandra (permanent record). Each state transition publishes a Kafka event that downstream services (billing, notifications, driver payout, analytics) consume independently.</p>
+
+<div class="step-badge">Step 3d — Dynamic (Surge) Pricing</div>
+<p>Every 60 seconds, the Pricing Service recomputes surge multiplier per geohash cell:</p>
+<ol>
+  <li>Count pending ride requests in cell over last 5 minutes (<em>demand</em>)</li>
+  <li>Count available drivers in cell (<em>supply</em>)</li>
+  <li>ratio = demand / max(supply, 1)</li>
+  <li>surge = lookup table: ratio &lt;1.5 → 1.0×; 1.5–3.0 → 1.5×; 3.0–5.0 → 2.0×; &gt;5.0 → 2.5×</li>
+</ol>
+<p><strong>Dampening:</strong> New multiplier = 0.7 × previous + 0.3 × calculated. Prevents rapid oscillation (the multiplier would otherwise spike and crash as drivers flood into the surge zone).</p>
+<p><strong>Rider confirmation:</strong> If surge &gt; 1.0×, rider sees explicit confirmation screen: "Prices are 2.0× normal due to high demand. Estimated fare: $18–22." Must confirm before booking.</p>
+
+<div class="step-badge">Step 3e — ETA Calculation</div>
+<ul>
+  <li>City road network stored as a weighted directed graph (nodes = intersections, edges = road segments with travel time weights).</li>
+  <li>Dijkstra / A* computes shortest-time path from driver's location to pickup, then pickup to dropoff.</li>
+  <li>Traffic weights updated continuously from anonymized GPS traces of all active drivers — effectively crowdsourced real-time traffic.</li>
+  <li>Common city-pair routes are pre-computed and cached. Full graph search runs only for non-cached queries.</li>
+</ul>
+
+<div class="step-badge">Step 3f — Fraud &amp; Safety</div>
+<ul>
+  <li><strong>GPS spoofing:</strong> Compare GPS trace to road network. Speed &gt;200 km/h between consecutive updates → flag for review (physically impossible movement).</li>
+  <li><strong>Fake trip fraud:</strong> New account + long expensive route + no prior rides → hold payment for manual review.</li>
+  <li><strong>SOS / Emergency:</strong> In-app emergency button shares live location with emergency contacts and optionally dispatches local authorities via public safety API integration.</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<h3>Key Design Decisions</h3>
+<table>
+  <thead><tr><th>Decision</th><th>Choice Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Location store</td><td>Redis GEO (in-memory)</td><td>PostGIS (PostgreSQL)</td><td>2.5M writes/sec requires in-memory; Redis GEO provides O(1) radius search</td></tr>
+    <tr><td>Matching approach</td><td>Radius search + weighted scoring</td><td>Global assignment optimization</td><td>Global optimization is NP-hard; greedy local search achieves sub-10s latency</td></tr>
+    <tr><td>Location persistence</td><td>Async write to Cassandra every 30s</td><td>Synchronous DB write on every update</td><td>Non-critical for real-time ops; saves ~2.5M writes/sec from hitting Cassandra</td></tr>
+    <tr><td>Surge pricing</td><td>Supply/demand ratio per geohash cell</td><td>ML-based demand prediction</td><td>Simpler, fully explainable, auditable; ML adds value but is an iteration</td></tr>
+    <tr><td>Trip state</td><td>Redis (active) + Cassandra (permanent)</td><td>Single DB for both</td><td>Redis for sub-ms active-trip reads; Cassandra for unbounded historical writes</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Driver supply prediction:</strong> Predict driver availability by area and time of day using historical data. Pre-position incentives to attract drivers to areas before demand spikes.</li>
+  <li><strong>Carpooling (shared rides):</strong> Match multiple riders travelling in the same direction. Requires a trip-merging algorithm that checks route overlap and detour cost. Much harder matching problem.</li>
+  <li><strong>Multi-region sharding:</strong> Shard driver/rider data by city or region. Cross-shard operations (airport trips crossing city boundaries) require a routing layer that spans shards.</li>
+</ul>
+`
+      },
+    ]
+  },
+
+  // ── System 14: Hotel Reservation System ──────────────────────────────────
+  {
+    id: 'hotel-reservation',
+    title: 'Design a Hotel Reservation System',
+    icon: '🏨',
+    difficulty: 'medium',
+    readTime: '20 min read',
+    teaser: 'Design a reservation platform like Booking.com. The core challenge: prevent double-booking at scale while handling high read traffic for availability searches.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Hotel-owned or marketplace?</strong> → Marketplace (Booking.com style — thousands of hotels, one platform).</li>
+  <li><strong>Search by location + dates?</strong> → Yes. Also filter by price, rating, amenities.</li>
+  <li><strong>Concurrent booking prevention?</strong> → Critical — no double booking under any circumstance.</li>
+  <li><strong>Overbooking allowed?</strong> → No (unlike airlines). Hard constraint.</li>
+  <li><strong>Scale?</strong> → 5,000 hotels, 1 million daily searches, 100,000 reservations/day.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Zero double-bookings (strong consistency for write path)</li>
+  <li>Search latency &lt;1 second</li>
+  <li>99.9% uptime (some degraded availability acceptable during non-peak)</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Search QPS</span><span class="cap-val">1M/day ÷ 86,400 ≈ 12 searches/sec (read-heavy)</span></div>
+  <div class="cap-row"><span class="cap-label">Booking QPS</span><span class="cap-val">100K/day ÷ 86,400 ≈ 1.15 bookings/sec (low QPS, high contention risk)</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Inventory size</span><span class="cap-val">5K hotels × 200 rooms × 365 days = 365M room-night records</span></div>
+</div>
+
+<div class="callout tip">
+  <div class="callout-icon">💬</div>
+  <div class="callout-body"><strong>Interview Tip: Always Ask About Overbooking</strong><br>
+  Airlines intentionally overbook 5–10% of seats based on historical no-show rates. Some hotels do the same. If overbooking is permitted, your concurrency model can relax significantly (no need for strict locking). Always clarify this before designing the inventory system.</div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Three Core Services</h3>
+<ul>
+  <li><strong>Hotel Service:</strong> CRUD for hotel metadata (name, location, amenities, photos, room types). Read-heavy, cached aggressively. Changes infrequently.</li>
+  <li><strong>Inventory Service:</strong> Manages available room counts per hotel/room-type/date. The source of truth for "how many rooms are left on this date?"</li>
+  <li><strong>Reservation Service:</strong> Manages the booking lifecycle — create, confirm, cancel, modify. Orchestrates payment and inventory deduction.</li>
+</ul>
+
+<pre class="diagram">
+  ┌─────────┐  search     ┌─────────────────────┐     ┌──────────────────────┐
+  │ Client  │────────────►│   Search Service    │────►│   Hotel Service      │
+  └────┬────┘             │ (Elasticsearch geo) │     │ (metadata, CDN-cached│
+       │                  └─────────────────────┘     └──────────────────────┘
+       │ book
+       │             ┌──────────────────────┐     ┌──────────────────────┐
+       └────────────►│  Reservation Service │────►│  Inventory Service   │
+                     └──────────┬───────────┘     │  (room availability) │
+                                │                  └──────────────────────┘
+                                ▼
+                         Payment Service
+                         (charge card on confirm)
+</pre>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Data Model</div>
+<pre><code>-- Room inventory: one row per (hotel, room_type, date)
+CREATE TABLE room_inventory (
+  hotel_id    BIGINT      NOT NULL,
+  room_type   VARCHAR(50) NOT NULL,
+  date        DATE        NOT NULL,
+  total_rooms INT         NOT NULL,
+  reserved    INT         NOT NULL DEFAULT 0,
+  version     INT         NOT NULL DEFAULT 0,   -- for optimistic locking
+  PRIMARY KEY (hotel_id, room_type, date)
+);
+
+-- Reservations
+CREATE TABLE reservations (
+  reservation_id  BIGINT PRIMARY KEY AUTO_INCREMENT,
+  hotel_id        BIGINT      NOT NULL,
+  room_type       VARCHAR(50) NOT NULL,
+  user_id         BIGINT      NOT NULL,
+  check_in        DATE        NOT NULL,
+  check_out       DATE        NOT NULL,
+  status          ENUM('PENDING','CONFIRMED','CANCELLED') NOT NULL,
+  created_at      DATETIME    NOT NULL,
+  INDEX idx_hotel_dates (hotel_id, check_in, check_out),
+  INDEX idx_user (user_id)
+);</code></pre>
+
+<div class="step-badge">Step 3b — Preventing Double-Booking (Core Problem)</div>
+<p><strong>Naive approach (WRONG):</strong></p>
+<pre><code>-- Thread A and Thread B both execute concurrently
+SELECT reserved, total_rooms FROM room_inventory WHERE ...;
+-- Both read: reserved=4, total=5. Both see 1 room available. Both proceed.
+UPDATE room_inventory SET reserved = reserved + 1 WHERE ...;
+-- Result: reserved=6 for total=5. DOUBLE BOOKED.</code></pre>
+
+<p><strong>Solution 1 — Optimistic Locking (low-to-medium contention):</strong></p>
+<pre><code>-- Include version in WHERE clause. Returns 0 rows if version changed.
+UPDATE room_inventory
+SET reserved = reserved + 1, version = version + 1
+WHERE hotel_id = ? AND room_type = ? AND date = ?
+  AND reserved &lt; total_rooms
+  AND version = ?;
+-- affectedRows == 0 → another booking won → retry or return "sold out"</code></pre>
+
+<p><strong>Solution 2 — Database Row Lock (standard reliability, higher contention):</strong></p>
+<pre><code>BEGIN TRANSACTION;
+-- Lock this row exclusively
+SELECT * FROM room_inventory
+WHERE hotel_id = ? AND room_type = ? AND date = ?
+FOR UPDATE;
+-- Now we have exclusive lock. Check and update safely:
+IF reserved &lt; total_rooms THEN
+  UPDATE room_inventory SET reserved = reserved + 1 WHERE ...;
+  INSERT INTO reservations (...) VALUES (...);
+  COMMIT;
+ELSE
+  ROLLBACK; -- sold out
+END IF;</code></pre>
+
+<p><strong>Solution 3 — Redis Atomic Decrement (flash sales / high-burst traffic):</strong></p>
+<pre><code>-- Pre-load inventory count at booking window open
+SET avail:hotel:123:std:2024-01-15 5
+
+-- On booking attempt (atomic):
+result = DECR avail:hotel:123:std:2024-01-15
+IF result >= 0:
+  proceed to DB write (row lock for final confirmation)
+ELSE:
+  INCR avail:hotel:123:std:2024-01-15  -- rollback counter
+  return "sold out"</code></pre>
+<p>Redis is not the source of truth — it's a fast first gate. After Redis approves, still do a DB write with row lock for the final ACID record.</p>
+
+<div class="step-badge">Step 3c — Availability Search</div>
+<ul>
+  <li>Users search: "San Francisco hotels, Jan 15–18, 2 guests, max $250/night"</li>
+  <li>Real-time query approach: JOIN room_inventory across 3 dates per hotel — works but slow at scale</li>
+  <li>Better: nightly Spark job precomputes availability summaries per hotel per date-range → writes to <strong>Elasticsearch</strong> with <code>geo_point</code> field for location search</li>
+  <li>Search results may be slightly stale (up to 24 hours from nightly job). On actual booking: always verify against the DB (source of truth).</li>
+</ul>
+
+<div class="step-badge">Step 3d — Reservation State Machine &amp; Hold Mechanism</div>
+<pre class="diagram">
+  PENDING (room held, 15-min timer)
+      ├──► CONFIRMED (payment captured successfully)
+      ├──► EXPIRED  (timer fires, no payment received)
+      └──► CANCELLED (user cancels during hold window)
+
+  CONFIRMED
+      └──► CANCELLED (user or hotel cancels after confirmation)
+</pre>
+<p>The 15-minute hold prevents inventory from vanishing while the user fills out payment details. Implementation: Redis key <code>hold:{reservation_id}</code> with 900s TTL. On TTL expiry → Kafka event → Release inventory in DB (<code>reserved = reserved - 1</code>, status = EXPIRED).</p>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<h3>Key Design Decisions</h3>
+<table>
+  <thead><tr><th>Decision</th><th>Choice Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Booking concurrency</td><td>Optimistic lock (normal) / Row lock (high contention) / Redis gate (flash sale)</td><td>Application-level mutex</td><td>DB ACID guarantees correctness; Redis adds speed for burst scenarios</td></tr>
+    <tr><td>Search index</td><td>Elasticsearch with geo_point</td><td>Direct DB query with PostGIS</td><td>Full-text + geospatial + faceted filtering in one fast query</td></tr>
+    <tr><td>Inventory model</td><td>Per-room-type per-date rows</td><td>Date-range records (check_in, check_out)</td><td>Simpler availability check per date; avoids range-overlap query complexity</td></tr>
+    <tr><td>Hold mechanism</td><td>Redis TTL + DB PENDING status</td><td>DB-level lock held for 15 min</td><td>Redis TTL fires reliably without holding a DB connection for 15 minutes</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Rate parity enforcement:</strong> Contracts with hotels often require the same price across all channels. A rate auditing service can scrape the hotel's own website and flag violations automatically.</li>
+  <li><strong>Dynamic pricing by hotel:</strong> Hotels often want to raise prices as rooms sell out. The inventory service can expose a webhook that triggers the hotel's pricing engine when availability drops below a threshold.</li>
+  <li><strong>No-show handling:</strong> For prepaid bookings, no action needed. For pay-at-hotel, the platform may need to charge a cancellation fee — requires a delayed charge job that fires at check-in time if the reservation is still CONFIRMED with no check-in event.</li>
+</ul>
+`
+      },
+    ]
+  },
+
+  // ── System 15: S3-like Object Storage ────────────────────────────────────
+  {
+    id: 'object-storage',
+    title: 'Design an Object Storage System (S3-style)',
+    icon: '🗄️',
+    difficulty: 'hard',
+    readTime: '23 min read',
+    teaser: 'Design a distributed object store like Amazon S3. Covers separation of data vs. metadata planes, erasure coding for durability at exabyte scale, consistent hashing for object placement, and multipart upload.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Object types?</strong> → Any binary data — images, videos, database backups, log archives.</li>
+  <li><strong>Max object size?</strong> → Up to 5 TB per object (like S3's maximum).</li>
+  <li><strong>Durability SLA?</strong> → 99.999999999% (11 nines) — lose fewer than 1 object per 100,000 years per 100 million objects stored.</li>
+  <li><strong>Versioning?</strong> → Yes — every PUT creates a new version; DELETE creates a delete marker.</li>
+  <li><strong>Access pattern?</strong> → Write-once, read-many. Objects are rarely overwritten.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>11-nines durability</li>
+  <li>99.99% availability</li>
+  <li>Effectively infinite horizontal scalability</li>
+  <li>Latency: &lt;100ms for small objects (&lt;1 MB) — first byte</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Total objects</span><span class="cap-val">1 billion, avg 1 MB = 1 PB raw data</span></div>
+  <div class="cap-row"><span class="cap-label">Write throughput</span><span class="cap-val">100K writes/sec × 1 MB = 100 GB/sec</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Read throughput</span><span class="cap-val">1M reads/sec × 1 MB = 1 TB/sec</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Fundamental Separation: Metadata Plane vs. Data Plane</h3>
+<p>The key architectural decision: <strong>never mix metadata with data</strong>. They have completely different access patterns, scaling needs, and consistency requirements.</p>
+<ul>
+  <li><strong>Metadata Plane:</strong> "Where is this object?" — small records, requires strong consistency, must be highly available for every read/write request. Backed by a distributed key-value store.</li>
+  <li><strong>Data Plane:</strong> "Give me the actual bytes." — large blobs, can use eventual consistency for replication, optimized for throughput over latency. Backed by cheap commodity storage nodes.</li>
+</ul>
+
+<pre class="diagram">
+  Client (S3-compatible REST API)
+    │
+    ▼
+  API Service (routes requests, authenticates, enforces bucket policies)
+    │
+    ├─► Metadata Service ──► Metadata DB (Cassandra / custom KV)
+    │   (object_key → {node_ids, checksum, size, version, ...})
+    │
+    └─► Data Service (cluster of storage nodes)
+        ├── Storage Node 1: /data/chunks/...
+        ├── Storage Node 2: /data/chunks/...
+        ├── Storage Node 3: /data/chunks/...
+        └── Storage Node N: /data/chunks/...
+
+  PUT flow:  Client → API → split into chunks → Data Service (write chunks)
+                                              → Metadata Service (write locations)
+  GET flow:  Client → API → Metadata Service (find chunk locations)
+                          → Data Service (fetch + reassemble chunks)
+</pre>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Durability: Erasure Coding vs. Replication</div>
+
+<p><strong>3× Replication:</strong> Store identical copies of each object on 3 different nodes. Survive up to 2 simultaneous node failures. Storage overhead: 3× (1 PB of data → 3 PB stored).</p>
+
+<p><strong>Erasure Coding — 8+4 Reed-Solomon:</strong></p>
+<ul>
+  <li>Split each object into 8 equal <em>data chunks</em>.</li>
+  <li>Compute 4 <em>parity chunks</em> using Reed-Solomon math (linear algebra over finite fields).</li>
+  <li>Distribute all 12 chunks across 12 different nodes in different failure domains (racks, AZs).</li>
+  <li>Any 8 of the 12 chunks are sufficient to reconstruct the full object — tolerate up to 4 simultaneous node failures.</li>
+  <li>Storage overhead: 12/8 = 1.5× (vs. 3× for replication). <strong>50% storage savings.</strong></li>
+</ul>
+
+<div class="callout insight">
+  <div class="callout-icon">💡</div>
+  <div class="callout-body"><strong>Why S3 Uses Erasure Coding at Scale</strong><br>
+  At 1 exabyte of customer data: 3× replication = 3 exabytes stored. Erasure coding at 1.5× = 1.5 exabytes stored. The CPU cost of encoding (typically &lt;2ms for objects under 10MB) is trivially cheap compared to the cost of 1.5 exabytes of additional disk capacity. At Amazon's scale, this difference is billions of dollars per year in hardware costs.</div>
+</div>
+
+<div class="step-badge">Step 3b — Object Placement via Consistent Hashing</div>
+<ul>
+  <li>Hash(bucket_name + "/" + object_key) → position on a consistent hash ring.</li>
+  <li>The hash position maps to a storage node responsible for that object's primary chunk.</li>
+  <li>Additional chunks distributed to nodes in different failure domains (enforce rack/AZ spread).</li>
+  <li><strong>Adding a node:</strong> Only objects whose hash range falls on the new node need to move (~1/N of objects). Other objects unaffected.</li>
+  <li><strong>Node failure:</strong> Detector marks node as failed → replication/erasure repair job fetches surviving chunks → reconstructs missing chunks on a replacement node.</li>
+</ul>
+
+<div class="step-badge">Step 3c — Multipart Upload</div>
+<p>Objects up to 5 TB cannot be sent in a single HTTP request (connection failures would require restarting from zero). Multipart upload provides resumable, parallelizable transfers:</p>
+<pre><code>// 1. Initiate
+POST /bucket/large-video.mp4?uploads
+Response: { upload_id: "VXBsb2FkIElEIGZvciA..." }
+
+// 2. Upload parts (can be done in parallel)
+PUT /bucket/large-video.mp4?partNumber=1&amp;uploadId=...  (5–5000 MB)
+Response: { ETag: "\"abc123\"" }
+
+PUT /bucket/large-video.mp4?partNumber=2&amp;uploadId=...
+Response: { ETag: "\"def456\"" }
+
+// 3. Complete (assembles parts into final object)
+POST /bucket/large-video.mp4?uploadId=...
+Body: [{ PartNumber: 1, ETag: "abc123" }, { PartNumber: 2, ETag: "def456" }]
+
+// 4. Abort (cleans up orphaned parts on failure)
+DELETE /bucket/large-video.mp4?uploadId=...</code></pre>
+<p>Parts are stored as temporary objects. On <code>CompleteMultipartUpload</code>, the metadata record is created linking all part locations. Orphaned incomplete uploads are cleaned up by a lifecycle policy (default: delete after 7 days).</p>
+
+<div class="step-badge">Step 3d — Metadata Design</div>
+<pre><code>ObjectMetadata {
+  bucket       : "my-photos",
+  key          : "vacation/2024/beach.jpg",
+  version_id   : "3HL4kqtJlcpXroDTDmJ+",  // random, lexicographically sortable
+  size         : 4194304,                   // bytes
+  checksum     : "sha256:abc123...",        // data integrity verification
+  content_type : "image/jpeg",
+  created_at   : 1704067200,               // epoch seconds
+  chunk_ids    : ["c0","c1","c2","c3","c4","c5","c6","c7",  // 8 data chunks
+                  "p0","p1","p2","p3"],                       // 4 parity chunks
+  node_ids     : [42, 17, 91, 3, 77, 56, 28, 64,            // data nodes
+                  5, 38, 19, 83],                              // parity nodes
+  storage_class: "STANDARD",
+  delete_marker: false
+}</code></pre>
+<p>Metadata store: Cassandra with <code>PRIMARY KEY (bucket, key, version_id)</code>. Latest version pointer maintained as a separate row. Fast O(1) lookup for all reads. Supports bucket listing via range scan on (bucket, key) prefix.</p>
+
+<div class="step-badge">Step 3e — Versioning &amp; Storage Classes</div>
+<p><strong>Versioning:</strong> Every PUT generates a new <code>version_id</code>. Metadata table retains all versions. <code>GET</code> returns latest by default; <code>GET?versionId=xyz</code> returns any historical version. DELETE creates a delete marker — the object is hidden from <code>GET</code> but recoverable. Lifecycle rules can automatically delete versions older than N days.</p>
+
+<p><strong>Storage Classes (tiered cost model):</strong></p>
+<table>
+  <thead><tr><th>Class</th><th>Retrieval latency</th><th>Use case</th><th>Storage cost</th></tr></thead>
+  <tbody>
+    <tr><td>STANDARD</td><td>Milliseconds</td><td>Frequently accessed data</td><td>Highest</td></tr>
+    <tr><td>STANDARD_IA</td><td>Milliseconds</td><td>Accessed &lt;1×/month; 30-day minimum</td><td>40% cheaper</td></tr>
+    <tr><td>GLACIER</td><td>3–5 hours</td><td>Archival; 90-day minimum</td><td>80% cheaper</td></tr>
+    <tr><td>DEEP_ARCHIVE</td><td>12–48 hours</td><td>Compliance, 7-year retention</td><td>95% cheaper</td></tr>
+  </tbody>
+</table>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<h3>Key Design Decisions</h3>
+<table>
+  <thead><tr><th>Decision</th><th>Choice Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Durability mechanism</td><td>Erasure coding (8+4 Reed-Solomon)</td><td>3× replication</td><td>1.5× storage overhead vs. 3×; better failure tolerance (4 nodes vs. 2)</td></tr>
+    <tr><td>Metadata store</td><td>Cassandra (distributed KV)</td><td>Relational DB (PostgreSQL)</td><td>Linear horizontal scalability for billions of object records</td></tr>
+    <tr><td>Object placement</td><td>Consistent hashing</td><td>Fixed range sharding</td><td>Minimizes data movement when nodes are added/removed</td></tr>
+    <tr><td>Large object upload</td><td>Multipart upload API</td><td>Single PUT stream</td><td>Resumable on failure; parallelizable; supports objects &gt;5 GB</td></tr>
+    <tr><td>Metadata/data separation</td><td>Separate services and storage</td><td>Unified store</td><td>Radically different scaling and consistency requirements</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Pre-signed URLs:</strong> Allow clients to upload/download directly to storage nodes without routing through the API service. API service generates a time-limited signed URL; client uses it directly. Reduces API service load for large transfers.</li>
+  <li><strong>Content-addressable storage:</strong> Hash object content → use hash as storage key. Identical objects stored once (deduplication). Tradeoff: metadata must map user-visible keys to content hashes; adds indirection layer.</li>
+  <li><strong>Cross-region replication:</strong> Asynchronously replicate objects to a second region for disaster recovery. Metadata service publishes replication events; a cross-region replication service consumes and copies. Slightly relaxed consistency (eventual cross-region) acceptable for most workloads.</li>
+</ul>
+`
+      },
+    ]
+  },
+
+  // ── System 16: Ad Click Event Aggregation ────────────────────────────────
+  {
+    id: 'ad-click-aggregation',
+    title: 'Design an Ad Click Event Aggregation System',
+    icon: '📣',
+    difficulty: 'medium',
+    readTime: '18 min read',
+    teaser: 'Aggregate billions of ad click events in real-time to report CTR, spend, and impressions. Covers Lambda architecture, exactly-once semantics, and windowed aggregation.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>What aggregations are needed?</strong> → Click count, impression count, CTR (clicks/impressions), and spend per ad per time window.</li>
+  <li><strong>Window sizes?</strong> → 1-minute (live dashboards), 1-hour, 1-day (reporting).</li>
+  <li><strong>Query latency?</strong> → &lt;1 second for dashboards.</li>
+  <li><strong>Exactly-once counting?</strong> → Yes — billing is computed from click counts. Duplicate counts = overcharging advertisers.</li>
+  <li><strong>Historical queries?</strong> → Yes, back to 1 year.</li>
+  <li><strong>Scale?</strong> → 10,000 clicks/sec (global peak).</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Exactly-once counting for billing accuracy</li>
+  <li>Real-time latency: 1-minute lag acceptable for live dashboards</li>
+  <li>Historical queries back to 1 year with sub-second response</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Clicks/day</span><span class="cap-val">10K/sec × 86,400 = 864 million</span></div>
+  <div class="cap-row"><span class="cap-label">Raw event size</span><span class="cap-val">100 bytes × 864M = 86 GB/day raw</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Aggregated size</span><span class="cap-val">1M ads × 1,440 min × 50 bytes ≈ 72 GB/day (1,000× smaller)</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Lambda Architecture</h3>
+<p>We need both real-time freshness (for live dashboards) and accuracy (for billing). Lambda Architecture uses two parallel processing paths:</p>
+<ul>
+  <li><strong>Speed layer (streaming):</strong> Flink processes events in real-time, computes 1-minute window aggregates. Serves live dashboards. Slightly approximate (handles late events with watermarks).</li>
+  <li><strong>Batch layer:</strong> Spark processes all raw events nightly from S3. Produces accurate historical aggregates that overwrite the speed layer results for past windows.</li>
+</ul>
+
+<pre class="diagram">
+  Ad Click Events
+  { ad_id, user_id, timestamp, ip, bid_price }
+         │
+         ▼
+  Kafka (raw click events, 7-day retention)
+         │
+         ├──────────────────────────────────────────►  Speed Layer
+         │                                              (Apache Flink)
+         │                                              1-min tumbling windows
+         │                                                     │
+         │                                                     ▼
+         │                                             ClickHouse (real-time)
+         │                                             serves live dashboards
+         │
+         ▼
+  S3 (raw event archive, 1-year retention)
+         │
+         ▼
+  Batch Layer (Apache Spark, nightly at 2am)
+  → accurate rollups (1-hr, 1-day)
+  → overwrites ClickHouse historical partitions
+
+  Query API
+  ├── recent (&lt;7d, minute granularity) → ClickHouse real-time
+  └── historical (&gt;7d or coarser) → ClickHouse batch partitions
+</pre>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Exactly-Once Aggregation</div>
+<p>Problem: Flink consumer crashes mid-window → on restart it re-reads Kafka events from last checkpoint → events already counted get counted again.</p>
+
+<p><strong>Solution A — Bloom Filter Deduplication (for non-billing metrics):</strong></p>
+<ul>
+  <li>Each click event carries a unique <code>event_id</code> (generated by ad server at click time).</li>
+  <li>Aggregator checks Redis bloom filter before counting: <code>BF.EXISTS dedup_filter {event_id}</code>.</li>
+  <li>If not seen: count + add to bloom filter. If seen: skip.</li>
+  <li>Bloom filter size: 864M events/day × 7 days × 10 bits/element ≈ 7.5 GB — fits in Redis memory.</li>
+  <li>False positive rate: ~0.1% → ~864K missed events/day. Acceptable for impression counts; not for billing.</li>
+</ul>
+
+<p><strong>Solution B — Exact Deduplication (for billing-critical click counts):</strong></p>
+<ul>
+  <li><code>SADD dedup:exact:{date} {event_id}</code> — Redis set, exact membership test, zero false positives.</li>
+  <li>Set expires after 7 days (TTL): <code>EXPIRE dedup:exact:{date} 604800</code>.</li>
+  <li>Memory cost: 864M events × 16 bytes (UUID) × 7 days = ~96 GB. Use a Redis cluster.</li>
+</ul>
+
+<p><strong>Solution C — Flink Native Exactly-Once (cleanest):</strong></p>
+<ul>
+  <li>Flink's 2-phase commit (2PC) with Kafka source + ClickHouse sink.</li>
+  <li>Flink checkpoints offset + in-flight aggregates atomically. On recovery, restores exactly the last committed state.</li>
+  <li>Requires Kafka consumer + ClickHouse writer to both support the 2PC protocol. Flink's Kafka connector does this natively.</li>
+</ul>
+
+<div class="step-badge">Step 3b — Windowed Aggregation in Flink</div>
+<pre><code>// Tumbling 1-minute window: count clicks per ad_id per minute
+stream
+  .keyBy(event -> event.adId)
+  .window(TumblingEventTimeWindows.of(Time.minutes(1)))
+  .aggregate(new ClickCountAggregator())
+  .addSink(clickHouseSink);
+
+// ClickCountAggregator produces:
+// { ad_id, window_start, click_count, impression_count, total_spend }</code></pre>
+
+<p><strong>Late data handling:</strong> Network delays cause events to arrive after their window closes. Flink uses a <em>watermark</em> — a timestamp threshold below which no more late data is expected. Configure a 2-minute watermark: accept events up to 2 minutes late; discard anything older. Late events within the watermark update the window result; a side output captures late discards for batch correction.</p>
+
+<div class="step-badge">Step 3c — Aggregation Rollups</div>
+<table>
+  <thead><tr><th>Level</th><th>Retention</th><th>Computed by</th></tr></thead>
+  <tbody>
+    <tr><td>1-minute</td><td>7 days</td><td>Flink (streaming)</td></tr>
+    <tr><td>1-hour</td><td>30 days</td><td>Spark (nightly rollup from 1-min)</td></tr>
+    <tr><td>1-day</td><td>1 year</td><td>Spark (nightly rollup from 1-hour)</td></tr>
+  </tbody>
+</table>
+<p>ClickHouse partitions data by date. Nightly Spark job reads yesterday's 1-minute rows → computes hourly and daily aggregates → inserts into ClickHouse. This overwrites the speed layer's results for finished days with accurate batch-computed values (the "lambda" correction).</p>
+
+<div class="step-badge">Step 3d — Query API Design</div>
+<pre><code>GET /api/v1/ads/{ad_id}/stats
+  ?start=2024-01-15T00:00:00Z
+  &amp;end=2024-01-15T23:59:59Z
+  &amp;granularity=hour
+
+Response:
+{
+  "ad_id": "12345",
+  "data": [
+    { "timestamp": "2024-01-15T00:00:00Z", "clicks": 1420, "impressions": 84300,
+      "ctr": 0.0169, "spend": 213.00 },
+    { "timestamp": "2024-01-15T01:00:00Z", "clicks": 893,  "impressions": 61200,
+      "ctr": 0.0146, "spend": 133.95 },
+    ...
+  ]
+}</code></pre>
+<p>Query routing logic:</p>
+<ul>
+  <li>Time range ≤7 days AND minute granularity → real-time ClickHouse partition</li>
+  <li>Time range &gt;7 days OR hour/day granularity → batch ClickHouse partition</li>
+  <li>Queries spanning both → merge results from both partitions</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<h3>Key Design Decisions</h3>
+<table>
+  <thead><tr><th>Decision</th><th>Choice Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Architecture</td><td>Lambda (speed + batch layers)</td><td>Kappa (streaming only)</td><td>Batch layer corrects approximations; billing requires accurate historical counts</td></tr>
+    <tr><td>Dedup (non-billing)</td><td>Bloom filter (7.5 GB)</td><td>Exact set (96 GB)</td><td>0.1% false positive acceptable for impression counts; 12× less memory</td></tr>
+    <tr><td>Dedup (billing)</td><td>Redis exact set with 7-day TTL</td><td>Bloom filter</td><td>Zero false positives — must not overcharge advertisers</td></tr>
+    <tr><td>Streaming engine</td><td>Apache Flink</td><td>Spark Structured Streaming</td><td>True event-time processing; native exactly-once with Kafka</td></tr>
+    <tr><td>Analytical storage</td><td>ClickHouse (columnar)</td><td>Cassandra</td><td>Columnar store enables fast GROUP BY aggregations over billions of rows</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Click fraud detection:</strong> Real-time Flink job detects: same IP clicking same ad &gt;3× in 1 minute → mark as fraud → exclude from billing aggregates. Fraud signals feed back into the ad serving layer to stop showing ads to suspected bots.</li>
+  <li><strong>Attribution modeling:</strong> A click may precede a conversion (purchase) by days. The attribution service joins click events with conversion events (windowed join across a multi-day window) to compute which ads drove actual revenue.</li>
+  <li><strong>Advertiser-facing API rate limiting:</strong> Advertisers query stats APIs frequently. Add Redis-based rate limiting (100 req/min per account) and a query result cache (5-minute TTL) to protect ClickHouse from hot-query bombardment.</li>
+</ul>
+`
+      },
+    ]
+  },
+
+  // ── System 17: Live Commenting / Real-Time Feed ───────────────────────────
+  {
+    id: 'live-comments',
+    title: 'Design a Live Commenting System (YouTube-style)',
+    icon: '💬',
+    difficulty: 'medium',
+    readTime: '16 min read',
+    teaser: 'Display live comments on a video or post with thousands of simultaneous viewers. Covers WebSocket fan-out to massive audiences, comment ranking, and anti-spam rate limiting.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Live or static comments?</strong> → Focus on live streaming (comments appear in real-time as the stream plays). Also support replay mode with ranked comments.</li>
+  <li><strong>Max concurrent viewers per stream?</strong> → 100,000 on a viral stream.</li>
+  <li><strong>Comment rate at peak?</strong> → Up to 1,000 comments/sec on the most active streams.</li>
+  <li><strong>Display order?</strong> → Chronological for live; ranked by likes for replay.</li>
+  <li><strong>Moderation?</strong> → Yes — streamer can ban users; system auto-filters spam.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Comment delivery within 500ms for live viewers</li>
+  <li>Support 100,000 concurrent viewers per stream</li>
+  <li>Handle 1,000 comments/sec during peak events</li>
+</ul>
+
+<h3>The Core Scalability Challenge</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Fan-out per comment</span><span class="cap-val">1 comment → 100K viewers = 100K WebSocket sends</span></div>
+  <div class="cap-row"><span class="cap-label">Peak fan-out rate</span><span class="cap-val">1,000 comments/sec × 100K viewers = 100M sends/sec</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Per WebSocket server (10K connections)</span><span class="cap-val">1,000 sends/sec — manageable with pub/sub routing</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Key Insight: Don't Fan-Out to Clients Directly</h3>
+<p>A single comment server cannot push to 100K clients simultaneously. Instead, use a <strong>publish/subscribe layer</strong> between comment ingestion and client delivery. Comment servers publish; WebSocket servers (each holding ~10K viewer connections) subscribe and fan-out to their own clients.</p>
+
+<pre class="diagram">
+  Commenter
+     │ POST /comment
+     ▼
+  Comment Service ──► Kafka (comment events per stream_id)
+                           │
+                      Comment Worker
+                      (validates, persists, publishes)
+                           │ PUBLISH stream:{stream_id} {comment_json}
+                           ▼
+                      Redis Pub/Sub
+                      (one channel per active stream_id)
+                           │
+              ┌────────────┼────────────────┐
+              ▼            ▼                ▼
+         WS Server 1   WS Server 2    WS Server N
+         (subscribed   (subscribed    (subscribed
+          to stream X)   to stream X)    to stream X)
+              │            │                │
+         10K viewers    10K viewers    10K viewers
+</pre>
+<p>Each WebSocket server subscribes to the Redis channel for every stream its connected viewers are watching. A comment published once to Redis is received by all WebSocket servers, each of which pushes only to its own connected viewers.</p>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Scalable Fan-Out via Redis Pub/Sub</div>
+<ul>
+  <li>Comment Worker calls: <code>PUBLISH stream:{stream_id} {comment_json}</code></li>
+  <li>All WebSocket servers subscribed to that channel receive the message within ~1ms (Redis pub/sub latency)</li>
+  <li>Each WebSocket server iterates its local connection map for that stream_id → pushes to each connected viewer</li>
+  <li>Viewer load balancing: sticky connections (viewer always reconnects to the same WS server) simplifies subscriptions but reduces resilience. Non-sticky (random) is more resilient but requires each server to subscribe to many channels.</li>
+  <li>Connection state per viewer: 5 KB × 1M concurrent viewers = 5 GB across WS server fleet (manageable)</li>
+</ul>
+
+<div class="callout tradeoff">
+  <div class="callout-icon">⚖️</div>
+  <div class="callout-body"><strong>Redis Pub/Sub vs. Kafka for Fan-Out</strong><br>
+  Redis pub/sub has zero persistence — if a WebSocket server is down when a comment is published, it misses the message. For live chat this is acceptable (viewer reconnects, scrolls up to see missed comments from DB). Kafka would provide replay but adds latency. Use Redis for live delivery speed; Kafka for durable event sourcing into the comment DB.</div>
+</div>
+
+<div class="step-badge">Step 3b — Comment Storage for Replay</div>
+<pre><code>-- Cassandra schema: fast time-ordered reads per stream
+CREATE TABLE comments (
+  stream_id    UUID,
+  comment_id   TIMEUUID,           -- time-ordered UUID: enables pagination by time
+  user_id      UUID,
+  display_name TEXT,
+  text         TEXT,
+  like_count   COUNTER,
+  is_deleted   BOOLEAN DEFAULT false,
+  PRIMARY KEY (stream_id, comment_id)
+) WITH CLUSTERING ORDER BY (comment_id DESC);
+
+-- Fetch latest 50 comments for a stream:
+SELECT * FROM comments WHERE stream_id = ? LIMIT 50;</code></pre>
+<p><strong>Ranked comments for replay:</strong> A nightly Spark job scores comments by <code>like_count + reply_count + freshness_decay</code> → writes top 100 comments per stream to a separate <code>top_comments</code> table. Replay mode reads from <code>top_comments</code>; live mode reads from the main chronological table.</p>
+
+<div class="step-badge">Step 3c — Spam Prevention</div>
+<p><strong>Rate limiting:</strong> Max 1 comment per 3 seconds per user (Redis token bucket):</p>
+<pre><code>-- Token bucket for user_id
+EVAL """
+  local key = 'rate:' .. KEYS[1]
+  local tokens = tonumber(redis.call('GET', key) or '3')
+  if tokens > 0 then
+    redis.call('SET', key, tokens - 1, 'EX', 3)
+    return 1  -- allowed
+  else
+    return 0  -- rate limited
+  end
+""" 1 {user_id}</code></pre>
+<p><strong>Slow mode:</strong> Streamer enables 30-second cooldown per viewer. WebSocket server enforces per-user per-stream timer before allowing next comment submission. Dramatically reduces spam during raids.</p>
+<p><strong>Content filtering:</strong></p>
+<ul>
+  <li>Synchronous: blocklist keyword check (Bloom filter, O(1)) before persisting comment</li>
+  <li>Asynchronous: ML toxicity classifier scores comment → if score &gt; 0.8 → auto-hold for human review</li>
+  <li>New account throttling: accounts &lt;7 days old limited to 1 comment/minute</li>
+</ul>
+
+<div class="step-badge">Step 3d — Moderation</div>
+<ul>
+  <li><strong>User ban:</strong> Streamer bans user → <code>SADD banned:stream:{stream_id} {user_id}</code> in Redis. Comment Service checks set before accepting comment. Ban is stream-scoped (not platform-wide, unless escalated).</li>
+  <li><strong>Comment deletion:</strong> Soft-delete: set <code>is_deleted=true</code> in Cassandra. Comment Workers push a delete event to Redis pub/sub → WebSocket servers send a <code>delete:{comment_id}</code> event to viewers → clients remove from UI.</li>
+  <li><strong>Moderator queue:</strong> ML-flagged comments routed to a review queue ordered by toxicity score. Moderators approve/reject. High-volume streams get dedicated moderator allocation.</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<h3>Key Design Decisions</h3>
+<table>
+  <thead><tr><th>Decision</th><th>Choice Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Fan-out mechanism</td><td>Redis pub/sub → WebSocket server fleet</td><td>Direct WebSocket push from comment server</td><td>No single server can push to 100K viewers; pub/sub distributes load across WS fleet</td></tr>
+    <tr><td>Comment storage</td><td>Cassandra (live, time-ordered) + ranked table (replay)</td><td>MySQL</td><td>Cassandra handles high write throughput and time-range scans efficiently</td></tr>
+    <tr><td>Spam filtering</td><td>Rate limit + bloom filter keywords + async ML</td><td>Rule-based only</td><td>ML catches novel spam patterns; synchronous checks keep latency low</td></tr>
+    <tr><td>Pagination</td><td>Cursor-based (TIMEUUID)</td><td>Offset-based</td><td>Stable during high-velocity comment insertion; offset skips rows incorrectly under insertion</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Reactions / emotes:</strong> High-frequency taps (thousands of ❤️/sec) should not create individual DB records. Aggregate reactions in a 1-second window in the Comment Worker → write one aggregated row per second per emote type. Readers see "3,421 hearts in the last minute" not individual records.</li>
+  <li><strong>Pinned comments:</strong> Streamer pins a comment → pin event pushed via pub/sub → all viewers see it highlighted at top. Pin state stored in stream metadata, not comment table.</li>
+  <li><strong>Cross-platform comments:</strong> Same stream accessible from web, iOS, Android, smart TV. WebSocket connections from all platforms connect to the same server fleet. A feature flag controls whether older clients receive all comment types (e.g., SuperChat payments) they can render.</li>
+</ul>
+`
+      },
+    ]
+  },
+
+  // ── System 18: Distributed Job Scheduler ─────────────────────────────────
+  {
+    id: 'job-scheduler',
+    title: 'Design a Distributed Job Scheduler',
+    icon: '⏰',
+    difficulty: 'medium',
+    readTime: '17 min read',
+    teaser: 'Design a system to run millions of scheduled and one-time jobs reliably. Covers at-least-once execution, idempotency, clock skew handling, and exactly-once via distributed locks.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Cron-style recurring or one-time jobs?</strong> → Both. Support cron expressions (e.g., "every weekday at 9am") and one-time future jobs.</li>
+  <li><strong>Scheduling latency?</strong> → Jobs should execute within 60 seconds of their scheduled time.</li>
+  <li><strong>Scale?</strong> → 10 million jobs/day.</li>
+  <li><strong>Failure handling?</strong> → Retry with exponential backoff up to max retries; then move to dead-letter queue.</li>
+  <li><strong>Job monitoring?</strong> → Yes — job status (pending, running, done, failed) must be queryable.</li>
+  <li><strong>Job duration?</strong> → Assume up to 10 minutes per job. Jobs longer than this are timed out.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>At-least-once execution (no job silently dropped)</li>
+  <li>Scheduling latency &lt;60 seconds</li>
+  <li>Horizontal scalability for both scheduler and worker tiers</li>
+  <li>No single point of failure</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Average job rate</span><span class="cap-val">10M/day ÷ 86,400 = 115 jobs/sec</span></div>
+  <div class="cap-row"><span class="cap-label">Peak job rate</span><span class="cap-val">~1,150 jobs/sec (10× spike, e.g., all nightly jobs at midnight)</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Job metadata storage</span><span class="cap-val">10M × 500 bytes × 30 days = 150 GB</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Components</h3>
+<ul>
+  <li><strong>Job API:</strong> REST endpoint for creating, updating, cancelling, and querying jobs.</li>
+  <li><strong>Job Store (MySQL):</strong> Persistent storage for all job definitions. Indexed on <code>(status, next_run_at)</code> for the scheduler's polling query.</li>
+  <li><strong>Scheduler:</strong> Polls job store every 10 seconds for due jobs, claims them (using <code>SELECT FOR UPDATE SKIP LOCKED</code>), and enqueues to the Job Queue.</li>
+  <li><strong>Job Queue (Redis / SQS):</strong> Decouples scheduler from workers. Absorbs burst of midnight jobs without overwhelming workers.</li>
+  <li><strong>Worker Pool:</strong> Horizontally scalable workers that dequeue jobs, execute them, and report status back.</li>
+  <li><strong>Status Tracker:</strong> Updates job status on start, success, and failure. Manages retry scheduling.</li>
+</ul>
+
+<pre class="diagram">
+  Client ──► Job API ──► Job Store (MySQL)
+                              │
+                         Scheduler (multiple instances)
+                         polls every 10s: SELECT FOR UPDATE SKIP LOCKED
+                              │
+                         Job Queue (Redis / SQS)
+                              │
+              ┌───────────────┼───────────────┐
+              ▼               ▼               ▼
+           Worker 1        Worker 2        Worker N
+           (execute)       (execute)       (execute)
+              │               │               │
+              └───────────────┴───────────────┘
+                              │
+                         Status Tracker
+                         (update job_store on complete/fail)
+</pre>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Job Store Schema</div>
+<pre><code>CREATE TABLE jobs (
+  job_id        BIGINT AUTO_INCREMENT PRIMARY KEY,
+  name          VARCHAR(255) NOT NULL,
+  type          ENUM('one_time', 'recurring') NOT NULL,
+  cron_expr     VARCHAR(100),             -- NULL for one_time jobs
+  next_run_at   DATETIME     NOT NULL,    -- when to next execute
+  last_run_at   DATETIME,                 -- when last executed
+  status        ENUM('PENDING','RUNNING','DONE','FAILED') NOT NULL DEFAULT 'PENDING',
+  handler       VARCHAR(255) NOT NULL,    -- function name or webhook URL
+  payload       JSON,                     -- arguments for the handler
+  max_retries   TINYINT UNSIGNED DEFAULT 3,
+  retry_count   TINYINT UNSIGNED DEFAULT 0,
+  timeout_sec   INT UNSIGNED DEFAULT 300, -- kill job after 5 min default
+  created_by    BIGINT,
+  INDEX idx_scheduler (status, next_run_at)  -- the critical index for polling
+);</code></pre>
+
+<div class="step-badge">Step 3b — Distributed Claim with SELECT FOR UPDATE SKIP LOCKED</div>
+<p>Multiple scheduler instances run concurrently for redundancy. Each runs this query every 10 seconds:</p>
+<pre><code>-- MySQL 8+ / PostgreSQL 9.5+
+BEGIN;
+SELECT job_id, handler, payload, retry_count, timeout_sec
+FROM jobs
+WHERE status = 'PENDING'
+  AND next_run_at &lt;= NOW()
+ORDER BY next_run_at ASC
+LIMIT 100
+FOR UPDATE SKIP LOCKED;  -- skip rows locked by another scheduler instance
+
+-- Mark claimed jobs as RUNNING
+UPDATE jobs SET status = 'RUNNING', last_run_at = NOW()
+WHERE job_id IN (...claimed ids...);
+COMMIT;</code></pre>
+
+<div class="callout insight">
+  <div class="callout-icon">💡</div>
+  <div class="callout-body"><strong>SKIP LOCKED: The Distributed Scheduler Trick</strong><br>
+  <code>FOR UPDATE SKIP LOCKED</code> is available in MySQL 8+ and PostgreSQL 9.5+. When Scheduler A locks row 42, Scheduler B's query simply skips row 42 and claims the next available row — no waiting, no deadlock, no double-dispatch. Two scheduler instances can poll concurrently and each claims a disjoint set of jobs. No external coordination service (ZooKeeper, etcd) required.</div>
+</div>
+
+<div class="step-badge">Step 3c — Clock Skew &amp; Drift Handling</div>
+<p>Scheduler instances on different machines may have clocks that differ by a few seconds:</p>
+<ul>
+  <li>A job scheduled for 12:00:00 may be picked up at 11:59:58 by a fast-clock scheduler (2 seconds early).</li>
+  <li>Mitigation: NTP synchronization keeps drift under ±100ms in practice.</li>
+  <li>For jobs requiring sub-second precision: use a single designated time source — one scheduler reads a Redis-stored timestamp updated by a time service, rather than local system clock.</li>
+  <li>For most jobs (cron at 9am, batch at midnight): 60-second scheduling window makes clock skew irrelevant.</li>
+</ul>
+
+<div class="step-badge">Step 3d — Exactly-Once Execution via Idempotency</div>
+<p>At-least-once execution is the default: if a worker crashes mid-job, the job retries and runs again. This is usually acceptable if job handlers are <strong>idempotent</strong>.</p>
+
+<p><strong>Idempotency examples:</strong></p>
+<ul>
+  <li>✅ "Send welcome email to user 123" → Check <code>email_sent</code> flag in DB before sending. Safe to retry.</li>
+  <li>✅ "Recompute daily report for 2024-01-15" → Overwrites same output. Safe to run multiple times.</li>
+  <li>❌ "Charge $9.99 to card" → NOT idempotent by default. Requires idempotency key passed to payment processor.</li>
+</ul>
+
+<p><strong>Distributed lock for non-idempotent jobs (when truly needed):</strong></p>
+<pre><code>-- Worker acquires lock before executing
+acquired = SETNX job_lock:{job_id} {worker_id} EX 600   -- 10-min TTL
+
+IF acquired:
+  execute_job(job_id)
+  DEL job_lock:{job_id}
+ELSE:
+  // Another worker is running this job — skip
+  return SKIPPED</code></pre>
+<p>If the worker crashes, the lock expires after 10 minutes → cleanup scheduler picks up the job and retries. The 10-minute TTL must exceed max expected job duration.</p>
+
+<div class="step-badge">Step 3e — Retry Logic &amp; Dead-Letter Queue</div>
+<p>On job failure, the Status Tracker updates the job for retry:</p>
+<pre><code>backoff_seconds = [30, 300, 1800, 7200, 28800]  -- 30s, 5m, 30m, 2h, 8h
+
+function on_failure(job):
+  if job.retry_count &lt; job.max_retries:
+    delay = backoff_seconds[job.retry_count]
+    UPDATE jobs SET status='PENDING', retry_count=retry_count+1,
+                    next_run_at=NOW() + delay
+    WHERE job_id = job.job_id
+  else:
+    -- Max retries exceeded: move to dead-letter
+    UPDATE jobs SET status='FAILED' WHERE job_id = job.job_id
+    INSERT INTO dead_letter_jobs SELECT * FROM jobs WHERE job_id = job.job_id
+    NOTIFY on_call_if_critical(job)</code></pre>
+<p><strong>Dead-letter queue:</strong> Failed jobs accumulate here for manual inspection and replay. On-call alert when DLQ size grows beyond threshold. Operator can requeue individual jobs after fixing the underlying issue.</p>
+
+<div class="step-badge">Step 3f — Cron Expression Evaluation &amp; Missed Runs</div>
+<ul>
+  <li>Next run time computed at job completion: <code>next_run_at = cron_parser.next(cron_expr, after=now)</code></li>
+  <li>Computing at completion (not pre-computing a schedule table) correctly handles DST changes, leap seconds, and server downtime.</li>
+  <li><strong>Missed runs:</strong> If the scheduler was down during a cron window, the job's <code>next_run_at</code> is in the past. The scheduler will pick it up immediately on recovery.</li>
+  <li>Per-job configuration: <code>allow_missed_runs: false</code> → skip to next scheduled time (e.g., daily report — no point running 7 midnight reports at 8am). <code>allow_missed_runs: true</code> → run the missed job once immediately (e.g., hourly data sync that must be caught up).</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<h3>Key Design Decisions</h3>
+<table>
+  <thead><tr><th>Decision</th><th>Choice Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Claim mechanism</td><td>SELECT FOR UPDATE SKIP LOCKED</td><td>Redis SETNX per job</td><td>DB-native; no extra infrastructure; atomic claim + status update in one transaction</td></tr>
+    <tr><td>Execution guarantee</td><td>At-least-once + idempotent handlers</td><td>Exactly-once via distributed lock</td><td>Simpler and correct when handlers are designed for idempotency; lock only for edge cases</td></tr>
+    <tr><td>Retry strategy</td><td>Exponential backoff → DLQ</td><td>Fixed-interval retry</td><td>Avoids thundering herd on a failing dependency; DLQ prevents silent job loss</td></tr>
+    <tr><td>Cron evaluation</td><td>Computed at completion time</td><td>Pre-computed schedule table</td><td>Handles DST/leap-second correctly; no separate scheduler for the scheduler</td></tr>
+    <tr><td>Multi-instance safety</td><td>SKIP LOCKED SQL</td><td>Leader election (ZooKeeper)</td><td>No external dependency; simpler ops; all scheduler instances are active (no standby waste)</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Priority queues:</strong> High-priority jobs (user-triggered) should not wait behind a thousand low-priority batch jobs. Use separate queues (Redis sorted sets by priority) — workers drain high-priority queue first, poll low-priority only when high-priority is empty.</li>
+  <li><strong>Job dependencies (DAG execution):</strong> "Run job B only after job A completes successfully." Model as a DAG where each node is a job. A DAG execution engine checks upstream job statuses before marking a downstream job as PENDING. Apache Airflow solves this problem at scale.</li>
+  <li><strong>Long-running job heartbeats:</strong> A job that takes 2 hours needs to periodically update a heartbeat timestamp so the scheduler knows it's still alive (not crashed). Scheduler checks: if <code>last_heartbeat &lt; NOW() - 10 min</code> AND status=RUNNING → assume crash → re-enqueue.</li>
+</ul>
+`
+      },
+    ]
   }
 ];
 
