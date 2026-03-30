@@ -1,894 +1,1615 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>System Design Prep</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #0d1117;
-  --bg2: #161b22;
-  --bg3: #21262d;
-  --border: rgba(255,255,255,0.1);
-  --acc: #00d4aa;
-  --acc2: rgba(0,212,170,0.12);
-  --acc3: rgba(0,212,170,0.22);
-  --text: #e6edf3;
-  --text2: rgba(230,237,243,0.65);
-  --red: #f85149;
-  --yellow: #e3b341;
-  --green: #3fb950;
-  --radius: 12px;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Nunito', sans-serif;
-  font-size: 15px;
-  line-height: 1.6;
-  min-height: 100vh;
-}
-a { color: var(--acc); text-decoration: none; }
-h1, h2, h3 { font-family: 'Fredoka One', sans-serif; letter-spacing: 0.3px; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Design Prep</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #0d1117;
+      --bg2:     #161b22;
+      --bg3:     #21262d;
+      --border:  rgba(255,255,255,0.1);
+      --acc:     #00d4aa;
+      --blue:    #58a6ff;
+      --orange:  #f0883e;
+      --red:     #f85149;
+      --green:   #3fb950;
+      --text:    #c9d1d9;
+      --strong:  #e6edf3;
+      --dim:     rgba(201,209,217,0.55);
+      --code-bg: #010409;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.8;
+    }
 
-/* ── SHARED ── */
-.back-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--bg3); border: 1px solid var(--border);
-  color: var(--text2); padding: 7px 14px; border-radius: 8px;
-  font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif;
-  cursor: pointer; transition: all .15s;
-}
-.back-btn:hover { background: var(--bg3); color: var(--text); border-color: var(--acc); }
+    /* ── Progress Bar ── */
+    #progressBar {
+      position: fixed; top: 0; left: 0; height: 3px;
+      width: 0%; background: var(--acc); z-index: 1000;
+      transition: width 0.1s linear; display: none;
+    }
 
-/* ── HOME SCREEN ── */
-#homeScreen { min-height: 100vh; }
-.home { max-width: 960px; margin: 0 auto; padding: 24px 16px 60px; }
-.home-header { text-align: center; margin: 28px 0 32px; }
-.home-header h1 { font-size: clamp(28px, 5vw, 42px); color: var(--acc); margin-bottom: 8px; }
-.home-header p { color: var(--text2); font-size: 15px; max-width: 500px; margin: 0 auto; }
+    /* ── Links ── */
+    a { color: var(--acc); text-decoration: none; }
+    a:hover { text-decoration: underline; }
 
-.filter-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
-.filter-btn {
-  padding: 7px 18px; border-radius: 20px; border: 1px solid var(--border);
-  background: var(--bg2); color: var(--text2); font-family: 'Nunito', sans-serif;
-  font-weight: 700; font-size: 13px; cursor: pointer; transition: all .15s;
-}
-.filter-btn:hover { border-color: var(--acc); color: var(--text); }
-.filter-btn.active { background: var(--acc); color: #000; border-color: var(--acc); }
+    /* ── HOME SCREEN ── */
+    #homeScreen { min-height: 100vh; }
+    .home-container { max-width: 860px; margin: 0 auto; padding: 32px 16px 80px; }
 
-.systems-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-  gap: 16px;
-}
-.sys-card {
-  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 20px; cursor: pointer; transition: all .2s; position: relative;
-  display: flex; flex-direction: column; gap: 8px;
-}
-.sys-card:hover { border-color: var(--acc); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,212,170,0.15); }
-.sys-card-top { display: flex; align-items: center; gap: 10px; }
-.sys-icon { font-size: 28px; line-height: 1; }
-.sys-meta { flex: 1; }
-.sys-name { font-family: 'Fredoka One', sans-serif; font-size: 18px; color: var(--text); line-height: 1.2; }
-.sys-badges { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
-.badge {
-  font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 10px;
-  text-transform: uppercase; letter-spacing: 0.5px;
-}
-.badge-easy { background: rgba(63,185,80,0.18); color: var(--green); }
-.badge-medium { background: rgba(227,179,65,0.18); color: var(--yellow); }
-.badge-hard { background: rgba(248,81,73,0.18); color: var(--red); }
-.badge-popular { background: var(--acc2); color: var(--acc); }
-.sys-desc { color: var(--text2); font-size: 13px; line-height: 1.5; }
-.sys-card-arrow { color: var(--acc); font-size: 18px; align-self: flex-end; margin-top: 4px; opacity: 0; transition: opacity .15s; }
-.sys-card:hover .sys-card-arrow { opacity: 1; }
+    .back-link {
+      display: inline-block; color: var(--dim); font-size: 0.875rem;
+      margin-bottom: 28px; transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--acc); text-decoration: none; }
 
-/* ── SESSION SCREEN ── */
-#sessionScreen { min-height: 100vh; }
-.session { max-width: 820px; margin: 0 auto; padding: 20px 16px 60px; }
+    .home-header { margin-bottom: 32px; }
+    .home-header h1 {
+      font-size: 2rem; font-weight: 700; color: var(--strong);
+      letter-spacing: -0.5px; margin-bottom: 10px;
+    }
+    .home-header p { color: var(--dim); font-size: 0.975rem; max-width: 560px; }
 
-.session-header {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
-}
-.session-back {
-  background: var(--bg3); border: 1px solid var(--border);
-  color: var(--text2); padding: 7px 14px; border-radius: 8px;
-  font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif;
-  cursor: pointer; transition: all .15s; white-space: nowrap;
-}
-.session-back:hover { color: var(--text); border-color: var(--acc); }
-.session-title {
-  flex: 1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-}
-.session-title-icon { font-size: 24px; }
-.session-title-name { font-family: 'Fredoka One', sans-serif; font-size: 22px; color: var(--text); }
-.timer-btn {
-  background: var(--bg3); border: 1px solid var(--border);
-  color: var(--text2); padding: 7px 14px; border-radius: 8px;
-  font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif;
-  cursor: pointer; transition: all .15s; white-space: nowrap; letter-spacing: 0.5px;
-}
-.timer-btn:hover { border-color: var(--acc); color: var(--text); }
-.timer-btn.running { border-color: var(--acc); color: var(--acc); background: var(--acc2); }
+    .filter-row { display: flex; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+    .filter-btn {
+      background: var(--bg2); border: 1px solid var(--border);
+      color: var(--dim); border-radius: 50px; padding: 6px 18px;
+      font-size: 0.83rem; font-weight: 600; cursor: pointer;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .filter-btn:hover { color: var(--strong); border-color: rgba(255,255,255,0.25); }
+    .filter-btn.active { background: var(--acc); border-color: var(--acc); color: #0d1117; }
 
-.problem-box {
-  background: var(--bg2); border-left: 3px solid var(--acc);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 16px 18px; margin-bottom: 22px;
-  color: var(--text2); font-size: 14px; line-height: 1.7;
-  border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
-}
+    .systems-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px; margin-top: 24px;
+    }
 
-.phases-nav {
-  display: flex; gap: 6px; margin-bottom: 20px;
-  overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
-  padding-bottom: 2px;
-}
-.phases-nav::-webkit-scrollbar { display: none; }
-.phase-tab {
-  flex-shrink: 0; padding: 8px 14px; border-radius: 8px;
-  border: 1px solid var(--border); background: var(--bg2);
-  color: var(--text2); font-family: 'Nunito', sans-serif;
-  font-weight: 700; font-size: 13px; cursor: pointer; transition: all .15s;
-  white-space: nowrap;
-}
-.phase-tab:hover { border-color: var(--acc); color: var(--text); }
-.phase-tab.active { background: var(--acc); color: #000; border-color: var(--acc); }
-.phase-tab.done { border-color: var(--green); color: var(--green); }
-.phase-tab.done.active { background: var(--green); color: #000; border-color: var(--green); }
+    .sys-card {
+      background: var(--bg2); border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 20px; cursor: pointer;
+      transition: all 0.2s; text-decoration: none; display: block;
+    }
+    .sys-card:hover {
+      border-color: var(--acc); transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,212,170,0.12);
+      text-decoration: none;
+    }
+    .card-icon { font-size: 2rem; margin-bottom: 12px; line-height: 1; }
+    .card-title { font-size: 1rem; font-weight: 700; color: var(--strong); margin-bottom: 6px; }
+    .card-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+    .diff-badge {
+      font-size: 0.72rem; font-weight: 700; padding: 2px 10px;
+      border-radius: 50px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .diff-easy   { background: rgba(63,185,80,0.15);  color: var(--green); }
+    .diff-medium { background: rgba(240,136,62,0.15); color: var(--orange); }
+    .diff-hard   { background: rgba(248,81,73,0.15);  color: var(--red); }
+    .read-time { font-size: 0.78rem; color: var(--dim); }
+    .card-teaser { font-size: 0.84rem; color: var(--dim); line-height: 1.6; }
 
-.phase-header { margin-bottom: 16px; }
-.phase-title { font-family: 'Fredoka One', sans-serif; font-size: 20px; color: var(--text); }
-.phase-subtitle { color: var(--text2); font-size: 13px; margin-top: 2px; }
+    /* ── ARTICLE SCREEN ── */
+    #articleScreen { min-height: 100vh; }
+    .article-layout {
+      display: flex; max-width: 1100px;
+      margin: 0 auto; padding: 0 16px;
+    }
 
-.items-list { display: flex; flex-direction: column; gap: 12px; }
-.item-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px; transition: border-color .2s;
-}
-.item-card.checked { border-color: var(--green); background: rgba(63,185,80,0.05); }
-.item-top {
-  display: flex; align-items: flex-start; gap: 12px;
-}
-.item-checkbox {
-  width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--border);
-  flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all .15s; margin-top: 1px; background: transparent;
-}
-.item-card.checked .item-checkbox { background: var(--green); border-color: var(--green); }
-.item-checkbox-mark { color: #000; font-size: 13px; font-weight: 900; display: none; }
-.item-card.checked .item-checkbox-mark { display: block; }
-.item-question { flex: 1; font-weight: 700; font-size: 14px; line-height: 1.5; color: var(--text); }
-.item-reveal-btn {
-  flex-shrink: 0; padding: 5px 10px; border-radius: 6px;
-  border: 1px solid var(--border); background: var(--bg3);
-  color: var(--text2); font-family: 'Nunito', sans-serif;
-  font-weight: 700; font-size: 12px; cursor: pointer; transition: all .15s;
-  white-space: nowrap;
-}
-.item-reveal-btn:hover { border-color: var(--acc); color: var(--acc); }
+    /* Sidebar TOC */
+    .toc-sidebar {
+      width: 220px; flex-shrink: 0; position: sticky;
+      top: 24px; height: fit-content;
+      padding: 24px 0 40px; align-self: flex-start;
+    }
+    .toc-back {
+      display: block; background: none; border: none;
+      color: var(--dim); font-size: 0.82rem; cursor: pointer;
+      padding: 6px 12px 10px 0; margin-bottom: 6px;
+      font-family: inherit; transition: color 0.15s;
+    }
+    .toc-back:hover { color: var(--acc); }
+    .toc-title {
+      font-size: 0.72rem; font-weight: 700; color: var(--dim);
+      text-transform: uppercase; letter-spacing: 1px;
+      padding: 0 12px; margin-bottom: 10px;
+    }
+    .toc-sidebar ul { list-style: none; padding: 0; margin: 0; }
+    .toc-sidebar li a {
+      display: block; font-size: 0.82rem; padding: 6px 12px;
+      border-radius: 6px; color: var(--dim); text-decoration: none;
+      border-left: 2px solid transparent; transition: all 0.15s;
+      line-height: 1.4;
+    }
+    .toc-sidebar li a:hover { color: var(--strong); background: rgba(255,255,255,0.04); }
+    .toc-sidebar li a.active {
+      color: var(--acc); border-left-color: var(--acc);
+      background: rgba(0,212,170,0.07);
+    }
 
-.item-reveal-body { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
-.item-reveal-body.visible { display: block; }
-.item-why {
-  font-style: italic; color: var(--text2); font-size: 13px;
-  margin-bottom: 10px; padding-left: 10px; border-left: 2px solid var(--acc);
-}
-.item-model {
-  background: var(--acc2); border: 1px solid var(--acc3);
-  border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.7; color: var(--text);
-}
+    /* Article main */
+    .article-main {
+      flex: 1; min-width: 0;
+      padding: 32px 0 80px 40px;
+      max-width: 720px;
+    }
+    .mobile-back {
+      display: none; background: none; border: none;
+      color: var(--dim); font-size: 0.875rem; cursor: pointer;
+      font-family: inherit; padding: 0; margin-bottom: 20px;
+      transition: color 0.15s;
+    }
+    .mobile-back:hover { color: var(--acc); }
+    .article-meta {
+      display: flex; gap: 10px; align-items: center;
+      margin-bottom: 32px; flex-wrap: wrap;
+    }
+    .meta-icon { font-size: 2rem; }
+    .meta-info { flex: 1; }
+    .meta-title { font-size: 1.6rem; font-weight: 700; color: var(--strong); line-height: 1.3; }
+    .meta-sub { display: flex; gap: 10px; margin-top: 6px; align-items: center; flex-wrap: wrap; }
 
-.phase-nav {
-  display: flex; gap: 10px; margin-top: 24px; justify-content: space-between;
-}
-.nav-btn {
-  padding: 10px 22px; border-radius: 8px; border: 1px solid var(--border);
-  background: var(--bg2); color: var(--text2); font-family: 'Nunito', sans-serif;
-  font-weight: 700; font-size: 14px; cursor: pointer; transition: all .15s;
-}
-.nav-btn:hover:not(:disabled) { border-color: var(--acc); color: var(--text); }
-.nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-.nav-btn.primary { background: var(--acc); color: #000; border-color: var(--acc); }
-.nav-btn.primary:hover:not(:disabled) { background: #00e8bc; }
+    /* ── Typography ── */
+    .article-main h2 {
+      font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.4rem;
+      color: var(--strong); padding-bottom: 10px;
+      border-bottom: 1px solid var(--border); margin-top: 48px;
+    }
+    .article-main h3 {
+      font-family: 'Inter', sans-serif; font-weight: 600; font-size: 1.1rem;
+      color: var(--blue); margin-top: 32px;
+    }
+    .article-main h4 {
+      font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.95rem;
+      color: var(--orange); margin-top: 24px;
+    }
+    .article-main p { margin: 14px 0; }
+    .article-main strong { color: var(--strong); }
+    .article-main em { color: var(--dim); font-style: italic; }
+    .article-main ul, .article-main ol { margin: 12px 0 12px 24px; }
+    .article-main li { margin: 5px 0; }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 600px) {
-  .systems-grid { grid-template-columns: 1fr; }
-  .session-header { gap: 8px; }
-  .session-title-name { font-size: 17px; }
-  .phase-tab { padding: 7px 11px; font-size: 12px; }
-}
-</style>
+    /* ── Code & Diagrams ── */
+    pre {
+      background: var(--code-bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; line-height: 1.6; color: #c9d1d9; margin: 20px 0;
+    }
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg3); padding: 2px 6px;
+      border-radius: 4px; font-size: 0.85em; color: var(--acc);
+    }
+    pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
+    pre.diagram {
+      background: var(--bg3); color: var(--acc);
+      white-space: pre; font-size: 0.8rem;
+    }
+
+    /* ── Callouts ── */
+    .callout {
+      display: flex; gap: 14px; border-radius: 10px;
+      padding: 14px 18px; margin: 24px 0; border-left: 3px solid;
+    }
+    .callout-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { font-size: 0.9rem; line-height: 1.65; color: var(--text); }
+    .callout-body strong { color: var(--strong); }
+    .callout.tip      { background: rgba(88,166,255,0.07);  border-color: var(--blue); }
+    .callout.insight  { background: rgba(0,212,170,0.07);   border-color: var(--acc); }
+    .callout.tradeoff { background: rgba(240,136,62,0.07);  border-color: var(--orange); }
+    .callout.warn     { background: rgba(248,81,73,0.07);   border-color: var(--red); }
+
+    /* ── Capacity block ── */
+    .capacity-block {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 20px; margin: 20px 0;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.83rem;
+    }
+    .cap-row {
+      display: flex; justify-content: space-between;
+      padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+      gap: 16px;
+    }
+    .cap-row:last-child { border-bottom: none; }
+    .cap-label { color: var(--dim); }
+    .cap-val { color: var(--strong); font-weight: 500; text-align: right; }
+    .cap-result .cap-label, .cap-result .cap-val {
+      color: var(--acc); font-weight: 700;
+    }
+    .cap-section-label {
+      font-size: 0.72rem; font-weight: 700; color: var(--orange);
+      text-transform: uppercase; letter-spacing: 1px;
+      padding: 10px 0 4px; display: block;
+    }
+
+    /* ── Step badge ── */
+    .step-badge {
+      display: inline-block; background: var(--bg3);
+      border: 1px solid var(--border); border-radius: 50px;
+      padding: 4px 16px; font-size: 0.8rem; font-weight: 700;
+      color: var(--acc); letter-spacing: 0.5px; margin: 24px 0 12px;
+    }
+
+    /* ── Tables ── */
+    .table-wrap { overflow-x: auto; margin: 20px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; min-width: 460px; }
+    th {
+      background: var(--bg3); color: var(--strong); font-weight: 600;
+      padding: 10px 14px; text-align: left;
+      border-bottom: 2px solid var(--border);
+    }
+    td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+    tr:hover td { background: rgba(255,255,255,0.025); }
+
+    /* ── Dialogue ── */
+    .dialogue { margin: 20px 0; }
+    .dlg-row { display: flex; gap: 10px; margin: 8px 0; font-size: 0.9rem; }
+    .dlg-label {
+      font-weight: 700; min-width: 110px; flex-shrink: 0;
+      font-size: 0.78rem; text-transform: uppercase;
+      letter-spacing: 0.4px; padding-top: 2px;
+    }
+    .dlg-label.cand { color: var(--blue); }
+    .dlg-label.iview { color: var(--orange); }
+    .dlg-text { color: var(--text); line-height: 1.6; }
+
+    /* ── Responsive ── */
+    @media (max-width: 960px) {
+      .toc-sidebar { display: none; }
+      .article-main { padding: 24px 0 60px; max-width: 100%; }
+      .mobile-back { display: block; }
+    }
+    @media (max-width: 600px) {
+      .home-header h1 { font-size: 1.5rem; }
+      .systems-grid { grid-template-columns: 1fr; }
+      .article-main { padding: 16px 0 60px; }
+    }
+
+    /* hidden utility */
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
 
+<!-- Reading progress bar -->
+<div id="progressBar"></div>
+
 <!-- HOME SCREEN -->
 <div id="homeScreen">
-  <div class="home">
-    <a class="back-btn" href="../../">&#8592; Home</a>
+  <div class="home-container">
+    <a href="../../" class="back-link">← Home</a>
     <div class="home-header">
-      <h1>&#127959; System Design Prep</h1>
-      <p>Practice the real interview flow &mdash; clarify, estimate, design, dive deep</p>
+      <h1>System Design Prep</h1>
+      <p>Deep-dive case studies in the style of Alex Yu &amp; Grokking. Read through each system end-to-end before your interview.</p>
     </div>
     <div class="filter-row">
       <button class="filter-btn active" onclick="setFilter('all')">All</button>
-      <button class="filter-btn" onclick="setFilter('Easy')">Easy</button>
-      <button class="filter-btn" onclick="setFilter('Medium')">Medium</button>
-      <button class="filter-btn" onclick="setFilter('Hard')">Hard</button>
+      <button class="filter-btn" onclick="setFilter('easy')">Easy</button>
+      <button class="filter-btn" onclick="setFilter('medium')">Medium</button>
+      <button class="filter-btn" onclick="setFilter('hard')">Hard</button>
     </div>
-    <div class="systems-grid" id="systemsGrid"></div>
+    <div id="systemsGrid" class="systems-grid"></div>
   </div>
 </div>
 
-<!-- SESSION SCREEN -->
-<div id="sessionScreen" style="display:none">
-  <div class="session">
-    <div class="session-header">
-      <button class="session-back" onclick="showHome()">&#8592; Back</button>
-      <div class="session-title" id="sessionTitle"></div>
-      <button class="timer-btn" id="timerBtn" onclick="toggleTimer()">&#9201; 00:00</button>
-    </div>
-    <div class="problem-box" id="problemBox"></div>
-    <div class="phases-nav" id="phasesNav"></div>
-    <div id="phaseContent"></div>
-    <div class="phase-nav">
-      <button class="nav-btn" id="prevPhaseBtn" onclick="changePhase(-1)">&#8592; Prev</button>
-      <button class="nav-btn primary" id="nextPhaseBtn" onclick="changePhase(1)">Next &#8594;</button>
-    </div>
+<!-- ARTICLE SCREEN -->
+<div id="articleScreen" style="display:none;">
+  <div class="article-layout">
+    <nav class="toc-sidebar" id="tocSidebar">
+      <button class="toc-back" onclick="showHome()">← Back</button>
+      <div class="toc-title" id="tocTitle">On this page</div>
+      <ul id="tocList"></ul>
+    </nav>
+    <main class="article-main" id="articleMain">
+      <button class="mobile-back" onclick="showHome()">← Back to list</button>
+      <div class="article-meta" id="articleMeta"></div>
+      <div id="articleBody"></div>
+    </main>
   </div>
 </div>
 
 <script>
-// ── DATA ──────────────────────────────────────────────────────────────────────
-
-var SYSTEMS = [
+// ─────────────────────────────────────────────────────────────────────────────
+// SYSTEM DATA
+// ─────────────────────────────────────────────────────────────────────────────
+const SYSTEMS = [
+  // ══════════════════════════════════════════════════════════════════════════
+  // SYSTEM 1: URL Shortener
+  // ══════════════════════════════════════════════════════════════════════════
   {
     id: 'url-shortener',
-    icon: '\u{1F517}',
-    name: 'URL Shortener',
-    difficulty: 'Easy',
-    popular: true,
-    desc: 'Design TinyURL \u2014 convert long URLs to short ones with redirect.',
-    problem: 'Design a URL shortening service. Users paste a long URL and receive a short link (e.g. short.ly/abc123). Clicking the short link redirects to the original. The service must handle billions of URLs and millions of redirects per day.',
-    phases: [
+    title: 'Design a URL Shortener',
+    icon: '🔗',
+    difficulty: 'easy',
+    readTime: '18 min read',
+    teaser: 'Design TinyURL: shorten long URLs, redirect instantly. Covers key generation, caching, 301 vs 302, and DB sharding.',
+    sections: [
       {
-        name: 'Requirements',
-        items: [
-          { q: 'What is the expected read:write ratio and daily scale?', why: 'Determines caching strategy \u2014 if reads dominate 10:1, aggressive caching is critical.', model: 'Assume 100M new URLs/day (writes) with 10:1 read ratio \u2192 ~1,160 writes/sec and ~11,600 reads/sec. Heavy read system \u2014 design a read-optimized cache layer.' },
-          { q: 'Should shortened URLs expire, or are they permanent?', why: 'Affects schema (TTL column), storage sizing, and whether you need a background cleanup job.', model: 'Default permanent. Support optional TTL per URL. Background job sweeps expired rows using an index on expires_at.' },
-          { q: 'Can users request custom aliases (e.g., bit.ly/my-promo)?', why: 'Adds collision detection complexity and may require auth to reserve named paths.', model: 'Yes. Check uniqueness before assignment. Conflict \u2192 409. No auth required for basic aliases but rate-limit creation per IP.' },
-          { q: 'Do we need click analytics (count, geography, referrer)?', why: 'Dramatically increases write volume \u2014 must not block the redirect hot path.', model: 'Yes, but via async writes to a separate analytics store (ClickHouse or Cassandra). The redirect endpoint fires-and-forgets; never waits for analytics.' },
-          { q: 'What are the latency and availability SLAs?', why: 'Forces concrete reliability discussion rather than vague "it should be fast."', model: 'Redirect latency <10ms P99. 99.9% availability. Eventual consistency OK for analytics; strong consistency for URL CRUD.' }
-        ]
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<div class="step-badge">Step 1 — Scope the Problem</div>
+<p><em>"Before diving into the design, let's clarify the requirements. In an interview, you should always ask the interviewer questions to narrow the scope."</em></p>
+
+<h3>Candidate–Interviewer Dialogue</h3>
+<div class="dialogue">
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">What's the expected traffic volume?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">100 million URLs created per day.</span></div>
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">How long do shortened URLs live?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">Live forever by default. Expiry is optional.</span></div>
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">Should users be able to specify a custom alias?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">Yes, optional.</span></div>
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">Do we need click analytics?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">Basic click count is sufficient for now.</span></div>
+</div>
+
+<h3>Functional Requirements</h3>
+<ul>
+  <li>Given a long URL, generate a unique short URL</li>
+  <li>Redirect a short URL to the original long URL</li>
+  <li>Optional: custom alias, TTL (time-to-live), click analytics</li>
+  <li>High availability, low latency, fault tolerance</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>100M URL creations/day, ~10:1 read-to-write ratio</li>
+  <li>Redirect latency &lt;10ms at P99</li>
+  <li>99.9% uptime SLA</li>
+</ul>
+
+<h3>Back-of-the-Envelope Estimation</h3>
+<div class="capacity-block">
+  <span class="cap-section-label">Write / Read QPS</span>
+  <div class="cap-row"><span class="cap-label">Write QPS — 100M / 86,400 s</span><span class="cap-val">≈ 1,160 writes/sec</span></div>
+  <div class="cap-row"><span class="cap-label">Read QPS — 1,160 × 10 (10:1 ratio)</span><span class="cap-val">≈ 11,600 reads/sec</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Peak read QPS (×2.5 spike)</span><span class="cap-val">≈ 29,000 reads/sec</span></div>
+  <span class="cap-section-label">Storage</span>
+  <div class="cap-row"><span class="cap-label">10-year storage — 100M/day × 365 × 10 × 500 bytes</span><span class="cap-val">≈ 182 TB</span></div>
+  <span class="cap-section-label">Key Space</span>
+  <div class="cap-row cap-result"><span class="cap-label">62^7 combinations</span><span class="cap-val">≈ 3.5 trillion — covers 365B URLs with 10× headroom</span></div>
+</div>
+
+<div class="callout tip">
+  <div class="callout-icon">💬</div>
+  <div class="callout-body"><strong>Interview Tip</strong><br>Do not jump into the design immediately. Spend 3–5 minutes establishing scope. Mention scale numbers explicitly — interviewers want to see that your design is <em>driven by data</em>, not intuition. Calling out "182 TB over 10 years" shows you're thinking beyond the happy path.</div>
+</div>
+`
       },
       {
-        name: 'Capacity',
-        items: [
-          { q: 'Calculate storage for 10 years.', why: 'Shows long-term growth thinking, not just today\'s numbers.', model: '100M/day \u00d7 365 \u00d7 10 = 365B rows. At ~500 bytes/row \u2192 ~182TB. Sharded relational DB or Cassandra handles this.' },
-          { q: 'How long should the short key be?', why: 'Directly ties to algorithm choice \u2014 must support 365B unique IDs with room to spare.', model: '7 chars from [a-zA-Z0-9] = 62^7 \u2248 3.5 trillion. Handles 365B URLs with 10x headroom. Use Base62 encoding of a sequential counter.' },
-          { q: 'What cache size covers the hot URLs?', why: 'Hot URLs follow 80/20 rule \u2014 caching 20% of daily URLs covers 80% of reads.', model: '20% of 100M = 20M URLs/day \u00d7 500 bytes = 10GB of hot data/day. A 20-30GB Redis node with LRU eviction handles this.' }
-        ]
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<div class="step-badge">Step 2 — High-Level Design</div>
+
+<h3>API Design</h3>
+<pre><code>POST /api/v1/urls
+  Request:  { long_url: string, alias?: string, ttl_days?: int }
+  Response: { short_url: string, short_key: string }
+
+GET /{short_key}
+  Response: HTTP 302  Location: &lt;long_url&gt;
+
+DELETE /api/v1/urls/{short_key}
+GET    /api/v1/urls/{short_key}/stats</code></pre>
+
+<h3>Data Model</h3>
+<pre><code>-- URL table (MySQL)
+CREATE TABLE urls (
+  id          BIGINT      PRIMARY KEY AUTO_INCREMENT,
+  short_key   VARCHAR(8)  NOT NULL,
+  long_url    TEXT        NOT NULL,
+  user_id     BIGINT,
+  created_at  DATETIME    NOT NULL DEFAULT NOW(),
+  expires_at  DATETIME,
+  UNIQUE INDEX idx_short_key (short_key),
+  INDEX        idx_expires   (expires_at)
+);</code></pre>
+
+<h3>Architecture Diagram</h3>
+<pre class="diagram">                    ┌─────────────────────────────────────────┐
+ Users ─────────►  │          Load Balancer                  │
+                    └─────────────┬───────────────────────────┘
+                                  │
+                    ┌─────────────▼───────────────────────────┐
+                    │         API Servers (stateless)          │
+                    └──────┬──────────────────┬───────────────┘
+                           │                  │
+              ┌────────────▼───┐    ┌─────────▼──────────┐
+              │   Redis Cache  │    │  Key Gen Service    │
+              │  (short→long)  │    │  (ID allocation)    │
+              └────────────────┘    └─────────────────────┘
+                           │
+              ┌────────────▼───────────────────────────────┐
+              │              MySQL Database                 │
+              │    Primary (writes) + Replicas (reads)     │
+              └────────────────────────────────────────────┘</pre>
+
+<h3>Request Flows</h3>
+<p><strong>Write flow:</strong> Client → API → Key Gen Service → Store in MySQL → Return short URL.</p>
+<p><strong>Read flow (hot path):</strong> Client → API → Check Redis → <strong>Cache hit</strong>: return long URL immediately (302 redirect). <strong>Cache miss</strong>: query MySQL → populate Redis → return long URL (302 redirect).</p>
+
+<div class="callout insight">
+  <div class="callout-icon">💡</div>
+  <div class="callout-body"><strong>Key Insight</strong><br>The read-to-write ratio is 10:1. The entire value of caching here is keeping ~90% of reads off the database. If your cache hit rate drops below 80%, redirect latency degrades significantly — make sure your eviction policy and cache size are calibrated for this.</div>
+</div>
+`
       },
       {
-        name: 'Architecture',
-        items: [
-          { q: 'Describe the main components and data flow.', why: 'Tests ability to identify the minimal viable component set without over-engineering.', model: 'Client \u2192 LB \u2192 Stateless API servers \u2192 Redis cache \u2192 SQL DB. Write: generate ID \u2192 store URL \u2192 return key. Read: cache first, DB on miss, populate cache.' },
-          { q: 'How do you generate the short key?', why: 'Core algorithm \u2014 multiple valid approaches, each with real trade-offs.', model: 'Option A (Counter + Base62): auto-increment ID encoded to Base62. No collisions. Use Snowflake-style distributed counter. Option B (Hash + truncate): MD5 first 7 chars. Risk of collision \u2192 retry loop. Prefer Option A.' },
-          { q: 'HTTP 301 or 302 for redirection?', why: 'Browser caching behavior directly impacts analytics capability.', model: '301 (permanent): browser caches \u2192 lose analytics after first click. 302 (temporary): every click hits server \u2192 enables counting. Choose 302 when analytics matter.' }
-        ]
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3 — Design Deep Dive</div>
+
+<h3>3a. Key Generation — The Core Challenge</h3>
+<p>How do you generate a 7-character key that is unique, fast, and collision-free at 1,160 writes/sec? There are three approaches.</p>
+
+<h4>Option A: Hash-based (MD5/SHA-256)</h4>
+<p>Hash the long URL → take the first 7 characters of the hex output, encode to Base62.</p>
+<ul>
+  <li><strong>Problem 1 — Collisions:</strong> Two different long URLs can produce the same short key. Fix: if collision detected, append a counter and rehash. Each retry adds latency and a DB round-trip.</li>
+  <li><strong>Problem 2 — Idempotence:</strong> The same long URL always maps to the same short key. Custom aliases and per-user short links become impossible to implement correctly.</li>
+</ul>
+
+<h4>Option B: Counter + Base62 Encoding (Recommended)</h4>
+<p>Use an auto-incrementing integer counter. Encode the integer to Base62 to produce the short key.</p>
+<ul>
+  <li><strong>No collisions:</strong> each counter value is globally unique by definition</li>
+  <li><strong>Deterministic length:</strong> counter up to 62^7 ≈ 3.5 trillion fits in 7 chars</li>
+  <li><strong>Simple to reason about:</strong> no retry logic, no hash conflicts</li>
+</ul>
+
+<pre><code>ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+def encode(n: int) -> str:
+    result = []
+    while n:
+        result.append(ALPHABET[n % 62])
+        n //= 62
+    return ''.join(reversed(result)).zfill(7)
+
+# encode(1)          → "aaaaaab"
+# encode(57_000_000) → "BvpnX"  (padded to 7: "aaBvpnX")</code></pre>
+
+<p><strong>The distributed counter problem:</strong> a single counter is a write bottleneck and a single point of failure. Solution: <em>pre-allocated range partitioning</em>.</p>
+<ul>
+  <li>A lightweight <strong>Range Service</strong> hands out blocks of IDs to API servers (Server A: 1–1,000,000; Server B: 1,000,001–2,000,000; etc.)</li>
+  <li>Each server exhausts its local range without network round-trips per request</li>
+  <li>Range Service itself backed by ZooKeeper or Redis INCR (atomic counter)</li>
+  <li>On server crash: at most one range (~1M IDs) is lost — an acceptable gap</li>
+</ul>
+
+<div class="callout insight">
+  <div class="callout-icon">💡</div>
+  <div class="callout-body"><strong>Key Insight</strong><br>Counter + Base62 is preferred over hashing because it guarantees no collisions and requires zero retry logic. The distributed range allocation pattern is the same technique used by Twitter's Snowflake ID generator and LinkedIn's distributed ID service.</div>
+</div>
+
+<h3>3b. Redirection: 301 vs. 302</h3>
+<div class="callout tradeoff">
+  <div class="callout-icon">⚖️</div>
+  <div class="callout-body"><strong>Trade-off: 301 vs. 302</strong><br><strong>301 Permanent Redirect:</strong> The browser caches the mapping. Every subsequent click goes directly to the destination — the short URL server never sees it again. Pros: zero server load after first hit. Cons: you lose all click analytics forever (browser never calls you again).<br><br><strong>302 Temporary Redirect:</strong> The browser always asks your server first. Every click hits your service. Pros: full analytics (who clicked, when, from where, on which device). Cons: higher server load — every click is a real request.<br><br><strong>Decision:</strong> Use 302 if analytics matter (they almost always do). Offer 301 as a premium option for enterprise customers who want maximum redirect speed and don't need analytics.</div>
+</div>
+
+<h3>3c. Cache Design</h3>
+<ul>
+  <li><strong>Technology:</strong> Redis, cache-aside pattern</li>
+  <li><strong>Key schema:</strong> <code>url:{short_key}</code> → value: <code>long_url</code> string</li>
+  <li><strong>Eviction policy:</strong> LRU (allkeys-lru). Recently accessed keys stay hot.</li>
+  <li><strong>TTL:</strong> 24h for regular URLs; match <code>expires_at</code> for expiring URLs so you don't serve stale data after expiry</li>
+</ul>
+
+<div class="capacity-block">
+  <span class="cap-section-label">Cache Sizing (80/20 rule)</span>
+  <div class="cap-row"><span class="cap-label">Daily URL writes</span><span class="cap-val">100M</span></div>
+  <div class="cap-row"><span class="cap-label">Hot set (20% of URLs get 80% of traffic)</span><span class="cap-val">20M keys</span></div>
+  <div class="cap-row"><span class="cap-label">Average entry size</span><span class="cap-val">500 bytes</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Hot set memory</span><span class="cap-val">≈ 10 GB</span></div>
+  <div class="cap-row"><span class="cap-label">A single Redis node (32 GB RAM)</span><span class="cap-val">Covers this comfortably</span></div>
+</div>
+
+<p>Cache hit rate target: &gt;90%. Monitor with Redis INFO and alert if hit rate drops below 85%.</p>
+
+<h3>3d. Database Scaling</h3>
+<p><strong>Phase 1 (0–1 TB):</strong> Single MySQL primary + 2 read replicas. Route all reads to replicas via a proxy (ProxySQL or HAProxy). Handles up to ~5,000 read QPS easily.</p>
+<p><strong>Phase 2 (1 TB+):</strong> Shard by <code>short_key</code> using consistent hashing.</p>
+<ul>
+  <li>hash(<code>short_key</code>) → shard index</li>
+  <li>Add ~10 virtual nodes per physical shard to balance load distribution</li>
+  <li>Client library or DB proxy (Vitess) routes to the correct shard transparently</li>
+</ul>
+<p><strong>Phase 3 (very large scale — 182 TB range):</strong> Evaluate Apache Cassandra.</p>
+<ul>
+  <li>Cassandra handles petabyte-scale natively with tunable consistency</li>
+  <li>Use <code>short_key</code> as the partition key → O(1) reads by design</li>
+  <li>No application-layer sharding logic required</li>
+  <li>Trade-off: more complex operations, eventual consistency (acceptable for redirects)</li>
+</ul>
+
+<h3>3e. Cleanup Service</h3>
+<p>Expired URLs accumulate over time. A background cleanup service prevents unbounded table growth.</p>
+<ul>
+  <li>Runs nightly during off-peak hours (e.g., 2–4 AM local time)</li>
+  <li>Query: <code>SELECT id FROM urls WHERE expires_at &lt; NOW() LIMIT 10000</code></li>
+  <li>Batch-deletes in chunks of 1,000 to avoid long table locks</li>
+  <li><strong>Soft delete first:</strong> set a <code>deleted_at</code> timestamp. Hard delete after a 7-day grace period (allows rollback if user complains).</li>
+  <li><strong>Key reclamation (optional optimization):</strong> add deleted <code>short_key</code>s back to an "available keys" pool. At 100M writes/day for 10 years, you have 365B keys — reclamation is rarely necessary.</li>
+</ul>
+`
       },
       {
-        name: 'Deep Dive',
-        items: [
-          { q: 'How do you scale the DB to 182TB?', why: 'Shows you think beyond initial design to long-term growth.', model: 'Shard by short_key using consistent hashing. Read replicas per shard. Consider Cassandra which handles 182TB natively with tunable consistency.' },
-          { q: 'How does the distributed counter work without a single bottleneck?', why: 'Naive single counter is a bottleneck \u2014 must be distributed.', model: 'Pre-allocate ranges to each server (server A: 1-1M, server B: 1M-2M). Server increments locally, requests new range from a range service (backed by ZooKeeper or Redis INCR) when exhausted.' },
-          { q: 'How do you prevent spam and malware links?', why: 'Interviewers want to see you address the unhappy path.', model: 'Bloom filter for O(1) blocklist checks. Token bucket rate limiting by IP. Async scan via Google Safe Browsing API. User report \u2192 manual review queue.' }
-        ]
-      },
-      {
-        name: 'Wrap-up',
-        items: [
-          { q: 'What are the key failure modes?', why: 'Tests resilience thinking.', model: 'DB down: serve reads from cache in degraded mode. Cache down: reads hit DB \u2014 monitor for spike. Add circuit breaker on DB calls and rate limiting on cache-miss path to prevent cascading failures.' },
-          { q: 'What metrics do you monitor?', why: 'Shows production-readiness thinking.', model: 'Redirect latency P50/P99/P999, cache hit rate (target >85%), DB replication lag, error rate per endpoint, top URLs by click volume for anomaly detection.' },
-          { q: 'What improvements would you make with more time?', why: 'Shows awareness of trade-offs made.', model: 'Multi-region CDN for <5ms redirects globally. Link preview cards (OG metadata scraping). Custom branded domains. Real-time analytics dashboard.' }
-        ]
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<div class="step-badge">Step 4 — Wrap Up</div>
+<p>You've designed a URL shortener that handles 100M writes/day and 1B reads/day with sub-10ms redirect latency at P99. Here's a summary of each design decision and why it was made.</p>
+
+<h3>Summary of Design Decisions</h3>
+<ul>
+  <li><strong>Counter + Base62</strong> for key generation — no collisions, no retry logic, distributed via range allocation</li>
+  <li><strong>302 redirect</strong> — preserves full click analytics</li>
+  <li><strong>Redis LRU cache</strong> — 10 GB hot set, target &gt;90% hit rate, keeps DB load minimal</li>
+  <li><strong>MySQL with read replicas</strong> → shard by <code>short_key</code> at scale using consistent hashing</li>
+  <li><strong>Nightly cleanup service</strong> — soft delete + batch delete for expired URLs</li>
+</ul>
+
+<h3>Trade-offs Summary</h3>
+<div class="table-wrap"><table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Key generation</td><td>Counter + Base62</td><td>Hash (MD5)</td><td>No collisions, no retry loop</td></tr>
+    <tr><td>Redirect type</td><td>302 Temporary</td><td>301 Permanent</td><td>Analytics preserved on every click</td></tr>
+    <tr><td>Cache</td><td>LRU Redis</td><td>Memcached</td><td>Rich data types, persistence option, TTL support</td></tr>
+    <tr><td>DB early stage</td><td>MySQL + replicas</td><td>Cassandra</td><td>Simpler operations, easy to migrate later</td></tr>
+    <tr><td>DB at scale</td><td>Sharded MySQL</td><td>Cassandra</td><td>Consistent hashing, no schema change required</td></tr>
+  </tbody>
+</table></div>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Rate limiting:</strong> 10 URL creations/min per IP using token bucket (prevents spam and abuse)</li>
+  <li><strong>Abuse prevention:</strong> bloom filter blocklist + async Google Safe Browsing scan (flag phishing URLs without blocking the create path)</li>
+  <li><strong>Multi-region deployment:</strong> DNS-based geo-routing (Route 53 latency routing) → global &lt;5ms redirect latency</li>
+  <li><strong>Analytics pipeline:</strong> click events → Kafka → ClickHouse for time-series queries (clicks per hour/country/device)</li>
+</ul>
+
+<div class="callout tip">
+  <div class="callout-icon">💬</div>
+  <div class="callout-body"><strong>Interview Tip</strong><br>Always end by summarizing your design decisions and the trade-offs you made. Interviewers remember candidates who show clear thinking about <em>why</em> they made each choice, not just <em>what</em> they chose. The wrap-up is your last impression — make it count.</div>
+</div>
+`
       }
     ]
   },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // SYSTEM 2: Twitter News Feed
+  // ══════════════════════════════════════════════════════════════════════════
   {
-    id: 'rate-limiter',
-    icon: '\u{1F6A6}',
-    name: 'Rate Limiter',
-    difficulty: 'Medium',
-    popular: false,
-    desc: 'Design a rate limiter to throttle API traffic by user, IP, or endpoint.',
-    problem: 'Design a rate limiter middleware that can be used by any API service. It must reject requests that exceed a configurable threshold (e.g., 100 req/min per user) and work correctly across a distributed fleet of API servers.',
-    phases: [
+    id: 'twitter-feed',
+    title: "Design Twitter's News Feed",
+    icon: '📰',
+    difficulty: 'hard',
+    readTime: '25 min read',
+    teaser: 'The fan-out problem: how do you show 500M users a fresh, personalized timeline in under 200ms? Covers push vs. pull vs. hybrid fan-out, feed cache design, pagination, and ranking.',
+    sections: [
       {
-        name: 'Requirements',
-        items: [
-          { q: 'Should rate limiting be based on user ID, IP, API key, or endpoint?', why: 'Different granularities require different key schemes in the storage layer.', model: 'All of the above, configured per rule. Key = prefix:identifier (e.g., "user:12345", "ip:1.2.3.4"). Rules specify limit and window per key type.' },
-          { q: 'What algorithm \u2014 fixed window, sliding window, or token bucket?', why: 'Each algorithm has different memory usage and accuracy trade-offs.', model: 'Token bucket: smooth bursting, intuitive. Sliding window log: exact but memory-heavy. Sliding window counter: good accuracy at low memory. Fixed window: simple but burst problem at window boundary. Recommend sliding window counter for most cases.' },
-          { q: 'Hard reject or soft throttle (queue requests)?', why: 'Queueing adds complexity and latency \u2014 usually hard reject with Retry-After header is better.', model: 'Hard reject with HTTP 429 and Retry-After header. Queueing is complex and shifts latency to client. Some APIs use "shed load" mode: accept then drop internally.' },
-          { q: 'What consistency is required \u2014 is it OK to allow slightly more than the limit?', why: 'Strong consistency needs distributed locks; eventual consistency is much simpler.', model: 'Slight over-counting (5-10%) is usually acceptable. Use Redis atomic operations (INCR + EXPIRE) for eventual consistency. Avoids distributed locks entirely.' },
-          { q: 'Should limits be configurable at runtime without restart?', why: 'Hardcoded limits require redeploy \u2014 operational burden.', model: 'Yes. Store rules in a config service (Redis or etcd). Servers poll every 30s or receive push updates. Zero-downtime rule changes.' }
-        ]
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<div class="step-badge">Step 1 — Scope the Problem</div>
+<p>The news feed is deceptively hard. Reading a timeline sounds trivial — just fetch the latest posts from the accounts you follow and display them in order. But at 500 million users doing this 10 times a day, "trivial" becomes a database-destroying query. The fan-out problem is the crux of this entire design.</p>
+
+<h3>Candidate–Interviewer Dialogue</h3>
+<div class="dialogue">
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">Can users post text only, or also images and video?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">Text and images for now. No video.</span></div>
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">Is the timeline sorted chronologically, or algorithmically ranked?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">Chronological first. Ranking is an extension if we have time.</span></div>
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">What's the maximum number of people a user can follow?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">Up to 5,000 follows per user.</span></div>
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">What's the DAU?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">500 million daily active users.</span></div>
+</div>
+
+<h3>Requirements</h3>
+<p><strong>Functional:</strong></p>
+<ul>
+  <li>Post a tweet (text + optional image)</li>
+  <li>Follow and unfollow users</li>
+  <li>View home timeline: last ~20 tweets from followed accounts</li>
+  <li>Like a tweet</li>
+</ul>
+<p><strong>Non-functional:</strong></p>
+<ul>
+  <li>Timeline load &lt;200ms P99</li>
+  <li>Eventual consistency acceptable (1–2 second lag after posting)</li>
+  <li>99.9% uptime</li>
+</ul>
+
+<h3>Back-of-the-Envelope Estimation</h3>
+<div class="capacity-block">
+  <span class="cap-section-label">Write Load</span>
+  <div class="cap-row"><span class="cap-label">Daily Active Users</span><span class="cap-val">500M</span></div>
+  <div class="cap-row"><span class="cap-label">Avg tweets per user per day</span><span class="cap-val">× 2</span></div>
+  <div class="cap-row"><span class="cap-label">Tweets per day</span><span class="cap-val">1 billion</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Write QPS — 1B / 86,400</span><span class="cap-val">≈ 11,574 writes/sec</span></div>
+  <span class="cap-section-label">Read Load</span>
+  <div class="cap-row"><span class="cap-label">Timeline opens per user per day</span><span class="cap-val">× 10</span></div>
+  <div class="cap-row"><span class="cap-label">Total feed reads per day</span><span class="cap-val">5 billion</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Read QPS — 5B / 86,400</span><span class="cap-val">≈ 57,870 reads/sec</span></div>
+  <span class="cap-section-label">The Fan-out Problem</span>
+  <div class="cap-row"><span class="cap-label">Avg followers per user</span><span class="cap-val">200</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Feed writes/sec — 11,574 × 200</span><span class="cap-val">≈ 2.3M feed writes/sec</span></div>
+  <span class="cap-section-label">Storage</span>
+  <div class="cap-row"><span class="cap-label">Text only — 1B × 280 chars</span><span class="cap-val">≈ 280 GB/day</span></div>
+  <div class="cap-row"><span class="cap-label">With media (10× multiplier)</span><span class="cap-val">≈ 2.8 TB/day</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">5-year archive</span><span class="cap-val">≈ 5 PB</span></div>
+</div>
+
+<div class="callout tip">
+  <div class="callout-icon">💬</div>
+  <div class="callout-body"><strong>Interview Tip</strong><br>The fan-out number — 2.3 million feed writes per second — is what should alarm you. This is the crux of the news feed problem. Show the interviewer you understand this by calling it out explicitly before proposing any solution. This one number drives the entire architectural decision between push, pull, and hybrid models.</div>
+</div>
+`
       },
       {
-        name: 'Capacity',
-        items: [
-          { q: 'How much memory does each rate limit counter use?', why: 'At millions of users, memory per counter matters.', model: 'Token bucket: 2 values (tokens, timestamp) per key. Sliding window counter: 2 integers per window. At 1M active users \u00d7 2 windows \u00d7 20 bytes \u2248 40MB. Trivial for Redis.' },
-          { q: 'What is the latency budget for the rate limit check?', why: 'Rate limiting is on the hot path \u2014 every API request goes through it.', model: 'Budget <2ms per check. Redis EVALSHA (Lua script for atomic check+increment) typically <1ms on same-AZ Redis. Use connection pooling to avoid connection overhead.' }
-        ]
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<div class="step-badge">Step 2 — High-Level Design</div>
+
+<h3>API Design</h3>
+<pre><code>POST /api/v1/tweets
+  Body:     { text: string, media_ids?: string[] }
+  Response: { tweet_id: string, created_at: string }
+
+GET /api/v1/feed
+  Query:    ?cursor=&lt;tweet_id&gt;&amp;limit=20
+  Response: { tweets: [...], next_cursor: string }
+
+POST   /api/v1/users/{id}/follow
+DELETE /api/v1/users/{id}/follow
+POST   /api/v1/tweets/{id}/like</code></pre>
+
+<h3>Data Model</h3>
+<pre><code>-- Tweets (MySQL, sharded by tweet_id)
+tweets: tweet_id BIGINT PK, user_id BIGINT, text VARCHAR(280),
+        created_at DATETIME, like_count INT, retweet_count INT
+
+-- Social graph (MySQL, sharded by follower_id)
+follows: follower_id BIGINT, followee_id BIGINT,
+         created_at DATETIME,
+         PRIMARY KEY (follower_id, followee_id)
+
+-- Feed cache (Redis Sorted Set, per user)
+-- Key: "feed:{user_id}"
+-- Score: tweet timestamp in unix milliseconds (for ordering)
+-- Member: tweet_id (BIGINT encoded as string)
+
+-- Media (S3 + CloudFront CDN)
+media: media_id, user_id, s3_url, content_type, size_bytes</code></pre>
+
+<h3>Architecture Overview</h3>
+<pre class="diagram">  ┌─────────┐    POST /tweet      ┌────────────────┐
+  │  Client │ ──────────────────► │  Tweet Service  │
+  └────┬────┘                     └───────┬─────────┘
+       │                                  │ publish event
+       │  GET /feed                ┌──────▼──────┐
+       │                           │    Kafka     │
+       │                           └──────┬───────┘
+       │                                  │ consume
+       │                           ┌──────▼─────────────┐
+       │                           │   Fanout Service    │
+       │                           │ (push to followers) │
+       │                           └──────┬──────────────┘
+       │                                  │ write feed entries
+  ┌────▼────────────┐              ┌──────▼──────┐
+  │  Feed Service   │ ◄── read ─── │  Redis Feed  │
+  │ (assemble feed) │              │    Cache     │
+  └─────────────────┘              └─────────────┘</pre>
+
+<p>When a tweet is posted, it flows asynchronously via Kafka to the Fanout Service. The Feed Service only handles reads — it assembles the final response from pre-computed data in Redis.</p>
+`
       },
       {
-        name: 'Architecture',
-        items: [
-          { q: 'Where does the rate limiter sit \u2014 client side, gateway, or application?', why: 'Placement determines what it can protect and the blast radius of failure.', model: 'API Gateway (recommended): single enforcement point, language-agnostic. Application middleware: more granular but duplicated logic. Client-side: trivially bypassed. Use gateway + application-level as defense in depth.' },
-          { q: 'How does it work across multiple API servers?', why: 'Each server seeing only its own traffic would under-count by N servers.', model: 'Centralized Redis counter shared by all servers. Atomic Lua script: INCR key, set EXPIRE on first increment, check against limit. Returns allow/deny atomically.' },
-          { q: 'What happens if Redis is down?', why: 'Rate limiter failure should not take down the API service.', model: 'Fail open (allow all requests) during Redis outage \u2014 better to let traffic through than to block everything. Alert on Redis unavailability. Consider local in-memory fallback with lower limits.' }
-        ]
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3 — Design Deep Dive</div>
+
+<h3>3a. The Fan-out Problem — Push vs. Pull vs. Hybrid</h3>
+<p>This is the central architectural decision of the entire system. Every other design choice follows from this one.</p>
+
+<h4>Fan-out on Write (Push Model)</h4>
+<p>When a user posts a tweet, immediately write the <code>tweet_id</code> to every follower's feed cache in Redis. The read path is just a Redis lookup — O(1).</p>
+<ul>
+  <li><strong>Read path:</strong> O(1) — read a pre-computed Redis sorted set</li>
+  <li><strong>Write path:</strong> O(N followers) — 200 followers = 200 Redis writes per tweet</li>
+  <li><strong>Fatal flaw:</strong> Suppose a celebrity has 50M followers and posts a tweet. That's 50M Redis writes triggered simultaneously. At our write rate of 11,574 tweets/sec, if even 0.1% of accounts are celebrities, the fan-out load becomes catastrophic.</li>
+  <li><strong>Memory:</strong> 500M users × 800 tweet_ids × 8 bytes = 3.2 TB across the Redis cluster — manageable</li>
+</ul>
+
+<h4>Fan-out on Read (Pull Model)</h4>
+<p>When a user opens their feed, fetch the latest tweets from each account they follow and merge-sort in real time.</p>
+<ul>
+  <li><strong>Write path:</strong> O(1) — just store the tweet in the tweets table</li>
+  <li><strong>Read path:</strong> O(N followees) — following 200 people = 200 DB queries + merge sort per feed load</li>
+  <li><strong>Fatal flaw:</strong> 57,870 feed reads/sec × 200 DB queries each = 11.57M database queries per second. The database would be destroyed instantly.</li>
+</ul>
+
+<h4>Hybrid Model (Recommended)</h4>
+<p>The key insight is that the problem only occurs at the extremes. The fix: treat regular users and celebrities differently.</p>
+<ul>
+  <li><strong>Regular users (&lt;10K followers):</strong> fan-out on write. Their tweets go to follower feed caches immediately after posting.</li>
+  <li><strong>Celebrity/high-follower accounts (≥10K followers):</strong> NOT fanned out. Their tweets are <em>not</em> pushed to follower caches.</li>
+  <li><strong>At read time:</strong> The Feed Service merges (a) the pre-computed Redis feed (regular users' tweets) + (b) fresh tweets from any celebrity accounts the user follows, fetched directly from the tweet database.</li>
+</ul>
+
+<div class="callout tradeoff">
+  <div class="callout-icon">⚖️</div>
+  <div class="callout-body"><strong>Trade-off</strong><br>Push (fan-out on write) optimizes reads at the cost of writes. Pull (fan-out on read) does the opposite. The hybrid model targets the actual distribution: the vast majority of accounts — regular users — have few followers and can safely use push. The small minority — celebrities — that would cause write explosion use pull. This is the same approach Twitter used in production, as documented in their 2013 architecture post.</div>
+</div>
+
+<h3>3b. Fan-out Service Implementation</h3>
+<pre><code>Tweet created
+  → Kafka event { tweet_id, user_id, created_at }
+    → Fanout Service consumer
+      → Lookup follower list from social graph DB (paginated, batch 1000)
+      → Filter: skip inactive users (no login in 30 days) — saves ~40% of writes
+      → For each active follower:
+          celebrity_threshold = 10,000 followers
+          if this user IS a celebrity: skip (handled at read time)
+          if follower's feed key NOT in Redis: skip (populate fresh on next read)
+          else:
+              ZADD feed:{follower_id} {unix_ms_timestamp} {tweet_id}
+      → Cap feed size: ZREMRANGEBYRANK feed:{user_id} 0 -801 (keep newest 800)</code></pre>
+
+<div class="callout insight">
+  <div class="callout-icon">💡</div>
+  <div class="callout-body"><strong>Key Insight</strong><br>Skip inactive users during fan-out. Twitter found that approximately 40% of followers haven't logged in for 30 days. Writing to their feed cache wastes Redis memory and CPU for zero benefit. When they return, populate their feed fresh from the database. This single optimization cuts fan-out write load by nearly half.</div>
+</div>
+
+<h3>3c. Feed Cache Design (Redis Sorted Set)</h3>
+<ul>
+  <li><strong>Data structure:</strong> Sorted Set. Key: <code>feed:{user_id}</code>. Score: unix millisecond timestamp (enables range queries). Member: <code>tweet_id</code> (8 bytes).</li>
+</ul>
+<pre><code>-- Fan-out write (add tweet to follower's feed)
+ZADD feed:{user_id} {timestamp_ms} {tweet_id}
+
+-- Read latest 20 tweets
+ZREVRANGEBYSCORE feed:{user_id} +inf -inf LIMIT 0 20
+
+-- Cursor-based pagination (next page)
+ZREVRANGEBYSCORE feed:{user_id} {cursor_score - 1} -inf LIMIT 0 20
+
+-- Cap at 800 entries (drop oldest)
+ZREMRANGEBYRANK feed:{user_id} 0 -801</code></pre>
+
+<div class="capacity-block">
+  <span class="cap-section-label">Redis Cluster Sizing</span>
+  <div class="cap-row"><span class="cap-label">Active users with feed cache</span><span class="cap-val">500M</span></div>
+  <div class="cap-row"><span class="cap-label">Avg tweet_ids per feed</span><span class="cap-val">400</span></div>
+  <div class="cap-row"><span class="cap-label">Bytes per tweet_id (BIGINT)</span><span class="cap-val">8 bytes</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Total Redis cluster size</span><span class="cap-val">≈ 1.6 TB → 6+ shards</span></div>
+</div>
+
+<p><strong>Expiry:</strong> Set a 7-day TTL on inactive user feed keys (lazy expiry on access). This reclaims memory without a complex cleanup job.</p>
+
+<h3>3d. Content Hydration</h3>
+<p>The feed cache stores only <code>tweet_id</code>s, not tweet content. On each feed read:</p>
+<ol>
+  <li>Fetch 20 <code>tweet_id</code>s from Redis sorted set (O(log N))</li>
+  <li>Batch fetch tweet content from MySQL: <code>SELECT * FROM tweets WHERE id IN (...)</code></li>
+  <li>Batch fetch author user profiles (cached separately in Redis with a 1-hour TTL)</li>
+  <li>Merge and serialize response</li>
+</ol>
+<p><strong>Optimization:</strong> Maintain an in-process LRU cache on each Feed Service instance for the most popular tweets (top 0.1% of tweets by engagement account for ~30% of all reads). Eliminates DB round-trips for viral content entirely.</p>
+
+<h3>3e. Pagination — Cursor vs. Offset</h3>
+<div class="callout warn">
+  <div class="callout-icon">⚠️</div>
+  <div class="callout-body"><strong>Watch Out</strong><br>Never use offset-based pagination (<code>LIMIT 20 OFFSET 40</code>) for a live feed. If 5 new tweets arrive while the user scrolls to page 2, the offset shifts — they see duplicates or miss tweets entirely. Always use cursor-based pagination for any real-time content feed.</div>
+</div>
+<p>The cursor is the last seen <code>tweet_id</code>, which — when using Snowflake IDs — encodes the creation timestamp directly in the bits. This makes it both an ID and a time pointer.</p>
+<p>Next page: <code>ZREVRANGEBYSCORE feed:{user_id} {cursor_score - 1} -inf LIMIT 0 20</code></p>
+
+<h3>3f. Ranking (Extension)</h3>
+<p>After establishing a working chronological feed, mention ranking as an architectural evolution:</p>
+<ul>
+  <li>Insert a <strong>Ranking Service</strong> between feed assembly and the API response</li>
+  <li>Candidate set: fetch top 200 tweet_ids from Redis → score each one → return top 20</li>
+  <li>Ranking signals: author relationship strength (DM frequency, mutual follows), tweet engagement velocity (likes per minute), recency decay (exponential), content type preference</li>
+  <li>Validate with A/B test: 50% chronological vs. 50% ranked. Measure session length and scroll depth.</li>
+</ul>
+`
       },
       {
-        name: 'Deep Dive',
-        items: [
-          { q: 'How do you implement the sliding window counter algorithm?', why: 'Core algorithm depth expected for this topic.', model: 'Divide time into fixed sub-windows (e.g., 1s sub-windows in a 60s window). Store count per sub-window in Redis hash. On request: sum counts in last 60s, compare to limit, increment current sub-window. Expire sub-windows older than window size.' },
-          { q: 'How do you handle distributed rate limiting across data centers?', why: 'Multi-region setup means a user in EU and US could each get the full limit.', model: 'Local rate limiting per region (simple). Global rate limiting via cross-region Redis replication (added latency). Practical approach: regional limit \u00d7 num_regions with periodic global sync. Most products use per-region limits.' },
-          { q: 'How do you prevent Redis from becoming a single point of failure?', why: 'Availability of rate limiter affects availability of entire API surface.', model: 'Redis Cluster with replication. Sentinel for automatic failover. Lua scripts ensure atomicity per shard. For ultra-high availability: Twemproxy or Envoy proxy in front of Redis cluster.' }
-        ]
-      },
-      {
-        name: 'Wrap-up',
-        items: [
-          { q: 'How do you handle sudden legitimate traffic spikes (e.g., viral event)?', why: 'Shows operational empathy \u2014 rigid limits can break good customers.', model: 'Burst allowance: token bucket naturally supports burst up to bucket size. Configurable "burst multiplier" per customer tier. Emergency override: ops can temporarily raise limits via config service.' },
-          { q: 'What metrics do you monitor?', why: 'Proactive monitoring distinguishes good rate limiting from a black box.', model: 'Throttle rate per user/IP/endpoint, P99 Redis latency, Redis memory usage, rule evaluation errors, false positive reports (legitimate traffic blocked).' }
-        ]
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<div class="step-badge">Step 4 — Wrap Up</div>
+<p>The news feed problem is fundamentally about the fan-out bottleneck. Every other decision flows from how you solve that. The hybrid push/pull model is the industry answer, and Redis Sorted Sets are the ideal data structure for pre-computed, time-ordered feeds.</p>
+
+<h3>Trade-offs Summary</h3>
+<div class="table-wrap"><table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Fan-out strategy</td><td>Hybrid (push + pull)</td><td>Pure push</td><td>Avoids 50M Redis writes per celebrity tweet</td></tr>
+    <tr><td>Feed cache</td><td>Redis Sorted Set</td><td>DB query at read time</td><td>O(1) reads, pre-computed, supports cursor pagination</td></tr>
+    <tr><td>Pagination</td><td>Cursor-based</td><td>Offset (LIMIT/OFFSET)</td><td>Stable across new inserts, no duplicate/missing tweets</td></tr>
+    <tr><td>Inactive user skip</td><td>Yes (30-day threshold)</td><td>Fan-out to all followers</td><td>Saves ~40% of fan-out write volume</td></tr>
+    <tr><td>Celebrity threshold</td><td>10K followers (dynamic)</td><td>Fixed whitelist</td><td>Automatically adjusts as accounts grow</td></tr>
+  </tbody>
+</table></div>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Follow backfill:</strong> when a user follows someone new, asynchronously populate their feed with that person's last N posts (don't leave the feed feeling empty)</li>
+  <li><strong>Multi-region replication:</strong> replicate feed caches to a second region with asynchronous write propagation — acceptable for eventual consistency</li>
+  <li><strong>Read-your-own-writes:</strong> after posting a tweet, route that user's feed reads to the primary for 1 minute (sticky routing) so they immediately see their own post</li>
+</ul>
+`
       }
     ]
   },
-  {
-    id: 'news-feed',
-    icon: '\u{1F4F0}',
-    name: 'News Feed',
-    difficulty: 'Hard',
-    popular: true,
-    desc: 'Design Twitter/Instagram feed \u2014 generate and serve personalized timelines.',
-    problem: 'Design the news feed system for a social platform. Users follow other users. When a user opens their app, they see a feed of posts from people they follow, sorted by recency (or ranked). The system must serve feeds to 500M daily active users with <200ms load time.',
-    phases: [
-      {
-        name: 'Requirements',
-        items: [
-          { q: 'Is the feed chronological or ranked (ML-based)?', why: 'Ranking requires a feature store, model serving infrastructure \u2014 completely different complexity.', model: 'Start with chronological (simpler). Mention ranking as an extension: would need offline feature engineering, model training pipeline, and real-time scoring service.' },
-          { q: 'What is the max fanout \u2014 how many followers can a user have?', why: 'High-follower accounts (celebrities) require fundamentally different write patterns.', model: 'Most users: <1,000 followers. Celebrities: millions. This necessitates a hybrid fanout strategy \u2014 different write paths for regular vs. high-follower accounts.' },
-          { q: 'Should the feed be generated on write (push) or on read (pull)?', why: 'Core architectural decision with major performance trade-offs.', model: 'Push (fan-out on write): pre-compute feed on post creation. Fast reads, expensive writes for high-follower users. Pull (fan-out on read): compute feed on open. Cheap writes, expensive reads. Hybrid: push for most users, pull for celebrity posts.' },
-          { q: 'What post types \u2014 text, images, videos, stories?', why: 'Media types require CDN integration and storage design beyond just text.', model: 'Start with text + images. Videos require transcoding pipeline and CDN. Stories have TTL (24h). Scope to text/image for initial design.' },
-          { q: 'What are the read/write ratios and latency requirements?', why: 'Drives caching depth and acceptable consistency model.', model: 'Heavy read: 10B reads/day vs. 1B writes/day. Feed load <200ms P99. Posts: eventual consistency (minor lag acceptable). Feed: stale by seconds is fine.' }
-        ]
-      },
-      {
-        name: 'Capacity',
-        items: [
-          { q: 'Estimate storage for posts and feed cache.', why: 'Post storage and feed cache are separate \u2014 estimate both.', model: '500M users \u00d7 2 posts/day avg = 1B posts/day. At 1KB/post \u2192 1TB/day of post data, 365TB/year. Feed cache: store last 20 posts per user = 500M \u00d7 20 \u00d7 200 bytes \u2248 2TB. Distributed Redis cluster.' },
-          { q: 'What is the fanout write amplification for a celebrity post?', why: 'A celebrity with 30M followers posting creates 30M cache writes \u2014 must be bounded.', model: '30M follower writes \u00d7 200 bytes = 6GB per celebrity post. At 10 celebrities posting simultaneously = 60GB write burst. Must throttle or batch-process celebrity fanouts asynchronously.' }
-        ]
-      },
-      {
-        name: 'Architecture',
-        items: [
-          { q: 'Describe the write path for a new post.', why: 'Feed systems are complex \u2014 walk through each step explicitly.', model: 'User POSTs \u2192 Post Service \u2192 store in Posts DB (Cassandra) + object store for media \u2192 publish to message queue (Kafka) \u2192 Fanout Service reads queue \u2192 for each follower writes post_id to their feed cache in Redis.' },
-          { q: 'Describe the read path for opening the feed.', why: 'Read path must be fast \u2014 every feed open goes through this.', model: 'User requests feed \u2192 Feed Service \u2192 read from Redis feed cache (list of post IDs) \u2192 batch fetch post content from Posts DB \u2192 merge, hydrate user profiles \u2192 return ranked list. Cache miss: fall back to pull-based query.' },
-          { q: 'How does the hybrid fanout strategy work for celebrities?', why: 'Mixing push and pull requires careful coordination at read time.', model: 'Regular users: fan-out on write (posts go to follower caches). Celebrities: don\'t fan-out. At read time, Feed Service fetches last N posts from each followed celebrity and merges with cached feed. Identify celebrities by follower count threshold (e.g., >10K).' }
-        ]
-      },
-      {
-        name: 'Deep Dive',
-        items: [
-          { q: 'How do you structure the feed cache in Redis?', why: 'Data structure choice affects list operations, expiry, and pagination.', model: 'Redis sorted set: score = post timestamp, member = post_id. ZRANGEBYSCORE for time-range queries. ZREMRANGEBYRANK to cap feed size. Expire full key after 7 days of inactivity (lazy TTL).' },
-          { q: 'How do you handle a user following or unfollowing?', why: 'Follow/unfollow must update feed consistently without full recomputation.', model: 'Follow: backfill last N posts from followed user into feed cache. Unfollow: remove their post_ids from cache (can be lazy \u2014 old posts expire naturally). Both are O(N) ops processed async.' },
-          { q: 'How do you paginate the feed efficiently?', why: 'Offset-based pagination breaks on new posts \u2014 cursor-based is correct.', model: 'Cursor = last seen post\'s timestamp. Next page: ZRANGEBYSCORE feed_key (cursor - \u03b5) 0 LIMIT 20. Client sends cursor on each request. No offset drift even if new posts arrive at top.' }
-        ]
-      },
-      {
-        name: 'Wrap-up',
-        items: [
-          { q: 'What are the hardest failure scenarios?', why: 'Feed systems have subtle failure modes.', model: 'Fanout worker lag (celebrity posts arrive late): show stale feed, backfill async. Redis feed cache eviction: fall back to pull-based query on miss. Post DB shard down: affected posts return empty \u2014 graceful degradation.' },
-          { q: 'How do you add ranked/algorithmic feed later?', why: 'Shows foresight without over-engineering the initial design.', model: 'Add a Ranking Service between feed assembly and response. Feed Service sends raw candidate posts \u2192 Ranking Service scores using feature store \u2192 returns ordered list. A/B test ranking vs. chronological on % of traffic.' }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'chat-system',
-    icon: '\u{1F4AC}',
-    name: 'Chat System',
-    difficulty: 'Hard',
-    popular: true,
-    desc: 'Design WhatsApp/Messenger \u2014 real-time 1:1 and group messaging.',
-    problem: 'Design a chat system supporting real-time 1:1 and group messaging for 500M DAU. Messages must be delivered in <500ms and never lost. Support message history sync when a user switches devices.',
-    phases: [
-      {
-        name: 'Requirements',
-        items: [
-          { q: '1:1 only, or also group chat? What is the max group size?', why: 'Group chat with large groups requires broadcast design, not just 1:1.', model: 'Both. Max group size 500-1000. Larger groups (broadcast channels) need different fanout strategy. Start with 1:1 then extend to groups.' },
-          { q: 'Does the system need to support message history and sync across devices?', why: 'Multi-device sync requires persistent storage, not just real-time delivery.', model: 'Yes. Last 30 days of history. Devices sync on login by fetching messages since last_seen timestamp. New messages pushed in real-time; old messages pulled via REST.' },
-          { q: 'Are media attachments required (images, video, voice)?', why: 'Media changes storage and delivery design significantly.', model: 'Scope to text first. For media: upload to S3/CDN, store URL in message. Client downloads from CDN directly. Mention end-to-end encryption (store encrypted blobs).' },
-          { q: 'Online presence and read receipts?', why: 'Presence requires heartbeat infrastructure; receipts require state tracking per message.', model: 'Yes to both. Presence: heartbeat every 30s from client \u2192 presence service \u2192 Redis TTL. Read receipts: client sends ACK \u2192 update message status in DB \u2192 notify sender.' },
-          { q: 'What delivery guarantees \u2014 at-most-once, at-least-once, or exactly-once?', why: 'Exactly-once is extremely hard; at-least-once with client deduplication is practical.', model: 'At-least-once delivery with client-side dedup using message_id. Client de-duplicates on receipt. Server marks message as delivered when client ACKs.' }
-        ]
-      },
-      {
-        name: 'Capacity',
-        items: [
-          { q: 'Estimate daily message volume and storage.', why: 'Message volume drives storage and queue throughput.', model: '500M users \u00d7 40 messages/day = 20B messages/day. At 100 bytes/message \u2192 2TB/day raw. With 30-day history: 60TB. Use time-series partitioned storage (Cassandra or HBase) for efficient range scans by (conversation_id, timestamp).' },
-          { q: 'How many concurrent WebSocket connections do you need to support?', why: 'Long-lived connections require different server architecture than stateless HTTP.', model: '500M DAU with 50% concurrently online = 250M open connections. 1 connection server handles ~50K connections (Linux epoll). Need ~5,000 connection servers. Use connection pooling and sticky routing.' }
-        ]
-      },
-      {
-        name: 'Architecture',
-        items: [
-          { q: 'How do you maintain persistent connections for real-time delivery?', why: 'Real-time chat requires long-lived connections \u2014 HTTP polling doesn\'t scale.', model: 'WebSocket connections between client and Chat Server. Chat Servers are stateful per-connection. A connection router (like Nginx with sticky sessions) routes each user consistently to one Chat Server. ZooKeeper tracks which server each user is connected to.' },
-          { q: 'Walk through the message send flow.', why: 'Core flow \u2014 be specific about each hop.', model: 'Sender \u2192 Chat Server (via WebSocket) \u2192 Chat Server writes to message queue (Kafka) and persists to Message DB (Cassandra) \u2192 Message queue consumed by delivery service \u2192 looks up recipient\'s Chat Server in ZooKeeper \u2192 pushes to recipient\'s Chat Server \u2192 sends to recipient via WebSocket. ACK flows back.' },
-          { q: 'How do you deliver messages when the recipient is offline?', why: 'Must not drop messages for offline users.', model: 'If recipient offline: store message in Inbox DB. On reconnect, client sends last_received_id \u2192 server pushes all messages since that ID. Also trigger push notification (APNs/FCM) to wake mobile app.' }
-        ]
-      },
-      {
-        name: 'Deep Dive',
-        items: [
-          { q: 'How do you design the message storage schema?', why: 'Cassandra schema design is specific to chat use cases.', model: 'Partition key: (conversation_id). Clustering key: message_id (time-ordered UUID). This enables efficient O(1) fetch of latest N messages per conversation. conversation_id = hash(min(user_a, user_b)) for 1:1 chats.' },
-          { q: 'How do you handle group chat delivery?', why: 'Group chat fanout to 500 members is expensive.', model: 'Group message \u2192 write once to message DB \u2192 create N delivery tasks (one per member) on a task queue \u2192 delivery workers push to each member\'s Chat Server. Use Cassandra group_inbox table: (group_id, user_id, last_read_id) for read-state tracking.' },
-          { q: 'How do you ensure message ordering?', why: 'Out-of-order delivery is confusing \u2014 require in-order guarantee within conversation.', model: 'Client-side sequence number per conversation. Server assigns global timestamp using Hybrid Logical Clocks (HLC). Recipient buffers out-of-order messages using sequence gaps. Re-request missing messages if gap detected.' }
-        ]
-      },
-      {
-        name: 'Wrap-up',
-        items: [
-          { q: 'How do you handle Chat Server failure?', why: 'Stateful servers failing means active connections are lost.', model: 'On Chat Server crash: clients detect WebSocket disconnect and immediately reconnect (to any available server). New server checks message DB for undelivered messages since last ACK and re-delivers. Connection timeout + auto-reconnect in client SDK.' },
-          { q: 'What metrics matter most for a chat system?', why: 'Shows operational awareness.', model: 'Message delivery latency (target <500ms P99), delivery success rate (target 99.99%), WebSocket connection count per server, message queue consumer lag, push notification delivery rate.' }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'kv-store',
-    icon: '\u{1F5C4}\uFE0F',
-    name: 'Key-Value Store',
-    difficulty: 'Medium',
-    popular: false,
-    desc: 'Design a distributed key-value store like Redis or DynamoDB.',
-    problem: 'Design a distributed key-value store that supports GET, PUT, and DELETE operations. The store must handle 1M QPS, provide tunable consistency, and tolerate node failures without data loss.',
-    phases: [
-      {
-        name: 'Requirements',
-        items: [
-          { q: 'What consistency level is required \u2014 strong, eventual, or tunable?', why: 'Consistency level determines the entire replication protocol.', model: 'Tunable (like Cassandra/DynamoDB). Client specifies quorum: W+R>N for strong consistency (e.g., N=3, W=2, R=2). Default to eventual consistency for higher availability.' },
-          { q: 'What data types do you support \u2014 just strings, or also lists, sets, sorted sets?', why: 'Complex types require more complex storage and API design.', model: 'Scope to bytes (opaque values). Client serializes. Avoids complexity of type-specific storage. Mention Redis as an example of complex types adding value.' },
-          { q: 'What are the latency requirements?', why: 'Sub-millisecond reads require in-memory storage; persistent storage is slower.', model: 'GET P99 <10ms. PUT P99 <20ms. For sub-ms: must be in-memory (like Redis). For 10ms tolerance: SSD-backed storage acceptable. Clarify with interviewer.' },
-          { q: 'Is horizontal scaling (adding nodes) required?', why: 'Static cluster vs. dynamic scaling changes the partitioning design significantly.', model: 'Yes. Must support adding/removing nodes with minimal data migration. Use consistent hashing with virtual nodes.' },
-          { q: 'What are the durability requirements?', why: 'In-memory vs. persisted to disk changes the failure model.', model: 'Durable: persist to disk. WAL (Write-Ahead Log) for crash recovery. Replication factor of 3 for availability during node failures.' }
-        ]
-      },
-      {
-        name: 'Capacity',
-        items: [
-          { q: 'Estimate storage and memory requirements.', why: 'Determines whether in-memory storage is feasible or you need SSD.', model: 'Assume 1KB average value size. 1B keys \u2192 1TB data. With replication factor 3 \u2192 3TB raw. 100-node cluster with 30GB RAM each = 3TB in-memory. Feasible. Or 10-node SSD cluster with 300GB each.' },
-          { q: 'How many nodes do you need to handle 1M QPS?', why: 'Shows you understand the relationship between QPS, replication, and node count.', model: '1M QPS across N=3 replicas means any node handles ~333K QPS. At 50K QPS per node (conservative for in-memory) \u2192 need 7 nodes per replica set. Total: ~20-30 nodes with headroom.' }
-        ]
-      },
-      {
-        name: 'Architecture',
-        items: [
-          { q: 'How do you partition data across nodes?', why: 'Partitioning is the foundation of horizontal scaling.', model: 'Consistent hashing with virtual nodes (vnodes). Each physical node owns multiple virtual nodes (100-200). New node claims vnodes from neighbors. Avoids hot spots. Client uses DHT or a coordinator node to route.' },
-          { q: 'How does replication work?', why: 'Replication is required for fault tolerance \u2014 explains the R/W/N parameters.', model: 'Leaderless replication (like Cassandra): any node can accept writes. Write to N nodes, return success after W acknowledgments. Sloppy quorum: if target nodes down, temporarily write to available nodes (hinted handoff).' },
-          { q: 'How do conflicts resolve in eventual consistency mode?', why: 'Concurrent writes to the same key on different replicas need conflict resolution.', model: 'Last-write-wins using vector clocks (like DynamoDB) or wall-clock timestamps (simpler but risks clock skew). For complex types, use CRDTs (Conflict-free Replicated Data Types).' }
-        ]
-      },
-      {
-        name: 'Deep Dive',
-        items: [
-          { q: 'How does the storage engine work internally?', why: 'LSM tree vs. B-tree is a classic interview deep dive.', model: 'LSM tree (like Cassandra/LevelDB): writes go to in-memory memtable \u2192 flushed to SSTable on disk. Reads merge memtable + SSTables. High write throughput. Compaction reclaims space. B-tree (like LMDB): writes directly update B-tree on disk. Better read performance.' },
-          { q: 'How do you detect and repair inconsistency between replicas?', why: 'Anti-entropy is needed to fix divergence from network partitions.', model: 'Merkle tree: each node maintains a hash tree of key ranges. Periodically compare Merkle trees between replicas. Only transfer keys where hashes differ. Efficient O(diff) sync instead of full replication.' },
-          { q: 'How do you handle node failure and recovery?', why: 'Node failures are normal at scale \u2014 must handle gracefully.', model: 'Detect failure: heartbeat timeout \u2192 mark node as down. Hinted handoff: coordinator stores hints for failed node\'s writes. On recovery: node requests missed writes from hint queue. Full recovery: stream key ranges from neighbors.' }
-        ]
-      },
-      {
-        name: 'Wrap-up',
-        items: [
-          { q: 'What are the trade-offs between your design and a managed service like DynamoDB?', why: 'Shows real-world awareness.', model: 'Build: full control, no vendor lock-in, tunable. Managed: operational burden removed, auto-scaling, pay-per-use. For most companies: use managed. Build only for unique requirements or scale that justifies the ops cost.' },
-          { q: 'How do you monitor a distributed KV store?', why: 'Complex system needs specific observability.', model: 'Key metrics: read/write latency P99 per node, replication lag, compaction throughput (for LSM), node failure rate, hinted handoff queue depth, consistency violation rate.' }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'notification-system',
-    icon: '\u{1F514}',
-    name: 'Notification System',
-    difficulty: 'Medium',
-    popular: false,
-    desc: 'Design a push notification system for mobile and email alerts.',
-    problem: 'Design a notification system that can send push notifications (iOS/Android), emails, and SMS to 1B users. It must be reliable (no dropped notifications), support priority levels, and handle large-scale broadcast campaigns (e.g., send to 100M users in 1 hour).',
-    phases: [
-      {
-        name: 'Requirements',
-        items: [
-          { q: 'What notification channels \u2014 push, email, SMS, in-app?', why: 'Each channel has different latency, cost, and reliability characteristics.', model: 'All four. Each has different SLA: in-app (<1s), push (<5s), email (<5min), SMS (<30s). Abstract behind a common interface; route based on user preferences and channel availability.' },
-          { q: 'Should users be able to opt out of specific notification types?', why: 'Compliance (GDPR, CAN-SPAM) requires preference management.', model: 'Yes. User preference service stores (user_id, notification_type, channel) \u2192 enabled/disabled. Check preferences before sending. Suppression list for permanently unsubscribed.' },
-          { q: 'What is the retry policy for failed deliveries?', why: 'Network failures are common \u2014 must retry without duplicate delivery.', model: 'Exponential backoff with jitter: 1s, 2s, 4s, 8s... up to 1 hour. Max 5 retries. Track delivery status per notification. Idempotency key prevents duplicate sends on retry.' },
-          { q: 'What is the priority model \u2014 urgent (auth codes) vs. marketing?', why: 'High-priority notifications (OTP) cannot be throttled; marketing can.', model: 'Priority levels: critical (OTP, alerts), high (DMs), normal (feed updates), low (marketing). Critical: bypass throttling, direct to provider. Low: batched and rate-limited.' },
-          { q: 'Do you need delivery receipts and analytics?', why: 'Delivery tracking requires provider webhooks and state management.', model: 'Yes. Track: sent, delivered, opened (for push/email), failed. Providers send webhooks on delivery events. Store in time-series DB for campaign analytics.' }
-        ]
-      },
-      {
-        name: 'Capacity',
-        items: [
-          { q: 'Estimate QPS for sending 100M notifications in 1 hour.', why: 'Shows you understand the throughput requirements for broadcast campaigns.', model: '100M \u00f7 3600s \u2248 27,800 notifications/sec. Each push notification: ~1KB payload. 27,800/sec \u00d7 1KB = 27MB/s outbound. Need a worker pool with ~50-100 workers per channel provider.' },
-          { q: 'How much storage do you need for notification history?', why: 'Audit trail and retry state require persistent storage.', model: '1B users \u00d7 5 notifications/day = 5B records/day. At 200 bytes/record \u2192 1TB/day. Retain 30 days: 30TB. Use time-partitioned Cassandra; delete old partitions by dropping the entire partition (O(1)).' }
-        ]
-      },
-      {
-        name: 'Architecture',
-        items: [
-          { q: 'Describe the high-level flow for sending a notification.', why: 'End-to-end flow shows you understand all the moving parts.', model: 'Caller \u2192 Notification Service API \u2192 validate + check preferences \u2192 enqueue to priority-specific Kafka topic \u2192 Notification Workers consume \u2192 call provider SDK (APNs/FCM/SendGrid/Twilio) \u2192 record delivery status \u2192 handle provider callbacks (webhooks).' },
-          { q: 'How do you abstract multiple channel providers?', why: 'Provider abstraction allows failover and A/B testing of providers.', model: 'Channel Handler interface: send(notification) \u2192 result. Concrete implementations: APNsHandler, FCMHandler, SendGridHandler. Router selects handler by channel type and user device. Failover: if primary provider fails, try secondary (e.g., FCM \u2192 APNs for cross-platform).' },
-          { q: 'How do you handle large-scale broadcast campaigns (100M sends)?', why: 'Naive approach of sending all at once overloads providers and downstream services.', model: 'Fan-out via Kafka: campaign message \u2192 partition reader splits into user batches \u2192 per-user notification events \u2192 workers process at controlled rate. Throttle at provider level (e.g., 10K/sec to SendGrid). Campaigns may take 1-4 hours to fully deliver.' }
-        ]
-      },
-      {
-        name: 'Deep Dive',
-        items: [
-          { q: 'How do you ensure exactly-once delivery to avoid duplicate notifications?', why: 'Users hate receiving the same notification twice.', model: 'Idempotency key = hash(user_id + notification_id + channel). Workers check Redis idempotency cache before sending. On retry, same key \u2192 return cached result without re-sending. TTL = 24h on idempotency keys.' },
-          { q: 'How do you handle provider failures (e.g., APNs is down)?', why: 'External providers are not 100% reliable.', model: 'Circuit breaker per provider. On N consecutive failures: open circuit \u2192 route to fallback provider or queue to dead-letter queue (DLQ). DLQ processed when provider recovers. Alert ops on circuit open.' },
-          { q: 'How do you implement user notification preferences at scale?', why: 'Preference check is on the hot path for every notification.', model: 'Store preferences in Cassandra (user_id partition key, notification_type clustering key). Cache in Redis with TTL=5min. Cache invalidation on preference update. Bloom filter for fast suppression list lookups.' }
-        ]
-      },
-      {
-        name: 'Wrap-up',
-        items: [
-          { q: 'What failure modes worry you most?', why: 'Prioritizes operational concerns.', model: 'Silent drops: message consumed from queue, worker crashes before sending. Fix: only commit offset after delivery status recorded. Preference service down: fail open (send), not closed \u2014 users prefer occasional unwanted notification over missed critical alert.' },
-          { q: 'Key monitoring metrics.', why: 'Shows operational maturity.', model: 'Notification delivery rate per channel, delivery latency P99, retry rate per provider, DLQ depth, provider error rate, opt-out rate (spike = spam indicator), campaign progress (% delivered).' }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'search-autocomplete',
-    icon: '\u{1F50D}',
-    name: 'Search Autocomplete',
-    difficulty: 'Medium',
-    popular: false,
-    desc: 'Design the search suggestions dropdown as you type (like Google).',
-    problem: 'Design the autocomplete feature for a search box. As the user types, show the top 5 suggestions in <100ms. The system must handle 10K QPS and surface trending/popular queries, not just static completions.',
-    phases: [
-      {
-        name: 'Requirements',
-        items: [
-          { q: 'Should suggestions be global (popular searches) or personalized?', why: 'Personalization requires user history and adds significant ML complexity.', model: 'Start with global. Personalization: mix global (70%) + user history (30%). Store user search history per user_id in Cassandra; retrieve top N recent queries for blending.' },
-          { q: 'What is the latency SLA?', why: 'Autocomplete is on the critical user-interaction path.', model: '<100ms end-to-end including network. Server computation budget: <20ms. Cache all top queries \u2014 miss falls back to trie traversal. P99 must stay under 100ms or users perceive lag.' },
-          { q: 'Should suggestions update in real-time (reflect trending topics)?', why: 'Real-time trending (Twitter-style) requires streaming infrastructure vs. batch.', model: 'Near real-time: refresh suggestion data every 5-10 minutes. True real-time streaming (per-second updates) is overkill for most products. Use Lambda architecture: batch baseline + streaming delta.' },
-          { q: 'How many top suggestions to return?', why: 'Fewer results = faster computation + smaller payload.', model: 'Top 5-10 suggestions per prefix. Return at most 5 to client. Rank by query frequency + recency weighting.' }
-        ]
-      },
-      {
-        name: 'Capacity',
-        items: [
-          { q: 'How large is the trie (prefix tree)?', why: 'In-memory trie must fit in RAM for fast traversal.', model: 'English queries: ~20M unique queries. Average query length ~20 chars. Trie node \u2248 50 bytes. 20M \u00d7 20 \u00d7 50 bytes \u2248 20GB. Fits in a large Redis instance or in-memory service. Sharding by first character(s) of prefix.' },
-          { q: 'Estimate QPS from user keystrokes.', why: 'Each keystroke is a query \u2014 typing 5 chars = 5 requests.', model: '10M DAU \u00d7 5 searches/day \u00d7 5 keystrokes avg = 250M requests/day \u00f7 86,400s \u2248 2,900 QPS baseline. Peak ~10K QPS. Aggressive caching needed: top prefixes get 99% of traffic.' }
-        ]
-      },
-      {
-        name: 'Architecture',
-        items: [
-          { q: 'How do you build the autocomplete data structure?', why: 'Trie is the classic answer but Redis Sorted Sets are practical at scale.', model: 'Option A (Trie): each node stores top-K queries. Space-efficient, fast. Hard to update incrementally. Option B (Redis ZSET per prefix): key="prefix", sorted set of (query, score). O(log N) lookup. Easy to update. Practical for production. Recommend Option B for operability.' },
-          { q: 'How do you compute and update query popularity scores?', why: 'Scores must reflect current trends, not just all-time counts.', model: 'Offline: aggregate last 7 days of search logs (Spark/Hive job) \u2192 compute frequency per query \u2192 update Redis ZSETs. Online: stream clicks/searches to Kafka \u2192 stream processor (Flink) updates scores in near-real-time. Merge offline + online scores with time-decay.' },
-          { q: 'How does the request flow work for each keystroke?', why: 'Must be efficient end-to-end.', model: 'Client (debounced ~100ms) \u2192 Autocomplete API \u2192 check Redis L1 cache (prefix key) \u2192 if miss, query Redis ZSET \u2192 return top 5. Cache hit rate >99% for common prefixes. Client-side: cache responses by prefix, cancel in-flight requests on new keystroke (request cancellation).' }
-        ]
-      },
-      {
-        name: 'Deep Dive',
-        items: [
-          { q: 'How do you handle filtering out inappropriate or spam queries?', why: 'User-typed queries can include offensive content.', model: 'Blocklist filter: O(1) bloom filter + exact set check before returning results. ML classifier for borderline cases (async, doesn\'t block response). Human review queue for reported suggestions. Score penalty for queries from blocked users.' },
-          { q: 'How do you scale the Redis tier for 10K QPS?', why: 'Single Redis instance may be a bottleneck.', model: 'Shard by first N characters of prefix (e.g., prefix[0] = 26 shards). Read replicas per shard for read-heavy workload. Hot prefixes (e.g., "th") are read-heavy \u2014 replicate more aggressively. In-process LRU cache in each API server for top 10K prefixes (covers 80% of traffic).' },
-          { q: 'How do you support multiple languages?', why: 'Internationalization affects tokenization and trie design.', model: 'Separate index per language/locale. Detect query language from user\'s locale setting. CJK languages: character-level n-gram index instead of word-level. Store unicode codepoints; normalize (lowercase, strip accents) at index time.' }
-        ]
-      },
-      {
-        name: 'Wrap-up',
-        items: [
-          { q: 'What are the key failure modes?', why: 'Tests resilience thinking for a cache-heavy system.', model: 'Redis down: fall back to DB scan (slower but functional). Index staleness: stale suggestions are usually OK \u2014 minor UX issue vs. 5-min lag. Trie rebuild during traffic: use blue-green deployment \u2014 build new index, swap pointer atomically.' },
-          { q: 'How do you measure quality?', why: 'Autocomplete quality is product metric, not just latency.', model: 'Click-through rate (CTR) on suggestions, search completion rate (user accepted suggestion vs. typed full query), latency P99, zero-result rate after accepting suggestion, A/B test new ranking models.' }
-        ]
-      }
-    ]
-  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // SYSTEM 3: YouTube / Video Streaming
+  // ══════════════════════════════════════════════════════════════════════════
   {
     id: 'youtube',
-    icon: '\u25B6\uFE0F',
-    name: 'YouTube',
-    difficulty: 'Hard',
-    popular: true,
-    desc: 'Design YouTube \u2014 video upload, processing, and adaptive streaming.',
-    problem: 'Design a video sharing platform at YouTube\'s scale. Users upload videos that are processed into multiple resolutions. Viewers stream videos smoothly with adaptive bitrate. The system handles 500 hours of video uploaded every minute and 1B hours watched per day.',
-    phases: [
+    title: 'Design YouTube / Video Streaming',
+    icon: '▶️',
+    difficulty: 'hard',
+    readTime: '28 min read',
+    teaser: 'Three separate pipelines — upload, transcoding, and delivery — each with its own scale challenges. Covers segment-parallel transcoding, adaptive bitrate streaming, CDN architecture, and the hot row problem.',
+    sections: [
       {
-        name: 'Requirements',
-        items: [
-          { q: 'What features are in scope \u2014 upload, processing, streaming, search, recommendations?', why: 'YouTube is enormous; must scope to core components.', model: 'Scope to: upload, transcoding, streaming (adaptive bitrate), metadata storage, and basic search. Exclude: recommendations ML, live streaming, comments (mention as extensions).' },
-          { q: 'What video resolutions and formats to support?', why: 'Transcoding into multiple resolutions is the most computationally expensive part.', model: 'Transcode each video to: 360p, 480p, 720p, 1080p, 4K (for eligible videos). Formats: H.264 + WebM for broad compatibility. HEVC for mobile (better compression). Total: 4-5 renditions per video.' },
-          { q: 'What are the latency requirements for video start time?', why: 'Video start time is the key user experience metric.', model: 'Video start time (time-to-first-frame) <3s. Buffering ratio <0.5%. Achieve with CDN PoPs near users and adaptive bitrate (ABR) starting at lower quality.' },
-          { q: 'Who can upload \u2014 all users or verified accounts?', why: 'Open upload creates content moderation requirements.', model: 'All users. Triggers content moderation pipeline: CSAM hash check (PhotoDNA), copyright detection (Content ID), violence/NSFW classifier. All happen async after upload.' },
-          { q: 'Should videos be globally available or geo-restricted?', why: 'Geo-restriction requires CDN access control.', model: 'Global by default. Geo-restriction configurable per video (for copyright reasons). CDN enforces via signed URLs with geo-filtering rules.' }
-        ]
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<div class="step-badge">Step 1 — Scope the Problem</div>
+<p>Video is the most resource-intensive content type on the internet. YouTube receives 500 hours of video uploaded <em>every minute</em> and serves 1 billion hours of watchtime <em>every day</em>. This system requires three distinct sub-systems, each with its own scaling challenges: the upload pipeline, the transcoding pipeline, and the delivery pipeline.</p>
+
+<h3>Candidate–Interviewer Dialogue</h3>
+<div class="dialogue">
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">What platforms need to be supported?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">Web, iOS, and Android.</span></div>
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">What features are in scope? Live streaming?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">Upload, playback, like, comment, subscribe. No live streaming for now.</span></div>
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">What's the maximum upload file size?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">10 GB per upload.</span></div>
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">Is this a global product?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">Yes, worldwide users.</span></div>
+</div>
+
+<h3>Requirements</h3>
+<p><strong>Functional:</strong></p>
+<ul>
+  <li>Upload video files up to 10 GB, resumable on failure</li>
+  <li>Stream video at multiple resolutions (360p through 4K)</li>
+  <li>Search, like, subscribe</li>
+</ul>
+<p><strong>Non-functional:</strong></p>
+<ul>
+  <li>Reliable upload: must resume after network failure (no restart from zero)</li>
+  <li>Video start time &lt;3 seconds globally</li>
+  <li>Re-buffering rate &lt;0.5%</li>
+  <li>99.5% uptime for playback</li>
+</ul>
+
+<h3>Back-of-the-Envelope Estimation</h3>
+<div class="capacity-block">
+  <span class="cap-section-label">Upload Volume</span>
+  <div class="cap-row"><span class="cap-label">Raw video uploaded per day</span><span class="cap-val">30,000 hours</span></div>
+  <div class="cap-row"><span class="cap-label">At 4 Mbps avg bitrate</span><span class="cap-val">54 TB/day raw</span></div>
+  <div class="cap-row"><span class="cap-label">5 output resolutions at avg 1 Mbps each</span><span class="cap-val">≈ 675 TB/day processed</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">With 3× replication — 10-year archive</span><span class="cap-val">≈ 7 EB (exabytes)</span></div>
+  <span class="cap-section-label">Streaming Bandwidth</span>
+  <div class="cap-row"><span class="cap-label">Watchtime per day — 1B hours × avg 2 Mbps</span><span class="cap-val">2 × 10¹⁵ bits/day</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Sustained bandwidth — ÷ 86,400 s</span><span class="cap-val">≈ 23 Tbps</span></div>
+  <div class="cap-row"><span class="cap-label">Serving from origin servers?</span><span class="cap-val">Impossible. Requires global CDN.</span></div>
+  <span class="cap-section-label">Transcoding Compute</span>
+  <div class="cap-row"><span class="cap-label">1-hour 4K video → 30 min CPU time per resolution</span><span class="cap-val">× 5 resolutions</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">CPU-hours needed per day</span><span class="cap-val">≈ 75,000 CPU-hours/day</span></div>
+  <div class="cap-row"><span class="cap-label">Solution</span><span class="cap-val">Auto-scaling EC2 Spot fleet</span></div>
+</div>
+`
       },
       {
-        name: 'Capacity',
-        items: [
-          { q: 'Estimate storage for uploaded videos.', why: '500 hours/minute of video is enormous \u2014 back-of-envelope needed.', model: '500 hrs/min \u00d7 60min/hr = 30,000 hrs/day of raw video. At 1GB/hr raw = 30TB/day raw. After transcoding to 5 resolutions (avg 500MB/hr each) = 75TB/day total. 27PB/year. Multi-region replication \u2192 3x = 81PB/year.' },
-          { q: 'Estimate CDN bandwidth for streaming.', why: '1B hours/day streaming requires massive CDN capacity.', model: '1B hours/day \u00d7 ~2Mbps avg bitrate = 2 \u00d7 10^15 bits/day \u00f7 86,400s \u2248 23 Tbps continuous bandwidth. Must use a global CDN (Akamai/Cloudfront) with hundreds of PoPs. No single origin server can handle this.' }
-        ]
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<div class="step-badge">Step 2 — High-Level Design</div>
+<p>The system is composed of three independent pipelines. Understanding this separation is the most important framing insight for this problem.</p>
+
+<h3>The Three Pipelines</h3>
+<pre class="diagram">                    ┌──────────────────────────────────────────────┐
+UPLOAD PIPELINE:    │                                              │
+                    │  Client ──► API Servers ──► Raw Storage (S3) │
+                    │                │                             │
+                    └────────────────┼─────────────────────────────┘
+                                     │ "upload complete" event
+                    ┌────────────────▼──────────────────────────────┐
+TRANSCODING:        │                                               │
+                    │  SQS Queue ──► Worker Fleet ──► CDN Storage   │
+                    │               (EC2 Spot)                      │
+                    └───────────────────────────────────────────────┘
+                                                         │
+                    ┌────────────────────────────────────▼──────────┐
+DELIVERY:           │                                               │
+                    │  Client ──► CDN Edge (PoP) ──► (miss) Origin  │
+                    │                                               │
+                    └───────────────────────────────────────────────┘</pre>
+
+<p><strong>Why decouple these?</strong> Because each pipeline has radically different requirements:</p>
+<ul>
+  <li><strong>Upload</strong> is user-facing and latency-sensitive — it must handle unreliable networks gracefully</li>
+  <li><strong>Transcoding</strong> is CPU-intensive and throughput-optimized — it runs asynchronously and doesn't affect user-perceived latency</li>
+  <li><strong>Delivery</strong> must serve petabytes globally at &lt;3s start time — only CDNs can achieve this at scale</li>
+</ul>
+
+<h3>Video Metadata Database</h3>
+<pre><code>-- Videos table (MySQL, sharded by video_id)
+videos: video_id BIGINT PK, user_id BIGINT,
+        title VARCHAR(500), description TEXT,
+        status ENUM('uploading','processing','ready','failed'),
+        duration_sec INT, view_count BIGINT,
+        created_at DATETIME, thumbnail_url TEXT
+
+-- Video formats (one row per resolution per video)
+video_formats: video_id, resolution VARCHAR(10),   -- '1080p', '720p', etc.
+               codec VARCHAR(20), bitrate_kbps INT,
+               hls_manifest_url TEXT, status ENUM('pending','done','failed')</code></pre>
+`
       },
       {
-        name: 'Architecture',
-        items: [
-          { q: 'Walk through the video upload and processing pipeline.', why: 'Core system \u2014 needs to be detailed.', model: 'Client \u2192 upload to origin storage (S3 via presigned URL, chunked multipart) \u2192 upload complete event \u2192 Transcoding Job Queue (Kafka) \u2192 Transcoding Workers (EC2 fleet) pull jobs \u2192 produce N renditions \u2192 store in CDN-backed object store \u2192 update video metadata DB \u2192 notify client of processing completion.' },
-          { q: 'How does adaptive bitrate streaming (ABR) work?', why: 'Core technical concept for smooth video playback.', model: 'Video chunked into 2-10s segments at each quality level. HLS or DASH manifest file lists all available segments and quality levels. Video player monitors download speed + buffer level \u2192 requests next segment at appropriate quality. Starts low, adapts up as bandwidth confirmed.' },
-          { q: 'How is the CDN structured?', why: 'CDN architecture is what makes YouTube actually work at scale.', model: '3-tier: Origin (S3) \u2192 Edge Cache servers (PoPs globally) \u2192 Client. Video segments cached at edge near user. Cache key = video_id + resolution + segment_id. Popularity-weighted: top 20% of videos cached everywhere; long tail served from origin. Signed URLs for access control.' }
-        ]
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3 — Design Deep Dive</div>
+
+<h3>3a. Chunked Resumable Upload</h3>
+<p><strong>Naive approach:</strong> single HTTP PUT of a 10 GB file. If the network drops at 9.9 GB, you start from scratch. Completely unacceptable.</p>
+<p><strong>Better:</strong> split the video into 5 MB chunks client-side. Upload each chunk independently. On failure, resume from the last successfully received chunk.</p>
+
+<pre><code>-- Upload flow:
+
+1. Client:  POST /api/v1/uploads/init
+            Body: { filename, file_size, content_type }
+   Server:  Response: { upload_id, total_chunks }
+
+2. Client:  PUT /api/v1/uploads/{upload_id}/chunks/{n}
+            Body: &lt;5MB binary chunk&gt;
+   Server:  Response: { chunk: n, received: true }
+   (Repeat for all n chunks. Failed chunks are retried individually.)
+
+3. Client:  POST /api/v1/uploads/{upload_id}/complete
+            Body: { chunk_checksums: [...] }
+   Server:  Assembles chunks in S3 (multipart upload)
+            → Publishes "upload_complete" event to SQS
+            → Returns: { video_id, status: "processing" }</code></pre>
+
+<p><strong>Pre-signed S3 URLs:</strong> rather than having chunks flow through your API servers, the API server issues a pre-signed S3 URL, and the client uploads the chunk directly to S3. This bypasses your application tier entirely, saving massive bandwidth costs and eliminating your app servers as a bottleneck.</p>
+
+<h3>3b. Transcoding Pipeline — Segment-Parallel Processing</h3>
+<p><strong>The naive problem:</strong> take a 2-hour movie, transcode to 5 resolutions sequentially. At 30 minutes CPU time per resolution, that's 2.5 hours per video. With 30,000 hours uploaded per day, the queue will never drain.</p>
+
+<pre class="diagram">Naive approach:
+  2-hour video → [1080p: 30min] → [720p: 30min] → [480p: 20min] → ...
+  Total: ~2.5 hours per video, serial
+
+Segment-parallel approach:
+  2-hour video
+    │
+    ▼ Segment Splitter (GOP-aligned 2-min segments)
+    │
+    ├── Segment 01 → [Worker A: 1080p] [Worker B: 720p] [Worker C: 480p] ...
+    ├── Segment 02 → [Worker D: 1080p] [Worker E: 720p] ...
+    ├── ...
+    └── Segment 60 → (distributed across worker pool)
+                         │
+                         ▼ All done → Assembler merges per-resolution
+                         │
+                         ▼ 5 complete HLS video files published to CDN storage</pre>
+
+<p><strong>Why GOP-aligned:</strong> a Group of Pictures begins with an I-frame (a complete keyframe). Segment boundaries must align with I-frames, or playback will glitch at the seam between segments. The splitter detects I-frame positions before cutting.</p>
+<p><strong>Worker fleet:</strong> EC2 Spot instances are 70% cheaper than on-demand. Transcoding is perfectly idempotent — re-transcoding a segment produces an identical output — so Spot preemption is safe. If a worker is killed mid-task, the SQS message becomes visible again after a visibility timeout, and another worker picks it up.</p>
+<p><strong>Output formats:</strong></p>
+<ul>
+  <li><strong>H.264 (AVC):</strong> universal compatibility — all browsers, all devices, all years</li>
+  <li><strong>H.265 (HEVC):</strong> 50% smaller at the same perceptual quality, for modern mobile devices</li>
+  <li><strong>AV1:</strong> YouTube's primary format as of 2023. ~30% smaller than H.265. Open, royalty-free. Slower to encode but worth it at YouTube's storage scale.</li>
+</ul>
+
+<div class="callout insight">
+  <div class="callout-icon">💡</div>
+  <div class="callout-body"><strong>Key Insight</strong><br>Segment-parallel transcoding transforms a serial 2.5-hour job into a parallel ~30-minute job. This is the single most important optimization in the upload pipeline. It's only possible because video is naturally partitioned at GOP boundaries — and the output of each segment task is deterministic and independent of others.</div>
+</div>
+
+<h3>3c. Adaptive Bitrate Streaming (ABR)</h3>
+<p><strong>Why not progressive download?</strong> Progressive download serves the video file from the beginning. The player buffers ahead — fine for reliable broadband. But on mobile with variable signal, the player needs 8 Mbps to buffer a 1080p stream and will hit a wall the moment you go under a bridge. The whole video stalls.</p>
+<p><strong>ABR:</strong> video is split into 2–10 second segments, each available at multiple quality levels. The player continuously measures available bandwidth and switches quality levels on every segment boundary — invisibly to the user.</p>
+
+<p>The transcoder produces a <strong>manifest file</strong> describing all available quality levels:</p>
+<pre><code>#EXTM3U
+#EXT-X-VERSION:3
+
+#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=640x360
+360p/playlist.m3u8
+
+#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1280x720
+720p/playlist.m3u8
+
+#EXT-X-STREAM-INF:BANDWIDTH=8000000,RESOLUTION=1920x1080
+1080p/playlist.m3u8</code></pre>
+
+<p>Buffer-based switching logic:</p>
+<ul>
+  <li>Buffer &gt; 30s: try upgrading to higher quality</li>
+  <li>Buffer &lt; 10s: immediately drop one quality level</li>
+  <li>Buffer &lt; 3s: drop to lowest quality (360p) and show the buffering spinner</li>
+</ul>
+
+<div class="callout tradeoff">
+  <div class="callout-icon">⚖️</div>
+  <div class="callout-body"><strong>Trade-off</strong><br>ABR adds transcoding complexity (you're producing 5× as many files) and storage overhead. But it eliminates re-buffering events for users on variable connections — mobile, congested WiFi, international bandwidth-limited links. YouTube reported that adopting ABR cut re-buffering events by over 40%. The storage cost is worth the user experience improvement at this scale.</div>
+</div>
+
+<h3>3d. CDN Architecture</h3>
+<pre class="diagram">Client (Tokyo) ──► Tokyo Edge PoP ──────────────────────► serve segment (cache hit)
+                                └──► US Regional Cache ──► serve segment (cache hit)
+                                              └──► Origin S3 ──► serve + cache segment</pre>
+
+<p><strong>Tiered caching layers:</strong></p>
+<ul>
+  <li><strong>L1 — Edge PoPs (~200 global locations):</strong> 1–5ms from most users. Cache popular segments. Every user in Tokyo hits the Tokyo PoP first.</li>
+  <li><strong>L2 — Regional (~20 locations):</strong> Cache mid-tier popularity segments. If the Tokyo PoP misses, it asks the Asia-Pacific regional cache before going to origin.</li>
+  <li><strong>Origin (S3):</strong> Cold storage. Only long-tail, low-popularity content misses reach here.</li>
+</ul>
+
+<p><strong>Popularity-tiered caching strategy:</strong></p>
+<ul>
+  <li>Top 5% of videos: proactively cached at all edge PoPs (100% geographic pre-warming)</li>
+  <li>Next 15%: cached at regional PoPs</li>
+  <li>Bottom 80% (long tail): served from origin on first request, then cached at the requesting edge</li>
+</ul>
+
+<p><strong>Access control for paid/private content:</strong> CDN validates time-limited signed URLs. The API server issues a signed URL (valid for 1 hour) when the user starts playback. The CDN verifies the signature on each segment request and refuses expired tokens.</p>
+
+<h3>3e. View Count — The Hot Row Problem</h3>
+<p><strong>Naive approach:</strong></p>
+<pre><code>UPDATE videos SET view_count = view_count + 1 WHERE id = ?</code></pre>
+<p>When a video goes viral — say 1 million views per hour — this is 277 updates per second to the exact same database row. MySQL's row-level lock serializes these updates into a queue. The queue grows faster than it drains. Latency spikes. Connections pile up. The database server becomes a bottleneck for the entire service.</p>
+
+<p><strong>Solution: Redis counter + async batch write</strong></p>
+<pre><code>-- Each view event:
+INCR view_count:{video_id}   ← atomic, O(1), no lock, handles millions/sec
+
+-- Background job runs every 30 seconds:
+for each video_id with pending Redis count:
+    count = GETDEL view_count:{video_id}
+    UPDATE videos SET view_count = view_count + count WHERE id = video_id</code></pre>
+
+<p>The display can show the Redis value (real-time, may lag by up to 30s vs. final DB value) or the MySQL value (exact, up to 30s behind). Both are acceptable for this use case.</p>
+
+<h3>3f. Content Safety</h3>
+<p><strong>At upload time (synchronous, blocking — video won't be published until this passes):</strong></p>
+<ul>
+  <li><strong>CSAM detection:</strong> compute perceptual hash (PhotoDNA or equivalent) → check against NCMEC hash database. Legal requirement in most jurisdictions. Block upload immediately if matched.</li>
+</ul>
+<p><strong>Post-upload (asynchronous, doesn't block availability):</strong></p>
+<ul>
+  <li><strong>Copyright:</strong> extract video fingerprint → search Content ID database using approximate nearest-neighbor index (FAISS). On match: rights holder's policy applies (block, monetize, or track).</li>
+  <li><strong>Violence/NSFW:</strong> ML classifier scoring 0–1. Score &gt;0.8: auto-reject. Score 0.5–0.8: human review queue. Score &lt;0.5: approved.</li>
+  <li><strong>Re-upload detection:</strong> SimHash of transcript + visual fingerprint. Block known-bad content from being re-uploaded under a new account.</li>
+</ul>
+`
       },
       {
-        name: 'Deep Dive',
-        items: [
-          { q: 'How does the transcoding pipeline scale to handle 30TB/day?', why: 'Transcoding is CPU-intensive \u2014 must parallelize effectively.', model: 'Each video split into segments (GOP-aligned, ~10s each). Each segment transcoded independently in parallel. Segment-level job queue \u2192 auto-scaling spot instance workers \u2192 results assembled into final video. 1-hour video = 360 segments processed in parallel in ~minutes.' },
-          { q: 'How do you handle video deduplication and copyright detection?', why: 'Content ID (YouTube\'s system) is a core scaling challenge.', model: 'At upload: compute perceptual hash (fingerprint) of video \u2192 check against content ID database. On match: block + notify rights holder OR monetize for rights holder. Fingerprint DB is an ANN index (like FAISS) over video fingerprints. Near-duplicate detection for re-uploads.' },
-          { q: 'How do you design the metadata storage?', why: 'Video metadata (title, description, likes, views) has different access patterns than video bytes.', model: 'Video metadata (immutable): MySQL with read replicas. View counts: Redis counter + async batch write to MySQL (avoid hot row problem). Comments: Cassandra (high write volume, time-ordered). Search index: Elasticsearch synced from MySQL via CDC.' }
-        ]
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<div class="step-badge">Step 4 — Wrap Up</div>
+<p>YouTube's complexity comes from the scale of each individual pipeline, not from their interactions. The upload must be resumable. The transcoding must be parallel. The delivery must be global. Each requires its own architecture.</p>
+
+<h3>Trade-offs Summary</h3>
+<div class="table-wrap"><table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Upload</td><td>Chunked + S3 pre-signed URLs</td><td>Direct server upload</td><td>Resumable, bypasses app servers, saves bandwidth cost</td></tr>
+    <tr><td>Transcoding</td><td>Segment-parallel (Spot)</td><td>Sequential (On-demand)</td><td>5–60× faster, 70% cheaper, crash-safe via idempotent retry</td></tr>
+    <tr><td>Streaming</td><td>HLS ABR</td><td>Progressive download</td><td>Adapts to variable network, eliminates re-buffering</td></tr>
+    <tr><td>View count</td><td>Redis INCR + async batch</td><td>SQL row increment</td><td>Eliminates hot row lock contention at viral traffic</td></tr>
+    <tr><td>CDN</td><td>Tiered (edge → regional → origin)</td><td>Single-tier CDN</td><td>Optimizes both cost (fewer origin fetches) and latency</td></tr>
+  </tbody>
+</table></div>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Thumbnail generation:</strong> extract keyframes at 10s intervals during transcoding → select sharpest frame → store as JPEG → include in video metadata response</li>
+  <li><strong>Subtitle/caption pipeline:</strong> send audio to speech-to-text API → align output to video timestamps → generate WebVTT files → serve alongside video segments</li>
+  <li><strong>Watch history and recommendations:</strong> click events → Kafka → feature store → collaborative filtering model (matrix factorization) → serve from recommendation cache</li>
+  <li><strong>Storage cost optimization:</strong> move videos with zero views in 90 days to Glacier (cold storage). Move with &lt;10 views to S3 Infrequent Access. Only keep hot videos in standard S3.</li>
+</ul>
+`
+      }
+    ]
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // SYSTEM 4: Rate Limiter
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'rate-limiter',
+    title: 'Design a Rate Limiter',
+    icon: '🚦',
+    difficulty: 'medium',
+    readTime: '20 min read',
+    teaser: 'Protect your APIs from overload and abuse. Covers all 5 rate limiting algorithms with honest trade-offs, Redis Lua scripts for atomic distributed limiting, and the fail-open vs. fail-closed decision.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<div class="step-badge">Step 1 — Scope the Problem</div>
+<p>Rate limiting is how you protect your services from being overloaded — whether by a buggy client, a well-meaning but overzealous integrator, or a malicious attacker. Real-world examples are everywhere: GitHub allows 5,000 API requests per hour per authenticated user. Stripe allows 100 requests per second per API key. Twitter's v2 API allows 180 requests per 15-minute window.</p>
+<p>The design problem is more nuanced than it appears. A naive implementation works fine on a single server but breaks silently in a distributed fleet. Let's scope it properly first.</p>
+
+<h3>Candidate–Interviewer Dialogue</h3>
+<div class="dialogue">
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">Client-side or server-side rate limiting?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">Server-side.</span></div>
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">Do we limit by user ID, IP address, or API key?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">All three, configurable per rule.</span></div>
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">When a request is rate limited, do we reject it immediately (HTTP 429) or queue it?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">Hard reject with 429.</span></div>
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">Does the rate limiter run on a single server or a fleet?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">A fleet. Must work consistently across multiple servers.</span></div>
+  <div class="dlg-row"><span class="dlg-label cand">Candidate</span><span class="dlg-text">Can rate limit rules be updated at runtime, without restarting servers?</span></div>
+  <div class="dlg-row"><span class="dlg-label iview">Interviewer</span><span class="dlg-text">Yes, live updates required.</span></div>
+</div>
+
+<h3>Requirements</h3>
+<p><strong>Functional:</strong></p>
+<ul>
+  <li>Rate limit by user ID, IP address, or API key — configurable per endpoint</li>
+  <li>Return HTTP 429 with a <code>Retry-After</code> header when limit exceeded</li>
+  <li>Return rate limit headers on all responses (<code>X-RateLimit-Remaining</code>, etc.)</li>
+</ul>
+<p><strong>Non-functional:</strong></p>
+<ul>
+  <li>&lt;2ms overhead added to every request on the hot path</li>
+  <li>No single point of failure — rate limiter itself must be highly available</li>
+  <li>Live configuration updates propagated to all servers within 1 second</li>
+</ul>
+`
       },
       {
-        name: 'Wrap-up',
-        items: [
-          { q: 'What are the hardest operational challenges?', why: 'Shows real-world engineering empathy.', model: 'Transcoding failures: partial results from spot instance preemption. Fix: idempotent segment transcoding with checkpoint state. CDN cache poisoning: wrong video cached at wrong URL \u2192 immediate purge API. Storage costs: intelligent tiering \u2014 S3 Standard for hot videos, Glacier for long-tail.' },
-          { q: 'How do you handle a viral video (10M views in 1 hour)?', why: 'Traffic spikes challenge CDN cache warming.', model: 'CDN handles most load once warmed. Problem: cache warming lag on first spike. Mitigation: predictive pre-warming for trending content (feed data from view velocity service). Origin protected by CDN but also needs rate limiting as last resort.' }
-        ]
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<div class="step-badge">Step 2 — High-Level Design</div>
+
+<h3>Where to Place the Rate Limiter</h3>
+<pre class="diagram">Option A — API Gateway (Recommended for coarse throttling):
+  Client ──► API Gateway [rate limit check] ──► Backend Services
+  ✓ Single enforcement point, language-agnostic
+  ✓ Protects ALL services behind the gateway
+  ✓ Centralized logging and alerting for 429s
+  ✗ Less granular (per-endpoint config is possible but more complex)
+
+Option B — Application Middleware (For fine-grained control):
+  Client ──► Load Balancer ──► App Server [rate limit check] ──► Handler
+  ✓ Exact request context available (business logic, user tier, etc.)
+  ✗ Must be implemented in every service, in every language
+
+Best Practice: both. Gateway for coarse throttling (IP-based DDoS protection),
+middleware for fine-grained per-endpoint business rules.</pre>
+
+<h3>High-Level Architecture</h3>
+<pre class="diagram">  Client
+    │
+    ▼
+  API Gateway ───────────────────────────────────────────────► Backend
+    │                                                              ▲
+    │ check_limit(key, rule)                                       │
+    ▼                                                      allow / reject
+  Rate Limit Service
+    │              │
+    ▼              ▼
+  Redis         Config Service
+  (counters)    (rules: per endpoint, per key type)
+                    │
+                    ▼
+                Redis Hash
+              (rule storage)</pre>
+
+<p>The Rate Limit Service is a thin layer that (1) looks up the applicable rule from the Config Service's in-memory cache, (2) runs an atomic Redis script to check and increment the counter, and (3) returns an allow/deny decision with the remaining quota.</p>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3 — Design Deep Dive</div>
+
+<h3>3a. The 5 Rate Limiting Algorithms</h3>
+
+<h4>1. Fixed Window Counter</h4>
+<p>Divide time into fixed 1-minute windows. Count requests per key per window. The window is encoded in the Redis key: <code>rl:user:123:2024-01-01T12:03</code>.</p>
+<p><strong>Fatal flaw — boundary burst attack:</strong> suppose the limit is 100 requests/minute. A client sends 100 requests at 12:02:59 (end of window 1) and 100 more at 12:03:00 (start of window 2). In a 2-second span, they sent 200 requests — 2× the intended limit. The window boundary creates a gap in enforcement.</p>
+
+<h4>2. Sliding Window Log</h4>
+<p>Store the timestamp of every request. On each new request, count timestamps in the last 60 seconds. Evict old timestamps.</p>
+<p>Completely accurate — no boundary issue. But memory-intensive: 1,000 requests/minute per user = 1,000 timestamps stored per user. At 1 million users: 1M × 1,000 × 8 bytes = 8 GB per rate limiter instance just for state.</p>
+
+<h4>3. Token Bucket</h4>
+<p>State per key: <code>(tokens, last_refill_time)</code>. Refill R tokens per second up to a max bucket size B. On each request: if tokens &gt; 0, consume 1 and allow. Else reject.</p>
+<ul>
+  <li><strong>Pros:</strong> allows bursting up to B (natural and user-friendly), smooth over time, O(1) state per key</li>
+  <li><strong>Cons:</strong> the two-field state update (tokens, last_refill_time) must be atomic — requires a Redis Lua script or compare-and-swap to avoid race conditions</li>
+</ul>
+
+<h4>4. Leaky Bucket</h4>
+<p>Incoming requests enter a fixed-capacity queue. The queue drains at a fixed rate (R requests/second). If the queue is full, the new request is rejected.</p>
+<ul>
+  <li><strong>Pros:</strong> produces a perfectly constant outbound rate — ideal for protecting a downstream service with a known fixed capacity</li>
+  <li><strong>Cons:</strong> requests sit in the queue and get processed stale. Adds latency instead of rejecting immediately. Not appropriate for interactive APIs.</li>
+</ul>
+
+<h4>5. Sliding Window Counter (Recommended)</h4>
+<p>A hybrid: divide time into 1-second sub-windows. Store request count per sub-window in a Redis sorted set or hash. On each request, compute a weighted approximation of the request count over the last full window.</p>
+
+<pre><code>-- Example: limit 100 req/min. Current time = 12:01:45
+
+overlap_ratio = (60 - 45) / 60 = 0.25   ← fraction of prev minute in window
+
+approx_count = (prev_minute_count × overlap_ratio) + curr_minute_count
+
+If approx_count >= 100: reject (return 429)
+Else: increment curr_minute_count and allow</code></pre>
+
+<p>The maximum error from this approximation is 0.003% — completely negligible for rate limiting. Memory: O(window_size_seconds) per key. For a 1-minute window: 60 entries per key.</p>
+
+<h3>Comparison Table</h3>
+<div class="table-wrap"><table>
+  <thead><tr><th>Algorithm</th><th>Memory</th><th>Accuracy</th><th>Burst OK?</th><th>Recommended For</th></tr></thead>
+  <tbody>
+    <tr><td>Fixed Window</td><td>O(1)</td><td>Low (boundary flaw)</td><td>Yes</td><td>Internal tools only</td></tr>
+    <tr><td>Sliding Window Log</td><td>O(N requests)</td><td>Exact</td><td>Yes</td><td>Low-traffic, strict compliance</td></tr>
+    <tr><td>Token Bucket</td><td>O(1)</td><td>Exact</td><td>Yes (up to bucket)</td><td>Smooth traffic shaping</td></tr>
+    <tr><td>Leaky Bucket</td><td>O(queue size)</td><td>Exact</td><td>No (queues instead)</td><td>Fixed-rate downstream protection</td></tr>
+    <tr><td><strong>Sliding Window Counter</strong></td><td>O(W seconds)</td><td>~99.997%</td><td>Yes</td><td><strong>Most production APIs</strong></td></tr>
+  </tbody>
+</table></div>
+
+<h3>3b. Redis Implementation — Atomic Lua Script</h3>
+<p>Why Lua? Redis executes Lua scripts atomically — no other Redis commands can run between lines of your script. This eliminates the race condition where two concurrent requests both read "49 remaining", both decide they're allowed, and both increment to 50, resulting in 51 total requests going through.</p>
+
+<pre><code>-- Sliding window counter rate limiter
+-- KEYS[1] = rate limit key (e.g. "rl:user:123:POST:/tweets")
+-- ARGV[1] = window size in seconds
+-- ARGV[2] = max requests allowed
+-- ARGV[3] = current timestamp in seconds
+-- Returns: {allowed (1/0), remaining, reset_timestamp}
+
+local key          = KEYS[1]
+local window       = tonumber(ARGV[1])
+local limit        = tonumber(ARGV[2])
+local now          = tonumber(ARGV[3])
+local window_start = now - window
+
+-- Remove sub-windows that have slid out of the current window
+redis.call('ZREMRANGEBYSCORE', key, 0, window_start)
+
+-- Count requests currently in the window
+local count = redis.call('ZCARD', key)
+
+if count &lt; limit then
+    -- Allow: record this request as a scored member
+    redis.call('ZADD', key, now, now .. '-' .. math.random(1000000))
+    redis.call('EXPIRE', key, window + 1)
+    return {1, limit - count - 1, now + window}
+else
+    return {0, 0, now + window}
+end</code></pre>
+
+<pre><code># Python usage
+result = redis.evalsha(SCRIPT_SHA, 1,
+    f"rl:{user_id}:{endpoint}",
+    60,     # window_seconds
+    100,    # max_requests
+    int(time.time())
+)
+allowed, remaining, reset_at = result[0], result[1], result[2]</code></pre>
+
+<div class="callout insight">
+  <div class="callout-icon">💡</div>
+  <div class="callout-body"><strong>Key Insight</strong><br>Use <code>EVALSHA</code> (not <code>EVAL</code>) in production. <code>EVALSHA</code> calls a pre-loaded script by its SHA-1 hash — no script body is transmitted on each call, saving bandwidth. Load the script once at startup via <code>SCRIPT LOAD</code>. This makes each rate limit check a single Redis round-trip carrying only the arguments.</div>
+</div>
+
+<h3>3c. Handling Distributed Rate Limiting</h3>
+<p>Suppose you have 10 API servers, each maintaining its own in-memory counter. Each server independently allows 100 requests/minute — so the system as a whole allows 1,000 requests/minute. That's 10× your intended limit.</p>
+<p><strong>Solution: centralized Redis counter.</strong> All API servers share one Redis instance (or cluster). Every check/increment call goes to the same counter.</p>
+<ul>
+  <li>Single Redis instance handles ~100K rate limit checks/sec comfortably</li>
+  <li>Redis Cluster (sharded by rate limit key): scales to 1M+ checks/sec</li>
+  <li>Use persistent connection pools per app server: 100–500 connections each, avoiding TCP handshake overhead on every request</li>
+</ul>
+
+<h3>3d. Fail-Open vs. Fail-Closed</h3>
+<p>When Redis becomes unavailable (network partition, restart, overload), what should the rate limiter do?</p>
+<div class="callout tradeoff">
+  <div class="callout-icon">⚖️</div>
+  <div class="callout-body"><strong>Trade-off: this is a business decision, not a technical one</strong><br><strong>Fail-closed (block all traffic):</strong> If you can't check the rate limit, reject the request. Zero risk of abuse during the Redis outage. But your entire API goes down whenever Redis has a hiccup. Your service availability is now capped by Redis availability.<br><br><strong>Fail-open (allow all traffic):</strong> If you can't check, allow the request. Your API stays up during Redis outages. Risk: an attacker can DDoS you during that window. For most public APIs, staying available is more important.<br><br><strong>Local fallback (recommended):</strong> Each server falls back to an in-memory counter with limit = global_limit / server_count. Less accurate (doesn't account for uneven load distribution) but functional. Graceful degradation rather than binary failure.</div>
+</div>
+
+<div class="callout warn">
+  <div class="callout-icon">⚠️</div>
+  <div class="callout-body"><strong>Watch Out</strong><br>Never implement fail-closed without explicit product sign-off. If you choose fail-closed, your API has <em>lower availability than your Redis cluster</em>. That means a Redis restart or network blip takes down your entire API. Most engineering orgs consider this unacceptable without a very deliberate decision.</div>
+</div>
+
+<h3>3e. Response Headers</h3>
+<p>Always return rate limit headers on every response, not just 429s. This allows clients to implement graceful backoff without polling or guessing.</p>
+<pre><code>HTTP/1.1 200 OK
+X-RateLimit-Limit:     100
+X-RateLimit-Remaining: 42
+X-RateLimit-Reset:     1704067260
+X-RateLimit-Policy:    100;w=60;burst=200</code></pre>
+
+<pre><code>HTTP/1.1 429 Too Many Requests
+Retry-After:           18
+X-RateLimit-Limit:     100
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset:     1704067260</code></pre>
+
+<p><code>X-RateLimit-Reset</code> is a Unix timestamp (not seconds-until-reset). This matches the GitHub and Stripe conventions, which are the de facto standard for REST APIs.</p>
+
+<h3>3f. Runtime Configuration Updates</h3>
+<p>Rules are stored as a Redis hash, editable via admin API:</p>
+<pre><code>HSET rate_limit_rules "POST:/api/v1/tweets:user"   "100:60"
+HSET rate_limit_rules "GET:/api/v1/timeline:ip"    "500:60"
+HSET rate_limit_rules "POST:/api/v1/users/*/follow:user" "50:3600"</code></pre>
+
+<p><strong>Live propagation flow (rule change reaches all servers in &lt;1 second):</strong></p>
+<ol>
+  <li>Admin calls: <code>PUT /admin/rl-rules/{rule_id}</code> with new limit values</li>
+  <li>Config Service writes updated rule to Redis hash</li>
+  <li>Config Service publishes to Redis pub/sub channel: <code>rl_rules_updated</code></li>
+  <li>All API servers (subscribed to this channel) receive the event</li>
+  <li>Each server reloads the affected rule into its local in-memory cache</li>
+  <li>Rule is active across the entire fleet within ~1 second, zero restarts</li>
+</ol>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<div class="step-badge">Step 4 — Wrap Up</div>
+<p>A production-grade rate limiter is deceptively complex. The algorithm choice matters less than getting the distributed consistency and failure modes right. The sliding window counter is the right algorithm for most APIs: good accuracy, bounded memory, and efficient Redis operations.</p>
+
+<h3>Trade-offs Summary</h3>
+<div class="table-wrap"><table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Algorithm</td><td>Sliding window counter</td><td>Token bucket</td><td>Less memory per key, good accuracy (~99.997%), no burst miscounting</td></tr>
+    <tr><td>Atomicity</td><td>Redis Lua (EVALSHA)</td><td>Redis MULTI/EXEC transactions</td><td>Single round-trip, no retry loop on optimistic lock failure</td></tr>
+    <tr><td>Failure mode</td><td>Fail-open + local fallback</td><td>Fail-closed</td><td>Service availability &gt; perfect enforcement during Redis outage</td></tr>
+    <tr><td>Config updates</td><td>Redis pub/sub</td><td>Polling every 30s</td><td>&lt;1s propagation vs. up-to-30s lag</td></tr>
+    <tr><td>Placement</td><td>Gateway + middleware</td><td>Gateway only</td><td>Defense in depth; middleware enables business-logic-aware limits</td></tr>
+  </tbody>
+</table></div>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Geo-distributed rate limiting:</strong> per-region counters with periodic global sync. Allows Tokyo users to burst against a Tokyo counter while still enforcing a global daily cap via async reconciliation.</li>
+  <li><strong>Dynamic limit adjustment:</strong> automatically raise limits for trusted IPs (known partners, your own internal services) and lower them for IPs with recent 429-heavy history.</li>
+  <li><strong>Audit log:</strong> stream every 429 event to Kafka → ClickHouse. Enables abuse investigation queries: "which IPs hit limits most in the last hour?", "which endpoints are most rate-limited?"</li>
+  <li><strong>Tiered limits:</strong> free tier gets 100 req/min, paid tier gets 1,000 req/min, enterprise gets unlimited. Encode the tier in the Redis key or the rule lookup.</li>
+</ul>
+`
       }
     ]
   }
 ];
 
-// ── STATE ──────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+let currentSystem = null;
+let currentFilter = 'all';
+let tocObserver   = null;
+let scrollHandler = null;
 
-var currentSystem = null;
-var currentPhase = 0;
-var checkedItems = {};
-var timerSeconds = 0;
-var timerInterval = null;
-var activeFilter = 'all';
-
-// ── HOME ───────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// HOME
+// ─────────────────────────────────────────────────────────────────────────────
+function renderHome() {
+  const grid = document.getElementById('systemsGrid');
+  grid.innerHTML = '';
+  const filtered = SYSTEMS.filter(s => currentFilter === 'all' || s.difficulty === currentFilter);
+  filtered.forEach(sys => {
+    const card = document.createElement('a');
+    card.className = 'sys-card';
+    card.href = '#';
+    card.setAttribute('data-id', sys.id);
+    card.innerHTML = `
+      <div class="card-icon">${sys.icon}</div>
+      <div class="card-title">${sys.title}</div>
+      <div class="card-meta">
+        <span class="diff-badge diff-${sys.difficulty}">${sys.difficulty}</span>
+        <span class="read-time">⏱ ${sys.readTime}</span>
+      </div>
+      <div class="card-teaser">${sys.teaser}</div>
+    `;
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
+      showArticle(sys.id);
+    });
+    grid.appendChild(card);
+  });
+}
 
 function setFilter(f) {
-  activeFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(function(b) {
-    var match = (f === 'all' && b.textContent === 'All') || b.textContent === f;
-    b.classList.toggle('active', match);
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.toLowerCase() === f ||
+      (f === 'all' && btn.textContent === 'All'));
   });
-  renderSystemsGrid();
+  renderHome();
 }
-
-function renderSystemsGrid() {
-  var grid = document.getElementById('systemsGrid');
-  var filtered = activeFilter === 'all'
-    ? SYSTEMS
-    : SYSTEMS.filter(function(s) { return s.difficulty === activeFilter; });
-
-  grid.innerHTML = filtered.map(function(sys) {
-    var diffClass = 'badge-' + sys.difficulty.toLowerCase();
-    var popularBadge = sys.popular ? '<span class="badge badge-popular">Popular</span>' : '';
-    return '<div class="sys-card" onclick="showSession(\'' + sys.id + '\')">'
-      + '<div class="sys-card-top">'
-      + '<div class="sys-icon">' + sys.icon + '</div>'
-      + '<div class="sys-meta">'
-      + '<div class="sys-name">' + sys.name + '</div>'
-      + '<div class="sys-badges"><span class="badge ' + diffClass + '">' + sys.difficulty + '</span>' + popularBadge + '</div>'
-      + '</div></div>'
-      + '<div class="sys-desc">' + sys.desc + '</div>'
-      + '<div class="sys-card-arrow">\u2192</div>'
-      + '</div>';
-  }).join('');
-}
-
-// ── SESSION ────────────────────────────────────────────────────────────────────
 
 function showHome() {
-  stopTimer();
+  document.getElementById('homeScreen').style.display  = '';
+  document.getElementById('articleScreen').style.display = 'none';
+  document.getElementById('progressBar').style.display  = 'none';
+  document.getElementById('progressBar').style.width    = '0%';
+  document.title = 'System Design Prep';
+  window.scrollTo(0, 0);
+  if (tocObserver) { tocObserver.disconnect(); tocObserver = null; }
+  if (scrollHandler) { window.removeEventListener('scroll', scrollHandler); scrollHandler = null; }
   currentSystem = null;
-  currentPhase = 0;
-  document.getElementById('homeScreen').style.display = '';
-  document.getElementById('sessionScreen').style.display = 'none';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ARTICLE
+// ─────────────────────────────────────────────────────────────────────────────
+function showArticle(systemId) {
+  const sys = SYSTEMS.find(s => s.id === systemId);
+  if (!sys) return;
+  currentSystem = sys;
+
+  document.getElementById('homeScreen').style.display    = 'none';
+  document.getElementById('articleScreen').style.display = '';
+  document.title = sys.title + ' — System Design';
+
+  renderArticle(sys);
   window.scrollTo(0, 0);
+
+  // Small delay to allow DOM paint before setting up observers
+  requestAnimationFrame(() => {
+    initTOC();
+    initProgressBar();
+  });
 }
 
-function showSession(sysId) {
-  var system = SYSTEMS.find(function(s) { return s.id === sysId; });
-  if (!system) return;
-  currentSystem = system;
-  currentPhase = 0;
-  timerSeconds = 0;
-  stopTimer();
+function renderArticle(sys) {
+  // Meta
+  const meta = document.getElementById('articleMeta');
+  meta.innerHTML = `
+    <div class="meta-icon">${sys.icon}</div>
+    <div class="meta-info">
+      <div class="meta-title">${sys.title}</div>
+      <div class="meta-sub">
+        <span class="diff-badge diff-${sys.difficulty}">${sys.difficulty}</span>
+        <span class="read-time">⏱ ${sys.readTime}</span>
+      </div>
+    </div>
+  `;
 
-  if (!checkedItems[system.id]) {
-    checkedItems[system.id] = {};
-    system.phases.forEach(function(_, i) { checkedItems[system.id][i] = new Set(); });
-  }
+  // TOC
+  const tocList  = document.getElementById('tocList');
+  const tocTitle = document.getElementById('tocTitle');
+  tocTitle.textContent = sys.title;
+  tocList.innerHTML = '';
+  sys.sections.forEach(sec => {
+    const li = document.createElement('li');
+    li.innerHTML = `<a href="#${sec.id}" data-toc="${sec.id}">${sec.title}</a>`;
+    li.querySelector('a').addEventListener('click', (e) => {
+      e.preventDefault();
+      const el = document.getElementById(sec.id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    tocList.appendChild(li);
+  });
 
-  var diffClass = 'badge-' + system.difficulty.toLowerCase();
-  var popularBadge = system.popular ? '<span class="badge badge-popular">Popular</span>' : '';
-  document.getElementById('sessionTitle').innerHTML =
-    '<span class="session-title-icon">' + system.icon + '</span>'
-    + '<span class="session-title-name">' + system.name + '</span>'
-    + '<span class="badge ' + diffClass + '">' + system.difficulty + '</span>'
-    + popularBadge;
-
-  document.getElementById('problemBox').textContent = system.problem;
-  document.getElementById('timerBtn').textContent = '\u23F1 00:00';
-  document.getElementById('timerBtn').classList.remove('running');
-
-  document.getElementById('homeScreen').style.display = 'none';
-  document.getElementById('sessionScreen').style.display = '';
-
-  renderPhaseTabs();
-  renderPhase(0);
-  window.scrollTo(0, 0);
+  // Body
+  const body = document.getElementById('articleBody');
+  body.innerHTML = sys.sections.map(sec => `
+    <h2 id="${sec.id}">${sec.title}</h2>
+    ${sec.content}
+  `).join('');
 }
 
-function renderPhaseTabs() {
-  var nav = document.getElementById('phasesNav');
-  nav.innerHTML = currentSystem.phases.map(function(phase, i) {
-    var done = isPhaseComplete(currentSystem.id, i);
-    var active = i === currentPhase;
-    var cls = 'phase-tab' + (active ? ' active' : '') + (done ? ' done' : '');
-    var check = done ? ' \u2713' : '';
-    return '<button class="' + cls + '" onclick="switchPhase(' + i + ')">' + phase.name + check + '</button>';
-  }).join('');
+// ─────────────────────────────────────────────────────────────────────────────
+// TOC — IntersectionObserver
+// ─────────────────────────────────────────────────────────────────────────────
+function initTOC() {
+  if (tocObserver) { tocObserver.disconnect(); tocObserver = null; }
+
+  const headers = document.querySelectorAll('#articleBody h2');
+  if (!headers.length) return;
+
+  const tocLinks = document.querySelectorAll('#tocList a[data-toc]');
+
+  // Track which section header is most visible in the viewport
+  const sectionVisible = {};
+
+  tocObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      sectionVisible[entry.target.id] = entry.isIntersecting;
+    });
+    // Find first visible section
+    let activeId = null;
+    headers.forEach(h => {
+      if (sectionVisible[h.id] && !activeId) activeId = h.id;
+    });
+    // If none visible (scrolled past all), pick the last one
+    if (!activeId && headers.length) {
+      const scrollY = window.scrollY + window.innerHeight / 2;
+      let best = headers[0];
+      headers.forEach(h => {
+        if (h.getBoundingClientRect().top + window.scrollY <= scrollY) best = h;
+      });
+      activeId = best.id;
+    }
+    tocLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('data-toc') === activeId);
+    });
+  }, {
+    rootMargin: '-10% 0px -70% 0px',
+    threshold: 0
+  });
+
+  headers.forEach(h => tocObserver.observe(h));
 }
 
-function switchPhase(idx) {
-  currentPhase = idx;
-  renderPhaseTabs();
-  renderPhase(idx);
-  updateNavButtons();
+// ─────────────────────────────────────────────────────────────────────────────
+// PROGRESS BAR
+// ─────────────────────────────────────────────────────────────────────────────
+function initProgressBar() {
+  const bar = document.getElementById('progressBar');
+  bar.style.display = 'block';
+  bar.style.width   = '0%';
+
+  if (scrollHandler) window.removeEventListener('scroll', scrollHandler);
+
+  scrollHandler = () => {
+    const docH    = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollY = window.scrollY;
+    const pct     = docH > 0 ? Math.min(100, (scrollY / docH) * 100) : 0;
+    bar.style.width = pct + '%';
+  };
+
+  window.addEventListener('scroll', scrollHandler, { passive: true });
 }
 
-var PHASE_SUBTITLES = [
-  'Functional & non-functional requirements',
-  'Storage, bandwidth & compute estimates',
-  'High-level components & data flow',
-  'Pick one component and go deep',
-  'Trade-offs, failures & what you\'d improve'
-];
-
-function renderPhase(phaseIdx) {
-  var phase = currentSystem.phases[phaseIdx];
-  var sysId = currentSystem.id;
-  var checked = checkedItems[sysId][phaseIdx];
-
-  var itemsHtml = phase.items.map(function(item, itemIdx) {
-    var isChecked = checked.has(itemIdx);
-    var cardCls = 'item-card' + (isChecked ? ' checked' : '');
-    return '<div class="' + cardCls + '" id="item-' + phaseIdx + '-' + itemIdx + '">'
-      + '<div class="item-top">'
-      + '<div class="item-checkbox" onclick="toggleItem(' + phaseIdx + ',' + itemIdx + ')">'
-      + '<span class="item-checkbox-mark">\u2713</span></div>'
-      + '<div class="item-question">' + esc(item.q) + '</div>'
-      + '<button class="item-reveal-btn" onclick="toggleReveal(this,\'reveal-' + phaseIdx + '-' + itemIdx + '\')">Reveal \u25BC</button>'
-      + '</div>'
-      + '<div class="item-reveal-body" id="reveal-' + phaseIdx + '-' + itemIdx + '">'
-      + '<div class="item-why">' + esc(item.why) + '</div>'
-      + '<div class="item-model">' + esc(item.model) + '</div>'
-      + '</div></div>';
-  }).join('');
-
-  document.getElementById('phaseContent').innerHTML =
-    '<div class="phase-header">'
-    + '<div class="phase-title">' + phase.name + '</div>'
-    + '<div class="phase-subtitle">' + (PHASE_SUBTITLES[phaseIdx] || '') + '</div>'
-    + '</div>'
-    + '<div class="items-list">' + itemsHtml + '</div>';
-
-  updateNavButtons();
-}
-
-function updateNavButtons() {
-  var prev = document.getElementById('prevPhaseBtn');
-  var next = document.getElementById('nextPhaseBtn');
-  var total = currentSystem.phases.length;
-  prev.disabled = (currentPhase === 0);
-  next.textContent = (currentPhase === total - 1) ? 'Done \u2713' : 'Next \u2192';
-  next.disabled = false;
-}
-
-function changePhase(delta) {
-  var next = currentPhase + delta;
-  if (next < 0) return;
-  if (next >= currentSystem.phases.length) {
-    showHome();
-    return;
-  }
-  switchPhase(next);
-  window.scrollTo(0, 0);
-}
-
-function toggleItem(phaseIdx, itemIdx) {
-  var sysId = currentSystem.id;
-  var s = checkedItems[sysId][phaseIdx];
-  if (s.has(itemIdx)) { s.delete(itemIdx); } else { s.add(itemIdx); }
-  var card = document.getElementById('item-' + phaseIdx + '-' + itemIdx);
-  if (card) card.classList.toggle('checked', s.has(itemIdx));
-  renderPhaseTabs();
-}
-
-function toggleReveal(btn, bodyId) {
-  var bodyEl = document.getElementById(bodyId);
-  if (!bodyEl) return;
-  var visible = bodyEl.classList.toggle('visible');
-  btn.textContent = visible ? 'Hide \u25B2' : 'Reveal \u25BC';
-}
-
-function isPhaseComplete(systemId, phaseIdx) {
-  if (!checkedItems[systemId]) return false;
-  var s = checkedItems[systemId][phaseIdx];
-  var sys = SYSTEMS.find(function(x) { return x.id === systemId; });
-  if (!sys) return false;
-  var total = sys.phases[phaseIdx].items.length;
-  return s && s.size === total;
-}
-
-// ── TIMER ──────────────────────────────────────────────────────────────────────
-
-function toggleTimer() {
-  if (timerInterval) { stopTimer(); } else { startTimer(); }
-}
-
-function startTimer() {
-  var btn = document.getElementById('timerBtn');
-  btn.classList.add('running');
-  timerInterval = setInterval(function() {
-    timerSeconds++;
-    btn.textContent = '\u23F9 ' + formatTime(timerSeconds);
-  }, 1000);
-}
-
-function stopTimer() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  var btn = document.getElementById('timerBtn');
-  if (btn) {
-    btn.classList.remove('running');
-    btn.textContent = (timerSeconds > 0 ? '\u23F1 ' + formatTime(timerSeconds) : '\u23F1 00:00');
-  }
-}
-
-function formatTime(s) {
-  var m = Math.floor(s / 60);
-  var sec = s % 60;
-  return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
-}
-
-// ── UTIL ───────────────────────────────────────────────────────────────────────
-
-function esc(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-// ── INIT ───────────────────────────────────────────────────────────────────────
-
-renderSystemsGrid();
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+renderHome();
 </script>
 </body>
 </html>
