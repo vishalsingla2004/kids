@@ -171,6 +171,7 @@
   <div class="tile-row"><div class="tile-info"><span class="tile-icon">🔬</span><span class="tile-name">Biology</span></div><label class="toggle"><input type="checkbox" id="t-biology" onchange="toggleTile('biology',this.checked)"><span class="toggle-track"></span></label></div>
   <div class="tile-row"><div class="tile-info"><span class="tile-icon">🎓</span><span class="tile-name">NSC Science Bowl</span></div><label class="toggle"><input type="checkbox" id="t-nsc" onchange="toggleTile('nsc',this.checked)"><span class="toggle-track"></span></label></div>
   <div class="tile-row"><div class="tile-info"><span class="tile-icon">📚</span><span class="tile-name">Learn Hub</span></div><label class="toggle"><input type="checkbox" id="t-learn" onchange="toggleTile('learn',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">🏗️</span><span class="tile-name">System Design</span></div><label class="toggle"><input type="checkbox" id="t-system-design" onchange="toggleTile('system-design',this.checked)"><span class="toggle-track"></span></label></div>
 </div>
 
 <div class="actions">
@@ -192,6 +193,7 @@ const SUBJECTS = [
   // Other
   { key:'kids_q_nsc',        name:'NSC Science Bowl',       icon:'🎓', color:'#38bdf8', total:499, easyN:167, medN:168, hardN:164, group:'other'   },
   { key:'kids_q_soccer',     name:'Soccer Quiz',            icon:'⚽', color:'#2ecc71', total:498, easyN:167, medN:169, hardN:162, group:'other'   },
+  { key:'kids_q_sysdesign',  name:'System Design',          icon:'🏗️', color:'#00d4aa', total:129, easyN:51,  medN:42,  hardN:36,  group:'other'   },
 ];
 
 function getData(key) {
@@ -315,7 +317,7 @@ function resetAll() {
   }
 }
 
-const ALL_TILES = ['princess','soccer','sba-math','sba-ela','sba-science','area-2d','circles','volume-3d','chemistry','physics','maths','environmental','biology','nsc','learn'];
+const ALL_TILES = ['princess','soccer','sba-math','sba-ela','sba-science','area-2d','circles','volume-3d','chemistry','physics','maths','environmental','biology','nsc','learn','system-design'];
 function getHidden() { return JSON.parse(localStorage.getItem('kids_hidden_tiles')||'[]'); }
 function saveHidden(arr) { localStorage.setItem('kids_hidden_tiles', JSON.stringify(arr)); }
 function toggleTile(id, visible) {
