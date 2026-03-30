@@ -1422,6 +1422,1063 @@ HSET rate_limit_rules "POST:/api/v1/users/*/follow:user" "50:3600"</code></pre>
 `
       }
     ]
+  },
+  {
+    id: 'chat-system',
+    title: 'Design a Chat System / WhatsApp',
+    icon: '💬',
+    difficulty: 'hard',
+    readTime: '26 min read',
+    teaser: 'Real-time 1:1 and group messaging for 500M users. Covers WebSocket connection management, message delivery guarantees, offline queuing, and multi-device sync.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<p>Start by nailing down scope before touching architecture.</p>
+
+<div class="callout tip"><div class="callout-icon">💬</div><div class="callout-body"><strong>Interview Tip</strong><br>Drive the requirements conversation yourself. Propose a specific scope, confirm it, then move on. Don't wait for the interviewer to hand you requirements line by line.</div></div>
+
+<p><strong>Clarifying dialogue:</strong></p>
+<ul>
+  <li><strong>1:1 and group chat?</strong> → Yes. Group max 100 members.</li>
+  <li><strong>Multi-device sync?</strong> → Yes, last 30 days of history synced across devices.</li>
+  <li><strong>Media?</strong> → Text + images (no video calls).</li>
+  <li><strong>Online presence + read receipts?</strong> → Yes.</li>
+  <li><strong>Delivery guarantee?</strong> → At-least-once; client deduplicates.</li>
+</ul>
+
+<p><strong>Non-functional requirements:</strong></p>
+<ul>
+  <li>Message delivery latency: &lt;500ms P99</li>
+  <li>Delivery success rate: 99.99% (no message loss)</li>
+  <li>Availability over consistency: brief duplicate delivery is acceptable; dropped messages are not</li>
+</ul>
+
+<p><strong>Capacity estimates:</strong></p>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">DAU</span><span class="cap-val">500M</span></div>
+  <div class="cap-row"><span class="cap-label">Messages per user per day</span><span class="cap-val">40</span></div>
+  <div class="cap-row"><span class="cap-label">Total messages/day</span><span class="cap-val">20B</span></div>
+  <div class="cap-row"><span class="cap-label">Write QPS</span><span class="cap-val">20B ÷ 86,400 ≈ 231,500 msg/sec</span></div>
+  <div class="cap-row"><span class="cap-label">Avg message size</span><span class="cap-val">200 bytes</span></div>
+  <div class="cap-row"><span class="cap-label">Write throughput</span><span class="cap-val">231,500 × 200B ≈ 46 MB/s</span></div>
+  <div class="cap-row"><span class="cap-label">Storage (30 days)</span><span class="cap-val">20B × 200B × 30 = 120 TB</span></div>
+  <div class="cap-row"><span class="cap-label">Concurrent connections (50% online)</span><span class="cap-val">250M open WebSockets</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Chat servers needed (50K conn/server)</span><span class="cap-val">5,000 servers</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<p><strong>API Design (two channels):</strong></p>
+<pre><code>WebSocket: ws://chat.example.com/ws  (persistent, authenticated)
+  Client → Server: { type:"message", to:user_id, msg_id, text, ts }
+  Server → Client: { type:"message", from:user_id, msg_id, text, ts }
+  Server → Client: { type:"ack", msg_id, status:"delivered" }
+
+REST (history sync):
+GET  /api/v1/messages/{conversation_id}?since={msg_id}&limit=50
+POST /api/v1/messages/{conversation_id}/read  (mark read up to msg_id)</code></pre>
+
+<p><strong>Data model:</strong></p>
+<pre><code>-- Messages (Cassandra)
+-- Partition: conversation_id → range scan by time
+CREATE TABLE messages (
+  conversation_id  UUID,
+  message_id       TIMEUUID,   -- time-ordered UUID (Cassandra native)
+  sender_id        BIGINT,
+  content          TEXT,
+  status           TINYINT,    -- 0=sent, 1=delivered, 2=read
+  PRIMARY KEY (conversation_id, message_id)
+) WITH CLUSTERING ORDER BY (message_id DESC);
+
+-- User presence (Redis, TTL-based)
+-- Key: presence:{user_id}  Value: {last_seen, device_id}  TTL: 65s
+-- Client heartbeat every 30s keeps TTL alive
+
+-- Offline inbox (Redis list, fallback for missed push)
+-- Key: inbox:{user_id}  Value: list of message_ids</code></pre>
+
+<p><strong>System architecture:</strong></p>
+<pre class="diagram">  ┌─────────┐  WebSocket   ┌───────────────────┐
+  │  Client │ ───────────► │   Chat Server N    │◄── ZooKeeper
+  └─────────┘              │  (stateful, owns   │    (routing table)
+                           │   connections)     │
+                           └────────┬───────────┘
+                                    │
+              ┌─────────────────────┼──────────────────────┐
+              │                     │                      │
+   ┌──────────▼──┐       ┌──────────▼──────┐    ┌─────────▼─────┐
+   │  Message DB  │       │  Message Queue   │    │  Presence     │
+   │  (Cassandra) │       │  (Kafka)         │    │  Service      │
+   └─────────────┘        └──────────┬───────┘    │  (Redis TTL)  │
+                                     │             └───────────────┘
+                           ┌─────────▼──────────┐
+                           │   Delivery Worker   │
+                           │ (push + WebSocket)  │
+                           └────────────────────┘</pre>
+
+<div class="callout insight"><div class="callout-icon">💡</div><div class="callout-body"><strong>Key Insight</strong><br>Chat servers are <em>stateful</em> — each one owns a set of active WebSocket connections. This is different from stateless REST services. The routing table (ZooKeeper) maps user_id → which chat server currently holds that user's connection.</div></div>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — WebSocket Connection Management</div>
+<ul>
+  <li>Chat servers are stateful: each holds active WebSocket connections in memory.</li>
+  <li>ZooKeeper/Redis routing table: <code>user_id → chat_server_id</code></li>
+  <li>On connect: register <code>user_id → server_id</code> in routing table.</li>
+  <li>On disconnect: deregister, record <code>last_seen</code> timestamp.</li>
+  <li>Server crash recovery: clients detect TCP disconnect → auto-reconnect with exponential backoff → register to new server.</li>
+</ul>
+
+<div class="step-badge">Step 3b — Message Send Flow (at-least-once delivery)</div>
+<pre><code>1. Sender sends msg via WebSocket to their Chat Server
+2. Chat Server writes message to Cassandra (durable)
+3. Chat Server publishes to Kafka topic "messages"
+4. Delivery Worker consumes from Kafka:
+   a. Look up recipient's Chat Server in routing table
+   b. If ONLINE: push via WebSocket through recipient's Chat Server → client ACKs
+   c. If OFFLINE: store in Redis inbox + send push notification (APNs/FCM)
+5. Chat Server sends ACK back to sender: { msg_id, status:"delivered" }</code></pre>
+
+<div class="callout tip"><div class="callout-icon">💬</div><div class="callout-body"><strong>Interview Tip</strong><br>Write to persistent storage (step 2) BEFORE publishing to queue (step 3). This ensures no message is lost even if the server crashes between steps 2 and 3. If step 3 fails, a retry mechanism re-publishes from the DB. This is the "write-ahead log" pattern applied to messaging.</div></div>
+
+<div class="step-badge">Step 3c — Offline Message Delivery</div>
+<ul>
+  <li>Push notification (APNs/FCM) wakes the app.</li>
+  <li>App opens WebSocket → requests missed messages via REST sync query.</li>
+  <li>Sync query: <code>GET /messages/{conv_id}?since={last_received_msg_id}</code></li>
+  <li>Cassandra's time-ordered clustering key (TIMEUUID) makes this a single efficient range scan — no full table scan.</li>
+  <li>Multiple devices: each device independently tracks its own <code>last_received_msg_id</code>.</li>
+</ul>
+
+<div class="step-badge">Step 3d — Online Presence at Scale</div>
+<ul>
+  <li>Client sends heartbeat every 30s: <code>{ type: "ping" }</code></li>
+  <li>Server updates Redis: <code>SET presence:{user_id} {ts} EX 65</code> (65s TTL = tolerate 2 missed heartbeats)</li>
+  <li>Read presence: <code>GET presence:{user_id}</code> → exists = online, missing = offline</li>
+</ul>
+<p><strong>Scale math:</strong> 250M online users × 1 heartbeat/30s = 8.3M Redis writes/sec. Use Redis Cluster, shard by <code>user_id</code>. Each shard handles ~300K writes/sec → need ~28 shards.</p>
+
+<div class="step-badge">Step 3e — Group Chat (up to 100 members)</div>
+<ul>
+  <li>Message written once to Cassandra with <code>group_id</code> as <code>conversation_id</code>.</li>
+  <li>Delivery Worker fans out to all group members (max 100 lookups + 100 deliveries).</li>
+  <li>Group membership: <code>(group_id, user_id, joined_at)</code> in MySQL.</li>
+  <li>Read receipts for group: track per-(message, user) pair — show "seen by N members" rather than per-person ticks.</li>
+</ul>
+
+<div class="callout tradeoff"><div class="callout-icon">⚖️</div><div class="callout-body"><strong>Trade-off</strong><br>At 100 members, synchronous fanout is fine. At 100,000 members (like a broadcast channel), you'd need async fanout — write to a "pending delivery" table, batch workers fan out in parallel. Single synchronous fanout would block the Delivery Worker for seconds.</div></div>
+
+<div class="step-badge">Step 3f — Message Ordering</div>
+<ul>
+  <li>TIMEUUID in Cassandra = timestamp (ms) + random component → globally unique, time-sortable.</li>
+  <li>Within a conversation: messages ordered by TIMEUUID (lexicographic = chronological).</li>
+  <li>Clock skew: if two messages arrive with the same millisecond timestamp, the random component breaks the tie deterministically.</li>
+  <li>Client always renders by server-assigned TIMEUUID, never by client-provided timestamp. This prevents message reordering when clients have different clocks.</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Protocol</td><td>WebSocket</td><td>HTTP long-polling</td><td>True bidirectional, lower overhead, server-push without polling</td></tr>
+    <tr><td>Storage</td><td>Cassandra</td><td>MySQL</td><td>Time-ordered range scans on conversation_id, high write throughput</td></tr>
+    <tr><td>Message ID</td><td>TIMEUUID</td><td>Auto-increment</td><td>Distributed generation, naturally sortable, no coordination needed</td></tr>
+    <tr><td>Delivery guarantee</td><td>At-least-once + client dedup</td><td>Exactly-once</td><td>Simpler; dedup on client is trivial (check msg_id already rendered)</td></tr>
+    <tr><td>Group fanout</td><td>Delivery worker (async)</td><td>Inline fanout</td><td>Non-blocking for sender; worker can retry failed deliveries independently</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>End-to-end encryption:</strong> Signal Protocol (double ratchet algorithm). Keys never leave the device. Server stores only ciphertext. Delivery worker cannot read message content.</li>
+  <li><strong>Media messages:</strong> client uploads image to S3 directly (pre-signed URL), then sends a message containing the S3 URL. Never send binary data through WebSocket or chat servers.</li>
+  <li><strong>Message search:</strong> async indexing pipeline: Cassandra → Kafka → Elasticsearch. Search is a separate service, doesn't touch the hot path.</li>
+  <li><strong>Typing indicators:</strong> ephemeral signal only, not persisted. Client sends <code>{ type:"typing", to:user_id }</code> → server forwards directly to recipient's chat server → WebSocket push. No DB write needed.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'web-crawler',
+    title: 'Design a Web Crawler',
+    icon: '🕷️',
+    difficulty: 'medium',
+    readTime: '20 min read',
+    teaser: 'Design a scalable web crawler that discovers and indexes billions of web pages. Covers URL frontier, politeness, deduplication with bloom filters, and distributed coordination.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<p>A web crawler is a deceptively complex distributed system. Get scope before diving in.</p>
+
+<div class="callout tip"><div class="callout-icon">💬</div><div class="callout-body"><strong>Interview Tip</strong><br>Web crawlers have many possible scopes: general-purpose (Googlebot), focused (product price crawler), or archival (Wayback Machine). Clarify which type, as they have very different requirements for politeness and freshness.</div></div>
+
+<p><strong>Clarifying dialogue:</strong></p>
+<ul>
+  <li><strong>Search engine crawler or specialized?</strong> → General-purpose (like Googlebot).</li>
+  <li><strong>How many pages?</strong> → 1 billion pages crawled in 4 weeks.</li>
+  <li><strong>Store content or just URLs?</strong> → Full HTML content.</li>
+  <li><strong>JavaScript-rendered pages?</strong> → No, static HTML only for now.</li>
+</ul>
+
+<p><strong>Non-functional requirements:</strong></p>
+<ul>
+  <li>Politeness: max 1 request/second per domain (respect robots.txt)</li>
+  <li>Fault tolerant: crawl can resume after a server crash (no lost progress)</li>
+  <li>Extensible: easy to add new content extractors (images, PDFs)</li>
+</ul>
+
+<p><strong>Capacity estimates:</strong></p>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Target</span><span class="cap-val">1B pages in 4 weeks</span></div>
+  <div class="cap-row"><span class="cap-label">Required throughput</span><span class="cap-val">1B ÷ (28 × 86,400) ≈ 416 pages/sec</span></div>
+  <div class="cap-row"><span class="cap-label">Avg page size</span><span class="cap-val">500KB raw HTML</span></div>
+  <div class="cap-row"><span class="cap-label">Incoming bandwidth</span><span class="cap-val">416 × 500KB = 208 MB/sec</span></div>
+  <div class="cap-row"><span class="cap-label">Raw storage (1B pages)</span><span class="cap-val">1B × 500KB = 500TB</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Storage after gzip (~5:1)</span><span class="cap-val">100TB</span></div>
+  <div class="cap-row"><span class="cap-label">URL frontier (10× discovered)</span><span class="cap-val">10B URLs × 200B = 2TB queue</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<p><strong>Core components:</strong></p>
+<ul>
+  <li><strong>URL Frontier</strong> — priority queue of URLs to crawl next</li>
+  <li><strong>Fetchers</strong> — HTTP workers that download pages</li>
+  <li><strong>Parser / Link Extractor</strong> — extracts links from HTML, feeds new URLs back to frontier</li>
+  <li><strong>Dedup Service</strong> — prevents re-crawling already-seen URLs</li>
+  <li><strong>Content Store</strong> — S3 for raw HTML</li>
+</ul>
+
+<pre class="diagram">                    ┌──────────────────┐
+  Seed URLs ──────► │   URL Frontier   │◄────────────┐
+                    │  (priority queue)│             │
+                    └────────┬─────────┘             │ new URLs
+                             │ next URL               │
+                    ┌────────▼─────────┐    ┌────────┴────────┐
+                    │    Fetchers      │    │  Link Extractor  │
+                    │ (HTTP download)  │───►│   + Parser       │
+                    └────────┬─────────┘    └─────────────────┘
+                             │ raw HTML
+                    ┌────────▼─────────┐
+                    │  Content Store   │
+                    │     (S3)         │
+                    └──────────────────┘
+                             │
+                    ┌────────▼─────────┐
+                    │  Dedup Service   │
+                    │  (Bloom Filter)  │
+                    └──────────────────┘</pre>
+
+<div class="callout insight"><div class="callout-icon">💡</div><div class="callout-body"><strong>Key Insight</strong><br>The URL Frontier is the hardest component to get right. It must balance two conflicting requirements: crawl high-priority pages first (BFS/priority order) while also respecting politeness (max 1 req/sec per domain). A simple priority queue satisfies the first but violates the second.</div></div>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — URL Frontier (the hardest part)</div>
+<p>Two requirements conflict: (1) crawl high-priority pages first; (2) max 1 req/sec per domain.</p>
+<p><strong>Solution: two-tier queue system.</strong></p>
+<ul>
+  <li><strong>Front end — Priority queues:</strong> multiple queues ranked by page importance (PageRank estimate, freshness). A URL Prioritizer assigns each incoming URL to a priority queue (high/medium/low).</li>
+  <li><strong>Back end — Politeness queues:</strong> one queue per domain. A Router maps domain → its dedicated queue. Each queue enforces a delay between pops (1 req/sec per domain).</li>
+  <li>Workers always pull from back-end (politeness) queues, which are fed from front-end (priority) queues.</li>
+</ul>
+
+<div class="callout insight"><div class="callout-icon">💡</div><div class="callout-body"><strong>Key Insight</strong><br>Separating priority from politeness is the core architectural insight. A single priority queue would send 1,000 req/sec to reddit.com because it has many high-priority pages. The two-tier design respects robots.txt rate limits while still processing high-value pages first.</div></div>
+
+<div class="step-badge">Step 3b — Deduplication with Bloom Filters</div>
+<p><strong>Problem:</strong> With 10B URLs, a hash table needs 10B × 200B = 2TB of memory — impractical.</p>
+<p><strong>Bloom filter solution:</strong></p>
+<ul>
+  <li>Probabilistic data structure: tells you "definitely not seen" or "probably seen".</li>
+  <li>False positive rate: ~1% with 10 bits/element. 10B URLs × 10 bits = <strong>12.5GB</strong> — fits in RAM.</li>
+  <li>False positive cost: skip ~1% of genuinely new URLs (acceptable for a crawler).</li>
+  <li>False negative: impossible. If it says "not seen," the URL is definitely new.</li>
+  <li>Also deduplicate content: compute SimHash of page body. Pages with Hamming distance &lt; 3 are near-duplicates (skip storing).</li>
+</ul>
+
+<div class="callout tradeoff"><div class="callout-icon">⚖️</div><div class="callout-body"><strong>Trade-off</strong><br>Bloom filter vs. hash set: 12.5GB vs. 2TB for the same 10B URLs. The 1% false positive rate means we miss ~100M genuinely new pages — acceptable since we'll likely discover and re-try them via other links. The 160× memory saving is worth it.</div></div>
+
+<div class="step-badge">Step 3c — robots.txt and Politeness</div>
+<ul>
+  <li>Fetch and cache <code>robots.txt</code> for every domain before crawling any page on that domain.</li>
+  <li>Respect <code>Crawl-delay</code> directive. Default: 1 req/sec if not specified.</li>
+  <li>Honor <code>Disallow</code> paths — filter these URLs before enqueuing.</li>
+  <li>User-Agent header: identify your bot honestly: <code>MyCrawler/1.0 (+https://example.com/bot)</code></li>
+  <li>Cache <code>robots.txt</code> with TTL 24h; re-fetch periodically to pick up changes.</li>
+</ul>
+
+<div class="step-badge">Step 3d — Fault Tolerance and Resumability</div>
+<ul>
+  <li>URL Frontier backed by persistent store (Kafka or a DB) — not in-memory only.</li>
+  <li>Each URL transitions through states: <code>queued → in_flight → done | failed</code>.</li>
+  <li>In-flight timeout: if a fetcher crashes, the URL reverts to <code>queued</code> after 5 minutes.</li>
+  <li>Progress checkpoint: periodically write crawl state to durable storage. On restart, resume from the last checkpoint.</li>
+</ul>
+
+<div class="callout warn"><div class="callout-icon">⚠️</div><div class="callout-body"><strong>Watch Out</strong><br>Never use an in-memory-only queue for the URL frontier. If the coordinator crashes, you lose all queued URLs and must restart the crawl from scratch. Always back the frontier with Kafka or a database so the crawl survives failures.</div></div>
+
+<div class="step-badge">Step 3e — Distributed Crawling</div>
+<ul>
+  <li>Partition URL space by domain hash: worker 1 owns domains in hash range 0–33%, worker 2 in 33–66%, etc.</li>
+  <li>Consistent hashing for worker assignment → minimal reshuffling when a worker is added or fails.</li>
+  <li>Coordinator (ZooKeeper): tracks worker assignments, detects failures, reassigns partitions within seconds.</li>
+</ul>
+
+<div class="step-badge">Step 3f — Content Processing Pipeline</div>
+<ul>
+  <li><strong>HTML parser:</strong> extract all <code>&lt;a href&gt;</code> links, normalize URLs (resolve relative URLs, strip fragments, lowercase scheme/host).</li>
+  <li><strong>URL filtering:</strong> skip non-HTTP/S schemes, skip known binary extensions (.exe, .zip, .jpg), apply robots.txt Disallow rules.</li>
+  <li><strong>Content hash:</strong> SHA-256 of page body → check against seen-content set. Different URL, same content = skip storing (mirror site dedup).</li>
+  <li><strong>Store:</strong> compressed HTML to S3. Metadata (URL, crawl_time, content_hash, outlinks) to Cassandra.</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>URL dedup</td><td>Bloom filter (12.5GB)</td><td>Hash set (2TB)</td><td>160× memory saving at 1% false positive rate</td></tr>
+    <tr><td>Politeness</td><td>Per-domain queues</td><td>Global rate limit</td><td>Prevents hammering single domains; respects robots.txt per domain</td></tr>
+    <tr><td>Frontier storage</td><td>Kafka (persistent)</td><td>In-memory queue</td><td>Resumable after crash; Kafka retains messages until acknowledged</td></tr>
+    <tr><td>Content dedup</td><td>SimHash (near-dupes)</td><td>Full MD5 compare</td><td>Catches near-duplicates (mirrors with minor diffs), not just exact copies</td></tr>
+    <tr><td>Distributed coord</td><td>ZooKeeper + consistent hashing</td><td>Centralized scheduler</td><td>No single point of failure; partitions auto-reassigned on worker failure</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Freshness re-crawl:</strong> pages that change frequently (news sites) should be re-crawled more often. Track change frequency per domain (how often content hash changes between crawls) and adjust crawl schedule accordingly.</li>
+  <li><strong>JavaScript rendering:</strong> add a headless Chrome (Puppeteer) tier for JS-heavy pages. Much more expensive — only for high-priority domains. Route based on a JS-required flag detected during first crawl.</li>
+  <li><strong>Link graph:</strong> store the outlink graph in a graph DB or adjacency-list table to enable PageRank computation, which feeds back into URL prioritization.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'google-drive',
+    title: 'Design Google Drive / File Storage',
+    icon: '📁',
+    difficulty: 'medium',
+    readTime: '22 min read',
+    teaser: 'Design Dropbox or Google Drive: reliable file storage with sync, versioning, and collaboration. Covers chunked upload, delta sync, conflict resolution, and metadata vs. blob separation.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<p>File storage is read-heavy with strong durability requirements. Nail down scope first.</p>
+
+<div class="callout tip"><div class="callout-icon">💬</div><div class="callout-body"><strong>Interview Tip</strong><br>Distinguish between file storage (Dropbox) and collaborative editing (Google Docs). They look similar but require completely different architectures. Collaborative editing needs Operational Transform or CRDTs. File storage uses simpler conflict detection.</div></div>
+
+<p><strong>Clarifying dialogue:</strong></p>
+<ul>
+  <li><strong>Sync across devices?</strong> → Yes.</li>
+  <li><strong>Versioning / file history?</strong> → Yes, last 30 versions.</li>
+  <li><strong>Max file size?</strong> → 10GB.</li>
+  <li><strong>Sharing?</strong> → Share links + folder sharing with view/edit permissions.</li>
+  <li><strong>Offline mode?</strong> → Files available offline if pinned by user.</li>
+</ul>
+
+<p><strong>Non-functional requirements:</strong></p>
+<ul>
+  <li>Durability: 99.999999999% (eleven nines) — no data loss ever</li>
+  <li>Sync latency: &lt;5s for changes to appear on other devices</li>
+  <li>Reliability: upload/download succeeds 99.99% of the time</li>
+</ul>
+
+<p><strong>Capacity estimates:</strong></p>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Users</span><span class="cap-val">50M</span></div>
+  <div class="cap-row"><span class="cap-label">Storage per user (free tier)</span><span class="cap-val">10GB</span></div>
+  <div class="cap-row"><span class="cap-label">Total storage</span><span class="cap-val">50M × 10GB = 500PB</span></div>
+  <div class="cap-row"><span class="cap-label">Daily uploads</span><span class="cap-val">50M × 2 files × 500KB avg = 50TB/day</span></div>
+  <div class="cap-row"><span class="cap-label">Upload QPS</span><span class="cap-val">50TB ÷ 86,400s ÷ 500KB ≈ 1,157 uploads/sec</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Metadata size</span><span class="cap-val">50M × 1,000 files × 200B = 10TB</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<p><strong>Core separation: metadata vs. blob storage</strong></p>
+<p>The fundamental design principle is to separate two very different types of data:</p>
+<ul>
+  <li><strong>Metadata</strong> — filenames, folder structure, version history, ACLs. Needs strong consistency and rich queries. Stored in MySQL.</li>
+  <li><strong>Blob storage</strong> — actual file bytes. Needs extreme durability and high throughput. Stored in S3.</li>
+</ul>
+
+<pre class="diagram">  ┌──────────────┐   upload/download   ┌────────────────────┐
+  │  Client App  │ ─────────────────►  │   API Gateway      │
+  │  (sync agent)│ ◄─── sync events ── │                    │
+  └──────────────┘                     └───────┬────────────┘
+                                               │
+                             ┌─────────────────┼──────────────────┐
+                             │                 │                  │
+                   ┌─────────▼──────┐ ┌────────▼────────┐ ┌──────▼──────────┐
+                   │  Metadata      │ │  Block Storage  │ │  Notification   │
+                   │  Service       │ │  Service        │ │  Service        │
+                   │  (MySQL)       │ │  (S3)           │ │  (long-poll/WS) │
+                   └────────────────┘ └─────────────────┘ └─────────────────┘</pre>
+
+<div class="callout insight"><div class="callout-icon">💡</div><div class="callout-body"><strong>Key Insight</strong><br>Never store file bytes in a database. Databases are optimized for structured queries, not streaming large binary objects. S3 (or equivalent object storage) gives you 11-nines durability, multi-region replication, and streaming upload/download — all out of the box.</div></div>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Chunked Upload and Delta Sync (the core optimization)</div>
+<p>Split every file into <strong>4MB chunks</strong>. Each chunk has a SHA-256 hash.</p>
+<p><strong>Upload protocol:</strong></p>
+<ol>
+  <li>Client chunks the file, computes SHA-256 of each chunk.</li>
+  <li>Client sends list of chunk hashes to the server.</li>
+  <li>Server responds: "which chunk hashes do I already have?" (returns set of missing hashes).</li>
+  <li>Client uploads only the missing chunks (delta sync).</li>
+  <li>Server assembles the file version record from (existing + new) chunk IDs.</li>
+</ol>
+<p><strong>Example savings:</strong> 100MB file (25 chunks of 4MB), user edits one paragraph:</p>
+<ul>
+  <li>Without chunking: upload 100MB</li>
+  <li>With chunking: only 1 chunk changed → upload 4MB (96% bandwidth saving)</li>
+</ul>
+
+<div class="callout insight"><div class="callout-icon">💡</div><div class="callout-body"><strong>Key Insight</strong><br>Chunking enables two powerful optimizations simultaneously: delta sync (only upload changed chunks) and cross-user deduplication (two users storing identical files share the same chunk objects in S3). These together are why cloud storage services can offer terabytes affordably.</div></div>
+
+<div class="step-badge">Step 3b — Block Storage Schema</div>
+<pre><code>-- Blocks (content-addressed, immutable)
+CREATE TABLE blocks (
+  block_id    VARCHAR(64) PRIMARY KEY,   -- SHA-256 hash
+  size_bytes  INT NOT NULL,
+  s3_key      VARCHAR(256) NOT NULL,
+  ref_count   INT DEFAULT 0              -- how many file versions reference this block
+);
+
+-- File versions (ordered list of blocks)
+CREATE TABLE file_versions (
+  file_id     BIGINT,
+  version     INT,
+  size_bytes  BIGINT,
+  block_ids   JSON,                      -- ordered array of block_id strings
+  created_at  DATETIME,
+  created_by  BIGINT,
+  PRIMARY KEY (file_id, version)
+);</code></pre>
+<p>Garbage collection: nightly job deletes S3 objects where <code>ref_count = 0</code> (no file version references them).</p>
+
+<div class="step-badge">Step 3c — Metadata Schema</div>
+<pre><code>CREATE TABLE files (
+  file_id      BIGINT PRIMARY KEY,
+  owner_id     BIGINT NOT NULL,
+  parent_id    BIGINT,                   -- parent folder (NULL = root)
+  name         VARCHAR(255),
+  latest_ver   INT DEFAULT 1,
+  is_deleted   BOOLEAN DEFAULT FALSE,    -- soft delete (trash)
+  created_at   DATETIME,
+  updated_at   DATETIME,
+  INDEX idx_owner_parent (owner_id, parent_id)  -- list folder contents
+);</code></pre>
+
+<div class="step-badge">Step 3d — Cross-Device Sync Flow</div>
+<pre><code>1. User edits file on Device A
+2. Client sync agent detects change (filesystem watcher: inotify on Linux, FSEvents on macOS)
+3. Client chunks file, computes hashes, sends delta to API Gateway
+4. Server updates metadata (new file_version record) + stores new blocks in S3
+5. Server publishes sync event to Notification Service
+6. Device B (and C, D...) subscribed via long-polling or WebSocket
+7. Devices receive sync event → pull new version metadata → reconstruct file from blocks
+   (fetch only blocks not already in local cache)</code></pre>
+
+<div class="step-badge">Step 3e — Conflict Resolution</div>
+<p>Two devices edit the same file while offline → both produce a new version based on the same base version.</p>
+<ul>
+  <li><strong>Detect conflict:</strong> server sees two attempts to create version N+1 from the same version N base.</li>
+  <li><strong>Dropbox strategy (recommended):</strong> keep both versions. Rename the second: <em>"report (John's conflicted copy 2024-01-15).docx"</em>. User resolves manually.</li>
+  <li><strong>Google Docs strategy:</strong> Operational Transform (OT) — merge edits automatically. Extremely complex to implement correctly.</li>
+</ul>
+
+<div class="callout tradeoff"><div class="callout-icon">⚖️</div><div class="callout-body"><strong>Trade-off</strong><br>Automatic conflict merge (OT/CRDTs) gives better UX but is one of the hardest algorithms in distributed systems. For file storage (not co-editing), creating a conflicted copy is simpler and safer — no data is ever lost. Only build OT if the core use case is simultaneous document editing.</div></div>
+
+<div class="step-badge">Step 3f — Sharing and Permissions</div>
+<pre><code>CREATE TABLE shares (
+  share_id      BIGINT PRIMARY KEY,
+  resource_id   BIGINT NOT NULL,          -- file_id or folder_id
+  resource_type ENUM('file','folder'),
+  shared_with   BIGINT,                   -- NULL = public link
+  permission    ENUM('view','edit'),
+  token         VARCHAR(64) UNIQUE,       -- random token for link sharing
+  expires_at    DATETIME
+);</code></pre>
+<ul>
+  <li>ACL check on every API call: verify user has permission for the requested resource.</li>
+  <li>Folder permissions cascade to all children (unless a child has an explicit override).</li>
+  <li>Public link: anyone with the <code>token</code> can access, regardless of login state.</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Chunk size</td><td>4MB</td><td>1MB / 10MB</td><td>Balance: too small = many round-trips; too large = poor delta efficiency on small edits</td></tr>
+    <tr><td>Deduplication</td><td>Block-level SHA-256</td><td>File-level hash</td><td>Catches partial duplicates (same content in different files); saves significantly more storage</td></tr>
+    <tr><td>Conflict resolution</td><td>Conflicted copy</td><td>Auto-merge (OT)</td><td>Simpler, no data loss risk; OT is extremely complex and only needed for real-time co-editing</td></tr>
+    <tr><td>Metadata store</td><td>MySQL (sharded by owner_id)</td><td>MongoDB</td><td>Relational ACL queries and folder hierarchy easier in SQL</td></tr>
+    <tr><td>Blob store</td><td>S3</td><td>Own block device</td><td>S3 gives 11-nines durability, multi-region replication, no operational overhead</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Large file upload resumability:</strong> S3 multipart upload. Client uploads chunks independently, each with a part number. If upload is interrupted, resume by re-uploading only failed parts. Server calls CompleteMultipartUpload when all parts are received.</li>
+  <li><strong>Thumbnail generation:</strong> async pipeline. On upload, enqueue a job to a worker that generates thumbnails at multiple resolutions using ImageMagick, stores to S3, updates metadata with thumbnail URLs.</li>
+  <li><strong>Storage tiering:</strong> files not accessed in 90 days move from S3 Standard → S3 Glacier (10× cheaper). Lifecycle rules configured in S3 — no application code changes needed.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'unique-id-generator',
+    title: 'Design a Unique ID Generator',
+    icon: '🔢',
+    difficulty: 'easy',
+    readTime: '14 min read',
+    teaser: 'Generate globally unique, roughly time-sortable IDs across a distributed system without coordination. Covers UUID, database auto-increment pitfalls, and Twitter\'s Snowflake algorithm.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<p>This is a common warm-up question. The key is showing you understand the trade-offs between different approaches, not just knowing Snowflake exists.</p>
+
+<div class="callout tip"><div class="callout-icon">💬</div><div class="callout-body"><strong>Interview Tip</strong><br>Walk through naive approaches first (UUID, DB auto-increment) and explain why each fails before introducing Snowflake. This shows analytical thinking, not just memorized answers.</div></div>
+
+<p><strong>Clarifying dialogue:</strong></p>
+<ul>
+  <li><strong>Unique across all machines?</strong> → Yes, globally unique, zero collisions.</li>
+  <li><strong>Time-sortable?</strong> → Yes, IDs generated later should be numerically larger.</li>
+  <li><strong>Length?</strong> → 64-bit integer preferred (fits in a BIGINT column).</li>
+  <li><strong>Throughput?</strong> → 10,000 IDs/sec across the system.</li>
+  <li><strong>Clock sync?</strong> → NTP, ~1ms accuracy (not perfect).</li>
+</ul>
+
+<p><strong>Non-functional requirements:</strong></p>
+<ul>
+  <li>Globally unique: zero collisions across all machines, ever</li>
+  <li>64-bit: fits in a database BIGINT, compatible with most systems</li>
+  <li>Time-ordered: IDs generated later are numerically larger (enables range scans)</li>
+  <li>High availability: ID generation must not be a single point of failure</li>
+</ul>
+
+<p><strong>Capacity (simple):</strong></p>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Required throughput</span><span class="cap-val">10,000 IDs/sec</span></div>
+  <div class="cap-row"><span class="cap-label">64-bit ID space</span><span class="cap-val">2^63 ≈ 9.2 × 10^18 IDs</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Exhaustion at 10K/sec</span><span class="cap-val">&gt;29 million years</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<p><strong>Four approaches — walk through all of them:</strong></p>
+
+<table>
+  <thead><tr><th>Approach</th><th>Unique?</th><th>Sortable?</th><th>64-bit?</th><th>Distributed?</th><th>Problem</th></tr></thead>
+  <tbody>
+    <tr><td>UUID v4</td><td>Yes</td><td>No</td><td>No (128-bit)</td><td>Yes</td><td>128-bit, random (not sortable), ugly in URLs</td></tr>
+    <tr><td>DB auto-increment</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td><td>Single DB = SPOF + write bottleneck</td></tr>
+    <tr><td>DB multi-master (stride)</td><td>Yes</td><td>Partially</td><td>Yes</td><td>Yes</td><td>IDs not time-sortable across servers (server 1: 1,3,5... server 2: 2,4,6...)</td></tr>
+    <tr><td><strong>Snowflake</strong></td><td><strong>Yes</strong></td><td><strong>Yes</strong></td><td><strong>Yes</strong></td><td><strong>Yes</strong></td><td><strong>Clock skew must be handled</strong></td></tr>
+  </tbody>
+</table>
+
+<p><strong>Snowflake ID structure (64 bits total):</strong></p>
+<pre class="diagram"> 63        41  40        10   9         0
+  ┌──────────┬────────────┬──────────────┐
+  │ sign bit │ timestamp  │ datacenter+  │ sequence
+  │  (1 bit) │  (41 bits) │ machine ID   │  (12 bits)
+  │          │            │  (10 bits)   │
+  └──────────┴────────────┴──────────────┘
+
+1  bit  — always 0 (keeps IDs positive when stored as signed BIGINT)
+41 bits — milliseconds since custom epoch (2^41 ms ≈ 69 years from epoch)
+10 bits — datacenter ID (5 bits) + machine ID (5 bits) = 32 DCs × 32 machines
+12 bits — sequence counter per millisecond (4,096 IDs/ms/machine = 4.1M IDs/sec/machine)</pre>
+
+<div class="callout insight"><div class="callout-icon">💡</div><div class="callout-body"><strong>Key Insight</strong><br>Snowflake IDs are time-sortable because the timestamp occupies the most-significant bits. Lexicographic order = chronological order. This means database indexes on Snowflake IDs are append-mostly, which eliminates page splits and gives excellent write performance compared to random UUIDs.</div></div>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Snowflake Generation Algorithm</div>
+<pre><code>class SnowflakeIDGenerator:
+    EPOCH = 1609459200000  # 2021-01-01 00:00:00 UTC in milliseconds
+
+    def __init__(self, datacenter_id: int, machine_id: int):
+        self.datacenter_id = datacenter_id  # 0-31
+        self.machine_id    = machine_id      # 0-31
+        self.sequence      = 0
+        self.last_ts       = -1
+
+    def next_id(self) -> int:
+        ts = self._current_ms()
+
+        if ts == self.last_ts:
+            self.sequence = (self.sequence + 1) & 0xFFF  # 12-bit mask (0-4095)
+            if self.sequence == 0:
+                ts = self._wait_next_ms(self.last_ts)    # sequence exhausted this ms
+        else:
+            self.sequence = 0
+
+        self.last_ts = ts
+
+        return ((ts - self.EPOCH) << 22) | \
+               (self.datacenter_id << 17) | \
+               (self.machine_id    << 12) | \
+               self.sequence
+
+    def _current_ms(self) -> int:
+        return int(time.time() * 1000)
+
+    def _wait_next_ms(self, last_ts: int) -> int:
+        ts = self._current_ms()
+        while ts <= last_ts:
+            ts = self._current_ms()
+        return ts</code></pre>
+<p>Throughput: 4,096 IDs/ms = <strong>4.1M IDs/sec per machine</strong>. A single machine satisfies the 10K/sec requirement with 400× headroom.</p>
+
+<div class="step-badge">Step 3b — The Clock Skew Problem</div>
+<p>NTP can adjust the system clock backwards. If the clock moves back 5ms, the new timestamp will be less than <code>last_ts</code> → duplicate IDs.</p>
+<ul>
+  <li><strong>Solution A (already in code):</strong> <code>_wait_next_ms</code> spins until the clock catches up. Works for small skew (&lt;10ms).</li>
+  <li><strong>Solution B:</strong> if detected clock regression exceeds threshold (e.g., 1 second), throw an exception and refuse to generate IDs. Alert the operations team to fix NTP.</li>
+  <li><strong>Solution C:</strong> use a monotonic clock (not wall clock) for the sequence component. The monotonic clock never goes backwards.</li>
+</ul>
+
+<div class="callout warn"><div class="callout-icon">⚠️</div><div class="callout-body"><strong>Watch Out</strong><br>Never use system wall time directly without handling backward movement. NTP clock corrections, VM live migrations, and DST transitions can all cause the clock to jump backwards. Even a 1ms regression generates duplicate IDs. Always compare <code>current_ts</code> to <code>last_ts</code> before using it.</div></div>
+
+<div class="step-badge">Step 3c — Machine ID Assignment</div>
+<p>Machine IDs must be unique across all machines in a datacenter, or IDs from two machines will collide when they share the same timestamp and sequence number.</p>
+<ul>
+  <li><strong>Option A — Config file:</strong> hardcode machine ID in deployment config. Simple, but easy to misconfigure when scaling. Risk of duplicate IDs on accidental copy-paste of configs.</li>
+  <li><strong>Option B — ZooKeeper ephemeral node:</strong> each server claims <code>/machines/{dc}/{id}</code> on startup as an ephemeral node. ZooKeeper guarantees uniqueness. On crash: ephemeral node is auto-deleted, freeing the ID for reuse.</li>
+  <li><strong>Option C — Redis SETNX:</strong> server tries <code>SETNX machine:{dc}:{id} {hostname}</code> for IDs 0–31 until one succeeds. Simple, atomic, no ZooKeeper dependency.</li>
+</ul>
+
+<div class="step-badge">Step 3d — Segment-Based Alternative</div>
+<p>A simpler approach for ultra-high throughput: each application server pre-allocates a range of IDs from a central ID server (e.g., "give me IDs 5,000,001 to 6,000,000"). The application then generates IDs locally from that range with no network calls.</p>
+<ul>
+  <li>Pros: zero network overhead per ID, trivially simple, no clock dependency.</li>
+  <li>Cons: IDs are monotone within a range but not globally time-sortable. Wasted IDs if a server crashes mid-range.</li>
+  <li>Used by: Instagram (with modifications), many internal systems where time-sort is not required.</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Approach comparison summary:</strong></p>
+<table>
+  <thead><tr><th>Approach</th><th>Unique?</th><th>Sortable?</th><th>64-bit?</th><th>Distributed?</th><th>Best For</th></tr></thead>
+  <tbody>
+    <tr><td>UUID v4</td><td>Yes</td><td>No</td><td>No (128-bit)</td><td>Yes</td><td>When string IDs are acceptable and sort order doesn't matter</td></tr>
+    <tr><td>DB auto-increment</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No (SPOF)</td><td>Low-scale monolith with a single DB</td></tr>
+    <tr><td>DB multi-master (stride)</td><td>Yes</td><td>Partially</td><td>Yes</td><td>Yes</td><td>Simple setups; sort order within a server is fine</td></tr>
+    <tr><td><strong>Snowflake</strong></td><td><strong>Yes</strong></td><td><strong>Yes</strong></td><td><strong>Yes</strong></td><td><strong>Yes</strong></td><td><strong>Most distributed systems needing time-sortable IDs</strong></td></tr>
+    <tr><td>Segment allocation</td><td>Yes</td><td>Within range</td><td>Yes</td><td>Yes</td><td>Ultra-high throughput where time-sort is not required</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Custom epoch:</strong> by using a custom epoch close to "now" (e.g., 2021-01-01), you maximize the 41-bit timestamp's useful range (69 years from 2021, not from 1970). Always document what epoch you chose.</li>
+  <li><strong>ID decoding for debugging:</strong> since Snowflake IDs encode a timestamp, you can decode any ID to find when it was generated. Extremely useful for debugging: "when was this record created?" without a separate <code>created_at</code> column.</li>
+  <li><strong>UUID v7 (modern alternative):</strong> a newer UUID standard that is time-sortable and 128-bit. Emerging support in databases. If your system can tolerate 128-bit IDs, UUID v7 eliminates machine ID management complexity.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'search-autocomplete',
+    title: 'Design Search Autocomplete',
+    icon: '🔍',
+    difficulty: 'medium',
+    readTime: '19 min read',
+    teaser: 'Show top 5 search suggestions as you type, in under 100ms. Covers Redis sorted sets vs. trie, query frequency scoring, real-time trending, and client-side optimizations.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<p>Autocomplete is a read-heavy system with strict latency requirements and an interesting data pipeline for keeping suggestions fresh.</p>
+
+<div class="callout tip"><div class="callout-icon">💬</div><div class="callout-body"><strong>Interview Tip</strong><br>Autocomplete has two distinct sub-systems: a real-time query service (&lt;100ms) and a data pipeline that updates suggestion scores (can be minutes behind). Separate them clearly in your design.</div></div>
+
+<p><strong>Clarifying dialogue:</strong></p>
+<ul>
+  <li><strong>Web only or also mobile?</strong> → Both.</li>
+  <li><strong>Top 5 suggestions?</strong> → Yes.</li>
+  <li><strong>Based on global popularity or personalized?</strong> → Global popularity first, mention personalization as an extension.</li>
+  <li><strong>Real-time trending?</strong> → Near real-time — 5-minute lag is acceptable.</li>
+  <li><strong>Languages?</strong> → English only for now.</li>
+</ul>
+
+<p><strong>Non-functional requirements:</strong></p>
+<ul>
+  <li>Suggestion latency: &lt;100ms end-to-end (network + server processing)</li>
+  <li>Throughput: handle 10K QPS</li>
+  <li>Score freshness: trending queries appear within 5 minutes</li>
+</ul>
+
+<p><strong>Capacity estimates:</strong></p>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">DAU</span><span class="cap-val">10M</span></div>
+  <div class="cap-row"><span class="cap-label">Searches per user per day</span><span class="cap-val">5</span></div>
+  <div class="cap-row"><span class="cap-label">Avg keystrokes per search</span><span class="cap-val">5 (with debounce)</span></div>
+  <div class="cap-row"><span class="cap-label">Autocomplete requests/day</span><span class="cap-val">10M × 5 × 5 = 250M</span></div>
+  <div class="cap-row"><span class="cap-label">Average QPS</span><span class="cap-val">250M ÷ 86,400 ≈ 2,894</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Peak QPS</span><span class="cap-val">~10,000</span></div>
+  <div class="cap-row"><span class="cap-label">Unique queries in index</span><span class="cap-val">~20M queries × 200B = 4GB raw</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<p><strong>Two sub-systems:</strong></p>
+<ol>
+  <li><strong>Query service</strong> — serves top-5 suggestions in real-time (&lt;100ms)</li>
+  <li><strong>Data pipeline</strong> — aggregates search logs and updates suggestion scores every 5 minutes</li>
+</ol>
+
+<pre class="diagram">  User types "sys"              ┌──────────────────────┐
+  ──────────────────────────►   │  Autocomplete API    │
+                                └────────┬─────────────┘
+                                         │ ZREVRANGEBYSCORE ac:sys +inf -inf LIMIT 0 5
+                             ┌───────────▼─────────────────┐
+                             │  Redis Sorted Sets           │
+                             │  key: "ac:sys"              │
+                             │  members: scored queries    │
+                             └─────────────────────────────┘
+
+  Every search logged ──► Kafka ──► Aggregator ──► Score Updater ──► Redis
+  (async, non-blocking)             (5-min batch)   (ZADD new score)</pre>
+
+<div class="callout insight"><div class="callout-icon">💡</div><div class="callout-body"><strong>Key Insight</strong><br>The query service and the data pipeline are completely decoupled. A user's search keystroke never blocks on score computation. The pipeline runs asynchronously every 5 minutes. This separation is what makes it possible to hit &lt;100ms latency while also keeping suggestions fresh.</div></div>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Data Structure: Redis Sorted Set vs. Trie</div>
+<p><strong>Trie approach:</strong> each node stores the top-K completions for that prefix. O(prefix_length) lookup.</p>
+<ul>
+  <li>Pros: space-efficient for shared prefixes.</li>
+  <li>Cons: hard to update incrementally (a score change must bubble up the trie). Complex to shard across machines.</li>
+</ul>
+<p><strong>Redis Sorted Set approach (recommended):</strong></p>
+<ul>
+  <li>One sorted set per prefix: key = <code>ac:{prefix}</code>, members = query strings, score = popularity score.</li>
+  <li>Lookup: <code>ZREVRANGEBYSCORE ac:sys +inf -inf LIMIT 0 5</code> → top 5 suggestions for "sys".</li>
+  <li>Update: <code>ZADD ac:sys {new_score} "system design"</code> (O(log N)).</li>
+  <li>Pros: simple to update, trivial to shard by key prefix, Redis handles persistence and expiry natively.</li>
+  <li>Cons: storage = O(unique prefixes). For 20M queries × avg 5-char prefixes × ~10 prefix lengths each ≈ ~3B sorted set entries. At 50 bytes/entry: ~150GB. Use Redis Cluster.</li>
+</ul>
+
+<div class="callout insight"><div class="callout-icon">💡</div><div class="callout-body"><strong>Key Insight</strong><br>Don't build a custom trie. Redis Sorted Sets implement exactly the operation you need (top-K by score for a given prefix key) with a single built-in command. You get persistence, clustering, and atomic updates for free. Only build a custom trie if you need sub-millisecond latency at 10M+ QPS.</div></div>
+
+<div class="step-badge">Step 3b — Score Calculation</div>
+<ul>
+  <li><strong>Base score:</strong> log₁₀(query_frequency) — logarithmic scale prevents "the" and "how" from dominating every suggestion.</li>
+  <li><strong>Time decay:</strong> <code>score = frequency × e^(-λ × days_since_last_seen)</code>, λ = 0.01 (half-life ~70 days). Old queries naturally fade out.</li>
+  <li><strong>Trending boost:</strong> if query appeared in top-10% growth this week, multiply score × 1.5.</li>
+  <li><strong>Personalization extension:</strong> blend global score (70%) + user query history score (30%). Avoids cold-start problem for new users who get pure global scores.</li>
+</ul>
+
+<div class="step-badge">Step 3c — Data Pipeline (score updates)</div>
+<pre><code>Every search: log { query, user_id, timestamp } to Kafka (non-blocking, fire-and-forget)
+
+Every 5 minutes (Flink / Spark Streaming job):
+  1. Aggregate: count(query) per 5-minute window from Kafka
+  2. Update global rolling 7-day counts in Redis
+  3. Recompute scores for all queries seen in this window
+  4. ZADD all affected prefix keys in Redis (use pipeline for batching — 1 round-trip per 100 commands)
+
+Every night (full rebuild, prevents drift accumulation):
+  1. Aggregate last 7 days of logs in Spark batch job
+  2. Rebuild all Redis sorted sets from scratch (correct any score drift)
+  3. Atomic swap: write to staging keys → rename to live keys (zero-downtime update)</code></pre>
+
+<div class="step-badge">Step 3d — Client-Side Optimizations</div>
+<p>The biggest latency wins are often client-side, not server-side:</p>
+<ul>
+  <li><strong>Debounce:</strong> wait 100ms after the last keystroke before firing a request. Typing "system" generates 1 request instead of 6. Eliminates ~83% of requests.</li>
+  <li><strong>Cancel in-flight requests:</strong> if the user types another character before the response arrives, cancel the stale request (fetch AbortController in JS). Prevents out-of-order display of stale suggestions.</li>
+  <li><strong>Browser cache:</strong> store the last 20 prefix responses in browser memory (Map with LRU eviction). Typing "sys", deleting back to "sy", then "sys" again = 0 server requests on the third keystroke.</li>
+  <li><strong>Prefix sharing:</strong> if the "sys" response returns 5 suggestions and all of them start with "syste", the client can infer suggestions for "syste" without a new request.</li>
+</ul>
+
+<div class="callout tradeoff"><div class="callout-icon">⚖️</div><div class="callout-body"><strong>Trade-off</strong><br>Debounce 100ms vs. 200ms: 100ms is imperceptible to the user but cuts requests by ~70% (assuming 150ms average typing speed). 200ms cuts requests further but users may perceive a delay before suggestions appear. 100ms is the standard industry choice.</div></div>
+
+<div class="step-badge">Step 3e — Filtering Unsafe and Spam Suggestions</div>
+<ul>
+  <li><strong>Blocklist:</strong> Bloom filter for ~1M known blocked queries (O(1) membership test, ~1.2MB memory). Any suggestion in the blocklist is removed from the response before returning.</li>
+  <li><strong>ML classifier:</strong> async pipeline flags borderline content for review. Does not block the query response.</li>
+  <li><strong>Spam detection:</strong> queries from a single IP with abnormally high frequency are excluded from global score updates. Prevents adversarial manipulation of suggestions.</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Data structure</td><td>Redis Sorted Set</td><td>Custom Trie</td><td>Simpler, atomic updates, easy sharding, battle-tested at scale</td></tr>
+    <tr><td>Score update frequency</td><td>5-minute batch</td><td>Real-time per-search</td><td>5-min freshness is sufficient; real-time would require complex stream-processing pipeline</td></tr>
+    <tr><td>Client debounce</td><td>100ms</td><td>None</td><td>Eliminates ~83% of autocomplete requests with zero perceptible UX impact</td></tr>
+    <tr><td>Personalization</td><td>30% user history blend</td><td>Pure global popularity</td><td>Balances relevance vs. cold-start problem for new users</td></tr>
+    <tr><td>Unsafe query filtering</td><td>Bloom filter blocklist</td><td>DB lookup per query</td><td>O(1) constant time, ~1.2MB vs. DB round-trip per autocomplete request</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Multi-language support:</strong> separate sorted set namespaces per language: <code>ac:en:sys</code>, <code>ac:es:sis</code>. Detect language from Accept-Language header or user profile. Dramatically improves relevance for non-English users.</li>
+  <li><strong>Spell correction:</strong> for zero-result prefixes, run edit-distance (Levenshtein) matching against the query index to find the closest real query. Display as "Did you mean: {corrected}".</li>
+  <li><strong>Query categorization:</strong> tag each suggestion with its likely category (movies, products, people) and show category icons next to suggestions. Requires an offline classification job on the query corpus.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'proximity-service',
+    title: 'Design a Proximity Service / Yelp',
+    icon: '📍',
+    difficulty: 'medium',
+    readTime: '21 min read',
+    teaser: 'Find nearby restaurants, drivers, or stores. Covers geospatial indexing with Geohash and Quadtree, radius search algorithms, and scaling to millions of location updates per second.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<p>Proximity queries are fundamentally a 2D indexing problem. The key insight is that standard B-tree indexes don't handle two-dimensional range queries efficiently.</p>
+
+<div class="callout tip"><div class="callout-icon">💬</div><div class="callout-body"><strong>Interview Tip</strong><br>Clarify whether objects are static (businesses) or moving (Uber drivers) early. Static objects can be precomputed and heavily cached. Moving objects require real-time writes at massive scale — a fundamentally different architecture.</div></div>
+
+<p><strong>Clarifying dialogue:</strong></p>
+<ul>
+  <li><strong>What are we finding nearby?</strong> → Businesses (like Yelp). Mention Uber drivers as an extension.</li>
+  <li><strong>Real-time moving objects?</strong> → No, static businesses only (Uber drivers in the extension).</li>
+  <li><strong>Search radius?</strong> → User-defined, up to 20km.</li>
+  <li><strong>How many businesses?</strong> → 200M globally.</li>
+</ul>
+
+<p><strong>Non-functional requirements:</strong></p>
+<ul>
+  <li>Search latency: &lt;200ms P99</li>
+  <li>Location data updated daily (businesses don't move)</li>
+  <li>High availability: read-heavy, optimize for reads over writes</li>
+</ul>
+
+<p><strong>Capacity estimates:</strong></p>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Businesses</span><span class="cap-val">200M</span></div>
+  <div class="cap-row"><span class="cap-label">DAU</span><span class="cap-val">100M</span></div>
+  <div class="cap-row"><span class="cap-label">Searches per user per day</span><span class="cap-val">5</span></div>
+  <div class="cap-row"><span class="cap-label">Proximity queries/day</span><span class="cap-val">500M</span></div>
+  <div class="cap-row"><span class="cap-label">Average read QPS</span><span class="cap-val">500M ÷ 86,400 ≈ 5,787</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Peak read QPS</span><span class="cap-val">~20,000</span></div>
+  <div class="cap-row"><span class="cap-label">Business metadata</span><span class="cap-val">200M × 1KB = 200GB (fits in memory with caching)</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<p><strong>Two services with different responsibilities:</strong></p>
+<ul>
+  <li><strong>Location Service</strong> — stores and indexes business locations (geospatial queries)</li>
+  <li><strong>Business Service</strong> — stores full business details (name, address, rating, photos)</li>
+</ul>
+<p>This separation matters: proximity search returns business IDs; the client then fetches full details for those IDs. This allows the two services to scale independently.</p>
+
+<pre class="diagram">  Client ──► API Gateway ──► Search Service ──► Location Index (Redis/DB)
+                                    │
+                                    ▼
+                           Business Service ──► Business DB (MySQL)
+                           (fetch full details
+                            for matched IDs)</pre>
+
+<div class="callout insight"><div class="callout-icon">💡</div><div class="callout-body"><strong>Key Insight</strong><br>The proximity search returns only business IDs. The client makes a second request to fetch details for those IDs. This "search then fetch" pattern lets you optimize each step independently: the location index optimizes for geospatial speed; the business service optimizes for rich metadata retrieval.</div></div>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Why Naive SQL Fails</div>
+<pre><code>-- Naive approach (DO NOT use at scale):
+SELECT * FROM businesses
+WHERE lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?</code></pre>
+<p>Problems:</p>
+<ul>
+  <li>Latitude and longitude are two separate dimensions. A 2D range query requires the DB to intersect two B-tree index results — not natively supported efficiently.</li>
+  <li>Even with indexes on both columns, the engine must scan large ranges and post-filter.</li>
+  <li>At 200M rows with 20K QPS, this approach collapses under load.</li>
+</ul>
+
+<div class="step-badge">Step 3b — Geohash: The Right Abstraction</div>
+<p>Geohash divides the Earth into a recursive grid of rectangular cells, encoded as a base32 string:</p>
+<ul>
+  <li><code>9q5c2p</code> = a specific cell covering ~1.2km × 0.6km in San Francisco</li>
+  <li>Longer string = smaller, more precise cell</li>
+</ul>
+<table>
+  <thead><tr><th>Geohash length</th><th>Cell size (approx.)</th><th>Use case</th></tr></thead>
+  <tbody>
+    <tr><td>4 chars</td><td>40km × 20km</td><td>City-level</td></tr>
+    <tr><td>6 chars</td><td>1.2km × 0.6km</td><td>Neighborhood</td></tr>
+    <tr><td>8 chars</td><td>38m × 19m</td><td>Building</td></tr>
+  </tbody>
+</table>
+<p><strong>Key property:</strong> nearby locations share a common prefix. Locations in the same 1.2km cell all start with the same 6-character geohash prefix.</p>
+
+<p><strong>Proximity search algorithm:</strong></p>
+<ol>
+  <li>Compute user's geohash at precision 6: e.g., <code>9q5c2p</code></li>
+  <li>Find the 8 neighboring cells (the target cell + 8 surrounding cells)</li>
+  <li>Query: <code>SELECT business_id FROM businesses WHERE geohash LIKE '9q5c2p%'</code> (9 queries, one per cell)</li>
+  <li>Post-filter results by actual distance using the Haversine formula</li>
+</ol>
+
+<div class="callout tip"><div class="callout-icon">💬</div><div class="callout-body"><strong>Interview Tip</strong><br>Always explain WHY you need the 8 neighboring cells. A user standing at the eastern edge of cell 9q5c2p would miss businesses just 10 meters away in the adjacent cell 9q5c2r. Including all 8 neighbors guarantees no nearby businesses are missed regardless of the user's position within their cell.</div></div>
+
+<div class="step-badge">Step 3c — Quadtree: The Alternative</div>
+<p>A Quadtree recursively subdivides the world into 4 quadrants until each leaf cell contains ≤ 100 businesses.</p>
+<ul>
+  <li><strong>Pros:</strong> adapts to business density. NYC gets deeply subdivided; the Sahara stays coarse. No wasted cells.</li>
+  <li><strong>Cons:</strong> complex to implement. Adding/removing a business may require tree rebalancing. Hard to shard across machines.</li>
+</ul>
+<p><strong>Recommendation:</strong> Geohash for most interview answers (simpler, Redis-native). Mention Quadtree as an alternative that handles uneven density better.</p>
+
+<div class="step-badge">Step 3d — Storage Design</div>
+<pre><code>-- Business table (MySQL, full details)
+CREATE TABLE businesses (
+  business_id   BIGINT PRIMARY KEY,
+  name          VARCHAR(255),
+  address       TEXT,
+  lat           DECIMAL(9,7),
+  lng           DECIMAL(10,7),
+  geohash       VARCHAR(12),      -- precision 12 = ~3.7cm accuracy
+  category      VARCHAR(64),
+  rating        DECIMAL(2,1),
+  INDEX idx_geohash (geohash)     -- prefix search: WHERE geohash LIKE '9q5c2p%'
+);</code></pre>
+
+<p><strong>Redis for hot-path geospatial lookups:</strong></p>
+<pre><code>-- Redis Sorted Set per geohash cell
+-- Key: "geo:{geohash_prefix_6}"  (e.g., "geo:9q5c2p")
+-- Value: Redis Set of business_ids in that cell
+-- Precomputed for all 6-char geohash cells containing at least one business
+-- Total: 200M businesses × avg 1 geohash key each ≈ manageable in Redis Cluster</code></pre>
+
+<div class="step-badge">Step 3e — Caching Strategy</div>
+<ul>
+  <li>Cache geohash → business_ids in Redis (businesses rarely move — high cache hit rate).</li>
+  <li>Cache full business details (id → metadata) in Redis with 1h TTL.</li>
+  <li>At 200M businesses × ~500B metadata each: ~100GB. Use Redis Cluster with 3 shards.</li>
+  <li>Cache warming on deployment: preload all geohash cells into Redis from MySQL.</li>
+  <li>Top 10K most-searched geohash cells (popular neighborhoods) cover ~80% of all queries.</li>
+</ul>
+
+<div class="step-badge">Step 3f — Extension: Real-Time Moving Objects (Uber Drivers)</div>
+<p>Drivers update location every 4 seconds. At 10M active drivers: 10M ÷ 4s = <strong>2.5M location updates/sec</strong>. Cannot use MySQL for this.</p>
+<p><strong>Solution: Redis GEO commands</strong></p>
+<pre><code>-- Update driver location:
+GEOADD drivers {longitude} {latitude} {driver_id}
+
+-- Find drivers within 5km of user:
+GEORADIUS drivers {user_lng} {user_lat} 5 km ASC COUNT 10</code></pre>
+<ul>
+  <li>Redis GEO uses Geohash internally, stored as a Sorted Set scored by geohash value.</li>
+  <li><code>GEORADIUS</code> is O(N + log M) for N results within the radius — extremely fast.</li>
+  <li>Redis handles 2.5M writes/sec with a Redis Cluster (each shard handles ~100K writes/sec).</li>
+  <li>Separate key per city: <code>drivers:seattle</code>, <code>drivers:nyc</code> — keeps each set small and local.</li>
+</ul>
+
+<div class="callout tradeoff"><div class="callout-icon">⚖️</div><div class="callout-body"><strong>Trade-off</strong><br>Redis GEO is in-memory only (no persistence needed for ephemeral driver locations). If Redis restarts, drivers simply re-register their location on the next heartbeat (within 4 seconds). For a driver's location, losing it on restart is acceptable; for a business's location, you'd want MySQL as the source of truth with Redis as a cache.</div></div>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Geospatial index</td><td>Geohash (Redis)</td><td>PostGIS / Quadtree</td><td>Simple, in-memory, easy to cache, Redis-native; PostGIS adds DB dependency</td></tr>
+    <tr><td>Search approach</td><td>9-cell geohash prefix query</td><td>Circular distance scan</td><td>O(1) prefix lookup vs. O(N) full table scan; handles edge-of-cell users correctly</td></tr>
+    <tr><td>Business storage</td><td>MySQL + geohash index</td><td>Elasticsearch with geo_point</td><td>Simpler for structured relational data; Elasticsearch adds operational complexity</td></tr>
+    <tr><td>Moving objects</td><td>Redis GEO commands</td><td>Custom spatial index</td><td>Built-in, atomic, handles 2.5M writes/sec, GEORADIUS query is one command</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Search radius edge cases:</strong> when the search radius crosses an ocean or a pole, geohash neighbor computation breaks down. Handle by using larger geohash precision and falling back to bounding box + Haversine post-filter.</li>
+  <li><strong>Business ranking:</strong> proximity search returns candidates; a ranking model scores them by distance + rating + price + personalization signals. Run ranking as a separate fast service after the geospatial lookup.</li>
+  <li><strong>Geo-fencing:</strong> trigger an event when a moving object (driver, delivery person) enters or exits a polygon (restaurant zone, delivery area). Use Redis Lua scripts to atomically check position against stored fence polygons on each location update.</li>
+</ul>
+`
+      }
+    ]
   }
 ];
 
