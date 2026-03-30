@@ -3950,6 +3950,828 @@ function on_failure(job):
 `
       },
     ]
+  },
+  {
+    id: 'notification-system',
+    title: 'Design a Notification System',
+    icon: '🔔',
+    difficulty: 'medium',
+    readTime: '16 min read',
+    teaser: 'Design a system that delivers billions of push, SMS, and email notifications reliably. Covers fan-out, channel routing, rate limiting per user, and retry with exponential backoff.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Which channels?</strong> → iOS push (APNs), Android push (FCM), SMS (Twilio), and email (SendGrid).</li>
+  <li><strong>Scale?</strong> → 1 million notifications/day across all channels; peak spikes to 5× during marketing blasts.</li>
+  <li><strong>Real-time or batch?</strong> → Both. Transactional alerts (password reset, order confirmation) must deliver in &lt;5 seconds. Marketing campaigns are scheduled batch sends.</li>
+  <li><strong>Can users opt out?</strong> → Yes. User preference per channel must be respected before every send.</li>
+  <li><strong>Retry on failure?</strong> → Yes — third-party providers (APNs, Twilio) can be temporarily unavailable.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Soft real-time: transactional notifications delivered within 5 seconds</li>
+  <li>At-least-once delivery (no silent drops); idempotent to avoid duplicate sends</li>
+  <li>Respect user channel preferences and opt-outs</li>
+  <li>Fault tolerant against third-party provider outages</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Daily notifications</span><span class="cap-val">1M/day → ~12/sec average</span></div>
+  <div class="cap-row"><span class="cap-label">Peak rate (5× spike)</span><span class="cap-val">~60 notifications/sec</span></div>
+  <div class="cap-row"><span class="cap-label">Notification metadata</span><span class="cap-val">~500 bytes each → 500 MB/day log storage</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Devices per user (avg)</span><span class="cap-val">1.5 → fan-out to ~1.5M device tokens/day</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Components</h3>
+<ul>
+  <li><strong>Notification API Service:</strong> Accepts requests from internal services (e.g., order-service, auth-service) or a CMS for campaigns. Validates payload and enqueues.</li>
+  <li><strong>User Preference Service:</strong> Stores per-user channel preferences and opt-outs. Checked before every dispatch.</li>
+  <li><strong>Message Queue (Kafka):</strong> One topic per channel — <code>notif.push</code>, <code>notif.sms</code>, <code>notif.email</code>. Decouples producers from channel workers.</li>
+  <li><strong>Channel Workers:</strong> Independent consumers per channel. Each worker reads from its topic, checks preferences, and calls the third-party provider.</li>
+  <li><strong>Third-Party Providers:</strong> APNs (Apple Push), FCM (Google Push), Twilio (SMS), SendGrid (email).</li>
+  <li><strong>Notification Log (Cassandra):</strong> Append-only log of every send attempt with status (sent, failed, delivered). Used for dedup and audit.</li>
+</ul>
+
+<pre class="diagram">
+  Internal Service  ──►  Notification API  ──►  Kafka Topics
+   (order-svc)              │                   /notif.push
+   (auth-svc)          User Preference DB      /notif.sms
+   (CMS campaign)      (checked before enqueue) /notif.email
+                                │
+              ┌─────────────────┼──────────────────┐
+              ▼                 ▼                  ▼
+         Push Worker        SMS Worker        Email Worker
+         (FCM / APNs)      (Twilio)          (SendGrid)
+              │                 │                  │
+              └─────────────────┴──────────────────┘
+                                │
+                         Notification Log (Cassandra)
+</pre>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Device Token Management</div>
+<p>Each mobile device registers a token with APNs/FCM. Tokens expire or rotate when the app reinstalls. A <strong>Device Token Service</strong> maintains a mapping: <code>user_id → [device_token, platform, last_seen]</code>. Workers query this table to fan out to all active devices for a user. Stale tokens (APNs returns 410 Gone) must be deleted promptly to avoid wasted sends.</p>
+
+<div class="step-badge">Step 3b — Retry with Exponential Backoff</div>
+<p>Channel workers use an at-least-once pattern:</p>
+<pre><code>def send_push(notification):
+    for attempt in range(MAX_RETRIES):   # MAX_RETRIES = 5
+        try:
+            provider.send(notification)
+            log_success(notification.id)
+            return
+        except RateLimitError:
+            sleep(2 ** attempt + jitter())  # exponential backoff
+        except ProviderDown:
+            sleep(2 ** attempt + jitter())
+    log_failure(notification.id)
+    send_to_dead_letter_queue(notification)</code></pre>
+
+<div class="step-badge">Step 3c — Deduplication</div>
+<p>A caller may retry the Notification API if it doesn't receive a 200 response. To avoid double-sends, the API assigns an <strong>idempotency key</strong> (caller-supplied or auto-generated). Before dispatching, workers check the Notification Log:</p>
+<pre><code>SELECT status FROM notif_log WHERE idempotency_key = ?</code></pre>
+<p>If status is already <code>sent</code>, the worker skips the provider call and acknowledges the queue message.</p>
+
+<div class="step-badge">Step 3d — Rate Limiting per User</div>
+<p>Sending 50 marketing emails to one user in an hour is spammy. A <strong>rate limiter</strong> (Redis token bucket) enforces per-user, per-channel limits (e.g., max 3 marketing emails/day). If the bucket is empty, the notification is dropped with a log entry. Transactional messages (password reset) bypass this check — they use a separate high-priority queue.</p>
+
+<div class="step-badge">Step 3e — Campaign Fan-out</div>
+<p>Marketing blasts go to millions of users. A synchronous fan-out would overwhelm the API. Instead:</p>
+<ol>
+  <li>CMS creates a <strong>campaign record</strong> in MySQL with the message template and target segment.</li>
+  <li>A <strong>Campaign Expander</strong> service reads the campaign, queries the user segment (e.g., users who haven't bought in 30 days), and writes individual notification records to Kafka at a controlled rate (e.g., 10K/sec).</li>
+  <li>Channel workers process them at their own pace. No single instant spike.</li>
+</ol>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Queue</td><td>Kafka (one topic per channel)</td><td>Single SQS queue</td><td>Channel isolation: push outage doesn't delay email. Independent scaling per channel.</td></tr>
+    <tr><td>Log store</td><td>Cassandra</td><td>MySQL</td><td>Append-heavy write pattern; time-series lookup by user_id; no joins needed</td></tr>
+    <tr><td>Dedup</td><td>Idempotency key in log</td><td>Exactly-once Kafka</td><td>Provider calls are external HTTP — Kafka exactly-once only covers internal broker delivery</td></tr>
+    <tr><td>Campaign fan-out</td><td>Async expander at controlled rate</td><td>Inline fan-out at API</td><td>Prevents traffic spike; expander can pause/resume without losing progress</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Analytics:</strong> Track open rates and click-through rates. When a user opens a push notification, the app sends a delivery receipt back to the Notification Log. Aggregate in a columnar store (ClickHouse) for reporting.</li>
+  <li><strong>Priority lanes:</strong> Use two Kafka partitions per channel topic — high-priority (transactional) and low-priority (marketing). Workers always drain high-priority first.</li>
+  <li><strong>Template rendering:</strong> Move Mustache/Handlebars rendering out of the API and into the channel workers so the API stays lightweight and templates can be A/B tested per channel independently.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'distributed-cache',
+    title: 'Design a Distributed Cache',
+    icon: '⚡',
+    difficulty: 'medium',
+    readTime: '18 min read',
+    teaser: 'Design a Redis-style in-memory key-value cache used by millions of services. Covers consistent hashing, eviction policies, hot-key mitigation, and cache invalidation strategies.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Read/write ratio?</strong> → ~90% reads, 10% writes (typical caching workload).</li>
+  <li><strong>Scale?</strong> → 10 million QPS reads, 1 million QPS writes across the cluster.</li>
+  <li><strong>Data size?</strong> → Typical value is 1KB; max 1MB. Keys are short strings.</li>
+  <li><strong>TTL support?</strong> → Yes. Keys expire automatically after a configurable TTL.</li>
+  <li><strong>High availability?</strong> → Yes. Cache nodes can fail; the cluster should degrade gracefully, not go down entirely.</li>
+  <li><strong>Persistence?</strong> → No. This is a pure cache — data loss on node failure is acceptable (the source of truth is the database).</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Sub-millisecond p99 read latency</li>
+  <li>Linear horizontal scalability (add nodes to increase capacity)</li>
+  <li>Fault tolerant: single node failure should not cause cluster-wide unavailability</li>
+  <li>Efficient memory usage — evict old entries when memory is full</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Read QPS</span><span class="cap-val">10M reads/sec → need ~50 cache nodes at 200K QPS/node</span></div>
+  <div class="cap-row"><span class="cap-label">Working set size</span><span class="cap-val">500GB (80/20 rule: top 20% of keys serve 80% of traffic)</span></div>
+  <div class="cap-row"><span class="cap-label">Node memory</span><span class="cap-val">64GB RAM per node → ~10 nodes for working set</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Bottleneck</span><span class="cap-val">QPS (need 50 nodes), not storage (need 10). Size for QPS.</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Architecture</h3>
+<ul>
+  <li><strong>Cache Cluster:</strong> N stateless cache nodes, each holding a shard of the keyspace. Clients pick the correct node using consistent hashing.</li>
+  <li><strong>Client Library:</strong> Thin library embedded in each service. Computes the node for a given key using the consistent hash ring, sends the GET/SET command over a connection pool.</li>
+  <li><strong>Configuration Service (ZooKeeper/etcd):</strong> Stores the current ring topology (which nodes are alive, their virtual node positions). Client library subscribes to changes — when a node is added/removed, the library updates its local ring view.</li>
+</ul>
+
+<pre class="diagram">
+  App Server  ──►  Client Library
+                  (consistent hash ring)
+                         │
+         ┌───────────────┼────────────────┐
+         ▼               ▼                ▼
+     Cache Node A   Cache Node B    Cache Node C
+     (shard 0-3)    (shard 4-7)     (shard 8-11)
+         │               │                │
+         └───────────────┴────────────────┘
+                  ZooKeeper (ring topology)
+                  ← client subscribes to changes
+</pre>
+
+<h3>Consistent Hashing</h3>
+<p>Map both cache nodes and keys onto a circular hash ring (0 to 2³² − 1). Each key is assigned to the first node clockwise from its hash position. When a node is added, only <code>K/N</code> keys (K=total keys, N=node count) need to be remapped — not a full rehash. Each physical node is represented by 100–200 <strong>virtual nodes</strong> (vnodes) spread around the ring to achieve even distribution.</p>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Eviction Policies</div>
+<p>When a node's memory is full, it must evict entries. Common policies:</p>
+<ul>
+  <li><strong>LRU (Least Recently Used):</strong> Evict the key that was accessed least recently. Best general-purpose policy. Redis implements an approximated LRU (samples 5 random keys, evicts the oldest) to avoid the overhead of a full sorted structure.</li>
+  <li><strong>LFU (Least Frequently Used):</strong> Evict the key accessed fewest times. Better for skewed access patterns (protects hot keys).</li>
+  <li><strong>TTL-first:</strong> Actively expire keys with the shortest remaining TTL. Redis runs a background thread that samples 20 random keys with TTLs every 100ms and deletes expired ones (lazy + active expiration combined).</li>
+</ul>
+
+<div class="step-badge">Step 3b — Hot Key Problem</div>
+<p>A single viral key (e.g., a celebrity's profile) can overwhelm one cache node with millions of QPS. Solutions:</p>
+<ul>
+  <li><strong>Local in-process cache:</strong> Client library keeps a small LRU cache (e.g., 1000 entries) in the application process itself. Hot keys are served from RAM without any network hop. Stale by up to a few hundred ms — acceptable for most use cases.</li>
+  <li><strong>Key replication:</strong> Store hot keys as <code>key#0</code>, <code>key#1</code>, … <code>key#N</code> across N nodes. Client randomly picks one on read. Writes update all N replicas. Identifies hot keys via a frequency counter sampled by the client library.</li>
+</ul>
+
+<div class="step-badge">Step 3c — Cache Invalidation Strategies</div>
+<p>Keeping cache consistent with the database is the hardest part of caching ("there are only two hard things in CS…"):</p>
+<ul>
+  <li><strong>Cache-aside (lazy loading):</strong> Application checks cache → if miss, loads from DB, writes to cache. Simple, but first request after expiry hits the DB (thundering herd). Fix with mutex/singleflight — one goroutine fetches, others wait.</li>
+  <li><strong>Write-through:</strong> Every DB write also writes to cache synchronously. Cache is always fresh, but adds write latency.</li>
+  <li><strong>Write-behind (write-back):</strong> Writes go to cache first, async to DB. Lowest latency, but risk of data loss if the cache node crashes before flushing.</li>
+  <li><strong>CDC-based invalidation:</strong> Debezium captures MySQL binlog changes → Kafka → cache invalidation service calls DEL on affected keys. Decoupled from application code; works across all services that share the same table.</li>
+</ul>
+
+<div class="step-badge">Step 3d — Thundering Herd</div>
+<p>When a TTL expires, thousands of concurrent requests find a cache miss and all hit the database simultaneously. Fix: <strong>singleflight</strong> — the first request acquires a distributed lock (Redis SETNX) and fetches from DB; subsequent requests wait for the lock to release, then read the now-populated cache. Only one DB query per key per TTL expiry.</p>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Sharding</td><td>Consistent hashing</td><td>Modulo hashing</td><td>Adding/removing nodes remaps only K/N keys; modulo rehashes everything</td></tr>
+    <tr><td>Eviction</td><td>LRU (approximated)</td><td>LFU</td><td>LRU is simpler and sufficient for most workloads; LFU adds frequency counter overhead</td></tr>
+    <tr><td>Hot keys</td><td>Local in-process cache</td><td>Key replication</td><td>Zero network hop; simpler; effective for the top-N hottest keys</td></tr>
+    <tr><td>Invalidation</td><td>TTL + CDC-based DEL</td><td>Write-through</td><td>CDC decouples cache logic from every write path; services don't need to know about the cache</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Read replicas:</strong> Add read-only replicas per shard for read scaling. Replica lag is typically &lt;1ms for in-memory replication — acceptable for cache workloads.</li>
+  <li><strong>Cluster autoscaling:</strong> Monitor per-node memory usage. When avg memory &gt;70%, trigger a scale-out via the configuration service. Consistent hashing means only ~10% of keys need remapping when a new node is added.</li>
+  <li><strong>Multi-tier caching:</strong> L1 = in-process cache (microseconds, small), L2 = distributed cache (sub-ms, large), L3 = database (ms, authoritative). Each tier caches more keys but with higher latency.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'payment-system',
+    title: 'Design a Payment System (Stripe-style)',
+    icon: '💳',
+    difficulty: 'hard',
+    readTime: '22 min read',
+    teaser: 'Design a payment processing platform that handles credit card charges, payouts, and reconciliation at scale. Covers exactly-once semantics, double-entry ledger, idempotency keys, and handling third-party PSP failures.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<div class="callout warning"><div class="callout-icon">⚠️</div><div class="callout-body"><strong>Hard System</strong><br>Payments require correctness guarantees that other systems don't. Money cannot be double-charged or silently lost. Every design decision must consider failure modes explicitly.</div></div>
+
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Scope?</strong> → Payment initiation (charging a card) and payout (sending money to a merchant). No card issuance.</li>
+  <li><strong>Which PSPs?</strong> → Route through Stripe and PayPal as primary; Braintree as fallback.</li>
+  <li><strong>Scale?</strong> → 1 million transactions/day. Peak is 50× on Black Friday.</li>
+  <li><strong>Global?</strong> → Yes — must handle multi-currency.</li>
+  <li><strong>What happens if PSP is down?</strong> → Queue payment, retry later; show user a "processing" state rather than an error.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Exactly-once: a user must never be double-charged</li>
+  <li>Consistency: ledger must always balance (sum of debits = sum of credits)</li>
+  <li>Auditability: every state transition persisted; immutable audit log</li>
+  <li>Availability over consistency for reads (users can see "processing"); consistency required for writes</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Average transaction rate</span><span class="cap-val">1M/day ÷ 86,400 ≈ 12 TPS</span></div>
+  <div class="cap-row"><span class="cap-label">Peak (50× Black Friday)</span><span class="cap-val">~600 TPS</span></div>
+  <div class="cap-row"><span class="cap-label">Transaction record size</span><span class="cap-val">~2KB including metadata</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Annual ledger storage</span><span class="cap-val">1M/day × 365 × 2KB ≈ 730 GB/year</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Payment Flow</h3>
+<ol>
+  <li>Client calls <strong>Payment API</strong> with amount, currency, and payment method token.</li>
+  <li>API writes a <strong>Payment Order</strong> to the DB with status <code>PENDING</code> and returns an order ID to the client.</li>
+  <li>A <strong>Payment Executor</strong> picks up the order, calls the PSP (Stripe/PayPal), and updates the order status to <code>EXECUTING</code>.</li>
+  <li>PSP responds (synchronously or via webhook). Executor updates status to <code>SUCCESS</code> or <code>FAILED</code>.</li>
+  <li>On success, the <strong>Ledger Service</strong> records double-entry bookkeeping entries.</li>
+  <li>The <strong>Wallet Service</strong> updates the merchant's balance.</li>
+</ol>
+
+<pre class="diagram">
+  Client ──► Payment API ──► Payment Order DB (status: PENDING)
+                                    │
+                             Payment Executor
+                             (polls for PENDING orders)
+                                    │
+                         ┌──────────┴──────────┐
+                         ▼                     ▼
+                    PSP (Stripe)          PSP (PayPal)
+                    primary               fallback
+                         │
+                    Webhook receiver
+                         │
+              ┌──────────┴──────────┐
+              ▼                     ▼
+         Ledger Service        Wallet Service
+         (double-entry)        (merchant balance)
+</pre>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Idempotency Keys</div>
+<p>A network timeout means: did the PSP receive my charge request? If I retry without an idempotency key, the user gets double-charged. Every PSP call includes a client-generated UUID:</p>
+<pre><code>POST /v1/charges
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+{ "amount": 2000, "currency": "usd", "source": "tok_visa" }</code></pre>
+<p>The PSP deduplicates on this key — a second call with the same key returns the original response without creating a new charge. Our system stores a mapping of <code>idempotency_key → payment_order_id</code> in Redis (TTL: 24h) to dedup at our API layer before even calling the PSP.</p>
+
+<div class="step-badge">Step 3b — Double-Entry Ledger</div>
+<p>All money movements are recorded as a pair of ledger entries that always sum to zero. This is standard accounting practice and mathematically guarantees consistency:</p>
+<pre><code>-- User pays $20 for an order
+INSERT INTO ledger_entries VALUES
+  (txn_id, account='buyer_wallet',   amount=-2000, currency='USD'),
+  (txn_id, account='merchant_wallet', amount=+1900, currency='USD'),
+  (txn_id, account='platform_fees',   amount=+100,  currency='USD');
+
+-- Invariant: SELECT SUM(amount) FROM ledger_entries = 0 (always)</code></pre>
+<p>The ledger is <strong>append-only</strong>. Mistakes are corrected with reversals, never by updating rows. This creates a complete audit trail.</p>
+
+<div class="step-badge">Step 3c — Handling PSP Failures</div>
+<p>PSPs go down. Strategy:</p>
+<ul>
+  <li><strong>Async execution:</strong> The Payment Executor polls a queue (not inline with the API request). If the PSP is down, orders stay in <code>PENDING</code> state and are retried automatically.</li>
+  <li><strong>PSP fallback:</strong> After 3 consecutive PSP failures, the executor switches to the secondary PSP (PayPal). A circuit breaker prevents hammering a downed PSP.</li>
+  <li><strong>Webhook reconciliation:</strong> PSPs send webhooks for async events (payment confirmed, dispute opened). A <strong>Reconciliation Service</strong> runs hourly to compare our DB state vs. the PSP's statement API — any mismatches are flagged for manual review.</li>
+</ul>
+
+<div class="step-badge">Step 3d — Consistency with Distributed Transactions</div>
+<p>After PSP confirms success, we need to update Payment Order, Ledger, and Wallet atomically. These are different services/databases. Use the <strong>Saga pattern</strong> (choreography-based):</p>
+<ol>
+  <li>Payment Executor publishes <code>payment.succeeded</code> event to Kafka.</li>
+  <li>Ledger Service consumes event → writes ledger entries → publishes <code>ledger.updated</code>.</li>
+  <li>Wallet Service consumes <code>ledger.updated</code> → updates merchant balance → publishes <code>wallet.updated</code>.</li>
+  <li>Each step is idempotent (keyed on <code>payment_id</code>). If a step fails, it retries until it succeeds.</li>
+</ol>
+<p>There is no distributed transaction or two-phase commit — eventual consistency via durable events is sufficient for payments where settlement takes seconds, not microseconds.</p>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Idempotency</td><td>Client-generated UUID key</td><td>Server-generated key</td><td>Client controls retry logic; UUID generated before network call — survives timeouts</td></tr>
+    <tr><td>Ledger model</td><td>Double-entry, append-only</td><td>Balance field updates</td><td>Mathematical consistency guarantee; full audit trail; cannot accidentally go negative</td></tr>
+    <tr><td>Cross-service consistency</td><td>Saga (event-driven)</td><td>2-Phase Commit</td><td>2PC across external PSP is impossible; Saga handles partial failures gracefully via idempotent retries</td></tr>
+    <tr><td>PSP failure</td><td>Circuit breaker + async queue</td><td>Synchronous retry</td><td>Client sees "processing" not error; orders persist through outages; no timeout pressure on API</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Fraud detection:</strong> Before calling the PSP, run the transaction through a rules engine (velocity checks: &gt;5 charges/min from same IP) and an ML model (anomaly score). Async so it doesn't add latency to the happy path — flag suspicious transactions for review after they're submitted.</li>
+  <li><strong>Payout scheduling:</strong> Merchant payouts are batched (daily at 2am) to minimize PSP fees. A separate Payout Service aggregates net balances from the Ledger and initiates ACH/SEPA transfers.</li>
+  <li><strong>Multi-currency:</strong> Store all amounts in minor units (cents/pence) as integers. Never use floats for money. FX rates are snapshotted at charge time and stored with the transaction record.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'social-graph',
+    title: 'Design a Social Graph (Facebook-style)',
+    icon: '🕸️',
+    difficulty: 'medium',
+    readTime: '17 min read',
+    teaser: 'Design a friendship/follow graph storing hundreds of billions of edges. Covers graph storage options, mutual-friend queries, friend suggestion via graph traversal, and eventual consistency at scale.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Directed (follow) or undirected (friend)?</strong> → Bidirectional friendship (Facebook-style): A and B are both friends or neither.</li>
+  <li><strong>Scale?</strong> → 500 million users; average 200 friends each → 50 billion friendship edges.</li>
+  <li><strong>Queries needed?</strong> → (1) Is A friends with B? (2) Get all friends of A. (3) Mutual friends of A and B. (4) Friend-of-friend suggestions.</li>
+  <li><strong>Write pattern?</strong> → Add/remove friend. Relatively rare — most traffic is read.</li>
+  <li><strong>Strong consistency required?</strong> → No. Eventual consistency is fine — if B doesn't see A's friend request for 1 second, that's okay.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Read-heavy: 100:1 read/write ratio</li>
+  <li>Low latency for friend-of-user lookup (&lt;50ms)</li>
+  <li>Mutual-friend queries need to be fast (&lt;200ms) — used in friend suggestions</li>
+  <li>Eventual consistency acceptable for graph updates</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Total edges</span><span class="cap-val">500M users × 200 friends ÷ 2 = 50B undirected edges</span></div>
+  <div class="cap-row"><span class="cap-label">Storage (both directions)</span><span class="cap-val">100B rows × 16 bytes (user_id pair + metadata) = 1.6 TB</span></div>
+  <div class="cap-row"><span class="cap-label">Read QPS</span><span class="cap-val">~5M friend-list lookups/sec across the cluster</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Avg friend list size</span><span class="cap-val">200 friends × 8 bytes per ID = 1.6 KB per user</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Storage: Adjacency List in a Sharded Database</h3>
+<p>The fundamental structure is an adjacency list table:</p>
+<pre><code>CREATE TABLE friendships (
+  user_id       BIGINT NOT NULL,
+  friend_id     BIGINT NOT NULL,
+  created_at    DATETIME NOT NULL,
+  PRIMARY KEY (user_id, friend_id),
+  INDEX idx_friend (friend_id, user_id)  -- for reverse lookup
+);</code></pre>
+<p>Each friendship is stored as <strong>two rows</strong>: (A→B) and (B→A). This makes <code>GET /friends/{user_id}</code> a single-partition scan. With sharding on <code>user_id</code>, each shard owns all outgoing edges for its users.</p>
+
+<pre class="diagram">
+  Graph API ──► Friend Service
+                     │
+        ┌────────────┼────────────┐
+        ▼            ▼            ▼
+    Shard 0      Shard 1      Shard 2
+   users 0-1M   users 1-2M   users 2-3M
+   (adjacency   (adjacency   (adjacency
+    list rows)   list rows)   list rows)
+        │
+  Redis Cache (friend lists, hot users)
+</pre>
+
+<h3>Caching Friend Lists</h3>
+<p>With 200 friends per user and 5M QPS reads, the database would be crushed. Cache friend lists in Redis as sorted sets: <code>friends:{user_id}</code> → sorted set of friend IDs (scored by friendship time). Cache hit rate &gt;95% in practice — most reads are for active users who are already cached.</p>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Mutual Friends Query</div>
+<p>"How many mutual friends do A and B have?" is a set intersection problem:</p>
+<pre><code>-- Option 1: Database (slow for large friend lists)
+SELECT COUNT(*) FROM friendships f1
+JOIN friendships f2 ON f1.friend_id = f2.friend_id
+WHERE f1.user_id = A AND f2.user_id = B;
+
+-- Option 2: Redis SINTER (fast — O(N) where N = smaller set size)
+SINTER friends:A friends:B  -- returns set of mutual friend IDs</code></pre>
+<p>For most users (200 friends), Redis SINTER takes &lt;1ms. For high-degree nodes (celebrities with 5000 friends), compute asynchronously and cache the result.</p>
+
+<div class="step-badge">Step 3b — Friend Suggestions (BFS)</div>
+<p>Suggest "people you may know" = friends-of-friends not already friends with A. This is a 2-hop graph traversal:</p>
+<pre><code>def friend_suggestions(user_a):
+    friends_a = get_friends(user_a)          # set, from Redis
+    fof = set()
+    for f in friends_a:
+        fof |= get_friends(f)                # 1-hop expansion
+    candidates = fof - friends_a - {user_a}  # remove existing friends
+    # rank by mutual friend count (use Redis SINTERCARD)
+    return sorted(candidates, key=lambda u: mutual_count(user_a, u), reverse=True)[:20]</code></pre>
+<p>This is computed <strong>offline</strong> by a batch job (Spark) running nightly. Results cached in Redis for 24 hours. Real-time queries use a pre-computed top-20 list, not live BFS — live BFS over 200×200 = 40K users is too slow at read time.</p>
+
+<div class="step-badge">Step 3c — Adding/Removing Friends</div>
+<p>When A sends B a friend request and B accepts:</p>
+<ol>
+  <li>Write <code>(A, B)</code> and <code>(B, A)</code> rows to the DB (single transaction).</li>
+  <li>Publish <code>friendship.created</code> event to Kafka.</li>
+  <li>Cache invalidation workers consume the event and update/invalidate Redis friend lists for A and B.</li>
+</ol>
+<p>The two DB rows must be written atomically (same MySQL transaction). If the transaction fails, the event is never published — no cache gets stale state.</p>
+
+<div class="step-badge">Step 3d — Handling Celebrities (High-Degree Nodes)</div>
+<p>A celebrity with 5 million followers creates problems: their adjacency list row set is massive, their Redis key is gigabytes, and every write that touches them is slow. Solution: <strong>separate hot nodes</strong>. Store celebrity follow lists in a dedicated high-memory shard. Use a different cache key structure (<code>celeb_friends:{id}</code>) to apply different TTL and eviction policies. For mutual-friend queries involving a celebrity, use a counting approach (HyperLogLog approximation) rather than exact set intersection.</p>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Storage model</td><td>Sharded adjacency list (MySQL)</td><td>Native graph DB (Neo4j)</td><td>Graph DBs struggle to shard to 50B edges; MySQL with correct indexing handles read-heavy adjacency lookups efficiently</td></tr>
+    <tr><td>Mutual friends</td><td>Redis SINTER</td><td>SQL JOIN</td><td>In-memory set intersection is O(N) and sub-millisecond; SQL join requires cross-shard coordination</td></tr>
+    <tr><td>Friend suggestions</td><td>Offline batch (Spark)</td><td>Real-time BFS</td><td>Latency-sensitive; 40K node traversal is too slow in real-time; pre-computed results are &lt;1ms</td></tr>
+    <tr><td>Cache invalidation</td><td>Event-driven (Kafka)</td><td>Write-through</td><td>Decoupled; friendship service doesn't need to know about every cache consumer</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Privacy filtering:</strong> Not all friend-of-friend candidates should be visible. Apply privacy settings (e.g., "only friends of friends can see me") during the suggestion ranking step — filter out users whose privacy settings exclude the requester.</li>
+  <li><strong>Directed graph (follow model):</strong> If you need Twitter-style follows (asymmetric), store only one row per follow. The "follower" and "following" lists require two different index scans. Cache separately: <code>followers:{id}</code> and <code>following:{id}</code>.</li>
+  <li><strong>Graph analytics:</strong> Offline Spark jobs compute graph metrics (degree centrality, community clusters) for recommendation and spam detection. These run on a read replica, not the primary DB.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'leaderboard',
+    title: 'Design a Real-Time Gaming Leaderboard',
+    icon: '🏆',
+    difficulty: 'easy',
+    readTime: '14 min read',
+    teaser: 'Design a leaderboard for a game with 10 million players, showing global top 100 and each player\'s own rank in real time. Covers Redis sorted sets, score update storms, and rank approximation for scale.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Global or segmented?</strong> → Both global (all players) and per-player "rank among friends".</li>
+  <li><strong>How many players?</strong> → 10 million active players; 500 million total registered.</li>
+  <li><strong>Score update rate?</strong> → Up to 10,000 score updates/second during peak game events.</li>
+  <li><strong>What does the user see?</strong> → Top 100 global, and their own rank + score (even if rank is 4,500,372).</li>
+  <li><strong>Real-time?</strong> → Near real-time: leaderboard should update within seconds, not minutes.</li>
+  <li><strong>Tie-breaking?</strong> → Same score = same rank. Earlier achiever ranks higher (break ties by timestamp).</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Top-100 query: &lt;10ms latency</li>
+  <li>Player rank query: &lt;20ms latency</li>
+  <li>Handles 10,000 score updates/second</li>
+  <li>Scores persist across server restarts</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Active players</span><span class="cap-val">10M active → sorted set size ~10M entries</span></div>
+  <div class="cap-row"><span class="cap-label">Redis memory</span><span class="cap-val">10M × ~50 bytes/entry ≈ 500MB — fits in one Redis node</span></div>
+  <div class="cap-row"><span class="cap-label">Score update throughput</span><span class="cap-val">10K writes/sec → manageable for Redis (300K+ ops/sec capacity)</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">DB writes</span><span class="cap-val">10K/sec → batch writes to MySQL every 5 seconds</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Redis Sorted Set: The Core Data Structure</h3>
+<p>Redis sorted sets (<code>ZSET</code>) are perfectly suited for leaderboards. Each member has a floating-point score; members are always ordered by score. Key operations:</p>
+<pre><code>-- Update player score (add delta, not absolute)
+ZINCRBY leaderboard:global 150 "player:42"  -- player 42 earned 150 points
+
+-- Get top 100 (highest score first)
+ZREVRANGE leaderboard:global 0 99 WITHSCORES
+
+-- Get player's rank (0-indexed; ZREVRANK for highest-first rank)
+ZREVRANK leaderboard:global "player:42"  -- returns e.g., 4500371
+
+-- Get player's score
+ZSCORE leaderboard:global "player:42"</code></pre>
+
+<pre class="diagram">
+  Game Server ──► Score Update API ──► Redis ZSET
+                                       (leaderboard:global)
+                                            │
+                              ┌─────────────┴─────────────┐
+                              ▼                           ▼
+                       Top-100 Read API            Player Rank API
+                       (ZREVRANGE 0 99)            (ZREVRANK player:id)
+                              │                           │
+                         MySQL (persistence)         MySQL (persistence)
+                         (batch write every 5s)     (batch write every 5s)
+</pre>
+
+<h3>Persistence</h3>
+<p>Redis is in-memory — a restart loses the leaderboard. Two layers of persistence:</p>
+<ol>
+  <li><strong>Redis AOF (Append-Only File):</strong> Every write is logged to disk. On restart, Redis replays the AOF to rebuild state. Recovery time: 30-60 seconds for 10M entries.</li>
+  <li><strong>MySQL source of truth:</strong> A background writer batches score updates to MySQL every 5 seconds. On cold Redis startup, load scores from MySQL to rebuild the sorted set.</li>
+</ol>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Score Update Storms</div>
+<p>During a popular game event, all 10M players might submit scores within minutes. 10,000 writes/sec is fine for Redis, but if every game server directly calls Redis, you need connection pooling and backpressure. Solution:</p>
+<ul>
+  <li>Game servers write to a <strong>Kafka topic</strong> (<code>score-updates</code>) instead of Redis directly.</li>
+  <li>A Score Aggregation Service consumes Kafka, batches updates, and applies them to Redis every 100ms using <code>MULTI/EXEC</code> pipelines.</li>
+  <li>Batching reduces Redis round trips from 10K/sec to 10/sec (1000 updates per pipeline batch).</li>
+</ul>
+
+<div class="step-badge">Step 3b — Rank for Non-Top Players</div>
+<p>A player ranked 4,500,372nd wants to know their rank. <code>ZREVRANK</code> is O(log N) and returns the exact rank in &lt;1ms for 10M entries. This works for active-user leaderboards. For 500M total registered users (many inactive), the sorted set would be 500M entries × 50 bytes = 25GB — still manageable, but you can exclude players with 0 score using a minimum score filter:</p>
+<pre><code>-- Only players with score > 0 are in the leaderboard
+ZINCRBY leaderboard:global score "player:42"
+-- Players who never scored are simply not in the set
+-- ZREVRANK returns nil for unknown players → display "unranked"</code></pre>
+
+<div class="step-badge">Step 3c — Friends Leaderboard</div>
+<p>A player wants to see their rank among their 200 friends. Approach:</p>
+<ol>
+  <li>Fetch the player's friend list (from Social Graph service — 200 IDs).</li>
+  <li><code>ZMSCORE leaderboard:global friend1 friend2 … friend200</code> — bulk score fetch in one Redis call (O(N) where N=200).</li>
+  <li>Sort the 200 scores in the application layer. No need for a separate ZSET per user.</li>
+</ol>
+<p>This is fast because 200-entry sort is negligible, and Redis handles the bulk score fetch in a single round trip.</p>
+
+<div class="step-badge">Step 3d — Tie-Breaking by Timestamp</div>
+<p>Redis ZSET scores are floating-point. To break ties (same score, earlier timestamp ranks higher), encode both into the score:</p>
+<pre><code># score = actual_score * 1e10 + (MAX_TIMESTAMP - achieved_at_unix)
+redis_score = game_score * 10_000_000_000 + (9_999_999_999 - achieved_at)
+
+# Larger redis_score = higher rank
+# Two players with same game_score → earlier timestamp wins (larger subtracted timestamp)</code></pre>
+<p>This encoding works as long as game scores fit within the remaining precision of a 64-bit double.</p>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Core data structure</td><td>Redis ZSET</td><td>SQL ORDER BY</td><td>O(log N) rank operations vs O(N log N) SQL sort; in-memory → sub-ms latency</td></tr>
+    <tr><td>Score updates</td><td>Kafka → batch pipeline</td><td>Direct Redis writes</td><td>Absorbs spike traffic; pipeline batching reduces Redis round trips 1000×</td></tr>
+    <tr><td>Persistence</td><td>Redis AOF + MySQL</td><td>Redis only</td><td>AOF for fast recovery; MySQL as cold-start bootstrap in case AOF is corrupted</td></tr>
+    <tr><td>Friends leaderboard</td><td>ZMSCORE + app sort</td><td>Per-user ZSET</td><td>10M per-user ZSETs would require terabytes; ZMSCORE bulk fetch is O(N) and fast</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Seasonal leaderboards:</strong> Create a new ZSET per season (<code>leaderboard:2024-Q4</code>). Archive old seasons to MySQL when the season ends. Rotate keys atomically with <code>RENAME</code>.</li>
+  <li><strong>Regional leaderboards:</strong> Maintain parallel ZSETs per region (<code>leaderboard:na</code>, <code>leaderboard:eu</code>). Score updates are replicated to the appropriate regional key based on the player's registered region.</li>
+  <li><strong>Anti-cheat:</strong> Flag score updates that exceed the maximum physically possible score rate (e.g., +10,000 points in 1 second in a game where max is 100/sec). Quarantine suspicious updates for review before applying to the leaderboard.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'recommendation-engine',
+    title: 'Design a Recommendation Engine (Netflix-style)',
+    icon: '🎬',
+    difficulty: 'hard',
+    readTime: '21 min read',
+    teaser: 'Design a recommendation system that personalizes content for 200 million users. Covers collaborative filtering, two-tower neural networks, offline training vs. online serving, feature stores, and A/B testing infrastructure.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<div class="callout tip"><div class="callout-icon">💬</div><div class="callout-body"><strong>Interview Tip</strong><br>Recommendation systems span ML, data engineering, and distributed systems. Interviewers usually want the data pipeline and serving architecture, not the ML math. Focus on how recommendations are generated and served at scale.</div></div>
+
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>What are we recommending?</strong> → Videos (movies and TV shows) on a streaming platform.</li>
+  <li><strong>Scale?</strong> → 200 million users; 50 million active daily; catalog of 10,000 titles.</li>
+  <li><strong>Input signals?</strong> → Watch history, explicit ratings (thumbs up/down), search queries, time of day, device type.</li>
+  <li><strong>Real-time or batch?</strong> → Homepage shown to a user should reflect their activity from the past hour, not just yesterday. Freshness matters.</li>
+  <li><strong>Latency requirement?</strong> → Homepage must load in &lt;200ms. Recommendations must be pre-computed or served from a fast cache.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Homepage response &lt;200ms (recommendations pre-computed, not computed on-demand)</li>
+  <li>Reflect recent user activity (past 1 hour) in recommendations</li>
+  <li>Handle 50M daily active users loading homepage 3× per day = 150M recommendation serves/day</li>
+  <li>Support A/B testing different recommendation models simultaneously</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Recommendation serves</span><span class="cap-val">150M/day → 1,750/sec average; 10,000/sec peak</span></div>
+  <div class="cap-row"><span class="cap-label">User embedding size</span><span class="cap-val">128-dim float32 vector = 512 bytes per user</span></div>
+  <div class="cap-row"><span class="cap-label">Total user embeddings</span><span class="cap-val">200M × 512 bytes = 100 GB</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Candidate ranking latency budget</span><span class="cap-val">10,000 titles × 1μs per score = 10ms → fits in 200ms budget</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Two-Stage Recommendation Pipeline</h3>
+<p>Recommending from 10,000 titles directly with a heavy model is too slow. Use two stages:</p>
+<ol>
+  <li><strong>Candidate Retrieval (fast, low precision):</strong> Narrow 10,000 titles to top 500 candidates. Must be &lt;10ms.</li>
+  <li><strong>Ranking (slow, high precision):</strong> Score the 500 candidates with a precise model. Top 20 shown to user. Must complete in &lt;100ms.</li>
+</ol>
+
+<pre class="diagram">
+  User request ──► API Gateway ──► Recommendation Service
+                                          │
+                              ┌───────────┴───────────┐
+                              ▼                       ▼
+                    Candidate Retrieval          User Context
+                    (ANN vector search)          (Feature Store)
+                    500 candidates                     │
+                              │                       ▼
+                              └─────────► Ranking Model (TensorFlow Serving)
+                                          score 500 candidates
+                                                │
+                                           Top 20 results
+                                                │
+                                         Response Cache (Redis)
+                                         TTL: 30 minutes
+</pre>
+
+<h3>Offline Training Pipeline</h3>
+<pre class="diagram">
+  Event Stream (Kafka) ──► Feature Pipeline (Spark) ──► Feature Store
+   (watch events,                                        (user/item features)
+    rating events,                                              │
+    search events)                                      Model Training (daily)
+                                                        (TF / PyTorch on GPU)
+                                                                │
+                                                        Model Registry
+                                                        (versioned artifacts)
+                                                                │
+                                                       TF Serving (deployed)
+</pre>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Candidate Retrieval with Two-Tower Model</div>
+<p>A <strong>two-tower model</strong> learns separate embeddings for users and items. At retrieval time, find items whose embedding is closest to the user's embedding (cosine similarity). Since embeddings are pre-computed, this is a <strong>vector search problem</strong>:</p>
+<ul>
+  <li>Offline: Train two-tower model → compute 128-dim embedding for each of 10,000 items → index in <strong>FAISS</strong> (Facebook AI Similarity Search) or ScaNN.</li>
+  <li>Online: Fetch user's embedding from Feature Store → run Approximate Nearest Neighbor (ANN) query → returns top-500 item IDs in &lt;5ms.</li>
+</ul>
+<p>The item index is 10,000 × 512 bytes = 5MB — trivially fits in RAM on every serving node.</p>
+
+<div class="step-badge">Step 3b — Ranking with a Wide &amp; Deep Model</div>
+<p>The ranking model takes the 500 candidates and scores each one using rich features:</p>
+<ul>
+  <li><strong>User features:</strong> watch history length, genre preferences, time of day, device</li>
+  <li><strong>Item features:</strong> genre, release year, avg rating, popularity trend</li>
+  <li><strong>Cross features:</strong> did user previously watch other films by this director?</li>
+</ul>
+<p>The model outputs a <strong>predicted engagement score</strong> (probability of watch &gt; 10 minutes). Top-20 by score are returned. Model runs in TensorFlow Serving, batching 500 items per user into a single forward pass (~50ms on CPU, ~5ms on GPU).</p>
+
+<div class="step-badge">Step 3c — Feature Store</div>
+<p>Both stages need fast access to user and item features. A <strong>Feature Store</strong> has two layers:</p>
+<ul>
+  <li><strong>Offline store (Hive/S3):</strong> Historical features for model training. Daily batch ETL from the data warehouse.</li>
+  <li><strong>Online store (Redis / DynamoDB):</strong> Low-latency feature serving for inference. Updated by a streaming pipeline (Kafka → Flink) with features derived from recent events (last-hour watch history).</li>
+</ul>
+<p>The online store is the key to freshness — when a user watches 3 horror movies, their horror affinity feature updates within minutes, and the next homepage load reflects this.</p>
+
+<div class="step-badge">Step 3d — A/B Testing Infrastructure</div>
+<p>Running multiple recommendation models simultaneously requires a proper experimentation framework:</p>
+<ol>
+  <li>Users are assigned to <strong>experiment buckets</strong> on login (hash of user_id mod 100 = bucket 0-99). Assignments stored in Feature Store.</li>
+  <li>The Recommendation Service reads the user's bucket → routes to the correct model version in TF Serving (model A for buckets 0-49, model B for 50-99).</li>
+  <li>Every recommendation serve logs <code>(user_id, model_version, items_shown)</code> to Kafka → Hive. Engagement events (clicks, watches) are joined with this log to compute per-model metrics (CTR, completion rate).</li>
+  <li>The experimentation platform (statsig/internal) runs significance tests and auto-promotes the winning model.</li>
+</ol>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Architecture</td><td>Two-stage (retrieval + ranking)</td><td>Single heavy model on all items</td><td>10K items → single model is too slow; two-stage makes latency tractable</td></tr>
+    <tr><td>Retrieval</td><td>Two-tower ANN (FAISS)</td><td>Collaborative filtering matrix</td><td>Two-tower handles cold users (no history) via content features; ANN scales to billions of items</td></tr>
+    <tr><td>Feature freshness</td><td>Streaming pipeline (Kafka→Flink) to online store</td><td>Daily batch only</td><td>Same-session freshness is key to engagement; batch-only misses "user just watched 3 horror films"</td></tr>
+    <tr><td>A/B testing</td><td>Bucket-based routing at serving layer</td><td>Client-side experiment flags</td><td>Server-side routing can change model without app update; full control over traffic split</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Cold start problem:</strong> New users have no history — the two-tower model has nothing to embed. Solve with a brief onboarding questionnaire (3-5 genre preferences) used as proxy features until real watch history accumulates. New items: use content-based features (genre, cast, synopsis embeddings) until collaborative signal builds.</li>
+  <li><strong>Diversity and serendipity:</strong> Pure engagement optimization creates filter bubbles (same genres forever). Add a diversity penalty: if the top-20 contains &gt;5 items from the same genre, replace the lowest-ranked with a diverse pick. This is a post-ranking business logic step, not part of the ML model.</li>
+  <li><strong>Contextual bandits:</strong> Instead of training a static model and deploying it, use a contextual bandit to continuously learn from real-time feedback. Each recommendation serve is an "arm pull"; the bandit updates its policy online. More responsive to trend shifts but harder to debug and control.</li>
+</ul>
+`
+      }
+    ]
   }
 ];
 
