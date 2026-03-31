@@ -4772,6 +4772,712 @@ redis_score = game_score * 10_000_000_000 + (9_999_999_999 - achieved_at)
 `
       }
     ]
+  },
+  {
+    id: 'cdn',
+    title: 'Design a Content Delivery Network (CDN)',
+    icon: '🌐',
+    difficulty: 'medium',
+    readTime: '16 min read',
+    teaser: 'Design a CDN that serves static assets (images, JS, video) to billions of users globally with sub-100ms latency. Covers PoP placement, cache hierarchy, cache invalidation, and anycast routing.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>What content types?</strong> → Static assets: images, JS/CSS bundles, fonts, HLS video segments. No dynamic HTML.</li>
+  <li><strong>Scale?</strong> → 1 billion requests/day, globally distributed users; average object size 500KB.</li>
+  <li><strong>Cache freshness?</strong> → Marketing images change infrequently (TTL = 7 days). JS bundles change on each deploy (use content-addressed URLs, TTL = 1 year). Video segments are immutable.</li>
+  <li><strong>Purge support?</strong> → Yes — when an emergency hotfix deploys, we must be able to purge stale JS files from all edge nodes within 30 seconds.</li>
+  <li><strong>Origin protection?</strong> → Yes — origin servers must not be overwhelmed by cache misses (thundering herd on a new asset).</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>p99 latency &lt;100ms for cache hits (edge serves from RAM/SSD)</li>
+  <li>Cache hit ratio &gt;95% (origin must handle at most 5% of total traffic)</li>
+  <li>Purge propagates to all edge nodes within 30 seconds</li>
+  <li>Highly available: single PoP failure is transparent to users</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Request rate</span><span class="cap-val">1B/day ÷ 86,400 ≈ 11,600 req/sec average</span></div>
+  <div class="cap-row"><span class="cap-label">Bandwidth (avg 500KB/req)</span><span class="cap-val">11,600 × 500KB ≈ 46 Gbps average; ~230 Gbps peak</span></div>
+  <div class="cap-row"><span class="cap-label">Unique objects (working set)</span><span class="cap-val">~10M objects × 500KB = 5TB total</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Per-PoP cache size (20 PoPs)</span><span class="cap-val">~250GB SSD per PoP to cache hot 5% of working set</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Architecture</h3>
+<ul>
+  <li><strong>Points of Presence (PoPs):</strong> 20 edge locations geographically close to users (NA-East, NA-West, EU-West, EU-Central, APAC, etc.). Each PoP has a cluster of edge servers with large SSD caches.</li>
+  <li><strong>Origin Servers:</strong> The customer's backend (S3 bucket, web server). The CDN fetches from origin on cache miss.</li>
+  <li><strong>DNS / Anycast routing:</strong> When a user resolves <code>cdn.example.com</code>, they're directed to the nearest PoP via GeoDNS or anycast IP routing.</li>
+</ul>
+
+<pre class="diagram">
+  User (Tokyo) ──DNS──► GeoDNS → APAC PoP
+                                  │ cache hit? → serve from SSD (10ms)
+                                  │ cache miss? → fetch from Origin
+                                  │              → cache + serve
+  User (NYC) ──DNS──► NA-East PoP
+                                  │ cache hit? → serve (8ms)
+  User (London) ──DNS──► EU-West PoP
+
+  All PoPs ←──── Purge Control Plane ────── CDN Admin API
+                 (invalidation fan-out)      (customer triggers purge)
+</pre>
+
+<h3>Cache Hierarchy</h3>
+<p>Two-tier caching within each PoP:</p>
+<ol>
+  <li><strong>L1 (in-process memory, ~10GB):</strong> Hottest objects, served in &lt;1ms.</li>
+  <li><strong>L2 (SSD, ~250GB):</strong> Warm objects, served in ~5ms.</li>
+  <li><strong>Origin pull:</strong> Only on full miss. Edge server fetches, caches at both L1+L2, and serves. Subsequent requests from the same PoP are cache hits.</li>
+</ol>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Cache Key Design</div>
+<p>Cache key = URL + relevant Vary headers. Common pitfalls:</p>
+<ul>
+  <li><strong>Don't vary on Cookie by default</strong> — every user gets a unique cache key → 0% hit rate. Only vary on cookies that actually affect content (e.g., <code>Accept-Language</code>).</li>
+  <li><strong>Content-addressed URLs</strong> for immutable assets: <code>/static/main.abc123.js</code>. The hash changes on every deploy, so the old URL stays cached forever (TTL=1 year) and the new deploy gets a fresh cache entry automatically. No purge needed.</li>
+  <li><strong>Query string normalization:</strong> <code>?v=1&lang=en</code> and <code>?lang=en&v=1</code> are the same content — sort query params before hashing the cache key.</li>
+</ul>
+
+<div class="step-badge">Step 3b — Cache Invalidation / Purge</div>
+<p>When a non-versioned asset changes (e.g., <code>/logo.png</code>), the customer triggers a purge via the CDN Admin API. The purge must reach all 20 PoPs within 30 seconds:</p>
+<ol>
+  <li>Purge API writes the invalidated URL to a <strong>Kafka topic</strong> (<code>cdn.invalidations</code>).</li>
+  <li>Each PoP runs an <strong>Invalidation Agent</strong> that consumes from this topic and issues a DEL to its local cache (both L1 and L2).</li>
+  <li>The Kafka replication lag across regions is ~1-2 seconds; all 20 PoPs are updated within 5 seconds.</li>
+</ol>
+<p>For tag-based purge ("purge everything with tag <code>product-images</code>"), each cached object stores a set of tags. The invalidation agent maintains an inverted index: <code>tag → [cache_keys]</code> in Redis, and bulk-deletes on purge.</p>
+
+<div class="step-badge">Step 3c — Origin Shield (Mid-Tier Cache)</div>
+<p>Without an origin shield, a cache miss on a popular new asset causes every PoP (20 of them) to simultaneously fetch from origin — the <strong>thundering herd</strong>. Solution: designate one PoP as the <strong>origin shield</strong> (e.g., a central US PoP close to the origin). Other PoPs on a cache miss fetch from the shield, not origin. The shield fetches from origin and caches — only 1 request hits origin regardless of how many PoPs miss simultaneously.</p>
+
+<div class="step-badge">Step 3d — Anycast vs. GeoDNS</div>
+<ul>
+  <li><strong>GeoDNS:</strong> DNS resolver returns different IPs based on the requester's country. Simple, but DNS TTL (30-300s) means slow failover if a PoP goes down.</li>
+  <li><strong>Anycast:</strong> All PoPs advertise the same IP via BGP. Internet routing naturally sends traffic to the topologically closest PoP. Failover is near-instant (BGP reconverges in seconds). Used by Cloudflare and Fastly. More complex to operate (requires BGP knowledge).</li>
+</ul>
+<p>For a new CDN, GeoDNS is simpler to implement. Anycast is better long-term for instant failover.</p>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Routing</td><td>GeoDNS (start) → Anycast (scale)</td><td>Client-side IP lookup</td><td>Server-side routing is transparent to clients; anycast enables BGP failover</td></tr>
+    <tr><td>Cache invalidation</td><td>Kafka fan-out to all PoPs</td><td>HTTP purge broadcast</td><td>Kafka is durable — PoPs that are temporarily partitioned will catch up when reconnected</td></tr>
+    <tr><td>Immutable assets</td><td>Content-addressed URLs (TTL=1yr)</td><td>Short TTL on all assets</td><td>Eliminates need for purge; 100% cache hit ratio on static assets forever</td></tr>
+    <tr><td>Origin protection</td><td>Origin shield (mid-tier PoP)</td><td>Thundering herd accepted</td><td>Without shield, 20 PoPs hit origin simultaneously on popular new asset = origin overload</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>HTTPS everywhere:</strong> TLS termination at the edge means the TLS handshake is geographically close to the user (~10ms vs ~150ms to a distant origin). Origin shield connects to origin over a persistent, already-negotiated TLS tunnel — one long-lived connection instead of per-request handshakes.</li>
+  <li><strong>Real-time analytics:</strong> Each edge server logs request metadata (cache status, latency, bytes served) to a local Kafka agent, which ships to a central ClickHouse cluster for real-time customer dashboards (cache hit ratio, bandwidth, top URLs by traffic).</li>
+  <li><strong>Video streaming optimization:</strong> For HLS video, pre-warm the edge cache by pushing the first 3 segments of trending videos to the edge before users request them. This eliminates the first-play cache miss that causes buffering.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'ticket-booking',
+    title: 'Design a Ticket Booking System (Ticketmaster)',
+    icon: '🎟️',
+    difficulty: 'medium',
+    readTime: '18 min read',
+    teaser: 'Design a system for booking concert and sports tickets where millions of users compete for a limited number of seats simultaneously. Covers seat reservation with temporary holds, virtual queues, and preventing overselling.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<div class="callout warning"><div class="callout-icon">⚠️</div><div class="callout-body"><strong>The Core Challenge</strong><br>Taylor Swift tickets go on sale at 10am. 2 million users simultaneously try to buy 50,000 seats. Every design decision must prevent: (1) the same seat being sold to two people, and (2) the entire system crashing under the spike.</div></div>
+
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Scale of spike?</strong> → 2 million concurrent users trying to buy 50,000 seats at the exact same moment.</li>
+  <li><strong>Seat selection?</strong> → Users can either pick specific seats or request "best available."</li>
+  <li><strong>Temporary hold?</strong> → Yes — when a user picks seats, hold them for 10 minutes while they complete checkout. Release back to pool if not purchased.</li>
+  <li><strong>Overselling allowed?</strong> → Never. Each physical seat can only be sold once.</li>
+  <li><strong>Events scale?</strong> → Platform hosts 500K events; most are low-traffic (local theater). Spikes happen for ~100 major events/year.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Strict consistency: no double-selling a seat</li>
+  <li>Temporary seat hold: 10-minute lock during checkout</li>
+  <li>Handle 2M concurrent users without crashing — via virtual queue</li>
+  <li>Fast availability reads: "how many seats are left?" must be fast</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Peak concurrent users</span><span class="cap-val">2M (at sale start) → must queue or they overwhelm the system</span></div>
+  <div class="cap-row"><span class="cap-label">Seats per major event</span><span class="cap-val">50,000 — only this many transactions can ever complete</span></div>
+  <div class="cap-row"><span class="cap-label">Hold expiry churn</span><span class="cap-val">10-min hold × ~20% abandon rate → ~10,000 re-released seats/event</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">DB writes at peak</span><span class="cap-val">~50,000 seat holds + purchases, not 2M — the queue absorbs the spike</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Components</h3>
+<ul>
+  <li><strong>Virtual Queue Service:</strong> When a major event goes on sale, users are placed in a virtual queue instead of hitting the booking system directly. Queue position is randomized (lottery) to prevent "fastest clicker wins" unfairness. Users are metered into the booking flow at a controlled rate.</li>
+  <li><strong>Seat Inventory Service:</strong> Manages seat availability. Handles seat selection, temporary holds (10-min TTL), and final booking. The source of truth for what's available.</li>
+  <li><strong>Checkout Service:</strong> Handles payment collection after seat hold. Calls Payment Service. If payment fails or times out, releases the hold.</li>
+  <li><strong>Booking DB (PostgreSQL):</strong> Stores seat holds and completed bookings. Seat-level locking prevents overselling.</li>
+</ul>
+
+<pre class="diagram">
+  2M Users ──► Virtual Queue Service (Redis queue)
+                    │ meter 500 users/sec into booking
+                    ▼
+              Seat Inventory Service
+              (seat selection + 10-min hold)
+                    │
+              PostgreSQL (seat state machine)
+              AVAILABLE → HELD → BOOKED
+                    │
+              Checkout Service ──► Payment Service
+                    │
+              Booking Confirmation (email/SMS)
+</pre>
+
+<h3>Seat State Machine</h3>
+<pre><code>AVAILABLE ──[user picks seat]──► HELD (TTL: 10 min, held_by: user_id)
+   ▲                                │
+   └──[hold expires / payment fail]──┘
+                                    │
+                            [payment succeeds]
+                                    ▼
+                                 BOOKED (immutable)</code></pre>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Preventing Double-Booking with Optimistic Locking</div>
+<p>Two users simultaneously try to hold seat 42A. The database must ensure only one succeeds:</p>
+<pre><code>-- Atomic check-and-update with version number (optimistic lock)
+UPDATE seats
+SET status = 'HELD', held_by = :user_id, hold_expires = NOW() + INTERVAL 10 MINUTE,
+    version = version + 1
+WHERE seat_id = :seat_id
+  AND status = 'AVAILABLE'
+  AND version = :expected_version;  -- fails if another transaction already modified
+
+-- If rows_affected = 0 → seat was taken → show "seat no longer available"
+-- If rows_affected = 1 → hold acquired successfully</code></pre>
+<p>The <code>version</code> column (optimistic locking) means no database-level row locks are held for the duration of the HTTP request — only for the microsecond of the UPDATE. This is far more scalable than pessimistic locking (SELECT FOR UPDATE) which holds a lock during network round trips.</p>
+
+<div class="step-badge">Step 3b — Virtual Queue Implementation</div>
+<p>Redis sorted set: <code>queue:event:123</code> where the score is a random float assigned on join (lottery) rather than join timestamp (would reward fast clickers):</p>
+<pre><code>-- User joins queue (Python)
+import random
+score = random.random()  # 0.0 to 1.0, randomized position
+redis.zadd(f"queue:event:{event_id}", {f"user:{user_id}": score})
+
+# User polls their position every 5 seconds
+rank = redis.zrank(f"queue:event:{event_id}", f"user:{user_id}")
+queue_size = redis.zcard(f"queue:event:{event_id}")
+# Show: "You are #4,521 in line. Estimated wait: 9 minutes."</code></pre>
+<p>A metering job runs every second, pops the top N users from the queue (ZPOPMIN N), and sends them a "it's your turn" JWT token. They use this token to access the booking flow. Without a valid token, the Seat Inventory Service rejects requests — protecting it from direct traffic.</p>
+
+<div class="step-badge">Step 3c — Hold Expiry</div>
+<p>Seats held by users who abandon checkout must be released. Two mechanisms:</p>
+<ul>
+  <li><strong>Active TTL check:</strong> Before showing a seat as available, the Seat Inventory Service filters out seats where <code>hold_expires &lt; NOW()</code>.</li>
+  <li><strong>Background expiry job:</strong> A cron runs every 60 seconds: <code>UPDATE seats SET status='AVAILABLE' WHERE status='HELD' AND hold_expires &lt; NOW()</code>. This releases seats back to the general pool, preventing them from being stuck in HELD forever.</li>
+</ul>
+
+<div class="step-badge">Step 3d — Caching Seat Maps</div>
+<p>Millions of users viewing the seat map (which seats are available) before they buy must not all hit the DB. Cache seat availability as a bitmap in Redis:</p>
+<ul>
+  <li><code>SETBIT event:123:seats {seat_index} 1</code> when a seat is booked/held.</li>
+  <li>The full 50,000-seat bitmap is only 6KB — trivially cacheable.</li>
+  <li>Invalidated on every seat state change. A slight staleness (&lt;5 sec) is acceptable for the display map — the DB is the source of truth when a user actually selects a seat.</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Oversell prevention</td><td>Optimistic locking (version column)</td><td>SELECT FOR UPDATE</td><td>Optimistic lock holds no DB lock during network round trips; scales better under high concurrency</td></tr>
+    <tr><td>Spike absorption</td><td>Virtual queue (Redis ZSET)</td><td>Let users hit booking directly</td><td>Without queue, 2M simultaneous requests would crash the DB; queue limits booking flow to sustainable rate</td></tr>
+    <tr><td>Queue fairness</td><td>Random score (lottery)</td><td>FIFO by join time</td><td>FIFO rewards fastest clickers / bots; lottery makes it fair for all users</td></tr>
+    <tr><td>Hold expiry</td><td>DB TTL column + background job</td><td>Redis TTL key</td><td>Redis TTL doesn't update DB state; DB column is authoritative for the seat state machine</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Anti-bot measures:</strong> CAPTCHA on queue entry. Rate-limit queue joins per IP/device fingerprint. Detect abnormal purchase velocity (one account buying 50 tickets across 50 sessions) and flag for human review.</li>
+  <li><strong>Dynamic pricing:</strong> As remaining inventory drops, automatically increase prices (surge pricing). Implemented as a hook in the Seat Inventory Service — after each booking, recalculate price tiers and update a Redis key the checkout flow reads.</li>
+  <li><strong>Waitlist:</strong> After sellout, users can join a waitlist. When a held seat expires or a booking is cancelled, the first waitlist user is notified via the Notification System and given 5 minutes to complete purchase before the seat is offered to the next user.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'code-judge',
+    title: 'Design an Online Code Judge (LeetCode-style)',
+    icon: '👨‍💻',
+    difficulty: 'medium',
+    readTime: '15 min read',
+    teaser: 'Design a system that executes arbitrary user-submitted code securely, judges correctness against test cases, and returns results within seconds — all without letting user code harm the host system.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Languages supported?</strong> → Python, Java, C++, JavaScript, Go — at minimum.</li>
+  <li><strong>Scale?</strong> → 100,000 code submissions/day; 2M during a contest (spike).</li>
+  <li><strong>Execution time limit?</strong> → 2 seconds per test case; 10 test cases per problem → max 20 seconds total per submission.</li>
+  <li><strong>Security?</strong> → Submitted code must not be able to: access the filesystem, make network calls, fork processes, or consume unbounded resources (CPU/memory).</li>
+  <li><strong>Result types?</strong> → Accepted, Wrong Answer, Time Limit Exceeded (TLE), Memory Limit Exceeded (MLE), Runtime Error, Compilation Error.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Result returned within 5 seconds for p95 of submissions (most problems)</li>
+  <li>Code execution is isolated — one submission cannot affect another</li>
+  <li>System stays up during contest spikes (100K → 2M submissions/day)</li>
+  <li>Consistent judging: same code always produces the same verdict</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Average submissions</span><span class="cap-val">100K/day ÷ 86,400 ≈ 1.2 submissions/sec</span></div>
+  <div class="cap-row"><span class="cap-label">Contest peak</span><span class="cap-val">2M/day ≈ 23 submissions/sec sustained</span></div>
+  <div class="cap-row"><span class="cap-label">Execution time per submission</span><span class="cap-val">~5s average (compile + 10 test cases)</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Judge workers needed at peak</span><span class="cap-val">23 req/sec × 5s = ~115 concurrent workers needed</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Components</h3>
+<ul>
+  <li><strong>Submission API:</strong> Accepts code + language + problem_id. Writes submission to DB (status: PENDING), enqueues job to Kafka.</li>
+  <li><strong>Judge Workers:</strong> Pull from Kafka. Compile code (if needed), run against all test cases inside an isolated sandbox, collect results.</li>
+  <li><strong>Sandbox:</strong> Per-submission isolated environment (Docker container or gVisor). Enforces CPU/memory/time limits.</li>
+  <li><strong>Result Store (MySQL):</strong> Persists submission records and verdicts. Referenced by the frontend polling loop.</li>
+  <li><strong>Problem Store (S3 + Redis):</strong> Test case inputs/expected outputs stored in S3, cached in Redis on workers (problems don't change often).</li>
+</ul>
+
+<pre class="diagram">
+  User ──► Submission API ──► Kafka topic: "submissions"
+               │                      │
+           MySQL (store              Judge Workers (auto-scale)
+           PENDING status)            │
+               │              ┌───────┴────────┐
+               │              ▼                ▼
+               │         Sandbox (Docker/gVisor)
+               │         compile + run + check
+               │              │
+               └◄─────── MySQL update: ACCEPTED / WA / TLE ...
+               │
+  User polls ──► GET /submission/{id} → status + verdict
+</pre>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Sandbox Security</div>
+<p>This is the most critical part. User code can be malicious. Defense in depth:</p>
+<ul>
+  <li><strong>Docker containers:</strong> Each submission runs in a fresh container (from a pre-built language image). Container is destroyed after execution — no state leaks between submissions.</li>
+  <li><strong>Linux namespaces + cgroups:</strong> Container has its own PID namespace (can't see host processes), network namespace (no network access), and cgroup limits (max 256MB RAM, max 1 CPU core).</li>
+  <li><strong>seccomp profile:</strong> Whitelist only safe syscalls. Block: <code>fork</code>, <code>exec</code>, <code>socket</code>, <code>open</code> (filesystem reads). If the code calls a blocked syscall, the kernel kills the process immediately with SIGSYS.</li>
+  <li><strong>Read-only filesystem:</strong> Container root filesystem is mounted read-only. Code can only write to a small <code>/tmp</code> tmpfs with limited quota.</li>
+  <li><strong>No root:</strong> Code runs as a non-privileged user (UID 10000) inside the container.</li>
+</ul>
+<p><strong>Why not just a VM?</strong> VMs are more isolated but take 5-15 seconds to boot — too slow for a 5-second SLA. Docker containers start in ~100ms. gVisor (Google's container sandbox with a userspace kernel) offers near-VM isolation with near-container startup speed — the best of both worlds.</p>
+
+<div class="step-badge">Step 3b — Judge Execution Flow</div>
+<pre><code>def judge(submission):
+    # 1. Compile (for compiled languages)
+    result = sandbox.run(
+        cmd=["g++", "-O2", "-o", "/tmp/sol", "/tmp/solution.cpp"],
+        timeout=10s, memory_mb=512
+    )
+    if result.exit_code != 0:
+        return Verdict.COMPILATION_ERROR, result.stderr
+
+    # 2. Run against each test case
+    for test in get_test_cases(submission.problem_id):  # from S3/Redis
+        result = sandbox.run(
+            cmd=["/tmp/sol"],
+            stdin=test.input,
+            timeout=2.0,   # TLE if exceeded
+            memory_mb=256  # MLE if exceeded
+        )
+        if result.timed_out:    return Verdict.TLE, test.case_num
+        if result.oom_killed:   return Verdict.MLE, test.case_num
+        if result.exit_code != 0: return Verdict.RUNTIME_ERROR, result.stderr
+        if result.stdout.strip() != test.expected.strip():
+            return Verdict.WRONG_ANSWER, test.case_num
+
+    return Verdict.ACCEPTED, None</code></pre>
+
+<div class="step-badge">Step 3c — Scaling Workers for Contest Spikes</div>
+<p>During a contest, submission rate jumps 20× in seconds. Strategy:</p>
+<ul>
+  <li>Judge workers run on <strong>Kubernetes</strong> with a Horizontal Pod Autoscaler (HPA) keyed on Kafka consumer lag. When lag exceeds 1000 messages, scale up workers (max 200 pods).</li>
+  <li>Pre-warm workers 15 minutes before a scheduled contest start — Kubernetes node pools pre-scale so there's no cold-start delay when the contest opens.</li>
+  <li>Use <strong>spot/preemptible instances</strong> for judge workers (they're stateless and short-lived — perfect fit for spot). 60-70% cheaper than on-demand.</li>
+</ul>
+
+<div class="step-badge">Step 3d — Result Delivery</div>
+<p>Users poll GET /submission/{id} every 2 seconds. With 100K concurrent users polling, this is 50K req/sec to the API. Optimizations:</p>
+<ul>
+  <li>Cache PENDING status responses in Redis (TTL: 1s) — most polls return PENDING during the 5-second wait.</li>
+  <li>Once judged, cache the final verdict indefinitely (it's immutable).</li>
+  <li>Alternatively, use <strong>WebSocket</strong> or Server-Sent Events — workers push the verdict to a pub/sub channel (Redis Pub/Sub), and the API server pushes it to the connected WebSocket. Eliminates polling entirely.</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Sandbox</td><td>gVisor (container + userspace kernel)</td><td>Full VM</td><td>gVisor: 100ms startup vs 10s for VM; near-VM isolation; perfect for &lt;5s SLA</td></tr>
+    <tr><td>Queue</td><td>Kafka</td><td>Direct worker RPC</td><td>Decouples submission API from judges; Kafka absorbs contest spikes; durable if workers crash</td></tr>
+    <tr><td>Worker scaling</td><td>K8s HPA on Kafka lag</td><td>Fixed worker pool</td><td>Fixed pool either wastes money (idle off-peak) or drops submissions (underpowered at peak)</td></tr>
+    <tr><td>Result delivery</td><td>WebSocket push (prod) / polling (simple)</td><td>Polling only</td><td>WebSocket eliminates 50K req/sec of poll traffic; polling is simpler to implement for MVP</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Plagiarism detection:</strong> Run MOSS (Measure of Software Similarity) on all submissions for a contest after it ends. Compare code structure (not text) to detect copy-paste cheating. Results shown to contest admins in a report.</li>
+  <li><strong>Submission caching:</strong> If 10,000 users submit the identical optimal solution to a popular problem, run the sandbox once and cache the verdict keyed on <code>hash(code + language + problem_id)</code>. Return the cached verdict for duplicate submissions instantly.</li>
+  <li><strong>Custom checkers:</strong> Problems where the answer isn't a unique string (e.g., "output any valid topological sort") need a custom checker program instead of string comparison. The judge runs the checker with the expected input, user output, and expected output, and trusts its exit code.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'food-delivery',
+    title: 'Design a Food Delivery App (DoorDash/Uber Eats)',
+    icon: '🍕',
+    difficulty: 'medium',
+    readTime: '17 min read',
+    teaser: 'Design a platform where users order food from restaurants, Dasher drivers pick up and deliver orders, and everyone tracks the delivery in real time. Covers order matching, location tracking, ETA estimation, and the three-sided marketplace.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Three sides to handle?</strong> → (1) Customer app — browse, order, track. (2) Restaurant tablet — receive orders, mark ready. (3) Dasher app — accept assignments, navigate, mark delivered.</li>
+  <li><strong>Scale?</strong> → 5 million orders/day; 500K active Dashers; peak is lunch 12-1pm and dinner 6-8pm.</li>
+  <li><strong>Real-time tracking?</strong> → Customer sees Dasher's location updating every 3-5 seconds while order is in transit.</li>
+  <li><strong>Assignment strategy?</strong> → System auto-assigns closest available Dasher to an order when the restaurant marks it ready (or slightly before, to minimize wait).</li>
+  <li><strong>ETA?</strong> → Show customer estimated delivery time at order placement, updated as real-world conditions change.</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Order placement: &lt;500ms end-to-end (user can't wait to see confirmation)</li>
+  <li>Dasher location updates: process 500K × 1 update/5s = 100K location writes/sec</li>
+  <li>Real-time tracking: customer sees location update within 5 seconds of Dasher moving</li>
+  <li>Assignment latency: Dasher assigned within 30 seconds of order being ready for pickup</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Orders/day</span><span class="cap-val">5M/day → ~58 orders/sec average; 300/sec at lunch peak</span></div>
+  <div class="cap-row"><span class="cap-label">Location updates/sec</span><span class="cap-val">500K Dashers × 1 update/5s = 100K writes/sec</span></div>
+  <div class="cap-row"><span class="cap-label">Active orders at peak</span><span class="cap-val">300 orders/sec × 30min avg delivery = 540K concurrent active orders</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Tracking reads/sec</span><span class="cap-val">540K active orders × 1 customer poll/5s = 108K location reads/sec</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Services</h3>
+<ul>
+  <li><strong>Order Service:</strong> Manages order lifecycle (PLACED → CONFIRMED → PREPARING → READY → PICKED_UP → DELIVERED). Publishes state change events to Kafka.</li>
+  <li><strong>Restaurant Service:</strong> Receives new orders via WebSocket/SSE to restaurant tablet. Restaurants confirm and mark orders ready.</li>
+  <li><strong>Assignment Service:</strong> Triggered when order is READY. Finds the best available Dasher within delivery radius. Sends assignment offer; Dasher accepts/declines.</li>
+  <li><strong>Location Service:</strong> Ingests real-time Dasher GPS coordinates (100K writes/sec). Stores current location in Redis. Customers query this to see their Dasher on the map.</li>
+  <li><strong>ETA Service:</strong> Computes estimated delivery time using: current restaurant queue time + prep time + Dasher travel time (from maps routing API).</li>
+</ul>
+
+<pre class="diagram">
+  Customer App ──► Order Service ──► Kafka ──► Restaurant Service ──► Restaurant Tablet
+       │               │                            │
+       │          Assignment Service ◄──────── Dasher accepts
+       │          (finds nearest Dasher)
+       │
+  Tracking ──► Location Service (Redis: current Dasher positions)
+               ▲
+          Dasher App (GPS update every 5s)
+</pre>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Dasher Location Tracking at Scale</div>
+<p>500K Dashers each send a GPS update every 5 seconds = 100K writes/sec. A traditional database would be crushed. Architecture:</p>
+<ul>
+  <li>Dasher app sends HTTP POST (or WebSocket frame) to a <strong>Location Ingestion Service</strong> (stateless, horizontally scalable).</li>
+  <li>Ingestion service writes <code>SET dasher:{id}:location "{lat},{lng},{timestamp}"</code> to Redis (TTL: 60s — auto-expires if Dasher goes offline). Redis handles 500K+ writes/sec easily.</li>
+  <li>Also writes to Kafka (<code>dasher-location-updates</code> topic) for downstream consumers (ETA service, analytics).</li>
+  <li>Customer tracking polls <code>GET /dasher/{id}/location</code> → served from Redis in &lt;1ms.</li>
+</ul>
+
+<div class="step-badge">Step 3b — Dasher Assignment Algorithm</div>
+<p>When an order is READY, the Assignment Service finds the best Dasher. Steps:</p>
+<ol>
+  <li>Query the <strong>Proximity Service</strong> (backed by Redis GEOSEARCH) to find all Dashers within a 3km radius of the restaurant who are in IDLE or FINISHING_DELIVERY state.</li>
+  <li>Score each candidate: <code>score = w1 × proximity + w2 × dasher_rating + w3 × current_load</code></li>
+  <li>Send an assignment offer to the top candidate. Offer is open for 30 seconds.</li>
+  <li>If declined or no response: try the next candidate. This is a <strong>waterfall dispatch</strong> — sequential offers until accepted.</li>
+  <li>Alternatively, use <strong>broadcast dispatch</strong> — send offer to top-5 Dashers simultaneously; first to accept gets it. Faster assignment but can cause race conditions (two Dashers accepting the same order). Use a distributed lock (Redis SETNX on <code>order:{id}:assignment</code>) to ensure only one acceptance goes through.</li>
+</ol>
+
+<div class="step-badge">Step 3c — ETA Estimation</div>
+<p>ETA shown to customer = (restaurant prep time remaining) + (Dasher travel time to restaurant) + (Dasher travel time to customer). Components:</p>
+<ul>
+  <li><strong>Restaurant prep time:</strong> ML model trained on historical prep times per restaurant, per item, per time-of-day. Updated as restaurants mark orders ready early/late vs. prediction.</li>
+  <li><strong>Dasher travel time:</strong> Google Maps Platform (Distance Matrix API) with real-time traffic. Called at assignment time and refreshed every 2 minutes as Dasher moves.</li>
+  <li><strong>ETA updates:</strong> When Dasher picks up the order (state: PICKED_UP), ETA resets to just the last-mile travel time. Pushed to customer via WebSocket.</li>
+</ul>
+
+<div class="step-badge">Step 3d — Order State Machine &amp; Reliability</div>
+<p>Orders transition through states. Each transition publishes a Kafka event consumed by multiple services:</p>
+<ul>
+  <li><strong>PLACED:</strong> Payment charged. Notification Service sends "order received" to customer.</li>
+  <li><strong>CONFIRMED:</strong> Restaurant confirmed. ETA calculated. Push notification to customer.</li>
+  <li><strong>READY:</strong> Assignment Service triggered.</li>
+  <li><strong>PICKED_UP:</strong> ETA recalculated. Customer tracking becomes live.</li>
+  <li><strong>DELIVERED:</strong> Payment fully settled. Rating prompt sent to customer and Dasher.</li>
+</ul>
+<p>If the Assignment Service crashes after an order is READY, the order gets stuck. A <strong>reconciliation job</strong> (runs every 30s) finds orders in READY state for &gt;2 minutes without an assigned Dasher and resubmits them for assignment.</p>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Location storage</td><td>Redis (current position only)</td><td>Time-series DB (all positions)</td><td>Current position is all that's needed for tracking; Redis handles 100K writes/sec trivially</td></tr>
+    <tr><td>Dasher dispatch</td><td>Waterfall (sequential offers)</td><td>Broadcast to top-5</td><td>Simpler; no race condition handling needed. Broadcast is faster but requires distributed locking</td></tr>
+    <tr><td>Order state</td><td>Event-driven (Kafka)</td><td>Direct service calls</td><td>Decoupled — adding a new consumer (analytics, fraud) doesn't require changing Order Service</td></tr>
+    <tr><td>Stuck orders</td><td>Reconciliation job</td><td>Saga compensation</td><td>Simpler; for food delivery the business logic is forgiving — a 2-minute resubmit is fine</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Batching orders:</strong> A smart assignment algorithm can route one Dasher to pick up two nearby restaurant orders and deliver them sequentially (Dasher earns more, fewer Dashers needed). Requires solving a Travelling Salesman variant — handled offline with heuristics, not exact algorithms.</li>
+  <li><strong>Dynamic Dasher pricing:</strong> When demand exceeds Dasher supply (storms, events), increase per-delivery pay in real time to incentivize more Dashers to go online. Requires a supply/demand forecasting model per geographic zone.</li>
+  <li><strong>Restaurant capacity management:</strong> If a restaurant's order queue grows beyond their capacity (tablet shows 20 pending orders), temporarily reduce their ranking in the app to slow incoming order rate — prevents a restaurant from drowning and ruining the customer experience.</li>
+</ul>
+`
+      }
+    ]
+  },
+  {
+    id: 'search-engine',
+    title: 'Design a Web Search Engine (Google-style)',
+    icon: '🔍',
+    difficulty: 'hard',
+    readTime: '23 min read',
+    teaser: 'Design a search engine that indexes billions of web pages and returns the 10 most relevant results in under 200ms. Covers web crawling, inverted index construction, TF-IDF + PageRank scoring, and query serving at internet scale.',
+    sections: [
+      {
+        id: 'step1',
+        title: 'Step 1 — Understand the Problem',
+        content: `
+<div class="callout tip"><div class="callout-icon">💬</div><div class="callout-body"><strong>Interview Tip</strong><br>Google-scale search is unfathomably large (100B+ pages). Frame your design for a web-scale search engine but be explicit about which simplifications you're making — interviewers appreciate honest scoping over vague handwaving.</div></div>
+
+<h3>Clarifying Questions</h3>
+<ul>
+  <li><strong>Scale of index?</strong> → 10 billion web pages. (Google: ~100B; scoping to 10B keeps math tractable.)</li>
+  <li><strong>Query volume?</strong> → 100,000 search queries/second globally.</li>
+  <li><strong>Freshness?</strong> → Breaking news pages indexed within hours; average page re-crawled every 2 weeks.</li>
+  <li><strong>Result types?</strong> → 10 blue links per results page (no images, videos, featured snippets for this design).</li>
+  <li><strong>Languages?</strong> → English only (to simplify tokenization).</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<ul>
+  <li>Query latency: &lt;200ms p99 (users abandon searches after 2 seconds)</li>
+  <li>Freshness: new pages discoverable within 24 hours; popular pages within 2 hours</li>
+  <li>Availability: 99.99% — the search engine is the internet for most users</li>
+  <li>Index size: 10B pages × ~10KB average content = ~100TB of raw content; inverted index is smaller</li>
+</ul>
+
+<h3>Capacity Estimation</h3>
+<div class="capacity-block">
+  <div class="cap-row"><span class="cap-label">Raw page content</span><span class="cap-val">10B pages × 10KB avg = 100TB</span></div>
+  <div class="cap-row"><span class="cap-label">Inverted index size</span><span class="cap-val">~500M unique terms × avg 500 postings × 8 bytes = ~2PB (distributed)</span></div>
+  <div class="cap-row"><span class="cap-label">Query rate</span><span class="cap-val">100K queries/sec; avg query = 3 words → 300K term lookups/sec</span></div>
+  <div class="cap-row cap-result"><span class="cap-label">Crawl rate needed</span><span class="cap-val">10B pages ÷ 14 days per re-crawl cycle = ~8,300 pages/sec continuous</span></div>
+</div>
+`
+      },
+      {
+        id: 'step2',
+        title: 'Step 2 — High-Level Design',
+        content: `
+<h3>Three Major Subsystems</h3>
+<ol>
+  <li><strong>Crawler Pipeline:</strong> Discovers and downloads web pages continuously.</li>
+  <li><strong>Index Builder:</strong> Processes raw pages into the inverted index.</li>
+  <li><strong>Query Serving:</strong> Looks up the index and ranks results for user queries.</li>
+</ol>
+
+<pre class="diagram">
+  ┌─────────────────── OFFLINE ───────────────────────┐
+  │                                                   │
+  │  URL Frontier ──► Crawlers ──► Raw Page Store     │
+  │  (priority queue)   (10K)      (GCS / S3, 100TB)  │
+  │                                    │              │
+  │                              Link Extractor        │
+  │                              (feeds URL Frontier)  │
+  │                                    │              │
+  │                              Index Builder         │
+  │                              (Spark batch)         │
+  │                              → Inverted Index (2PB)│
+  └───────────────────────────────────────────────────┘
+                           │
+  ┌─────────────── ONLINE (Query Serving) ─────────────┐
+  │                                                    │
+  │  User query ──► Query Parser ──► Index Shards      │
+  │                                  (parallel lookup) │
+  │                                        │          │
+  │                                  Result Merger     │
+  │                                  (ranking + dedup) │
+  │                                        │          │
+  │                                  Top 10 results → User
+  └────────────────────────────────────────────────────┘
+</pre>
+`
+      },
+      {
+        id: 'step3',
+        title: 'Step 3 — Design Deep Dive',
+        content: `
+<div class="step-badge">Step 3a — Inverted Index</div>
+<p>The inverted index maps each term to the list of documents containing it (the <strong>posting list</strong>):</p>
+<pre><code>term "python" → [(doc_id:42, tf:0.3, positions:[5,22,89]),
+                  (doc_id:1337, tf:0.7, positions:[1,2,3]),
+                  ...]   ← sorted by doc_id for merge operations
+
+-- A query "python tutorial" → intersect posting lists for "python" AND "tutorial"
+-- Documents appearing in both lists are candidates; scored by relevance</code></pre>
+<p>The 2PB index is sharded across thousands of machines by term (term sharding) or by document range (document sharding). Document sharding is preferred — each shard answers a complete query for its document subset, then results are merged. This is how Google's index servers work.</p>
+
+<div class="step-badge">Step 3b — Relevance Scoring: TF-IDF + PageRank</div>
+<p>Two signals combined:</p>
+<ul>
+  <li><strong>TF-IDF (content relevance):</strong><br>
+    <code>TF(t,d)</code> = how often term t appears in document d (normalized by doc length)<br>
+    <code>IDF(t)</code> = log(total_docs / docs_containing_t) — rare terms are more informative<br>
+    <code>Score = TF × IDF</code> — high for documents where the query term is frequent but globally rare</li>
+  <li><strong>PageRank (authority):</strong> Iterative graph algorithm. A page's rank = weighted sum of ranks of all pages linking to it. Pages with many high-authority inbound links (Wikipedia, BBC) get high PageRank. Computed offline with Spark over the link graph (10B nodes, ~100B edges). Takes days to converge — run weekly.</li>
+  <li><strong>Final score</strong> = α × TF-IDF + β × PageRank + γ × (query-specific signals like click-through rate, freshness for news queries)</li>
+</ul>
+
+<div class="step-badge">Step 3c — Query Serving Architecture</div>
+<p>For a query "machine learning python tutorial":</p>
+<ol>
+  <li><strong>Query Parser:</strong> Tokenize, lowercase, remove stopwords ("the", "a"), expand synonyms (optional). Result: <code>["machine", "learning", "python", "tutorial"]</code>.</li>
+  <li><strong>Fan-out:</strong> The query is broadcast to all <strong>index leaf servers</strong> in parallel (each holds a shard of the document space). Each shard returns its top-100 results in ~10ms.</li>
+  <li><strong>Merge:</strong> A <strong>top-level merge server</strong> receives results from all shards, re-ranks globally, deduplicates near-identical pages (SimHash content fingerprinting), and selects the top 10.</li>
+  <li><strong>Snippet generation:</strong> A separate <strong>snippet service</strong> fetches the raw document from a compressed document store and extracts 2-3 sentences containing the query terms to show as the result description. This runs concurrently with the ranking step.</li>
+</ol>
+<p>Total latency budget: 10ms fan-out + 50ms shard processing + 20ms merge + 20ms snippet = ~100ms, leaving margin for the 200ms SLA.</p>
+
+<div class="step-badge">Step 3d — Crawler Design</div>
+<p>The crawler's job: discover and download 8,300 pages/second continuously.</p>
+<ul>
+  <li><strong>URL Frontier:</strong> Priority queue of URLs to crawl (backed by a distributed queue like Kafka). Priority based on: PageRank (high-authority sites crawled more frequently), freshness signals (pages that change often), and recency since last crawl.</li>
+  <li><strong>Politeness:</strong> Per-domain rate limiting — crawl each domain at most 1 request/second to avoid overloading websites. Per-domain queues stored in Redis with a scheduled release time.</li>
+  <li><strong>robots.txt:</strong> Fetch and cache <code>robots.txt</code> for each domain. Respect Disallow rules — skip disallowed paths.</li>
+  <li><strong>Deduplication:</strong> Before storing a crawled page, compute a SimHash of its content and check a distributed hash set (Redis Bloom Filter or HBase). If the content is near-duplicate of an already-indexed page, discard it — ~30% of the web is near-duplicate content.</li>
+</ul>
+`
+      },
+      {
+        id: 'step4',
+        title: 'Step 4 — Wrap Up',
+        content: `
+<p><strong>Key decisions summary:</strong></p>
+<table>
+  <thead><tr><th>Decision</th><th>Made</th><th>Alternative</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Index sharding</td><td>Document sharding</td><td>Term sharding</td><td>Each shard can answer a complete query; merge is simple top-K. Term sharding requires coordinating across N shards per term lookup</td></tr>
+    <tr><td>Ranking</td><td>TF-IDF × PageRank (offline)</td><td>Pure ML ranking (BERT)</td><td>Offline pre-computed scores enable sub-ms per-doc scoring; ML re-ranking added on top-K candidates (100), not all candidates</td></tr>
+    <tr><td>Deduplication</td><td>SimHash (near-duplicate detection)</td><td>Exact hash</td><td>Exact hash misses paraphrased content; SimHash catches near-duplicate pages that differ in boilerplate but share core content</td></tr>
+    <tr><td>Crawl priority</td><td>Priority queue (PageRank + freshness)</td><td>BFS from seed URLs</td><td>BFS treats all pages equally; priority crawling ensures high-value pages are indexed first within the crawl budget</td></tr>
+  </tbody>
+</table>
+
+<h3>If You Have Extra Time</h3>
+<ul>
+  <li><strong>Spell correction:</strong> "machien learning" → "machine learning". Use a noisy channel model (Bayesian): P(intended | typed) ∝ P(typed | intended) × P(intended). P(intended) comes from query frequency logs — common searches are likely to be correct spellings.</li>
+  <li><strong>Personalization:</strong> Re-rank results based on the user's search history (searches in the past 30 days weighted by recency). Stored in a per-user profile. Controversial — many users now opt out.</li>
+  <li><strong>Freshness for news:</strong> A separate "freshness index" stores pages crawled in the last 24 hours. When a query contains news signals (breaking, today, latest), merge results from the freshness index with the main index. The freshness index is smaller (few billion pages) and updated continuously via stream processing.</li>
+</ul>
+`
+      }
+    ]
   }
 ];
 
