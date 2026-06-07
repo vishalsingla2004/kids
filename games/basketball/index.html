@@ -1,544 +1,384 @@
 <!DOCTYPE html>
-    <html lang="en">
-    <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    const SESSION_SIZE = 12;
-
-    const BASE_QUESTIONS = [
-      { icon:'🏀', q:'How many players from one team are on the court at once in NBA play?', answer:5, fact:'Each team has 5 players on court, so 10 total players are active during normal play.' },
-      { icon:'⏱️', q:'How many minutes is one NBA game (regulation only)?', answer:48, fact:'An NBA game has 4 quarters of 12 minutes each.' },
-      { icon:'🕒', q:'How many minutes are in one NBA quarter?', answer:12, fact:'NBA quarters are 12 minutes.' },
-      { icon:'📉', q:'How many seconds are on the NBA shot clock?', answer:24, fact:'The shot clock has been 24 seconds since 1954.' },
-      { icon:'🎯', q:'How many points is a made free throw worth?', answer:1, fact:'Free throws are always 1 point each.' },
-      { icon:'🎯', q:'How many points is a made shot behind the NBA arc worth?', answer:3, fact:'Three-pointers were added in the 1979-80 season.' },
-      { icon:'🏁', q:'How many regular-season games does an NBA team play?', answer:82, fact:'Each team plays 82 regular-season games.' },
-      { icon:'🏆', q:'How many teams are currently in the NBA?', answer:30, fact:'The NBA has 30 teams across two conferences.' },
-      { icon:'📋', q:'How many fouls before a player fouls out in the NBA?', answer:6, fact:'Players foul out after 6 personal fouls in NBA games.' },
-      { icon:'📏', q:'How high is an NBA rim in feet?', answer:10, fact:'The rim height is 10 feet.' },
-      { icon:'📏', q:'How long is an NBA court in feet?', answer:94, fact:'NBA courts are 94 feet long.' },
-      { icon:'📏', q:'How wide is an NBA court in feet?', answer:50, fact:'NBA courts are 50 feet wide.' },
-      { icon:'📚', q:'How many rounds are in the NBA Draft?', answer:2, fact:'The NBA Draft consists of two rounds.' },
-      { icon:'📚', q:'How many total picks are in a normal NBA Draft?', answer:60, fact:'A full 2-round draft with 30 teams has 60 picks.' },
-      { icon:'🌟', q:'How many points did Wilt Chamberlain score in his famous 100-point game?', answer:100, fact:'Wilt scored 100 points on March 2, 1962.' },
-      { icon:'🌟', q:'How many points did Kobe Bryant score in his 81-point game?', answer:81, fact:'Kobe scored 81 points against Toronto in 2006.' },
-      { icon:'🌟', q:'How many rebounds did Wilt Chamberlain have in his career-high game?', answer:55, fact:'Wilt grabbed 55 rebounds in one game.' },
-      { icon:'🌟', q:'How many threes did Klay Thompson make in his single-game record?', answer:14, fact:'Klay made 14 threes in one game.' },
-      { icon:'🧠', q:'How many players are on the floor total during normal NBA gameplay?', answer:10, fact:'It is 5-on-5, so 10 players total.' },
-      { icon:'🧠', q:'How many overtime minutes are played in the NBA?', answer:5, fact:'Each NBA overtime period is 5 minutes.' },
-      { icon:'📣', q:'How many referees typically officiate an NBA game?', answer:3, fact:'Modern NBA games use a 3-official crew.' },
-      { icon:'📣', q:'How many seconds does a team have to get over half-court?', answer:8, fact:'NBA backcourt violation is 8 seconds.' },
-      { icon:'📐', q:'How many feet is the NBA free throw line from the backboard?', answer:15, fact:'The free throw line is 15 feet from the backboard.' },
-      { icon:'📐', q:'How many feet is the NBA corner three?', answer:22, fact:'NBA corner threes are 22 feet.' },
-      { icon:'📐', q:'How many inches is the diameter of a basketball rim?', answer:18, fact:'A standard rim has an 18-inch diameter.' },
-      { icon:'📐', q:'How many inches is an NBA ball circumference (rounded)?', answer:30, fact:'An NBA size 7 ball is about 29.5 inches around.' },
-      { icon:'🏟️', q:'How many championships have the Boston Celtics won?', answer:18, fact:'Boston has won 18 NBA championships.' },
-      { icon:'🏟️', q:'How many championships have the Los Angeles Lakers won?', answer:17, fact:'The Lakers have 17 NBA titles.' },
-      { icon:'🏟️', q:'How many championships have the Chicago Bulls won?', answer:6, fact:'The Bulls won 6 titles in the Jordan era.' },
-      { icon:'🏟️', q:'How many championships have the San Antonio Spurs won?', answer:5, fact:'The Spurs won 5 NBA championships.' },
-      { icon:'🏟️', q:'How many championships have the Golden State Warriors won?', answer:7, fact:'Golden State has won 7 championships.' },
-      { icon:'🏟️', q:'How many championships have the Miami Heat won?', answer:3, fact:'The Heat have won 3 titles.' },
-      { icon:'🏟️', q:'How many championships have the Detroit Pistons won?', answer:3, fact:'Detroit has won 3 NBA titles.' },
-      { icon:'🏟️', q:'How many championships have the Milwaukee Bucks won?', answer:2, fact:'Milwaukee has won 2 championships.' },
-      { icon:'🏟️', q:'How many championships have the New York Knicks won?', answer:2, fact:'The Knicks have 2 titles.' },
-      { icon:'🏟️', q:'How many championships have the Toronto Raptors won?', answer:1, fact:'Toronto won its first title in 2019.' },
-      { icon:'🏟️', q:'How many championships have the Denver Nuggets won?', answer:1, fact:'Denver won its first title in 2023.' },
-      { icon:'🏅', q:'How many MVP awards has Michael Jordan won?', answer:5, fact:'Jordan won 5 regular-season MVPs.' },
-      { icon:'🏅', q:'How many MVP awards has LeBron James won?', answer:4, fact:'LeBron has 4 regular-season MVPs.' },
-      { icon:'🏅', q:'How many MVP awards has Nikola Jokic won?', answer:3, fact:'Jokic has won 3 MVPs.' },
-      { icon:'🏅', q:'How many MVP awards did Larry Bird win?', answer:3, fact:'Bird won 3 straight MVPs.' },
-      { icon:'🏅', q:'How many MVP awards did Magic Johnson win?', answer:3, fact:'Magic won 3 MVP awards.' }
-    ];
-
-    const PLAYER_FACTS = [
-      { name:'Michael Jordan', jersey:23, draft:1984, champs:6, mvp:5 },
-      { name:'LeBron James', jersey:23, draft:2003, champs:4, mvp:4 },
-      { name:'Stephen Curry', jersey:30, draft:2009, champs:4, mvp:2 },
-      { name:'Kevin Durant', jersey:35, draft:2007, champs:2, mvp:1 },
-      { name:'Kobe Bryant', jersey:24, draft:1996, champs:5, mvp:1 },
-      { name:'Tim Duncan', jersey:21, draft:1997, champs:5, mvp:2 },
-      { name:'Giannis Antetokounmpo', jersey:34, draft:2013, champs:1, mvp:2 },
-      { name:'Nikola Jokic', jersey:15, draft:2014, champs:1, mvp:3 },
-      { name:'Luka Doncic', jersey:77, draft:2018, champs:0, mvp:0 },
-      { name:'Victor Wembanyama', jersey:1, draft:2023, champs:0, mvp:0 },
-      { name:'Jayson Tatum', jersey:0, draft:2017, champs:1, mvp:0 },
-      { name:'Joel Embiid', jersey:21, draft:2014, champs:0, mvp:1 },
-      { name:'Magic Johnson', jersey:32, draft:1979, champs:5, mvp:3 },
-      { name:'Larry Bird', jersey:33, draft:1978, champs:3, mvp:3 },
-      { name:'Shaquille O\'Neal', jersey:34, draft:1992, champs:4, mvp:1 },
-      { name:'Kareem Abdul-Jabbar', jersey:33, draft:1969, champs:6, mvp:6 },
-      { name:'Bill Russell', jersey:6, draft:1956, champs:11, mvp:5 },
-      { name:'Dirk Nowitzki', jersey:41, draft:1998, champs:1, mvp:1 },
-      { name:'Dwyane Wade', jersey:3, draft:2003, champs:3, mvp:0 },
-      { name:'Kawhi Leonard', jersey:2, draft:2011, champs:2, mvp:0 },
-      { name:'Damian Lillard', jersey:0, draft:2012, champs:0, mvp:0 },
-      { name:'Kyrie Irving', jersey:11, draft:2011, champs:1, mvp:0 },
-      { name:'Anthony Davis', jersey:3, draft:2012, champs:1, mvp:0 },
-      { name:'James Harden', jersey:1, draft:2009, champs:0, mvp:1 },
-      { name:'Russell Westbrook', jersey:0, draft:2008, champs:0, mvp:1 },
-      { name:'Chris Paul', jersey:3, draft:2005, champs:0, mvp:0 },
-      { name:'Paul George', jersey:13, draft:2010, champs:0, mvp:0 },
-      { name:'Klay Thompson', jersey:11, draft:2011, champs:4, mvp:0 },
-      { name:'Donovan Mitchell', jersey:45, draft:2017, champs:0, mvp:0 },
-      { name:'Devin Booker', jersey:1, draft:2015, champs:0, mvp:0 }
-    ];
-
-    const TEAM_FACTS = [
-      { team:'Boston Celtics', titles:18 },
-      { team:'Los Angeles Lakers', titles:17 },
-      { team:'Golden State Warriors', titles:7 },
-      { team:'Chicago Bulls', titles:6 },
-      { team:'San Antonio Spurs', titles:5 },
-      { team:'Miami Heat', titles:3 },
-      { team:'Detroit Pistons', titles:3 },
-      { team:'Philadelphia 76ers', titles:3 },
-      { team:'New York Knicks', titles:2 },
-      { team:'Milwaukee Bucks', titles:2 },
-      { team:'Toronto Raptors', titles:1 },
-      { team:'Denver Nuggets', titles:1 },
-      { team:'Dallas Mavericks', titles:1 },
-      { team:'Cleveland Cavaliers', titles:1 },
-      { team:'Washington Wizards', titles:1 }
-    ];
-
-    function buildQuestionBank() {
-      const questions = [...BASE_QUESTIONS];
-
-      PLAYER_FACTS.forEach((p) => {
-        questions.push({
-          icon: '📛',
-          q: `What jersey number is most associated with ${p.name}?`,
-          answer: p.jersey,
-          fact: `${p.name} is best known for wearing jersey #${p.jersey}.`
-        });
-        questions.push({
-          icon: '📆',
-          q: `In what year was ${p.name} drafted into the NBA?`,
-          answer: p.draft,
-          fact: `${p.name} entered the NBA in ${p.draft}.`
-        });
-        questions.push({
-          icon: '👑',
-          q: `How many NBA championships has ${p.name} won?`,
-          answer: p.champs,
-          fact: `${p.name} has won ${p.champs} NBA championship${p.champs === 1 ? '' : 's'}.`
-        });
-        questions.push({
-          icon: '🏅',
-          q: `How many MVP awards has ${p.name} won?`,
-          answer: p.mvp,
-          fact: `${p.name} has won ${p.mvp} regular-season MVP award${p.mvp === 1 ? '' : 's'}.`
-        });
-      });
-
-      TEAM_FACTS.forEach((t) => {
-        questions.push({
-          icon: '🏟️',
-          q: `How many NBA championships has ${t.team} won?`,
-          answer: t.titles,
-          fact: `${t.team} has won ${t.titles} NBA title${t.titles === 1 ? '' : 's'}.`
-        });
-      });
-
-      PLAYER_FACTS.slice(0, 24).forEach((p) => {
-        questions.push({
-          icon: '🎲',
-          q: `Fun math: ${p.name}'s jersey number plus championships equals?`,
-          answer: p.jersey + p.champs,
-          fact: `${p.name}: jersey ${p.jersey} + championships ${p.champs} = ${p.jersey + p.champs}.`
-        });
-        questions.push({
-          icon: '🧩',
-          q: `Fun math: How many years after 2000 was ${p.name} drafted?`,
-          answer: p.draft - 2000,
-          fact: `${p.name} was drafted in ${p.draft}, which is ${p.draft - 2000} years after 2000.`
-        });
-      });
-
-      for (let i = 0; i < 20; i++) {
-        const a = PLAYER_FACTS[i];
-        const b = PLAYER_FACTS[(i + 5) % PLAYER_FACTS.length];
-        questions.push({
-          icon: '⚖️',
-          q: `How many more career championships does ${a.name} have than ${b.name}?`,
-          answer: Math.max(0, a.champs - b.champs),
-          fact: `${a.name}: ${a.champs} titles, ${b.name}: ${b.champs} titles.`
-        });
-        questions.push({
-          icon: '⚖️',
-          q: `How many more MVP awards does ${a.name} have than ${b.name}?`,
-          answer: Math.max(0, a.mvp - b.mvp),
-          fact: `${a.name}: ${a.mvp} MVPs, ${b.name}: ${b.mvp} MVPs.`
-        });
-      }
-
-      for (let i = 0; i < TEAM_FACTS.length; i++) {
-        const t = TEAM_FACTS[i];
-        const ref = TEAM_FACTS[(i + 3) % TEAM_FACTS.length];
-        questions.push({
-          icon: '🏁',
-          q: `How many more titles does ${t.team} have than ${ref.team}?`,
-          answer: Math.max(0, t.titles - ref.titles),
-          fact: `${t.team} has ${t.titles}, while ${ref.team} has ${ref.titles}.`
-        });
-      }
-
-      const uniqueByQuestion = [];
-      const seen = new Set();
-      for (const item of questions) {
-        if (!seen.has(item.q)) {
-          uniqueByQuestion.push(item);
-          seen.add(item.q);
-        }
-      }
-
-      let k = 0;
-      while (uniqueByQuestion.length < 300) {
-        const p = PLAYER_FACTS[k % PLAYER_FACTS.length];
-        const games = 3 + (k % 10);
-        const twos = 2 + (k % 8);
-        const threes = 1 + (k % 6);
-        const fts = 2 + (k % 7);
-        const total = (twos * 2) + (threes * 3) + fts;
-        const qText = `Game math #${k + 1}: ${p.name} makes ${twos} two-pointers, ${threes} threes, and ${fts} free throws in one game. Total points?`;
-
-        if (!seen.has(qText)) {
-          seen.add(qText);
-          uniqueByQuestion.push({
-            icon: '🧮',
-            q: qText,
-            answer: total,
-            fact: `Scoring formula: 2PT makes × 2 + 3PT makes × 3 + FT makes × 1. Over ${games} games this pace would be ${total * games} points.`
-          });
-        }
-
-        k += 1;
-      }
-
-      return uniqueByQuestion.slice(0, 300);
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Basketball Wits & Wagers</title>
+  <style>
+    :root {
+      --bg1: #2a1300;
+      --bg2: #7a3200;
+      --txt: #fff8ea;
     }
 
-    const QUESTION_BANK = buildQuestionBank();
-        overflow: auto;
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      color: var(--txt);
+      background:
+        radial-gradient(circle at 10% 15%, rgba(255, 183, 77, 0.28), transparent 40%),
+        radial-gradient(circle at 88% 25%, rgba(255, 138, 0, 0.22), transparent 45%),
+        radial-gradient(circle at 15% 88%, rgba(255, 111, 0, 0.22), transparent 45%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      display: grid;
+      place-items: center;
+      padding: 14px;
+    }
+
+    .screen {
+      width: min(900px, 98vw);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 22px;
+      background: rgba(0, 0, 0, 0.24);
+      backdrop-filter: blur(4px);
+      padding: 16px;
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.35);
+    }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .back {
+      color: #ffe3a4;
+      text-decoration: none;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .title {
+      text-align: center;
+      font-size: clamp(1.2rem, 4.5vw, 2rem);
+      font-weight: 900;
+      margin: 8px 0 4px;
+    }
+
+    .subtitle {
+      text-align: center;
+      opacity: 0.9;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+    }
+
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .pill {
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      padding: 7px 8px;
+      text-align: center;
+    }
+
+    .k {
+      font-size: 0.74rem;
+      opacity: 0.85;
+    }
+
+    .v {
+      font-size: 1.05rem;
+      font-weight: 900;
+    }
+
+    .card {
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .q-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .q-icon {
+      font-size: clamp(1.8rem, 7vw, 2.7rem);
+    }
+
+    .level {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .level.easy { color: #8efcb2; }
+    .level.medium { color: #ffe08a; }
+    .level.hard { color: #ffad9a; }
+
+    .q-text {
+      text-align: center;
+      font-size: clamp(1rem, 3.6vw, 1.3rem);
+      line-height: 1.35;
+      min-height: 68px;
+    }
+
+    .hint {
+      text-align: center;
+      font-size: 0.86rem;
+      opacity: 0.85;
+    }
+
+    .actions,
+    .bottom-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 999px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-weight: 800;
+      color: #fff;
+      background: linear-gradient(145deg, #f7ad35, #dc7f04);
+    }
+
+    .btn.secondary {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    .status {
+      text-align: center;
+      font-size: 0.95rem;
+      min-height: 20px;
+    }
+
+    .fact {
+      display: none;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.09);
+      padding: 10px;
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+
+    .fact.show {
+      display: block;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.78);
+      padding: 14px;
+      z-index: 50;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .panel {
+      width: min(560px, 96vw);
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 18px;
+      text-align: center;
+    }
+
+    .panel h2 {
+      margin: 0 0 8px;
+    }
+
+    @media (max-width: 640px) {
+      .hud {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    <div class="topline">
+      <a class="back" href="../../">← Back</a>
+      <div style="font-size:0.82rem;opacity:0.85;">Basketball Trivia</div>
+    </div>
 
-      .q-icon {
-        font-size: clamp(1.85rem, 9vw, 3rem);
-        filter: drop-shadow(0 4px 10px rgba(0,0,0,0.45));
-      }
+    <div class="title">🏀 Basketball Wits &amp; Wagers</div>
+    <div class="subtitle">Balanced round: easy + medium + hard. Tap once to reveal answer.</div>
 
-      .q-text {
-        font-size: clamp(0.98rem, 3.8vw, 1.28rem);
-        line-height: 1.34;
-      }
+    <div class="hud">
+      <div class="pill"><div class="k">Round</div><div class="v" id="round">1 / 12</div></div>
+      <div class="pill"><div class="k">Score</div><div class="v" id="score">0</div></div>
+      <div class="pill"><div class="k">Streak</div><div class="v" id="streak">0</div></div>
+      <div class="pill"><div class="k">Pool</div><div class="v" id="pool">300</div></div>
+      <div class="pill"><div class="k">Tier Mix</div><div class="v">4/4/4</div></div>
+    </div>
 
-      .hint {
-        font-family: 'Nunito', sans-serif;
-        font-size: 0.82rem;
-        color: rgba(255,255,255,0.74);
-      }
+    <div class="card">
+      <div class="q-head">
+        <div class="q-icon" id="qIcon">🏀</div>
+        <div class="level easy" id="qLevel">Easy</div>
+      </div>
+      <div class="q-text" id="qText"></div>
+      <div class="hint">No typing required. Reveal answer, read the fact, then go next.</div>
 
-      .guess-row {
-        width: 100%;
-        display: flex;
-        gap: 8px;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .guess-input {
-        width: min(220px, 60vw);
-        border: 2px solid rgba(255,255,255,0.25);
-        border-radius: 12px;
-        padding: 10px 12px;
-        font-family: 'Nunito', sans-serif;
-        font-weight: 900;
-        font-size: 1rem;
-        background: rgba(255,255,255,0.95);
-        color: #2a1708;
-      }
-
-      .btn {
-        font-family: 'Fredoka One', cursive;
-        border-radius: 50px;
-        padding: 10px 16px;
-        border: 2px solid rgba(255,255,255,0.28);
-        background: linear-gradient(145deg, #f7ad35, #dc7f04);
-        color: #fff;
-        cursor: pointer;
-        font-size: 0.9rem;
-      }
-
-      .btn.secondary { background: rgba(255,255,255,0.12); }
-      .btn:disabled { opacity: 0.5; cursor: default; }
-
-      .board {
-        width: 100%;
-        display: none;
-        grid-template-columns: repeat(2, minmax(0,1fr));
-        gap: 8px;
-      }
-
-      .board.show { display: grid; }
-
-      .line {
-        border: 2px solid rgba(255,255,255,0.2);
-        border-radius: 12px;
-        background: rgba(255,255,255,0.08);
-        color: #fff;
-        padding: 10px 8px;
-        min-height: 50px;
-        font-family: 'Fredoka One', cursive;
-        font-size: 1rem;
-        cursor: pointer;
-      }
-
-      .line.me {
-        border-color: rgba(255,208,120,0.8);
-        background: rgba(255,208,120,0.12);
-      }
-
-      .line.winner {
-        border-color: var(--ok);
-        background: rgba(46,204,113,0.25);
-      }
-
-      .line.you-picked {
-        border-color: var(--bad);
-        background: rgba(242,95,76,0.2);
-      }
-
-      .status {
-        font-family: 'Nunito', sans-serif;
-        font-size: 0.92rem;
-        min-height: 22px;
-        text-align: center;
-        color: rgba(255,255,255,0.9);
-      }
-
-      .fact {
-        display: none;
-        width: 100%;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.25);
-        background: rgba(255,255,255,0.08);
-        padding: 10px;
-        font-family: 'Nunito', sans-serif;
-        font-weight: 800;
-        font-size: 0.86rem;
-        color: #fff6df;
-        text-align: left;
-      }
-
-      .fact.show { display: block; }
-
-      .actions {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-      }
-
-      .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(12,8,5,0.88);
-        backdrop-filter: blur(4px);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 50;
-        padding: 16px;
-      }
-
-      .overlay.show { display: flex; }
-
-      .panel {
-        width: min(560px, 96vw);
-        background: rgba(255,255,255,0.08);
-        border: 2px solid rgba(255,255,255,0.22);
-        border-radius: 20px;
-        text-align: center;
-        padding: 20px 16px;
-      }
-
-      .panel h2 {
-        font-size: clamp(1.45rem, 6vw, 2.05rem);
-        color: #ffd277;
-      }
-
-      .panel p {
-        margin-top: 7px;
-        font-family: 'Nunito', sans-serif;
-        color: rgba(255,255,255,0.84);
-      }
-    </style>
-    </head>
-    <body>
-      <div class="bg-ball" style="top:8%;left:6%;animation-delay:0s">🏀</div>
-      <div class="bg-ball" style="top:23%;right:7%;animation-delay:1s">🏀</div>
-      <div class="bg-ball" style="bottom:14%;left:8%;animation-delay:2s">🏀</div>
-      <div class="bg-ball" style="bottom:25%;right:5%;animation-delay:3s">🏀</div>
-
-      <div class="screen">
-        <a class="back" href="../../">← Back</a>
-        <div class="title">🏀 Basketball Wits &amp; Wagers</div>
-        <div class="subtitle">Tap once to reveal answer and fact</div>
-
-        <div class="hud">
-          <div class="pill"><div class="k">Round</div><div class="v" id="round">1 / 12</div></div>
-          <div class="pill"><div class="k">Score</div><div class="v" id="score">0</div></div>
-          <div class="pill"><div class="k">Streak</div><div class="v" id="streak">0</div></div>
-          <div class="pill"><div class="k">Pool</div><div class="v" id="pool">100</div></div>
-        </div>
-
-        <div class="card">
-          <div class="q-icon" id="qIcon">🏀</div>
-          <div class="q-text" id="qText"></div>
-          <div class="hint">No guess needed. Click reveal to see the answer and learn a fact.</div>
-
-          <button class="btn secondary" id="revealBtn" onclick="revealAnswer()">Reveal Answer</button>
-
-          <div class="status" id="status"></div>
-          <div class="fact" id="fact"></div>
-        </div>
-
-        <div class="actions">
-          <button class="btn secondary" id="nextBtn" style="display:none" onclick="nextRound()">Next Round</button>
-          <button class="btn secondary" onclick="refreshGame()">New Random Game</button>
-        </div>
+      <div class="actions">
+        <button class="btn secondary" id="revealBtn" onclick="revealAnswer()">Reveal Answer</button>
       </div>
 
-      <div class="overlay" id="endOverlay">
-        <div class="panel">
-          <h2 id="endTitle">Game Over</h2>
-          <p id="endBody"></p>
-          <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-            <button class="btn" onclick="refreshGame()">Play Again</button>
-            <a class="btn secondary" href="../../" style="text-decoration:none;display:inline-flex;align-items:center;">Back to Hub</a>
-          </div>
-        </div>
-      </div>
+      <div class="status" id="status"></div>
+      <div class="fact" id="fact"></div>
+    </div>
 
-    <script>
+    <div class="bottom-actions" style="margin-top:10px;">
+      <button class="btn secondary" id="nextBtn" style="display:none" onclick="nextRound()">Next Question</button>
+      <button class="btn secondary" onclick="refreshGame()">New Random Game</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="endOverlay">
+    <div class="panel">
+      <h2 id="endTitle">Game Over</h2>
+      <p id="endBody"></p>
+      <div class="bottom-actions" style="margin-top:10px;">
+        <button class="btn" onclick="refreshGame()">Play Again</button>
+        <a class="btn secondary" href="../../" style="text-decoration:none;display:inline-flex;align-items:center;">Back to Hub</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
     const SESSION_SIZE = 12;
     const TARGET_POOL_SIZE = 300;
+    const LEVELS = {
+      1: 'Easy',
+      2: 'Medium',
+      3: 'Hard'
+    };
 
-    const CORE_RULE_QUESTIONS = [
-      { icon:'🏀', q:'How many players from one team are on the court at once in NBA play?', answer:5, fact:'Each team has 5 players on court, so 10 total players are active during normal play.' },
-      { icon:'⏱️', q:'How many minutes is one NBA game (regulation only)?', answer:48, fact:'An NBA game has 4 quarters of 12 minutes each, totaling 48 regulation minutes.' },
-      { icon:'🕒', q:'How many minutes are in one NBA quarter?', answer:12, fact:'NBA quarters are 12 minutes.' },
-      { icon:'📉', q:'How many seconds are on the NBA shot clock?', answer:24, fact:'The 24-second shot clock was introduced in the 1954-55 season.' },
-      { icon:'🎯', q:'How many points is a made free throw worth?', answer:1, fact:'Free throws are worth 1 point each.' },
-      { icon:'🎯', q:'How many points is a made basket inside the three-point line worth?', answer:2, fact:'Any made field goal inside the arc is worth 2 points.' },
-      { icon:'🎯', q:'How many points is a made shot from beyond the NBA arc worth?', answer:3, fact:'The three-point line was added in the NBA in the 1979-80 season.' },
-      { icon:'🏁', q:'How many regular-season games does an NBA team play?', answer:82, fact:'Each NBA team plays 82 regular-season games.' },
-      { icon:'🏆', q:'How many teams are currently in the NBA?', answer:30, fact:'The league has 30 teams split between East and West.' },
-      { icon:'📋', q:'How many fouls does a player get before fouling out in the NBA?', answer:6, fact:'A player is disqualified after 6 personal fouls in NBA games.' },
-      { icon:'📏', q:'How high is an NBA rim in feet?', answer:10, fact:'The rim height is 10 feet at all major levels.' },
-      { icon:'📏', q:'How wide is an NBA court in feet?', answer:50, fact:'NBA courts are 94 feet long by 50 feet wide.' },
-      { icon:'📏', q:'How long is an NBA court in feet?', answer:94, fact:'The full court length is 94 feet in the NBA.' },
-      { icon:'📚', q:'How many rounds are in the NBA Draft?', answer:2, fact:'The NBA Draft consists of two rounds.' },
-      { icon:'📚', q:'How many total picks are in a normal 2-round NBA Draft?', answer:60, fact:'A full 30-team, 2-round draft has 60 picks.' },
-      { icon:'📚', q:'In what year did the NBA add the three-point line?', answer:1979, fact:'The NBA adopted the three-point line in the 1979-80 season.' },
-      { icon:'📚', q:'In what year was the ABA-NBA merger completed?', answer:1976, fact:'The ABA merger happened in 1976.' },
-      { icon:'📚', q:'How many wins are needed to take a best-of-seven playoff series?', answer:4, fact:'Best-of-seven means first to 4 wins advances.' },
-      { icon:'📚', q:'How many referees typically officiate an NBA game on court?', answer:3, fact:'Modern NBA games use a 3-official crew.' },
-      { icon:'📚', q:'How many seconds does a team have to advance the ball past half-court?', answer:8, fact:'NBA teams must cross half-court within 8 seconds.' }
+    const BASE_RULE_QUESTIONS = [
+      { icon: '🏀', level: 1, q: 'How many players from one team are on court at once in the NBA?', answer: 5, fact: 'Each team has 5 players on court.' },
+      { icon: '⏱️', level: 1, q: 'How many minutes is NBA regulation time?', answer: 48, fact: 'NBA games are 4 quarters of 12 minutes.' },
+      { icon: '🕒', level: 1, q: 'How many minutes is one NBA quarter?', answer: 12, fact: 'Each quarter is 12 minutes.' },
+      { icon: '📉', level: 1, q: 'How many seconds are on the NBA shot clock?', answer: 24, fact: 'The shot clock is 24 seconds.' },
+      { icon: '🎯', level: 1, q: 'How many points is a free throw?', answer: 1, fact: 'A made free throw is worth 1 point.' },
+      { icon: '🎯', level: 1, q: 'How many points is a basket inside the arc?', answer: 2, fact: 'Inside the arc is worth 2 points.' },
+      { icon: '🎯', level: 1, q: 'How many points is a shot behind the arc?', answer: 3, fact: 'A made three is worth 3 points.' },
+      { icon: '🏁', level: 1, q: 'How many regular-season games does an NBA team play?', answer: 82, fact: 'Each team plays 82 regular-season games.' },
+      { icon: '🏆', level: 1, q: 'How many teams are in the NBA?', answer: 30, fact: 'The NBA has 30 franchises.' },
+      { icon: '📋', level: 1, q: 'How many personal fouls before fouling out in the NBA?', answer: 6, fact: 'Players foul out after 6 personals.' },
+      { icon: '📏', level: 1, q: 'How high is the rim in feet?', answer: 10, fact: 'The rim is 10 feet high.' },
+      { icon: '📏', level: 1, q: 'How long is an NBA court in feet?', answer: 94, fact: 'NBA courts are 94 feet long.' },
+      { icon: '📏', level: 1, q: 'How wide is an NBA court in feet?', answer: 50, fact: 'NBA courts are 50 feet wide.' },
+      { icon: '📚', level: 1, q: 'How many rounds are in the NBA Draft?', answer: 2, fact: 'The NBA Draft has two rounds.' },
+      { icon: '📚', level: 1, q: 'How many total picks are in a normal NBA Draft?', answer: 60, fact: '30 teams x 2 rounds = 60 picks.' },
+      { icon: '📣', level: 1, q: 'How many referees officiate most NBA games?', answer: 3, fact: 'A three-official crew handles NBA games.' },
+      { icon: '📣', level: 1, q: 'How many seconds to cross half-court in the NBA?', answer: 8, fact: 'Teams must advance in 8 seconds.' },
+      { icon: '🧠', level: 1, q: 'How many players are on the floor total during play?', answer: 10, fact: 'It is always 5-on-5 in live play.' }
     ];
 
     const PLAYER_FACTS = [
-      { name:'Michael Jordan', jersey:23, draft:1984, titles:6, mvp:5 },
-      { name:'LeBron James', jersey:23, draft:2003, titles:4, mvp:4 },
-      { name:'Kobe Bryant', jersey:24, draft:1996, titles:5, mvp:1 },
-      { name:'Stephen Curry', jersey:30, draft:2009, titles:4, mvp:2 },
-      { name:'Kevin Durant', jersey:35, draft:2007, titles:2, mvp:1 },
-      { name:'Tim Duncan', jersey:21, draft:1997, titles:5, mvp:2 },
-      { name:'Magic Johnson', jersey:32, draft:1979, titles:5, mvp:3 },
-      { name:'Larry Bird', jersey:33, draft:1978, titles:3, mvp:3 },
-      { name:'Shaquille O\'Neal', jersey:34, draft:1992, titles:4, mvp:1 },
-      { name:'Kareem Abdul-Jabbar', jersey:33, draft:1969, titles:6, mvp:6 },
-      { name:'Bill Russell', jersey:6, draft:1956, titles:11, mvp:5 },
-      { name:'Giannis Antetokounmpo', jersey:34, draft:2013, titles:1, mvp:2 },
-      { name:'Nikola Jokic', jersey:15, draft:2014, titles:1, mvp:3 },
-      { name:'Dirk Nowitzki', jersey:41, draft:1998, titles:1, mvp:1 },
-      { name:'Hakeem Olajuwon', jersey:34, draft:1984, titles:2, mvp:1 },
-      { name:'Wilt Chamberlain', jersey:13, draft:1959, titles:2, mvp:4 },
-      { name:'Oscar Robertson', jersey:14, draft:1960, titles:1, mvp:1 },
-      { name:'Moses Malone', jersey:2, draft:1974, titles:1, mvp:3 },
-      { name:'David Robinson', jersey:50, draft:1987, titles:2, mvp:1 },
-      { name:'Kawhi Leonard', jersey:2, draft:2011, titles:2, mvp:0 },
-      { name:'Dwyane Wade', jersey:3, draft:2003, titles:3, mvp:0 },
-      { name:'Kevin Garnett', jersey:21, draft:1995, titles:1, mvp:1 },
-      { name:'Paul Pierce', jersey:34, draft:1998, titles:1, mvp:0 },
-      { name:'James Harden', jersey:13, draft:2009, titles:0, mvp:1 },
-      { name:'Russell Westbrook', jersey:0, draft:2008, titles:0, mvp:1 },
-      { name:'Chris Paul', jersey:3, draft:2005, titles:0, mvp:0 },
-      { name:'Luka Doncic', jersey:77, draft:2018, titles:0, mvp:0 },
-      { name:'Joel Embiid', jersey:21, draft:2014, titles:0, mvp:1 },
-      { name:'Jayson Tatum', jersey:0, draft:2017, titles:1, mvp:0 },
-      { name:'Victor Wembanyama', jersey:1, draft:2023, titles:0, mvp:0 },
-      { name:'Kyrie Irving', jersey:11, draft:2011, titles:1, mvp:0 },
-      { name:'Damian Lillard', jersey:0, draft:2012, titles:0, mvp:0 },
-      { name:'Allen Iverson', jersey:3, draft:1996, titles:0, mvp:1 },
-      { name:'Steve Nash', jersey:13, draft:1996, titles:0, mvp:2 },
-      { name:'Charles Barkley', jersey:34, draft:1984, titles:0, mvp:1 },
-      { name:'Reggie Miller', jersey:31, draft:1987, titles:0, mvp:0 },
-      { name:'Tracy McGrady', jersey:1, draft:1997, titles:0, mvp:0 },
-      { name:'Vince Carter', jersey:15, draft:1998, titles:0, mvp:0 },
-      { name:'Pau Gasol', jersey:16, draft:2001, titles:2, mvp:0 },
-      { name:'Manu Ginobili', jersey:20, draft:1999, titles:4, mvp:0 }
+      { name: 'Michael Jordan', jersey: 23, draft: 1984, titles: 6, mvp: 5 },
+      { name: 'LeBron James', jersey: 23, draft: 2003, titles: 4, mvp: 4 },
+      { name: 'Kobe Bryant', jersey: 24, draft: 1996, titles: 5, mvp: 1 },
+      { name: 'Stephen Curry', jersey: 30, draft: 2009, titles: 4, mvp: 2 },
+      { name: 'Kevin Durant', jersey: 35, draft: 2007, titles: 2, mvp: 1 },
+      { name: 'Tim Duncan', jersey: 21, draft: 1997, titles: 5, mvp: 2 },
+      { name: 'Magic Johnson', jersey: 32, draft: 1979, titles: 5, mvp: 3 },
+      { name: 'Larry Bird', jersey: 33, draft: 1978, titles: 3, mvp: 3 },
+      { name: 'Shaquille O\'Neal', jersey: 34, draft: 1992, titles: 4, mvp: 1 },
+      { name: 'Kareem Abdul-Jabbar', jersey: 33, draft: 1969, titles: 6, mvp: 6 },
+      { name: 'Bill Russell', jersey: 6, draft: 1956, titles: 11, mvp: 5 },
+      { name: 'Giannis Antetokounmpo', jersey: 34, draft: 2013, titles: 1, mvp: 2 },
+      { name: 'Nikola Jokic', jersey: 15, draft: 2014, titles: 1, mvp: 3 },
+      { name: 'Dirk Nowitzki', jersey: 41, draft: 1998, titles: 1, mvp: 1 },
+      { name: 'Hakeem Olajuwon', jersey: 34, draft: 1984, titles: 2, mvp: 1 },
+      { name: 'Kawhi Leonard', jersey: 2, draft: 2011, titles: 2, mvp: 0 },
+      { name: 'Dwyane Wade', jersey: 3, draft: 2003, titles: 3, mvp: 0 },
+      { name: 'James Harden', jersey: 13, draft: 2009, titles: 0, mvp: 1 },
+      { name: 'Russell Westbrook', jersey: 0, draft: 2008, titles: 0, mvp: 1 },
+      { name: 'Luka Doncic', jersey: 77, draft: 2018, titles: 0, mvp: 0 },
+      { name: 'Joel Embiid', jersey: 21, draft: 2014, titles: 0, mvp: 1 },
+      { name: 'Jayson Tatum', jersey: 0, draft: 2017, titles: 1, mvp: 0 },
+      { name: 'Victor Wembanyama', jersey: 1, draft: 2023, titles: 0, mvp: 0 },
+      { name: 'Kyrie Irving', jersey: 11, draft: 2011, titles: 1, mvp: 0 },
+      { name: 'Damian Lillard', jersey: 0, draft: 2012, titles: 0, mvp: 0 },
+      { name: 'Steve Nash', jersey: 13, draft: 1996, titles: 0, mvp: 2 }
     ];
 
     const TEAM_TITLES = [
-      { team:'Boston Celtics', titles:18 },
-      { team:'Los Angeles Lakers', titles:17 },
-      { team:'Golden State Warriors', titles:7 },
-      { team:'Chicago Bulls', titles:6 },
-      { team:'San Antonio Spurs', titles:5 },
-      { team:'Miami Heat', titles:3 },
-      { team:'Detroit Pistons', titles:3 },
-      { team:'Philadelphia 76ers', titles:3 },
-      { team:'New York Knicks', titles:2 },
-      { team:'Milwaukee Bucks', titles:2 },
-      { team:'Houston Rockets', titles:2 },
-      { team:'Cleveland Cavaliers', titles:1 },
-      { team:'Toronto Raptors', titles:1 },
-      { team:'Dallas Mavericks', titles:1 },
-      { team:'Denver Nuggets', titles:1 },
-      { team:'Washington Wizards', titles:1 },
-      { team:'Atlanta Hawks', titles:1 },
-      { team:'Sacramento Kings', titles:1 },
-      { team:'Portland Trail Blazers', titles:1 },
-      { team:'Seattle SuperSonics / OKC history', titles:1 }
+      { team: 'Boston Celtics', titles: 18 },
+      { team: 'Los Angeles Lakers', titles: 17 },
+      { team: 'Golden State Warriors', titles: 7 },
+      { team: 'Chicago Bulls', titles: 6 },
+      { team: 'San Antonio Spurs', titles: 5 },
+      { team: 'Miami Heat', titles: 3 },
+      { team: 'Detroit Pistons', titles: 3 },
+      { team: 'Philadelphia 76ers', titles: 3 },
+      { team: 'New York Knicks', titles: 2 },
+      { team: 'Milwaukee Bucks', titles: 2 },
+      { team: 'Houston Rockets', titles: 2 },
+      { team: 'Toronto Raptors', titles: 1 },
+      { team: 'Dallas Mavericks', titles: 1 },
+      { team: 'Denver Nuggets', titles: 1 },
+      { team: 'Cleveland Cavaliers', titles: 1 }
     ];
 
     function buildQuestionBank() {
       const questions = [];
       const seen = new Set();
 
-      const addQ = (icon, q, answer, fact) => {
+      const addQ = (icon, level, q, answer, fact) => {
         if (!Number.isFinite(answer)) return;
         if (seen.has(q)) return;
         seen.add(q);
-        questions.push({ icon, q, answer, fact });
+        questions.push({ icon, level, q, answer, fact });
       };
 
-      CORE_RULE_QUESTIONS.forEach((item) => addQ(item.icon, item.q, item.answer, item.fact));
+      BASE_RULE_QUESTIONS.forEach((item) => addQ(item.icon, item.level, item.q, item.answer, item.fact));
 
       PLAYER_FACTS.forEach((p) => {
-        addQ('📛', `What jersey number is most associated with ${p.name}?`, p.jersey, `${p.name} is most associated with jersey #${p.jersey}.`);
-        addQ('📆', `In what year was ${p.name} drafted into the NBA?`, p.draft, `${p.name} entered the NBA in ${p.draft}.`);
-        addQ('🏆', `How many NBA championships has ${p.name} won?`, p.titles, `${p.name} has ${p.titles} NBA title${p.titles === 1 ? '' : 's'}.`);
-        addQ('🏅', `How many regular-season MVP awards does ${p.name} have?`, p.mvp, `${p.name} has ${p.mvp} regular-season MVP award${p.mvp === 1 ? '' : 's'}.`);
+        addQ('📛', 1, `What jersey number is most associated with ${p.name}?`, p.jersey, `${p.name} is most associated with jersey #${p.jersey}.`);
+        addQ('📆', 1, `In what year was ${p.name} drafted into the NBA?`, p.draft, `${p.name} was drafted in ${p.draft}.`);
+        addQ('🏆', 2, `How many NBA championships has ${p.name} won?`, p.titles, `${p.name} has ${p.titles} NBA title${p.titles === 1 ? '' : 's'}.`);
+        addQ('🏅', 2, `How many regular-season MVP awards does ${p.name} have?`, p.mvp, `${p.name} has ${p.mvp} MVP award${p.mvp === 1 ? '' : 's'}.`);
 
-        addQ('🧩', `Fun math: ${p.name}'s jersey (${p.jersey}) + MVPs (${p.mvp}) equals what?`, p.jersey + p.mvp, `Jersey + MVP is a fun way to memorize ${p.name}'s profile.`);
-        addQ('🎯', `If ${p.name} made ${p.jersey} two-pointers in a game, how many points is that?`, p.jersey * 2, `${p.jersey} made two-point shots would be ${p.jersey * 2} points.`);
-        addQ('🔥', `If ${p.name} hit ${p.mvp + 2} three-pointers, how many points from threes?`, (p.mvp + 2) * 3, `Three-point total is makes × 3.`);
-        addQ('🧮', `What is ${p.draft} minus ${p.jersey}?`, p.draft - p.jersey, `A quick arithmetic challenge tied to ${p.name}.`);
+        addQ('🧩', 2, `Fun math: ${p.name}'s jersey (${p.jersey}) + MVPs (${p.mvp}) equals what?`, p.jersey + p.mvp, `Jersey + MVP helps remember ${p.name}.`);
+        addQ('🎯', 2, `If ${p.name} made ${p.jersey} two-pointers, how many points is that?`, p.jersey * 2, `${p.jersey} two-pointers score ${p.jersey * 2} points.`);
+        addQ('🔥', 3, `If ${p.name} hit ${p.mvp + 3} threes in a game, points from threes?`, (p.mvp + 3) * 3, `Three-point scoring is makes x 3.`);
+        addQ('🧮', 3, `What is ${p.draft} minus ${p.jersey}?`, p.draft - p.jersey, `Arithmetic challenge tied to ${p.name}.`);
       });
 
       TEAM_TITLES.forEach((t) => {
-        addQ('🏟️', `How many NBA championships have the ${t.team} won?`, t.titles, `${t.team} have won ${t.titles} title${t.titles === 1 ? '' : 's'}.`);
+        addQ('🏟️', 1, `How many NBA championships have the ${t.team} won?`, t.titles, `${t.team} have ${t.titles} title${t.titles === 1 ? '' : 's'}.`);
       });
 
       const duos = [
@@ -549,50 +389,45 @@
         ['Tim Duncan', 'Manu Ginobili', 9],
         ['Stephen Curry', 'Klay Thompson', 8],
         ['Larry Bird', 'Kevin McHale', 6],
-        ['Hakeem Olajuwon', 'Clyde Drexler', 3],
         ['Giannis Antetokounmpo', 'Khris Middleton', 2],
-        ['Nikola Jokic', 'Jamal Murray', 2]
+        ['Nikola Jokic', 'Jamal Murray', 2],
+        ['Kawhi Leonard', 'Tim Duncan', 7]
       ];
 
       duos.forEach((d) => {
-        addQ('🤝', `How many combined NBA championships do ${d[0]} and ${d[1]} have?`, d[2], `${d[0]} + ${d[1]} combine for ${d[2]} title${d[2] === 1 ? '' : 's'}.`);
+        addQ('🤝', 2, `How many combined championships do ${d[0]} and ${d[1]} have?`, d[2], `${d[0]} + ${d[1]} combine for ${d[2]} title${d[2] === 1 ? '' : 's'}.`);
       });
 
       let i = 0;
       while (questions.length < TARGET_POOL_SIZE && i < 5000) {
         const p = PLAYER_FACTS[i % PLAYER_FACTS.length];
-        const t = TEAM_TITLES[(i * 5 + 3) % TEAM_TITLES.length];
-        const mode = i % 8;
+        const t = TEAM_TITLES[(i * 3 + 2) % TEAM_TITLES.length];
+        const mode = i % 6;
 
         if (mode === 0) {
-          const games = 6 + (i % 12);
-          addQ('🎲', `Fun sim: if ${p.name} wore #${p.jersey} for ${games} games in a challenge, what is jersey × games?`, p.jersey * games, `${p.jersey} × ${games} = ${p.jersey * games}.`);
+          const games = 5 + (i % 12);
+          addQ('🎲', 2, `Sim challenge: ${p.name} wears #${p.jersey} for ${games} games. What is jersey x games?`, p.jersey * games, `${p.jersey} x ${games} = ${p.jersey * games}.`);
         } else if (mode === 1) {
-          const made = (p.mvp + 2) + (i % 4);
-          addQ('🎯', `Quick shot math: ${p.name} makes ${made} threes in a game. How many points from threes?`, made * 3, `Three-point makes are always worth 3 each.`);
-        } else if (mode === 2) {
-          const minutes = 28 + (i % 11);
-          const games = 4 + (i % 7);
-          addQ('⏱️', `Clock challenge: ${p.name} plays ${minutes} minutes for ${games} games. Total minutes?`, minutes * games, `${minutes} × ${games} = ${minutes * games} total minutes.`);
-        } else if (mode === 3) {
-          const wins = 45 + (i % 18);
-          const losses = 82 - wins;
-          addQ('📈', `Season math: a team goes ${wins}-${losses}. How many total games is that?`, wins + losses, `NBA regular season totals 82 games.`);
-        } else if (mode === 4) {
-          addQ('🧠', `Compare eras: what is the difference between ${p.name}'s draft year (${p.draft}) and the 3-point line year (1979)?`, p.draft - 1979, `This shows how far into the modern 3-point era that draft happened.`);
-        } else if (mode === 5) {
-          const rounds = 4;
-          const needWins = rounds * 4;
-          addQ('🏁', `Playoff path: if a team sweeps all ${rounds} rounds, how many playoff wins is that?`, needWins, `A sweep in each round means 4 wins per round.`);
-        } else if (mode === 6) {
-          const games = 3 + (i % 9);
-          addQ('🏟️', `Franchise fun: if the ${t.team} add ${games} hypothetical title-banner years to their ${t.titles} titles, what is the new total?`, t.titles + games, `This is a pure arithmetic challenge using real title totals.`);
-        } else {
-          const ft = 5 + (i % 8);
-          const twos = 4 + (i % 7);
+          const twos = 3 + (i % 8);
           const threes = 2 + (i % 5);
-          const total = ft + (twos * 2) + (threes * 3);
-          addQ('🧮', `Box score puzzle: player records ${ft} FTs, ${twos} two-pointers, and ${threes} three-pointers. Total points?`, total, `Total points = FTs + 2s×2 + 3s×3.`);
+          const fts = 2 + (i % 6);
+          const total = (twos * 2) + (threes * 3) + fts;
+          addQ('🧮', 3, `Box score puzzle: ${twos} two-pointers, ${threes} threes, ${fts} free throws. Total points?`, total, `Total = 2PT x2 + 3PT x3 + FT x1.`);
+        } else if (mode === 2) {
+          const wins = 44 + (i % 20);
+          const losses = 82 - wins;
+          addQ('📈', 1, `Season record math: team finishes ${wins}-${losses}. How many total games?`, wins + losses, `Regular season total is 82.`);
+        } else if (mode === 3) {
+          const rounds = 4;
+          const sweeps = 4 * rounds;
+          addQ('🏁', 2, `Playoff path: if a team sweeps all ${rounds} rounds, how many wins is that?`, sweeps, `A sweep means 4 wins per round.`);
+        } else if (mode === 4) {
+          const bonus = 2 + (i % 9);
+          addQ('🏟️', 2, `Franchise fun: if the ${t.team} added ${bonus} future titles to ${t.titles}, new total?`, t.titles + bonus, `This uses the team's current title count as a math base.`);
+        } else {
+          const mins = 26 + (i % 14);
+          const games = 3 + (i % 9);
+          addQ('⏱️', 3, `Stamina math: ${p.name} plays ${mins} minutes for ${games} games. Total minutes?`, mins * games, `${mins} x ${games} = ${mins * games}.`);
         }
 
         i += 1;
@@ -603,30 +438,58 @@
 
     const QUESTION_BANK = buildQuestionBank();
 
-
-    function randomUint32() {
-      const buf = new Uint32Array(1);
-      crypto.getRandomValues(buf);
-      return buf[0];
-    }
-
     function randomInt(maxExclusive) {
       if (maxExclusive <= 0) return 0;
-      const maxUint = 0xFFFFFFFF;
-      const cutoff = maxUint - (maxUint % maxExclusive);
-      let n;
-      do {
-        n = randomUint32();
-      } while (n >= cutoff);
-      return n % maxExclusive;
+      if (window.crypto && crypto.getRandomValues) {
+        const buf = new Uint32Array(1);
+        const maxUint = 0xFFFFFFFF;
+        const cutoff = maxUint - (maxUint % maxExclusive);
+        let n = 0;
+        do {
+          crypto.getRandomValues(buf);
+          n = buf[0];
+        } while (n >= cutoff);
+        return n % maxExclusive;
+      }
+      return Math.floor(Math.random() * maxExclusive);
     }
 
     function shuffleSecure(arr) {
-      for (let i = arr.length - 1; i > 0; i--) {
+      for (let i = arr.length - 1; i > 0; i -= 1) {
         const j = randomInt(i + 1);
         [arr[i], arr[j]] = [arr[j], arr[i]];
       }
       return arr;
+    }
+
+    function pickBalancedSession(pool) {
+      const byLevel = { 1: [], 2: [], 3: [] };
+      pool.forEach((q) => byLevel[q.level].push(q));
+
+      shuffleSecure(byLevel[1]);
+      shuffleSecure(byLevel[2]);
+      shuffleSecure(byLevel[3]);
+
+      const picked = [];
+      const take = (level, count) => {
+        const bucket = byLevel[level];
+        for (let i = 0; i < count && bucket.length > 0; i += 1) {
+          picked.push(bucket.pop());
+        }
+      };
+
+      take(1, 4);
+      take(2, 4);
+      take(3, 4);
+
+      if (picked.length < SESSION_SIZE) {
+        const leftovers = shuffleSecure([...byLevel[1], ...byLevel[2], ...byLevel[3]]);
+        while (picked.length < SESSION_SIZE && leftovers.length > 0) {
+          picked.push(leftovers.pop());
+        }
+      }
+
+      return shuffleSecure(picked);
     }
 
     let session = [];
@@ -635,11 +498,13 @@
     let streak = 0;
     let roundResolved = false;
 
-    function setText(id, text) { document.getElementById(id).textContent = text; }
+    function setText(id, text) {
+      document.getElementById(id).textContent = text;
+    }
 
     function refreshGame() {
       const pool = shuffleSecure([...QUESTION_BANK]);
-      session = pool.slice(0, SESSION_SIZE);
+      session = pickBalancedSession(pool);
       roundIndex = 0;
       score = 0;
       streak = 0;
@@ -659,12 +524,16 @@
       setText('qText', q.q);
       setText('status', '');
 
+      const levelEl = document.getElementById('qLevel');
+      levelEl.textContent = LEVELS[q.level] || 'Easy';
+      levelEl.className = 'level ' + (q.level === 1 ? 'easy' : q.level === 2 ? 'medium' : 'hard');
+
       document.getElementById('revealBtn').disabled = false;
       document.getElementById('nextBtn').style.display = 'none';
 
       const fact = document.getElementById('fact');
-      fact.classList.remove('show');
       fact.textContent = '';
+      fact.classList.remove('show');
     }
 
     function revealAnswer() {
@@ -674,10 +543,11 @@
       const q = session[roundIndex];
       score += 1;
       streak += 1;
-      setText('status', `Answer: ${q.answer}`);
 
       setText('score', String(score));
       setText('streak', String(streak));
+      setText('status', `Answer: ${q.answer}`);
+
       document.getElementById('revealBtn').disabled = true;
 
       const fact = document.getElementById('fact');
@@ -687,7 +557,7 @@
       if (roundIndex < SESSION_SIZE - 1) {
         document.getElementById('nextBtn').style.display = 'inline-block';
       } else {
-        setTimeout(showEnd, 350);
+        setTimeout(showEnd, 260);
       }
     }
 
@@ -697,14 +567,13 @@
     }
 
     function showEnd() {
-      const maxScore = SESSION_SIZE;
-      const pct = Math.round((score / maxScore) * 100);
-      setText('endTitle', pct >= 80 ? '🏀 Great Learning Run!' : (pct >= 55 ? '🔥 Nice Progress!' : '💪 Keep Going!'));
-      setText('endBody', `You revealed ${score} answers across ${SESSION_SIZE} rounds (${pct}%). Questions are randomly drawn from 100 curated basketball facts every new game.`);
+      const pct = Math.round((score / SESSION_SIZE) * 100);
+      setText('endTitle', pct >= 85 ? '🏀 Elite Run!' : (pct >= 60 ? '🔥 Nice Progress!' : '💪 Keep Going!'));
+      setText('endBody', `You completed ${SESSION_SIZE} balanced questions (${pct}% revealed). New games draw from 300 unique questions with easy/medium/hard tiers.`);
       document.getElementById('endOverlay').classList.add('show');
     }
 
     refreshGame();
-    </script>
-    </body>
-    </html>
+  </script>
+</body>
+</html>
