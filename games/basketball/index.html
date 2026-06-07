@@ -1,492 +1,676 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Basketball Wits & Wager 🏀</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Basketball Wits & Wagers 🏀</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+      * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --c1: #160d06;
-    --c2: #5a2c0f;
-    --acc: #ff9f1a;
-    --ok: #2ecc71;
-    --bad: #e74c3c;
-  }
+      :root {
+        --c1: #1b0e06;
+        --c2: #6a320f;
+        --acc: #ffae3d;
+        --ok: #2ecc71;
+        --bad: #f25f4c;
+      }
 
-  body {
-    font-family: 'Fredoka One', cursive;
-    min-height: 100dvh;
-    background: radial-gradient(circle at 20% 15%, #7a3f17 0%, var(--c2) 28%, var(--c1) 100%);
-    color: #fff;
-    overflow: hidden;
-    position: relative;
-  }
+      body {
+        font-family: 'Fredoka One', cursive;
+        min-height: 100dvh;
+        background: radial-gradient(circle at 20% 15%, #8f4a1b 0%, var(--c2) 30%, var(--c1) 100%);
+        color: #fff;
+        overflow: hidden;
+        position: relative;
+      }
 
-  .bg-ball {
-    position: fixed;
-    font-size: 2rem;
-    opacity: 0.08;
-    animation: bob 8s ease-in-out infinite;
-    pointer-events: none;
-  }
+      .bg-ball {
+        position: fixed;
+        font-size: 2rem;
+        opacity: 0.08;
+        animation: bob 8s ease-in-out infinite;
+        pointer-events: none;
+      }
 
-  @keyframes bob {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-24px) rotate(12deg); }
-  }
+      @keyframes bob {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-22px) rotate(10deg); }
+      }
 
-  .screen {
-    width: 100vw;
-    height: 100dvh;
-    padding: 10px 14px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    position: relative;
-    z-index: 2;
-  }
+      .screen {
+        width: 100vw;
+        height: 100dvh;
+        padding: 10px 14px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        position: relative;
+        z-index: 2;
+      }
 
-  .back {
-    text-decoration: none;
-    color: rgba(255,255,255,0.82);
-    font-size: 0.9rem;
-    align-self: flex-start;
-    border: 1px solid rgba(255,255,255,0.22);
-    border-radius: 50px;
-    padding: 4px 12px;
-    background: rgba(255,255,255,0.08);
-  }
+      .back {
+        text-decoration: none;
+        color: rgba(255,255,255,0.85);
+        font-size: 0.9rem;
+        align-self: flex-start;
+        border: 1px solid rgba(255,255,255,0.22);
+        border-radius: 50px;
+        padding: 4px 12px;
+        background: rgba(255,255,255,0.08);
+      }
 
-  .title {
-    text-align: center;
-    font-size: clamp(1.5rem, 6vw, 2.3rem);
-    color: #ffd277;
-    text-shadow: 0 4px 16px rgba(0,0,0,0.45);
-  }
+      .title {
+        text-align: center;
+        font-size: clamp(1.45rem, 6vw, 2.25rem);
+        color: #ffd27b;
+        text-shadow: 0 4px 16px rgba(0,0,0,0.45);
+      }
 
-  .subtitle {
-    text-align: center;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 700;
-    font-size: clamp(0.8rem, 2.8vw, 1rem);
-    color: rgba(255,255,255,0.7);
-    margin-top: -4px;
-  }
+      .subtitle {
+        text-align: center;
+        font-family: 'Nunito', sans-serif;
+        font-weight: 800;
+        font-size: clamp(0.75rem, 2.8vw, 0.98rem);
+        color: rgba(255,255,255,0.75);
+        margin-top: -4px;
+      }
 
-  .hud {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0,1fr));
-    gap: 8px;
-  }
+      .hud {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0,1fr));
+        gap: 8px;
+      }
 
-  .pill {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 12px;
-    padding: 8px 6px;
-    text-align: center;
-  }
+      .pill {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 12px;
+        padding: 8px 6px;
+        text-align: center;
+      }
 
-  .pill .k {
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.66rem;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.62);
-  }
+      .pill .k {
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.66rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.62);
+      }
 
-  .pill .v {
-    font-size: clamp(0.9rem, 3.5vw, 1.2rem);
-    color: #fff4db;
-    margin-top: 2px;
-  }
+      .pill .v {
+        font-size: clamp(0.9rem, 3.5vw, 1.18rem);
+        color: #fff4db;
+        margin-top: 2px;
+      }
 
-  .card {
-    flex: 1;
-    min-height: 0;
-    background: rgba(0,0,0,0.27);
-    border: 2px solid rgba(255,255,255,0.15);
-    border-radius: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 14px;
-    gap: 10px;
-  }
+      .card {
+        flex: 1;
+        min-height: 0;
+        background: rgba(0,0,0,0.27);
+        border: 2px solid rgba(255,255,255,0.14);
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 12px;
+        gap: 9px;
+        overflow: auto;
+      }
 
-  .q-icon {
-    font-size: clamp(2rem, 10vw, 3.2rem);
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.45));
-  }
+      .q-icon {
+        font-size: clamp(1.85rem, 9vw, 3rem);
+        filter: drop-shadow(0 4px 10px rgba(0,0,0,0.45));
+      }
 
-  .q-text {
-    font-size: clamp(1rem, 3.9vw, 1.35rem);
-    line-height: 1.35;
-    max-width: 95%;
-  }
+      .q-text {
+        font-size: clamp(0.98rem, 3.8vw, 1.28rem);
+        line-height: 1.34;
+      }
 
-  .hint {
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.82rem;
-    color: rgba(255,255,255,0.7);
-  }
+      .hint {
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.82rem;
+        color: rgba(255,255,255,0.74);
+      }
 
-  .choices {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
+      .guess-row {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+      }
 
-  .choice {
-    border: 2px solid rgba(255,255,255,0.18);
-    border-radius: 12px;
-    background: rgba(255,255,255,0.08);
-    color: #fff;
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(0.95rem, 3.5vw, 1.1rem);
-    padding: 10px 8px;
-    min-height: 48px;
-    cursor: pointer;
-  }
+      .guess-input {
+        width: min(220px, 60vw);
+        border: 2px solid rgba(255,255,255,0.25);
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-family: 'Nunito', sans-serif;
+        font-weight: 900;
+        font-size: 1rem;
+        background: rgba(255,255,255,0.95);
+        color: #2a1708;
+      }
 
-  .choice:active { transform: scale(0.98); }
-  .choice:disabled { cursor: default; opacity: 0.95; }
-  .choice.correct { background: rgba(46,204,113,0.28); border-color: var(--ok); }
-  .choice.wrong { background: rgba(231,76,60,0.25); border-color: var(--bad); }
+      .btn {
+        font-family: 'Fredoka One', cursive;
+        border-radius: 50px;
+        padding: 10px 16px;
+        border: 2px solid rgba(255,255,255,0.28);
+        background: linear-gradient(145deg, #f7ad35, #dc7f04);
+        color: #fff;
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
 
-  .actions {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-  }
+      .btn.secondary { background: rgba(255,255,255,0.12); }
+      .btn:disabled { opacity: 0.5; cursor: default; }
 
-  .btn {
-    font-family: 'Fredoka One', cursive;
-    border-radius: 50px;
-    padding: 10px 18px;
-    border: 2px solid rgba(255,255,255,0.3);
-    background: linear-gradient(145deg, #f5a623, #d97600);
-    color: #fff;
-    cursor: pointer;
-  }
+      .board {
+        width: 100%;
+        display: none;
+        grid-template-columns: repeat(2, minmax(0,1fr));
+        gap: 8px;
+      }
 
-  .btn.secondary {
-    background: rgba(255,255,255,0.12);
-  }
+      .board.show { display: grid; }
 
-  .result {
-    text-align: center;
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.92rem;
-    min-height: 24px;
-    color: rgba(255,255,255,0.85);
-  }
+      .line {
+        border: 2px solid rgba(255,255,255,0.2);
+        border-radius: 12px;
+        background: rgba(255,255,255,0.08);
+        color: #fff;
+        padding: 10px 8px;
+        min-height: 50px;
+        font-family: 'Fredoka One', cursive;
+        font-size: 1rem;
+        cursor: pointer;
+      }
 
-  .overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(12,8,5,0.88);
-    backdrop-filter: blur(4px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-    padding: 16px;
-  }
+      .line.me {
+        border-color: rgba(255,208,120,0.8);
+        background: rgba(255,208,120,0.12);
+      }
 
-  .overlay.show { display: flex; }
+      .line.winner {
+        border-color: var(--ok);
+        background: rgba(46,204,113,0.25);
+      }
 
-  .panel {
-    width: min(540px, 96vw);
-    background: rgba(255,255,255,0.08);
-    border: 2px solid rgba(255,255,255,0.2);
-    border-radius: 20px;
-    text-align: center;
-    padding: 20px 16px;
-  }
+      .line.you-picked {
+        border-color: var(--bad);
+        background: rgba(242,95,76,0.2);
+      }
 
-  .panel h2 {
-    font-size: clamp(1.5rem, 6vw, 2.1rem);
-    color: #ffd277;
-  }
+      .status {
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.92rem;
+        min-height: 22px;
+        text-align: center;
+        color: rgba(255,255,255,0.9);
+      }
 
-  .panel p {
-    margin-top: 6px;
-    font-family: 'Nunito', sans-serif;
-    color: rgba(255,255,255,0.8);
-  }
-</style>
-</head>
-<body>
-  <div class="bg-ball" style="top:7%;left:6%;animation-delay:0s">🏀</div>
-  <div class="bg-ball" style="top:20%;right:8%;animation-delay:1s">🏀</div>
-  <div class="bg-ball" style="bottom:14%;left:9%;animation-delay:2s">🏀</div>
-  <div class="bg-ball" style="bottom:24%;right:5%;animation-delay:3s">🏀</div>
+      .fact {
+        display: none;
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.25);
+        background: rgba(255,255,255,0.08);
+        padding: 10px;
+        font-family: 'Nunito', sans-serif;
+        font-weight: 800;
+        font-size: 0.86rem;
+        color: #fff6df;
+        text-align: left;
+      }
 
-  <div class="screen">
-    <a class="back" href="../../">← Back</a>
-    <div class="title">🏀 Basketball Wits & Wager</div>
-    <div class="subtitle">1000-question pool • closest without going over wins</div>
+      .fact.show { display: block; }
 
-    <div class="hud">
-      <div class="pill"><div class="k">Round</div><div class="v" id="round">1 / 15</div></div>
-      <div class="pill"><div class="k">Score</div><div class="v" id="score">0</div></div>
-      <div class="pill"><div class="k">Streak</div><div class="v" id="streak">0</div></div>
-      <div class="pill"><div class="k">Pool</div><div class="v" id="pool">1000</div></div>
-    </div>
+      .actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
 
-    <div class="card">
-      <div class="q-icon" id="qIcon">🏀</div>
-      <div class="q-text" id="qText"></div>
-      <div class="hint">Pick the number closest to the true answer without going over.</div>
-    </div>
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(12,8,5,0.88);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        padding: 16px;
+      }
 
-    <div class="choices" id="choices"></div>
-    <div class="result" id="result"></div>
+      .overlay.show { display: flex; }
 
-    <div class="actions">
-      <button class="btn secondary" id="nextBtn" style="display:none" onclick="nextRound()">Next Round</button>
-      <button class="btn secondary" onclick="refreshGame()">New Random Game</button>
-    </div>
-  </div>
+      .panel {
+        width: min(560px, 96vw);
+        background: rgba(255,255,255,0.08);
+        border: 2px solid rgba(255,255,255,0.22);
+        border-radius: 20px;
+        text-align: center;
+        padding: 20px 16px;
+      }
 
-  <div class="overlay" id="endOverlay">
-    <div class="panel">
-      <h2 id="endTitle">Game Over</h2>
-      <p id="endBody"></p>
-      <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-        <button class="btn" onclick="refreshGame()">Play Again</button>
-        <a class="btn secondary" href="../../" style="text-decoration:none;display:inline-flex;align-items:center;">Back to Hub</a>
+      .panel h2 {
+        font-size: clamp(1.45rem, 6vw, 2.05rem);
+        color: #ffd277;
+      }
+
+      .panel p {
+        margin-top: 7px;
+        font-family: 'Nunito', sans-serif;
+        color: rgba(255,255,255,0.84);
+      }
+    </style>
+    </head>
+    <body>
+      <div class="bg-ball" style="top:8%;left:6%;animation-delay:0s">🏀</div>
+      <div class="bg-ball" style="top:23%;right:7%;animation-delay:1s">🏀</div>
+      <div class="bg-ball" style="bottom:14%;left:8%;animation-delay:2s">🏀</div>
+      <div class="bg-ball" style="bottom:25%;right:5%;animation-delay:3s">🏀</div>
+
+      <div class="screen">
+        <a class="back" href="../../">← Back</a>
+        <div class="title">🏀 Basketball Wits &amp; Wagers</div>
+        <div class="subtitle">Guess first, reveal wagers second, win by smart betting</div>
+
+        <div class="hud">
+          <div class="pill"><div class="k">Round</div><div class="v" id="round">1 / 12</div></div>
+          <div class="pill"><div class="k">Score</div><div class="v" id="score">0</div></div>
+          <div class="pill"><div class="k">Streak</div><div class="v" id="streak">0</div></div>
+          <div class="pill"><div class="k">Pool</div><div class="v" id="pool">100</div></div>
+        </div>
+
+        <div class="card">
+          <div class="q-icon" id="qIcon">🏀</div>
+          <div class="q-text" id="qText"></div>
+          <div class="hint">Enter your best guess. Wager lines stay hidden until you reveal.</div>
+
+          <div class="guess-row">
+            <input class="guess-input" id="guessInput" inputmode="decimal" placeholder="Your guess">
+            <button class="btn" id="lockGuessBtn" onclick="lockGuess()">Lock Guess</button>
+          </div>
+
+          <button class="btn secondary" id="revealBtn" onclick="revealBoard()" disabled>Reveal Wager Board</button>
+
+          <div class="board" id="board"></div>
+          <div class="status" id="status"></div>
+          <div class="fact" id="fact"></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn secondary" id="nextBtn" style="display:none" onclick="nextRound()">Next Round</button>
+          <button class="btn secondary" onclick="refreshGame()">New Random Game</button>
+        </div>
       </div>
-    </div>
-  </div>
 
-<script>
-const SESSION_SIZE = 15;
+      <div class="overlay" id="endOverlay">
+        <div class="panel">
+          <h2 id="endTitle">Game Over</h2>
+          <p id="endBody"></p>
+          <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+            <button class="btn" onclick="refreshGame()">Play Again</button>
+            <a class="btn secondary" href="../../" style="text-decoration:none;display:inline-flex;align-items:center;">Back to Hub</a>
+          </div>
+        </div>
+      </div>
 
-const PLAYERS = [
-  'LeBron James','Stephen Curry','Kevin Durant','Nikola Jokic','Luka Doncic','Giannis Antetokounmpo','Jayson Tatum','Joel Embiid',
-  'Anthony Davis','Damian Lillard','James Harden','Kawhi Leonard','Devin Booker','Kyrie Irving','Trae Young','Jimmy Butler',
-  'Ja Morant','Shai Gilgeous-Alexander','Tyrese Haliburton','Donovan Mitchell','Jaylen Brown','Zion Williamson','Bradley Beal','Paul George',
-  'Jamal Murray','Karl-Anthony Towns','Rudy Gobert','Victor Wembanyama','Draymond Green','Klay Thompson','Chris Paul','Russell Westbrook',
-  'DeMar DeRozan','Jrue Holiday','Jalen Brunson','Pascal Siakam','Bam Adebayo','Mikal Bridges','Chet Holmgren','Paolo Banchero',
-  'Scottie Barnes','Darius Garland','LaMelo Ball','Brandon Ingram','Julius Randle','Franz Wagner','Alperen Sengun','Tyrese Maxey',
-  'DeAaron Fox','Domantas Sabonis'
-];
+    <script>
+    const SESSION_SIZE = 12;
 
-const TEAMS = [
-  'Lakers','Warriors','Celtics','Bulls','Heat','Spurs','Nuggets','Suns','Mavericks','Knicks',
-  '76ers','Bucks','Nets','Clippers','Raptors','Cavaliers','Hawks','Kings','Timberwolves','Thunder',
-  'Magic','Pelicans','Pistons','Pacers','Hornets','Rockets','Grizzlies','Trail Blazers','Jazz','Wizards'
-];
+    const QUESTION_BANK = [
+      { icon:'🏀', q:'How many players from one team are on the court at once in NBA play?', answer:5, fact:'Each team has 5 players on court, so 10 total players are active during normal play.' },
+      { icon:'⏱️', q:'How many minutes is one NBA game (regulation only)?', answer:48, fact:'An NBA game has 4 quarters of 12 minutes each, totaling 48 regulation minutes.' },
+      { icon:'🕒', q:'How many minutes are in one NBA quarter?', answer:12, fact:'NBA quarters are 12 minutes; college uses 20-minute halves.' },
+      { icon:'📉', q:'How many seconds are on the NBA shot clock?', answer:24, fact:'The 24-second shot clock was introduced in the 1954-55 season.' },
+      { icon:'🎯', q:'How many points is a made free throw worth?', answer:1, fact:'Free throws are worth 1 point each.' },
+      { icon:'🎯', q:'How many points is a made basket inside the three-point line worth?', answer:2, fact:'Any made field goal inside the arc is worth 2 points.' },
+      { icon:'🎯', q:'How many points is a made shot from beyond the NBA arc worth?', answer:3, fact:'The three-point line was added in the NBA in the 1979-80 season.' },
+      { icon:'🏁', q:'How many regular-season games does an NBA team play?', answer:82, fact:'Each NBA team plays 82 regular-season games.' },
+      { icon:'🏆', q:'How many teams are currently in the NBA?', answer:30, fact:'The league has 30 teams split between Eastern and Western conferences.' },
+      { icon:'📋', q:'How many fouls does a player get before fouling out in the NBA?', answer:6, fact:'A player is disqualified after 6 personal fouls in NBA games.' },
 
-function randomUint32() {
-  const buf = new Uint32Array(1);
-  crypto.getRandomValues(buf);
-  return buf[0];
-}
+      { icon:'👑', q:'How many NBA championships did Michael Jordan win?', answer:6, fact:'Jordan won 6 titles with the Chicago Bulls in two three-peats.' },
+      { icon:'👑', q:'How many NBA championships has LeBron James won?', answer:4, fact:'LeBron has 4 championships with Miami, Cleveland, and the Lakers.' },
+      { icon:'👑', q:'How many NBA championships did Kobe Bryant win?', answer:5, fact:'Kobe won 5 titles with the Los Angeles Lakers.' },
+      { icon:'👑', q:'How many NBA championships has Stephen Curry won?', answer:4, fact:'Curry won 4 championships with the Golden State Warriors.' },
+      { icon:'👑', q:'How many NBA championships did Magic Johnson win?', answer:5, fact:'Magic won 5 championships with the Lakers in the 1980s.' },
+      { icon:'👑', q:'How many NBA championships did Larry Bird win?', answer:3, fact:'Bird won 3 titles with the Boston Celtics.' },
+      { icon:'👑', q:'How many NBA championships did Tim Duncan win?', answer:5, fact:'Tim Duncan won all 5 championships with the San Antonio Spurs.' },
+      { icon:'👑', q:'How many NBA championships did Shaquille O’Neal win?', answer:4, fact:'Shaq won 3 with the Lakers and 1 with the Heat.' },
+      { icon:'👑', q:'How many NBA championships did Bill Russell win?', answer:11, fact:'Bill Russell won a record 11 NBA championships with the Celtics.' },
+      { icon:'👑', q:'How many NBA championships did Kareem Abdul-Jabbar win?', answer:6, fact:'Kareem won 1 with Milwaukee and 5 with the Lakers.' },
 
-function randomInt(maxExclusive) {
-  if (maxExclusive <= 0) return 0;
-  const maxUint = 0xFFFFFFFF;
-  const cutoff = maxUint - (maxUint % maxExclusive);
-  let n;
-  do {
-    n = randomUint32();
-  } while (n >= cutoff);
-  return n % maxExclusive;
-}
+      { icon:'📛', q:'What jersey number is most associated with Michael Jordan on the Bulls?', answer:23, fact:'Jordan wore 23 for most of his Bulls career.' },
+      { icon:'📛', q:'What jersey number does Stephen Curry wear?', answer:30, fact:'Curry has worn number 30 with Golden State throughout his NBA career.' },
+      { icon:'📛', q:'What jersey number is LeBron James wearing with the Lakers now?', answer:23, fact:'LeBron switched back to 23 after wearing 6 for multiple seasons.' },
+      { icon:'📛', q:'What jersey number does Kevin Durant wear?', answer:35, fact:'Durant is strongly associated with number 35.' },
+      { icon:'📛', q:'What jersey number does Luka Doncic wear?', answer:77, fact:'Doncic has worn 77 in both Europe and the NBA.' },
+      { icon:'📛', q:'What jersey number does Giannis Antetokounmpo wear?', answer:34, fact:'Giannis wears 34 for the Milwaukee Bucks.' },
+      { icon:'📛', q:'What jersey number does Nikola Jokic wear?', answer:15, fact:'Jokic wears number 15 for the Denver Nuggets.' },
+      { icon:'📛', q:'What jersey number does Joel Embiid wear?', answer:21, fact:'Embiid wears 21 for the Philadelphia 76ers.' },
+      { icon:'📛', q:'What jersey number does Jayson Tatum wear?', answer:0, fact:'Tatum wears number 0 for the Boston Celtics.' },
+      { icon:'📛', q:'What jersey number does Victor Wembanyama wear?', answer:1, fact:'Wembanyama wears number 1 for the Spurs.' },
 
-function shuffleSecure(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = randomInt(i + 1);
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
+      { icon:'📆', q:'In what year was LeBron James drafted into the NBA?', answer:2003, fact:'LeBron was the No. 1 pick in the 2003 NBA Draft.' },
+      { icon:'📆', q:'In what year was Stephen Curry drafted?', answer:2009, fact:'Curry was selected 7th overall in 2009.' },
+      { icon:'📆', q:'In what year was Kevin Durant drafted?', answer:2007, fact:'Durant was drafted 2nd overall in 2007.' },
+      { icon:'📆', q:'In what year was Kobe Bryant drafted?', answer:1996, fact:'Kobe was drafted in 1996 and entered the NBA straight from high school.' },
+      { icon:'📆', q:'In what year was Michael Jordan drafted?', answer:1984, fact:'Jordan was drafted 3rd overall in 1984 by Chicago.' },
+      { icon:'📆', q:'In what year was Tim Duncan drafted?', answer:1997, fact:'Duncan was the No. 1 pick in 1997.' },
+      { icon:'📆', q:'In what year was Giannis Antetokounmpo drafted?', answer:2013, fact:'Giannis was selected 15th overall in 2013.' },
+      { icon:'📆', q:'In what year was Nikola Jokic drafted?', answer:2014, fact:'Jokic was picked 41st in the 2014 draft.' },
+      { icon:'📆', q:'In what year was Luka Doncic drafted?', answer:2018, fact:'Doncic was drafted in 2018 and traded to Dallas on draft night.' },
+      { icon:'📆', q:'In what year was Victor Wembanyama drafted?', answer:2023, fact:'Wembanyama was the No. 1 pick in 2023.' },
 
-function buildQuestionPool() {
-  const questions = [];
-  for (let i = 0; i < 1000; i++) {
-    const p = PLAYERS[i % PLAYERS.length];
-    const t = TEAMS[(i * 7 + 3) % TEAMS.length];
-    const y = 2010 + (i % 15);
-    const icon = ['🏀','📈','⛹️','🔥','📊'][i % 5];
+      { icon:'📏', q:'How high is an NBA rim in feet?', answer:10, fact:'The rim height is 10 feet at all major levels of basketball.' },
+      { icon:'📏', q:'How far is the NBA free-throw line from the backboard in feet?', answer:15, fact:'The free-throw line is 15 feet from the backboard.' },
+      { icon:'📏', q:'How far is the NBA three-point line at the top of the arc in feet (to nearest whole foot)?', answer:24, fact:'Officially it is 23.75 feet at the top (rounded to 24 here).' },
+      { icon:'📏', q:'How far is the NBA corner three in feet?', answer:22, fact:'Corner threes are shorter at 22 feet.' },
+      { icon:'📏', q:'What is the diameter of a basketball rim in inches?', answer:18, fact:'A standard rim has an 18-inch diameter.' },
+      { icon:'📏', q:'What is the circumference of an official NBA game ball in inches (to nearest whole number)?', answer:30, fact:'An NBA ball is size 7, about 29.5 inches in circumference.' },
+      { icon:'📏', q:'How wide is an NBA court in feet?', answer:50, fact:'NBA courts are 94 feet long by 50 feet wide.' },
+      { icon:'📏', q:'How long is an NBA court in feet?', answer:94, fact:'The full court length is 94 feet in the NBA.' },
+      { icon:'📏', q:'How many feet from baseline to baseline in NBA play?', answer:94, fact:'Baseline to baseline equals full court length: 94 feet.' },
+      { icon:'📏', q:'How many feet from sideline to sideline in NBA play?', answer:50, fact:'Sideline to sideline is the width: 50 feet.' },
 
-    let q;
-    let a;
+      { icon:'📚', q:'How many rounds are in the NBA Draft?', answer:2, fact:'The NBA Draft consists of two rounds.' },
+      { icon:'📚', q:'How many total picks are in a normal NBA Draft?', answer:60, fact:'A full 30-team, 2-round draft has 60 picks.' },
+      { icon:'📚', q:'In what year did the NBA add the three-point line?', answer:1979, fact:'The NBA adopted the three-point line in the 1979-80 season.' },
+      { icon:'📚', q:'In what year was the ABA-NBA merger completed?', answer:1976, fact:'The ABA merger happened in 1976.' },
+      { icon:'📚', q:'In what year was the shot clock introduced to the NBA?', answer:1954, fact:'The shot clock debuted in 1954 and transformed pace and scoring.' },
+      { icon:'📚', q:'How many NBA teams make the main playoff bracket each season?', answer:16, fact:'After play-in, 16 teams enter the playoff bracket.' },
+      { icon:'📚', q:'How many wins are needed to take a best-of-seven NBA playoff series?', answer:4, fact:'Best-of-seven means first to 4 wins advances.' },
+      { icon:'📚', q:'How many rounds are there to win an NBA championship from Round 1 to Finals?', answer:4, fact:'Teams must win four series: first round, semifinals, conference finals, finals.' },
+      { icon:'📚', q:'How many referees typically officiate an NBA game on court?', answer:3, fact:'Modern NBA games use a 3-official crew.' },
+      { icon:'📚', q:'How many seconds does a team have to advance the ball past half-court?', answer:8, fact:'NBA teams must cross half-court within 8 seconds.' },
 
-    switch (i % 10) {
-      case 0: {
-        const games = 18 + (i % 28);
-        const ppg = 18 + (i % 17);
-        a = games * ppg;
-        q = `In ${y}, if ${p} averaged ${ppg} points for ${games} games, what was the total points?`;
-        break;
+      { icon:'🌟', q:'How many points did Wilt Chamberlain score in his famous 100-point game?', answer:100, fact:'Wilt scored 100 points on March 2, 1962, still the NBA single-game record.' },
+      { icon:'🌟', q:'How many three-pointers did Klay Thompson make in his single-game record performance?', answer:14, fact:'Klay set the NBA single-game 3PT record with 14 made threes.' },
+      { icon:'🌟', q:'How many assists did Scott Skiles record in the NBA single-game assist record?', answer:30, fact:'Scott Skiles recorded 30 assists in one game in 1990.' },
+      { icon:'🌟', q:'How many rebounds did Wilt Chamberlain have in his career-high game?', answer:55, fact:'Wilt grabbed 55 rebounds in one game against Bill Russell.' },
+      { icon:'🌟', q:'How many points did Kobe Bryant score in his 81-point game?', answer:81, fact:'Kobe scored 81 against Toronto in 2006, second all-time in one game.' },
+      { icon:'🌟', q:'How many steals does John Stockton hold for the all-time NBA steals record?', answer:3265, fact:'Stockton is the NBA all-time steals leader with 3,265.' },
+      { icon:'🌟', q:'How many career assists does John Stockton hold for the NBA record?', answer:15806, fact:'Stockton’s 15,806 assists are the all-time NBA record.' },
+      { icon:'🌟', q:'How many career regular-season points did Kareem Abdul-Jabbar finish with?', answer:38387, fact:'Kareem retired with 38,387 points, later surpassed by LeBron.' },
+      { icon:'🌟', q:'How many points did Dirk Nowitzki score in his NBA career?', answer:31560, fact:'Dirk retired with 31,560 regular-season points.' },
+      { icon:'🌟', q:'How many points did Karl Malone score in his NBA career?', answer:36928, fact:'Karl Malone scored 36,928 regular-season points.' },
+
+      { icon:'🏅', q:'How many MVP awards has Michael Jordan won?', answer:5, fact:'Jordan won 5 regular-season MVP awards.' },
+      { icon:'🏅', q:'How many MVP awards has LeBron James won?', answer:4, fact:'LeBron has 4 regular-season MVPs.' },
+      { icon:'🏅', q:'How many MVP awards has Nikola Jokic won?', answer:3, fact:'Jokic has won 3 regular-season MVP awards.' },
+      { icon:'🏅', q:'How many MVP awards did Magic Johnson win?', answer:3, fact:'Magic won 3 MVPs.' },
+      { icon:'🏅', q:'How many MVP awards did Larry Bird win?', answer:3, fact:'Bird won 3 straight MVPs from 1984-86.' },
+      { icon:'🏅', q:'How many MVP awards did Kobe Bryant win?', answer:1, fact:'Kobe won one regular-season MVP in 2008.' },
+      { icon:'🏅', q:'How many MVP awards did Shaquille O’Neal win?', answer:1, fact:'Shaq won one regular-season MVP in 2000.' },
+      { icon:'🏅', q:'How many MVP awards did Tim Duncan win?', answer:2, fact:'Duncan won MVP in 2002 and 2003.' },
+      { icon:'🏅', q:'How many MVP awards has Giannis Antetokounmpo won?', answer:2, fact:'Giannis won MVP in 2019 and 2020.' },
+      { icon:'🏅', q:'How many MVP awards did Steve Nash win?', answer:2, fact:'Nash won back-to-back MVPs in 2005 and 2006.' },
+
+      { icon:'🏟️', q:'How many NBA championships have the Boston Celtics won (franchise total)?', answer:18, fact:'Boston leads NBA history with 18 championships.' },
+      { icon:'🏟️', q:'How many NBA championships have the Los Angeles Lakers won?', answer:17, fact:'The Lakers have won 17 NBA titles.' },
+      { icon:'🏟️', q:'How many championships have the Golden State Warriors won?', answer:7, fact:'Golden State has won 7 championships.' },
+      { icon:'🏟️', q:'How many championships have the Chicago Bulls won?', answer:6, fact:'All 6 Bulls titles came during the Jordan era.' },
+      { icon:'🏟️', q:'How many championships have the San Antonio Spurs won?', answer:5, fact:'The Spurs won titles in 1999, 2003, 2005, 2007, and 2014.' },
+      { icon:'🏟️', q:'How many championships have the Miami Heat won?', answer:3, fact:'Miami won titles in 2006, 2012, and 2013.' },
+      { icon:'🏟️', q:'How many championships have the Detroit Pistons won?', answer:3, fact:'Detroit titles came in 1989, 1990, and 2004.' },
+      { icon:'🏟️', q:'How many championships have the Philadelphia 76ers won?', answer:3, fact:'Philadelphia has won 3 NBA championships.' },
+      { icon:'🏟️', q:'How many championships have the New York Knicks won?', answer:2, fact:'The Knicks won titles in 1970 and 1973.' },
+      { icon:'🏟️', q:'How many championships have the Milwaukee Bucks won?', answer:2, fact:'Milwaukee won in 1971 and 2021.' },
+
+      { icon:'🧠', q:'How many players can be on an NBA active roster in a regular season game (max active)?', answer:15, fact:'Teams typically carry up to 15 standard roster spots, with game-day inactives possible.' },
+      { icon:'🧠', q:'How many timeouts does each NBA team get per game (full allotment)?', answer:7, fact:'NBA teams are allowed 7 timeouts per game under current rules.' },
+      { icon:'🧠', q:'How many personal fouls are a team allowed in a quarter before penalty free throws begin?', answer:5, fact:'After the 5th team foul in a quarter, non-shooting fouls generally lead to free throws.' },
+      { icon:'🧠', q:'How many overtime minutes are played in the NBA?', answer:5, fact:'Each overtime period lasts 5 minutes.' },
+      { icon:'🧠', q:'How many points does a team score for a made basket at the buzzer if shot is inside arc?', answer:2, fact:'If both feet are inside the arc, the shot is worth 2 points regardless of timing.' },
+      { icon:'🧠', q:'How many players are selected each year as NBA All-Stars total (both conferences combined)?', answer:24, fact:'12 players per conference are selected as All-Stars, totaling 24.' },
+      { icon:'🧠', q:'How many players are on the floor total during normal NBA gameplay?', answer:10, fact:'It is always 5 vs 5 in live play, so 10 total players.' },
+      { icon:'🧠', q:'How many made field goals did Wilt Chamberlain have in his 100-point game?', answer:36, fact:'Wilt made 36 field goals and 28 free throws in that 100-point game.' },
+      { icon:'🧠', q:'How many free throws did Wilt Chamberlain make in his 100-point game?', answer:28, fact:'He went 28-for-32 at the line in that historic game.' },
+      { icon:'🧠', q:'How many consecutive championships did the Bulls win in each Jordan three-peat run?', answer:3, fact:'Each Bulls dynasty run was a three-peat: 3 straight titles.' }
+    ];
+
+
+    function randomUint32() {
+      const buf = new Uint32Array(1);
+      crypto.getRandomValues(buf);
+      return buf[0];
+    }
+
+    function randomInt(maxExclusive) {
+      if (maxExclusive <= 0) return 0;
+      const maxUint = 0xFFFFFFFF;
+      const cutoff = maxUint - (maxUint % maxExclusive);
+      let n;
+      do {
+        n = randomUint32();
+      } while (n >= cutoff);
+      return n % maxExclusive;
+    }
+
+    function shuffleSecure(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = randomInt(i + 1);
+        [arr[i], arr[j]] = [arr[j], arr[i]];
       }
-      case 1: {
-        const games = 22 + (i % 18);
-        const rpg = 6 + (i % 10);
-        a = games * rpg;
-        q = `Estimate total rebounds: ${p} at ${rpg} RPG across ${games} games.`;
-        break;
+      return arr;
+    }
+
+    function buildHouseLines(answer, yourGuess) {
+      const base = Number(answer);
+      const guess = Number(yourGuess);
+      const deltas = [-0.5, -0.34, -0.2, -0.1, 0.08, 0.2, 0.38, 0.55];
+      const picks = [guess];
+
+      while (picks.length < 7) {
+        const idx = randomInt(deltas.length);
+        const raw = base * (1 + deltas[idx]);
+        const val = base >= 1000 ? Math.max(1, Math.round(raw)) : Math.max(0.1, Math.round(raw * 10) / 10);
+        if (!picks.includes(val)) picks.push(val);
       }
-      case 2: {
-        const made = 120 + (i % 160);
-        const pct = 32 + (i % 19);
-        a = Math.round((made / (pct / 100)) * 10) / 10;
-        q = `${p} made ${made} threes at ${pct}%. About how many three-point attempts?`;
-        break;
+
+      return picks.sort((a, b) => a - b);
+    }
+
+    let session = [];
+    let roundIndex = 0;
+    let score = 0;
+    let streak = 0;
+    let currentGuess = null;
+    let boardLines = [];
+    let boardRevealed = false;
+    let roundResolved = false;
+
+    function setText(id, text) { document.getElementById(id).textContent = text; }
+
+    function refreshGame() {
+      const pool = shuffleSecure([...QUESTION_BANK]);
+      session = pool.slice(0, SESSION_SIZE);
+      roundIndex = 0;
+      score = 0;
+      streak = 0;
+      document.getElementById('endOverlay').classList.remove('show');
+      setText('pool', String(QUESTION_BANK.length));
+      renderRound();
+    }
+
+    function renderRound() {
+      const q = session[roundIndex];
+      currentGuess = null;
+      boardLines = [];
+      boardRevealed = false;
+      roundResolved = false;
+
+      setText('round', `${roundIndex + 1} / ${SESSION_SIZE}`);
+      setText('score', String(score));
+      setText('streak', String(streak));
+      setText('qIcon', q.icon);
+      setText('qText', q.q);
+      setText('status', '');
+
+      const guessInput = document.getElementById('guessInput');
+      guessInput.value = '';
+      guessInput.disabled = false;
+
+      document.getElementById('lockGuessBtn').disabled = false;
+      document.getElementById('revealBtn').disabled = true;
+      document.getElementById('nextBtn').style.display = 'none';
+
+      const board = document.getElementById('board');
+      board.classList.remove('show');
+      board.innerHTML = '';
+
+      const fact = document.getElementById('fact');
+      fact.classList.remove('show');
+      fact.textContent = '';
+    }
+
+    function parseGuess() {
+      const value = document.getElementById('guessInput').value.trim();
+      if (!value) return null;
+      const n = Number(value);
+      if (!Number.isFinite(n) || n < 0) return null;
+      return n;
+    }
+
+    function lockGuess() {
+      if (roundResolved) return;
+      const guess = parseGuess();
+      if (guess === null) {
+        setText('status', 'Enter a valid number before locking your guess.');
+        return;
       }
-      case 3: {
-        const wins = 35 + (i % 25);
-        const losses = 82 - wins;
-        a = Math.round((wins / (wins + losses)) * 100);
-        q = `${t} went ${wins}-${losses}. What was their win percentage (whole %)?`;
-        break;
+
+      currentGuess = guess;
+      document.getElementById('guessInput').disabled = true;
+      document.getElementById('lockGuessBtn').disabled = true;
+      document.getElementById('revealBtn').disabled = false;
+      setText('status', `Your guess is locked at ${guess}. Now reveal the wager board.`);
+    }
+
+    function revealBoard() {
+      if (currentGuess === null || roundResolved || boardRevealed) return;
+      const q = session[roundIndex];
+      boardLines = buildHouseLines(q.answer, currentGuess);
+      boardRevealed = true;
+
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      boardLines.forEach((line) => {
+        const b = document.createElement('button');
+        b.className = 'line';
+        if (line === currentGuess) b.classList.add('me');
+        b.textContent = line === currentGuess ? `${line} (Your Guess)` : String(line);
+        b.onclick = () => placeBet(line, b);
+        board.appendChild(b);
+      });
+
+      board.classList.add('show');
+      document.getElementById('revealBtn').disabled = true;
+      setText('status', 'Pick one line to bet on. Closest without going over wins.');
+    }
+
+    function placeBet(selectedLine, selectedBtn) {
+      if (roundResolved || !boardRevealed) return;
+      roundResolved = true;
+
+      const q = session[roundIndex];
+      const eligible = boardLines.filter(v => v <= q.answer);
+      const winner = eligible.length ? Math.max(...eligible) : Math.min(...boardLines);
+
+      const allButtons = [...document.querySelectorAll('.line')];
+      allButtons.forEach((btn) => {
+        const val = Number(btn.textContent.split(' ')[0]);
+        btn.disabled = true;
+        if (val === winner) btn.classList.add('winner');
+      });
+
+      if (selectedBtn && Number(selectedBtn.textContent.split(' ')[0]) !== winner) {
+        selectedBtn.classList.add('you-picked');
       }
-      case 4: {
-        const minutes = 24 + (i % 14);
-        const games = 20 + (i % 40);
-        a = minutes * games;
-        q = `How many total minutes: ${p} played ${minutes} MPG over ${games} games?`;
-        break;
+
+      const diff = Math.abs(q.answer - selectedLine);
+      if (selectedLine === winner) {
+        streak += 1;
+        score += 12 + (streak >= 3 ? 3 : 0) + (diff === 0 ? 5 : 0);
+        setText('status', `Nice bet! Correct answer: ${q.answer}. Winning line: ${winner}.`);
+      } else {
+        streak = 0;
+        setText('status', `Answer was ${q.answer}. Winning line was ${winner}. You bet ${selectedLine}.`);
       }
-      case 5: {
-        const made = 180 + (i % 140);
-        const att = made + 60 + (i % 130);
-        a = Math.round((made / att) * 1000) / 10;
-        q = `${p} shot ${made}/${att} from the field. What FG% (1 decimal)?`;
-        break;
-      }
-      case 6: {
-        const off = 6 + (i % 8);
-        const def = 16 + (i % 14);
-        const games = 24 + (i % 30);
-        a = (off + def) * games;
-        q = `${p} averaged ${off} offensive and ${def} defensive rebounds for ${games} games. Total rebounds?`;
-        break;
-      }
-      case 7: {
-        const homeWins = 14 + (i % 24);
-        const awayWins = 8 + (i % 20);
-        a = homeWins + awayWins;
-        q = `What was ${t}'s total wins if they had ${homeWins} home wins and ${awayWins} away wins?`;
-        break;
-      }
-      case 8: {
-        const fta = 120 + (i % 180);
-        const ftp = 62 + (i % 31);
-        a = Math.round(fta * (ftp / 100));
-        q = `${p} attempted ${fta} free throws at ${ftp}%. About how many did they make?`;
-        break;
-      }
-      default: {
-        const ast = 4 + (i % 11);
-        const games = 25 + (i % 35);
-        a = ast * games;
-        q = `${p} averaged ${ast} assists for ${games} games. Total assists?`;
-        break;
+
+      setText('score', String(score));
+      setText('streak', String(streak));
+
+      const fact = document.getElementById('fact');
+      fact.textContent = `Fact: ${q.fact}`;
+      fact.classList.add('show');
+
+      if (roundIndex < SESSION_SIZE - 1) {
+        document.getElementById('nextBtn').style.display = 'inline-block';
+      } else {
+        setTimeout(showEnd, 350);
       }
     }
 
-    questions.push({ id: i + 1, icon, q, answer: a });
-  }
-  return questions;
-}
+    function nextRound() {
+      roundIndex += 1;
+      renderRound();
+    }
 
-function makeOptions(answer) {
-  const base = Number(answer);
-  const offsets = [-0.5, -0.35, -0.22, -0.12, 0.08, 0.18, 0.33, 0.48];
-  const picks = [];
+    function showEnd() {
+      const maxScore = SESSION_SIZE * 20;
+      const pct = Math.round((score / maxScore) * 100);
+      setText('endTitle', pct >= 80 ? '🏀 Sharp Bettor!' : (pct >= 55 ? '🔥 Solid Wagering!' : '💪 Keep Learning!'));
+      setText('endBody', `You scored ${score} over ${SESSION_SIZE} rounds (${pct}%). Questions are randomly drawn from 100 curated basketball facts every new game.`);
+      document.getElementById('endOverlay').classList.add('show');
+    }
 
-  const chosen = new Set();
-  while (picks.length < 6) {
-    const idx = randomInt(offsets.length);
-    if (chosen.has(idx)) continue;
-    chosen.add(idx);
-    const raw = base * (1 + offsets[idx]);
-    const rounded = base % 1 === 0 ? Math.max(1, Math.round(raw)) : Math.max(0.1, Math.round(raw * 10) / 10);
-    picks.push(rounded);
-  }
+    document.getElementById('guessInput').addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' && !document.getElementById('lockGuessBtn').disabled) {
+        lockGuess();
+      }
+    });
 
-  const under = base % 1 === 0 ? Math.max(1, Math.floor(base * 0.96)) : Math.max(0.1, Math.floor(base * 10 * 0.96) / 10);
-  picks.push(under);
-
-  const unique = [...new Set(picks)].sort((a, b) => a - b);
-  while (unique.length < 7) {
-    const bump = base % 1 === 0 ? randomInt(25) + 1 : (randomInt(80) + 1) / 10;
-    unique.push((base + bump));
-  }
-
-  return unique.slice(0, 7).sort((a, b) => a - b);
-}
-
-let pool = [];
-let session = [];
-let idx = 0;
-let score = 0;
-let streak = 0;
-let locked = false;
-
-function setText(id, text) { document.getElementById(id).textContent = text; }
-
-function refreshGame() {
-  pool = buildQuestionPool();
-  shuffleSecure(pool);
-  session = pool.slice(0, SESSION_SIZE).map(q => ({ ...q, options: makeOptions(q.answer) }));
-  idx = 0;
-  score = 0;
-  streak = 0;
-  locked = false;
-  document.getElementById('endOverlay').classList.remove('show');
-  setText('pool', String(pool.length));
-  renderRound();
-}
-
-function renderRound() {
-  const r = session[idx];
-  setText('round', `${idx + 1} / ${SESSION_SIZE}`);
-  setText('score', String(score));
-  setText('streak', String(streak));
-  setText('qIcon', r.icon);
-  setText('qText', r.q);
-  setText('result', '');
-  document.getElementById('nextBtn').style.display = 'none';
-
-  const root = document.getElementById('choices');
+    refreshGame();
+    </script>
+    </body>
+    </html>
+  const root = document.getElementById('board');
   root.innerHTML = '';
+  root.classList.remove('hidden');
 
-  r.options.forEach((opt) => {
+  wagerBoard.forEach((value) => {
     const b = document.createElement('button');
-    b.className = 'choice';
-    b.textContent = String(opt);
-    b.onclick = () => submitAnswer(opt, b);
+    b.className = 'wager';
+    b.textContent = String(value);
+    if (value === userGuess) b.classList.add('you');
+    b.onclick = () => placeWager(value, b);
     root.appendChild(b);
   });
 
-  locked = false;
+  setText('result', 'Board revealed. Place your wager on the best guess (closest without going over).');
 }
 
-function submitAnswer(chosen, btn) {
-  if (locked) return;
-  locked = true;
+function placeWager(chosenValue, btn) {
+  if (roundLocked || !revealDone) return;
+  roundLocked = true;
 
   const r = session[idx];
-  const options = r.options;
-
   let winner = null;
-  for (const v of options) {
+  for (const v of wagerBoard) {
     if (v <= r.answer) winner = v;
   }
-  if (winner === null) winner = Math.min(...options);
+  if (winner === null) winner = Math.min(...wagerBoard);
 
-  const buttons = [...document.querySelectorAll('.choice')];
+  const buttons = [...document.querySelectorAll('.wager')];
   buttons.forEach((b) => {
     const v = Number(b.textContent);
     b.disabled = true;
@@ -494,17 +678,20 @@ function submitAnswer(chosen, btn) {
     if (b === btn && v !== winner) b.classList.add('wrong');
   });
 
-  if (chosen === winner) {
+  if (chosenValue === winner) {
     streak += 1;
-    score += 10 + (streak >= 3 ? 2 : 0);
-    setText('result', `Nice! True answer: ${r.answer}. Winning wager: ${winner}.`);
+    const points = 12 + (streak >= 3 ? 3 : 0);
+    const bonus = userGuess === r.answer ? 5 : 0;
+    score += points + bonus;
+    setText('result', `Win! True answer: ${r.answer}. Winning line: ${winner}. ${r.fact} ${bonus ? 'Exact guess bonus +5!' : ''}`);
   } else {
     streak = 0;
-    setText('result', `True answer: ${r.answer}. Winning wager: ${winner}. You picked ${chosen}.`);
+    setText('result', `Miss. True answer: ${r.answer}. Winning line: ${winner}. ${r.fact}`);
   }
 
   setText('score', String(score));
   setText('streak', String(streak));
+  document.getElementById('revealActions').style.display = 'none';
 
   if (idx < SESSION_SIZE - 1) {
     document.getElementById('nextBtn').style.display = 'inline-block';
@@ -519,10 +706,10 @@ function nextRound() {
 }
 
 function showEnd() {
-  const maxScore = SESSION_SIZE * 12;
+  const maxScore = SESSION_SIZE * 20;
   const pct = Math.round((score / maxScore) * 100);
   setText('endTitle', pct >= 80 ? '🏀 MVP Mode!' : (pct >= 55 ? '🔥 Strong Run!' : '💪 Keep Shooting!'));
-  setText('endBody', `You scored ${score} points across ${SESSION_SIZE} rounds (${pct}%). Refresh for a brand-new random set from all 1000 questions.`);
+  setText('endBody', `You scored ${score} points across ${SESSION_SIZE} rounds (${pct}%). Refresh for a new random set from all 100 curated basketball fact questions.`);
   document.getElementById('endOverlay').classList.add('show');
 }
 
