@@ -279,7 +279,7 @@
       <div class="screen">
         <a class="back" href="../../">← Back</a>
         <div class="title">🏀 Basketball Wits &amp; Wagers</div>
-        <div class="subtitle">Guess first, reveal wagers second, win by smart betting</div>
+        <div class="subtitle">Tap once to reveal answer and fact</div>
 
         <div class="hud">
           <div class="pill"><div class="k">Round</div><div class="v" id="round">1 / 12</div></div>
@@ -291,16 +291,10 @@
         <div class="card">
           <div class="q-icon" id="qIcon">🏀</div>
           <div class="q-text" id="qText"></div>
-          <div class="hint">Enter your best guess. Wager lines stay hidden until you reveal.</div>
+          <div class="hint">No guess needed. Click reveal to see the answer and learn a fact.</div>
 
-          <div class="guess-row">
-            <input class="guess-input" id="guessInput" inputmode="decimal" placeholder="Your guess">
-            <button class="btn" id="lockGuessBtn" onclick="lockGuess()">Lock Guess</button>
-          </div>
+          <button class="btn secondary" id="revealBtn" onclick="revealAnswer()">Reveal Answer</button>
 
-          <button class="btn secondary" id="revealBtn" onclick="revealBoard()" disabled>Reveal Wager Board</button>
-
-          <div class="board" id="board"></div>
           <div class="status" id="status"></div>
           <div class="fact" id="fact"></div>
         </div>
@@ -463,29 +457,10 @@
       return arr;
     }
 
-    function buildHouseLines(answer, yourGuess) {
-      const base = Number(answer);
-      const guess = Number(yourGuess);
-      const deltas = [-0.5, -0.34, -0.2, -0.1, 0.08, 0.2, 0.38, 0.55];
-      const picks = [guess];
-
-      while (picks.length < 7) {
-        const idx = randomInt(deltas.length);
-        const raw = base * (1 + deltas[idx]);
-        const val = base >= 1000 ? Math.max(1, Math.round(raw)) : Math.max(0.1, Math.round(raw * 10) / 10);
-        if (!picks.includes(val)) picks.push(val);
-      }
-
-      return picks.sort((a, b) => a - b);
-    }
-
     let session = [];
     let roundIndex = 0;
     let score = 0;
     let streak = 0;
-    let currentGuess = null;
-    let boardLines = [];
-    let boardRevealed = false;
     let roundResolved = false;
 
     function setText(id, text) { document.getElementById(id).textContent = text; }
@@ -503,9 +478,6 @@
 
     function renderRound() {
       const q = session[roundIndex];
-      currentGuess = null;
-      boardLines = [];
-      boardRevealed = false;
       roundResolved = false;
 
       setText('round', `${roundIndex + 1} / ${SESSION_SIZE}`);
@@ -515,99 +487,26 @@
       setText('qText', q.q);
       setText('status', '');
 
-      const guessInput = document.getElementById('guessInput');
-      guessInput.value = '';
-      guessInput.disabled = false;
-
-      document.getElementById('lockGuessBtn').disabled = false;
-      document.getElementById('revealBtn').disabled = true;
+      document.getElementById('revealBtn').disabled = false;
       document.getElementById('nextBtn').style.display = 'none';
-
-      const board = document.getElementById('board');
-      board.classList.remove('show');
-      board.innerHTML = '';
 
       const fact = document.getElementById('fact');
       fact.classList.remove('show');
       fact.textContent = '';
     }
 
-    function parseGuess() {
-      const value = document.getElementById('guessInput').value.trim();
-      if (!value) return null;
-      const n = Number(value);
-      if (!Number.isFinite(n) || n < 0) return null;
-      return n;
-    }
-
-    function lockGuess() {
+    function revealAnswer() {
       if (roundResolved) return;
-      const guess = parseGuess();
-      if (guess === null) {
-        setText('status', 'Enter a valid number before locking your guess.');
-        return;
-      }
-
-      currentGuess = guess;
-      document.getElementById('guessInput').disabled = true;
-      document.getElementById('lockGuessBtn').disabled = true;
-      document.getElementById('revealBtn').disabled = false;
-      setText('status', `Your guess is locked at ${guess}. Now reveal the wager board.`);
-    }
-
-    function revealBoard() {
-      if (currentGuess === null || roundResolved || boardRevealed) return;
-      const q = session[roundIndex];
-      boardLines = buildHouseLines(q.answer, currentGuess);
-      boardRevealed = true;
-
-      const board = document.getElementById('board');
-      board.innerHTML = '';
-      boardLines.forEach((line) => {
-        const b = document.createElement('button');
-        b.className = 'line';
-        if (line === currentGuess) b.classList.add('me');
-        b.textContent = line === currentGuess ? `${line} (Your Guess)` : String(line);
-        b.onclick = () => placeBet(line, b);
-        board.appendChild(b);
-      });
-
-      board.classList.add('show');
-      document.getElementById('revealBtn').disabled = true;
-      setText('status', 'Pick one line to bet on. Closest without going over wins.');
-    }
-
-    function placeBet(selectedLine, selectedBtn) {
-      if (roundResolved || !boardRevealed) return;
       roundResolved = true;
 
       const q = session[roundIndex];
-      const eligible = boardLines.filter(v => v <= q.answer);
-      const winner = eligible.length ? Math.max(...eligible) : Math.min(...boardLines);
-
-      const allButtons = [...document.querySelectorAll('.line')];
-      allButtons.forEach((btn) => {
-        const val = Number(btn.textContent.split(' ')[0]);
-        btn.disabled = true;
-        if (val === winner) btn.classList.add('winner');
-      });
-
-      if (selectedBtn && Number(selectedBtn.textContent.split(' ')[0]) !== winner) {
-        selectedBtn.classList.add('you-picked');
-      }
-
-      const diff = Math.abs(q.answer - selectedLine);
-      if (selectedLine === winner) {
-        streak += 1;
-        score += 12 + (streak >= 3 ? 3 : 0) + (diff === 0 ? 5 : 0);
-        setText('status', `Nice bet! Correct answer: ${q.answer}. Winning line: ${winner}.`);
-      } else {
-        streak = 0;
-        setText('status', `Answer was ${q.answer}. Winning line was ${winner}. You bet ${selectedLine}.`);
-      }
+      score += 1;
+      streak += 1;
+      setText('status', `Answer: ${q.answer}`);
 
       setText('score', String(score));
       setText('streak', String(streak));
+      document.getElementById('revealBtn').disabled = true;
 
       const fact = document.getElementById('fact');
       fact.textContent = `Fact: ${q.fact}`;
@@ -626,94 +525,14 @@
     }
 
     function showEnd() {
-      const maxScore = SESSION_SIZE * 20;
+      const maxScore = SESSION_SIZE;
       const pct = Math.round((score / maxScore) * 100);
-      setText('endTitle', pct >= 80 ? '🏀 Sharp Bettor!' : (pct >= 55 ? '🔥 Solid Wagering!' : '💪 Keep Learning!'));
-      setText('endBody', `You scored ${score} over ${SESSION_SIZE} rounds (${pct}%). Questions are randomly drawn from 100 curated basketball facts every new game.`);
+      setText('endTitle', pct >= 80 ? '🏀 Great Learning Run!' : (pct >= 55 ? '🔥 Nice Progress!' : '💪 Keep Going!'));
+      setText('endBody', `You revealed ${score} answers across ${SESSION_SIZE} rounds (${pct}%). Questions are randomly drawn from 100 curated basketball facts every new game.`);
       document.getElementById('endOverlay').classList.add('show');
     }
-
-    document.getElementById('guessInput').addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter' && !document.getElementById('lockGuessBtn').disabled) {
-        lockGuess();
-      }
-    });
 
     refreshGame();
     </script>
     </body>
     </html>
-  const root = document.getElementById('board');
-  root.innerHTML = '';
-  root.classList.remove('hidden');
-
-  wagerBoard.forEach((value) => {
-    const b = document.createElement('button');
-    b.className = 'wager';
-    b.textContent = String(value);
-    if (value === userGuess) b.classList.add('you');
-    b.onclick = () => placeWager(value, b);
-    root.appendChild(b);
-  });
-
-  setText('result', 'Board revealed. Place your wager on the best guess (closest without going over).');
-}
-
-function placeWager(chosenValue, btn) {
-  if (roundLocked || !revealDone) return;
-  roundLocked = true;
-
-  const r = session[idx];
-  let winner = null;
-  for (const v of wagerBoard) {
-    if (v <= r.answer) winner = v;
-  }
-  if (winner === null) winner = Math.min(...wagerBoard);
-
-  const buttons = [...document.querySelectorAll('.wager')];
-  buttons.forEach((b) => {
-    const v = Number(b.textContent);
-    b.disabled = true;
-    if (v === winner) b.classList.add('correct');
-    if (b === btn && v !== winner) b.classList.add('wrong');
-  });
-
-  if (chosenValue === winner) {
-    streak += 1;
-    const points = 12 + (streak >= 3 ? 3 : 0);
-    const bonus = userGuess === r.answer ? 5 : 0;
-    score += points + bonus;
-    setText('result', `Win! True answer: ${r.answer}. Winning line: ${winner}. ${r.fact} ${bonus ? 'Exact guess bonus +5!' : ''}`);
-  } else {
-    streak = 0;
-    setText('result', `Miss. True answer: ${r.answer}. Winning line: ${winner}. ${r.fact}`);
-  }
-
-  setText('score', String(score));
-  setText('streak', String(streak));
-  document.getElementById('revealActions').style.display = 'none';
-
-  if (idx < SESSION_SIZE - 1) {
-    document.getElementById('nextBtn').style.display = 'inline-block';
-  } else {
-    setTimeout(showEnd, 500);
-  }
-}
-
-function nextRound() {
-  idx += 1;
-  renderRound();
-}
-
-function showEnd() {
-  const maxScore = SESSION_SIZE * 20;
-  const pct = Math.round((score / maxScore) * 100);
-  setText('endTitle', pct >= 80 ? '🏀 MVP Mode!' : (pct >= 55 ? '🔥 Strong Run!' : '💪 Keep Shooting!'));
-  setText('endBody', `You scored ${score} points across ${SESSION_SIZE} rounds (${pct}%). Refresh for a new random set from all 100 curated basketball fact questions.`);
-  document.getElementById('endOverlay').classList.add('show');
-}
-
-refreshGame();
-</script>
-</body>
-</html>
