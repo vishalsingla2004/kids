@@ -155,6 +155,7 @@
   <div class="tile-group-label">🎮 Games</div>
   <div class="tile-row"><div class="tile-info"><span class="tile-icon">👸</span><span class="tile-name">Princess Counting</span></div><label class="toggle"><input type="checkbox" id="t-princess" onchange="toggleTile('princess',this.checked)"><span class="toggle-track"></span></label></div>
   <div class="tile-row"><div class="tile-info"><span class="tile-icon">⚽</span><span class="tile-name">Soccer Quiz</span></div><label class="toggle"><input type="checkbox" id="t-soccer" onchange="toggleTile('soccer',this.checked)"><span class="toggle-track"></span></label></div>
+  <div class="tile-row"><div class="tile-info"><span class="tile-icon">🏀</span><span class="tile-name">Basketball Wits & Wager</span></div><label class="toggle"><input type="checkbox" id="t-basketball" onchange="toggleTile('basketball',this.checked)"><span class="toggle-track"></span></label></div>
   <div class="tile-group-label">📝 5th Grade SBA</div>
   <div class="tile-row"><div class="tile-info"><span class="tile-icon">📐</span><span class="tile-name">SBA Math</span></div><label class="toggle"><input type="checkbox" id="t-sba-math" onchange="toggleTile('sba-math',this.checked)"><span class="toggle-track"></span></label></div>
   <div class="tile-row"><div class="tile-info"><span class="tile-icon">📚</span><span class="tile-name">SBA English</span></div><label class="toggle"><input type="checkbox" id="t-sba-ela" onchange="toggleTile('sba-ela',this.checked)"><span class="toggle-track"></span></label></div>
@@ -317,7 +318,7 @@ function resetAll() {
   }
 }
 
-const ALL_TILES = ['princess','soccer','sba-math','sba-ela','sba-science','area-2d','circles','volume-3d','chemistry','physics','maths','environmental','biology','nsc','learn','system-design'];
+const ALL_TILES = ['princess','soccer','basketball','sba-math','sba-ela','sba-science','area-2d','circles','volume-3d','chemistry','physics','maths','environmental','biology','nsc','learn','system-design'];
 function getHidden() { return JSON.parse(localStorage.getItem('kids_hidden_tiles')||'[]'); }
 function saveHidden(arr) { localStorage.setItem('kids_hidden_tiles', JSON.stringify(arr)); }
 function toggleTile(id, visible) {

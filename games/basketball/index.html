@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Basketball Wits & Wager 🏀</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --c1: #160d06;
+    --c2: #5a2c0f;
+    --acc: #ff9f1a;
+    --ok: #2ecc71;
+    --bad: #e74c3c;
+  }
+
+  body {
+    font-family: 'Fredoka One', cursive;
+    min-height: 100dvh;
+    background: radial-gradient(circle at 20% 15%, #7a3f17 0%, var(--c2) 28%, var(--c1) 100%);
+    color: #fff;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bg-ball {
+    position: fixed;
+    font-size: 2rem;
+    opacity: 0.08;
+    animation: bob 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-24px) rotate(12deg); }
+  }
+
+  .screen {
+    width: 100vw;
+    height: 100dvh;
+    padding: 10px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .back {
+    text-decoration: none;
+    color: rgba(255,255,255,0.82);
+    font-size: 0.9rem;
+    align-self: flex-start;
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 50px;
+    padding: 4px 12px;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .title {
+    text-align: center;
+    font-size: clamp(1.5rem, 6vw, 2.3rem);
+    color: #ffd277;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.45);
+  }
+
+  .subtitle {
+    text-align: center;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: clamp(0.8rem, 2.8vw, 1rem);
+    color: rgba(255,255,255,0.7);
+    margin-top: -4px;
+  }
+
+  .hud {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 8px;
+  }
+
+  .pill {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 8px 6px;
+    text-align: center;
+  }
+
+  .pill .k {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.62);
+  }
+
+  .pill .v {
+    font-size: clamp(0.9rem, 3.5vw, 1.2rem);
+    color: #fff4db;
+    margin-top: 2px;
+  }
+
+  .card {
+    flex: 1;
+    min-height: 0;
+    background: rgba(0,0,0,0.27);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .q-icon {
+    font-size: clamp(2rem, 10vw, 3.2rem);
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.45));
+  }
+
+  .q-text {
+    font-size: clamp(1rem, 3.9vw, 1.35rem);
+    line-height: 1.35;
+    max-width: 95%;
+  }
+
+  .hint {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .choice {
+    border: 2px solid rgba(255,255,255,0.18);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(0.95rem, 3.5vw, 1.1rem);
+    padding: 10px 8px;
+    min-height: 48px;
+    cursor: pointer;
+  }
+
+  .choice:active { transform: scale(0.98); }
+  .choice:disabled { cursor: default; opacity: 0.95; }
+  .choice.correct { background: rgba(46,204,113,0.28); border-color: var(--ok); }
+  .choice.wrong { background: rgba(231,76,60,0.25); border-color: var(--bad); }
+
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .btn {
+    font-family: 'Fredoka One', cursive;
+    border-radius: 50px;
+    padding: 10px 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    background: linear-gradient(145deg, #f5a623, #d97600);
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .btn.secondary {
+    background: rgba(255,255,255,0.12);
+  }
+
+  .result {
+    text-align: center;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.92rem;
+    min-height: 24px;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(12,8,5,0.88);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 16px;
+  }
+
+  .overlay.show { display: flex; }
+
+  .panel {
+    width: min(540px, 96vw);
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    text-align: center;
+    padding: 20px 16px;
+  }
+
+  .panel h2 {
+    font-size: clamp(1.5rem, 6vw, 2.1rem);
+    color: #ffd277;
+  }
+
+  .panel p {
+    margin-top: 6px;
+    font-family: 'Nunito', sans-serif;
+    color: rgba(255,255,255,0.8);
+  }
+</style>
+</head>
+<body>
+  <div class="bg-ball" style="top:7%;left:6%;animation-delay:0s">🏀</div>
+  <div class="bg-ball" style="top:20%;right:8%;animation-delay:1s">🏀</div>
+  <div class="bg-ball" style="bottom:14%;left:9%;animation-delay:2s">🏀</div>
+  <div class="bg-ball" style="bottom:24%;right:5%;animation-delay:3s">🏀</div>
+
+  <div class="screen">
+    <a class="back" href="../../">← Back</a>
+    <div class="title">🏀 Basketball Wits & Wager</div>
+    <div class="subtitle">1000-question pool • closest without going over wins</div>
+
+    <div class="hud">
+      <div class="pill"><div class="k">Round</div><div class="v" id="round">1 / 15</div></div>
+      <div class="pill"><div class="k">Score</div><div class="v" id="score">0</div></div>
+      <div class="pill"><div class="k">Streak</div><div class="v" id="streak">0</div></div>
+      <div class="pill"><div class="k">Pool</div><div class="v" id="pool">1000</div></div>
+    </div>
+
+    <div class="card">
+      <div class="q-icon" id="qIcon">🏀</div>
+      <div class="q-text" id="qText"></div>
+      <div class="hint">Pick the number closest to the true answer without going over.</div>
+    </div>
+
+    <div class="choices" id="choices"></div>
+    <div class="result" id="result"></div>
+
+    <div class="actions">
+      <button class="btn secondary" id="nextBtn" style="display:none" onclick="nextRound()">Next Round</button>
+      <button class="btn secondary" onclick="refreshGame()">New Random Game</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="endOverlay">
+    <div class="panel">
+      <h2 id="endTitle">Game Over</h2>
+      <p id="endBody"></p>
+      <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn" onclick="refreshGame()">Play Again</button>
+        <a class="btn secondary" href="../../" style="text-decoration:none;display:inline-flex;align-items:center;">Back to Hub</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+const SESSION_SIZE = 15;
+
+const PLAYERS = [
+  'LeBron James','Stephen Curry','Kevin Durant','Nikola Jokic','Luka Doncic','Giannis Antetokounmpo','Jayson Tatum','Joel Embiid',
+  'Anthony Davis','Damian Lillard','James Harden','Kawhi Leonard','Devin Booker','Kyrie Irving','Trae Young','Jimmy Butler',
+  'Ja Morant','Shai Gilgeous-Alexander','Tyrese Haliburton','Donovan Mitchell','Jaylen Brown','Zion Williamson','Bradley Beal','Paul George',
+  'Jamal Murray','Karl-Anthony Towns','Rudy Gobert','Victor Wembanyama','Draymond Green','Klay Thompson','Chris Paul','Russell Westbrook',
+  'DeMar DeRozan','Jrue Holiday','Jalen Brunson','Pascal Siakam','Bam Adebayo','Mikal Bridges','Chet Holmgren','Paolo Banchero',
+  'Scottie Barnes','Darius Garland','LaMelo Ball','Brandon Ingram','Julius Randle','Franz Wagner','Alperen Sengun','Tyrese Maxey',
+  'DeAaron Fox','Domantas Sabonis'
+];
+
+const TEAMS = [
+  'Lakers','Warriors','Celtics','Bulls','Heat','Spurs','Nuggets','Suns','Mavericks','Knicks',
+  '76ers','Bucks','Nets','Clippers','Raptors','Cavaliers','Hawks','Kings','Timberwolves','Thunder',
+  'Magic','Pelicans','Pistons','Pacers','Hornets','Rockets','Grizzlies','Trail Blazers','Jazz','Wizards'
+];
+
+function randomUint32() {
+  const buf = new Uint32Array(1);
+  crypto.getRandomValues(buf);
+  return buf[0];
+}
+
+function randomInt(maxExclusive) {
+  if (maxExclusive <= 0) return 0;
+  const maxUint = 0xFFFFFFFF;
+  const cutoff = maxUint - (maxUint % maxExclusive);
+  let n;
+  do {
+    n = randomUint32();
+  } while (n >= cutoff);
+  return n % maxExclusive;
+}
+
+function shuffleSecure(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = randomInt(i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function buildQuestionPool() {
+  const questions = [];
+  for (let i = 0; i < 1000; i++) {
+    const p = PLAYERS[i % PLAYERS.length];
+    const t = TEAMS[(i * 7 + 3) % TEAMS.length];
+    const y = 2010 + (i % 15);
+    const icon = ['🏀','📈','⛹️','🔥','📊'][i % 5];
+
+    let q;
+    let a;
+
+    switch (i % 10) {
+      case 0: {
+        const games = 18 + (i % 28);
+        const ppg = 18 + (i % 17);
+        a = games * ppg;
+        q = `In ${y}, if ${p} averaged ${ppg} points for ${games} games, what was the total points?`;
+        break;
+      }
+      case 1: {
+        const games = 22 + (i % 18);
+        const rpg = 6 + (i % 10);
+        a = games * rpg;
+        q = `Estimate total rebounds: ${p} at ${rpg} RPG across ${games} games.`;
+        break;
+      }
+      case 2: {
+        const made = 120 + (i % 160);
+        const pct = 32 + (i % 19);
+        a = Math.round((made / (pct / 100)) * 10) / 10;
+        q = `${p} made ${made} threes at ${pct}%. About how many three-point attempts?`;
+        break;
+      }
+      case 3: {
+        const wins = 35 + (i % 25);
+        const losses = 82 - wins;
+        a = Math.round((wins / (wins + losses)) * 100);
+        q = `${t} went ${wins}-${losses}. What was their win percentage (whole %)?`;
+        break;
+      }
+      case 4: {
+        const minutes = 24 + (i % 14);
+        const games = 20 + (i % 40);
+        a = minutes * games;
+        q = `How many total minutes: ${p} played ${minutes} MPG over ${games} games?`;
+        break;
+      }
+      case 5: {
+        const made = 180 + (i % 140);
+        const att = made + 60 + (i % 130);
+        a = Math.round((made / att) * 1000) / 10;
+        q = `${p} shot ${made}/${att} from the field. What FG% (1 decimal)?`;
+        break;
+      }
+      case 6: {
+        const off = 6 + (i % 8);
+        const def = 16 + (i % 14);
+        const games = 24 + (i % 30);
+        a = (off + def) * games;
+        q = `${p} averaged ${off} offensive and ${def} defensive rebounds for ${games} games. Total rebounds?`;
+        break;
+      }
+      case 7: {
+        const homeWins = 14 + (i % 24);
+        const awayWins = 8 + (i % 20);
+        a = homeWins + awayWins;
+        q = `What was ${t}'s total wins if they had ${homeWins} home wins and ${awayWins} away wins?`;
+        break;
+      }
+      case 8: {
+        const fta = 120 + (i % 180);
+        const ftp = 62 + (i % 31);
+        a = Math.round(fta * (ftp / 100));
+        q = `${p} attempted ${fta} free throws at ${ftp}%. About how many did they make?`;
+        break;
+      }
+      default: {
+        const ast = 4 + (i % 11);
+        const games = 25 + (i % 35);
+        a = ast * games;
+        q = `${p} averaged ${ast} assists for ${games} games. Total assists?`;
+        break;
+      }
+    }
+
+    questions.push({ id: i + 1, icon, q, answer: a });
+  }
+  return questions;
+}
+
+function makeOptions(answer) {
+  const base = Number(answer);
+  const offsets = [-0.5, -0.35, -0.22, -0.12, 0.08, 0.18, 0.33, 0.48];
+  const picks = [];
+
+  const chosen = new Set();
+  while (picks.length < 6) {
+    const idx = randomInt(offsets.length);
+    if (chosen.has(idx)) continue;
+    chosen.add(idx);
+    const raw = base * (1 + offsets[idx]);
+    const rounded = base % 1 === 0 ? Math.max(1, Math.round(raw)) : Math.max(0.1, Math.round(raw * 10) / 10);
+    picks.push(rounded);
+  }
+
+  const under = base % 1 === 0 ? Math.max(1, Math.floor(base * 0.96)) : Math.max(0.1, Math.floor(base * 10 * 0.96) / 10);
+  picks.push(under);
+
+  const unique = [...new Set(picks)].sort((a, b) => a - b);
+  while (unique.length < 7) {
+    const bump = base % 1 === 0 ? randomInt(25) + 1 : (randomInt(80) + 1) / 10;
+    unique.push((base + bump));
+  }
+
+  return unique.slice(0, 7).sort((a, b) => a - b);
+}
+
+let pool = [];
+let session = [];
+let idx = 0;
+let score = 0;
+let streak = 0;
+let locked = false;
+
+function setText(id, text) { document.getElementById(id).textContent = text; }
+
+function refreshGame() {
+  pool = buildQuestionPool();
+  shuffleSecure(pool);
+  session = pool.slice(0, SESSION_SIZE).map(q => ({ ...q, options: makeOptions(q.answer) }));
+  idx = 0;
+  score = 0;
+  streak = 0;
+  locked = false;
+  document.getElementById('endOverlay').classList.remove('show');
+  setText('pool', String(pool.length));
+  renderRound();
+}
+
+function renderRound() {
+  const r = session[idx];
+  setText('round', `${idx + 1} / ${SESSION_SIZE}`);
+  setText('score', String(score));
+  setText('streak', String(streak));
+  setText('qIcon', r.icon);
+  setText('qText', r.q);
+  setText('result', '');
+  document.getElementById('nextBtn').style.display = 'none';
+
+  const root = document.getElementById('choices');
+  root.innerHTML = '';
+
+  r.options.forEach((opt) => {
+    const b = document.createElement('button');
+    b.className = 'choice';
+    b.textContent = String(opt);
+    b.onclick = () => submitAnswer(opt, b);
+    root.appendChild(b);
+  });
+
+  locked = false;
+}
+
+function submitAnswer(chosen, btn) {
+  if (locked) return;
+  locked = true;
+
+  const r = session[idx];
+  const options = r.options;
+
+  let winner = null;
+  for (const v of options) {
+    if (v <= r.answer) winner = v;
+  }
+  if (winner === null) winner = Math.min(...options);
+
+  const buttons = [...document.querySelectorAll('.choice')];
+  buttons.forEach((b) => {
+    const v = Number(b.textContent);
+    b.disabled = true;
+    if (v === winner) b.classList.add('correct');
+    if (b === btn && v !== winner) b.classList.add('wrong');
+  });
+
+  if (chosen === winner) {
+    streak += 1;
+    score += 10 + (streak >= 3 ? 2 : 0);
+    setText('result', `Nice! True answer: ${r.answer}. Winning wager: ${winner}.`);
+  } else {
+    streak = 0;
+    setText('result', `True answer: ${r.answer}. Winning wager: ${winner}. You picked ${chosen}.`);
+  }
+
+  setText('score', String(score));
+  setText('streak', String(streak));
+
+  if (idx < SESSION_SIZE - 1) {
+    document.getElementById('nextBtn').style.display = 'inline-block';
+  } else {
+    setTimeout(showEnd, 500);
+  }
+}
+
+function nextRound() {
+  idx += 1;
+  renderRound();
+}
+
+function showEnd() {
+  const maxScore = SESSION_SIZE * 12;
+  const pct = Math.round((score / maxScore) * 100);
+  setText('endTitle', pct >= 80 ? '🏀 MVP Mode!' : (pct >= 55 ? '🔥 Strong Run!' : '💪 Keep Shooting!'));
+  setText('endBody', `You scored ${score} points across ${SESSION_SIZE} rounds (${pct}%). Refresh for a brand-new random set from all 1000 questions.`);
+  document.getElementById('endOverlay').classList.add('show');
+}
+
+refreshGame();
+</script>
+</body>
+</html>
