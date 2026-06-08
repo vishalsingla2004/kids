@@ -70,31 +70,6 @@
       margin-bottom: 12px;
     }
 
-    .hud {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .pill {
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.1);
-      padding: 5px 6px;
-      text-align: center;
-    }
-
-    .k {
-      font-size: 0.62rem;
-      opacity: 0.85;
-    }
-
-    .v {
-      font-size: 0.85rem;
-      font-weight: 900;
-    }
-
     .card {
       border-radius: 16px;
       border: 1px solid rgba(255, 255, 255, 0.22);
@@ -219,9 +194,6 @@
     }
 
     @media (max-width: 640px) {
-      .hud {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
     }
   </style>
 </head>
@@ -234,14 +206,6 @@
 
     <div class="title">🏀 Basketball Wits &amp; Wagers</div>
     <div class="subtitle">Balanced round: easy + medium + hard. Tap once to reveal answer.</div>
-
-    <div class="hud">
-      <div class="pill"><div class="k">Round</div><div class="v" id="round">1 / 12</div></div>
-      <div class="pill"><div class="k">Score</div><div class="v" id="score">0</div></div>
-      <div class="pill"><div class="k">Streak</div><div class="v" id="streak">0</div></div>
-      <div class="pill"><div class="k">Pool</div><div class="v" id="pool">300</div></div>
-      <div class="pill"><div class="k">Tier Mix</div><div class="v">4/4/4</div></div>
-    </div>
 
     <div class="card">
       <div class="q-head">
@@ -387,12 +351,38 @@
       { icon: '🌟', level: 3, q: 'How many career steals does John Stockton have (NBA record)?', answer: 3265, fact: 'John Stockton is the all-time steals leader with 3,265.' }
     ];
 
+    const TEAM_LOGO_QUESTIONS = [
+      { icon: '🟢', level: 1, q: 'Which NBA team logo features a shamrock vibe and leprechaun identity?', answer: 'Boston Celtics', fact: 'The Celtics brand uses clover and leprechaun imagery.' },
+      { icon: '💜', level: 1, q: 'Which NBA team logo prominently features a basketball and "Lakers" wordmark?', answer: 'Los Angeles Lakers', fact: 'The Lakers logo is a gold basketball with purple lettering.' },
+      { icon: '💛', level: 1, q: 'Which team logo uses a bridge motif tied to the Bay Area?', answer: 'Golden State Warriors', fact: 'The Warriors logo references the Bay Bridge.' },
+      { icon: '🦌', level: 1, q: 'Which NBA team logo includes a deer head?', answer: 'Milwaukee Bucks', fact: 'The Bucks identity centers around a deer logo.' },
+      { icon: '🦖', level: 1, q: 'Which NBA team is represented by a dinosaur-style logo theme?', answer: 'Toronto Raptors', fact: 'Raptors branding is built around a dinosaur identity.' },
+      { icon: '☀️', level: 1, q: 'Which team logo features a basketball sunburst?', answer: 'Phoenix Suns', fact: 'The Suns logo is known for its sunburst basketball design.' },
+      { icon: '🔴', level: 1, q: 'Which NBA team logo prominently uses a red bull head?', answer: 'Chicago Bulls', fact: 'The Bulls logo is one of the most recognizable in sports.' },
+      { icon: '🎷', level: 1, q: 'Which team logo name and branding connect to jazz music?', answer: 'Utah Jazz', fact: 'The Jazz name and branding come from musical roots.' }
+    ];
+
+    const JERSEY_SPOTLIGHT = [
+      'Michael Jordan',
+      'LeBron James',
+      'Stephen Curry',
+      'Kobe Bryant',
+      'Kevin Durant',
+      'Giannis Antetokounmpo',
+      'Nikola Jokic',
+      'Luka Doncic',
+      'Jayson Tatum',
+      'Victor Wembanyama'
+    ];
+
     function buildQuestionBank() {
       const questions = [];
       const seen = new Set();
 
       const addQ = (icon, level, q, answer, fact) => {
-        if (!Number.isFinite(answer)) return;
+        const isNumberAnswer = typeof answer === 'number' && Number.isFinite(answer);
+        const isStringAnswer = typeof answer === 'string' && answer.trim().length > 0;
+        if (!isNumberAnswer && !isStringAnswer) return;
         if (seen.has(q)) return;
         seen.add(q);
         questions.push({ icon, level, q, answer, fact });
@@ -401,15 +391,12 @@
       BASE_RULE_QUESTIONS.forEach((item) => addQ(item.icon, item.level, item.q, item.answer, item.fact));
 
       PLAYER_FACTS.forEach((p) => {
-        addQ('📛', 1, `What jersey number is most associated with ${p.name}?`, p.jersey, `${p.name} is most associated with jersey #${p.jersey}.`);
+        if (JERSEY_SPOTLIGHT.includes(p.name)) {
+          addQ('📛', 1, `What jersey number is most associated with ${p.name}?`, p.jersey, `${p.name} is most associated with jersey #${p.jersey}.`);
+        }
         addQ('📆', 1, `In what year was ${p.name} drafted into the NBA?`, p.draft, `${p.name} was drafted in ${p.draft}.`);
         addQ('🏆', 2, `How many NBA championships has ${p.name} won?`, p.titles, `${p.name} has ${p.titles} NBA title${p.titles === 1 ? '' : 's'}.`);
         addQ('🏅', 2, `How many regular-season MVP awards does ${p.name} have?`, p.mvp, `${p.name} has ${p.mvp} MVP award${p.mvp === 1 ? '' : 's'}.`);
-
-        addQ('🧩', 2, `Fun math: ${p.name}'s jersey (${p.jersey}) + MVPs (${p.mvp}) equals what?`, p.jersey + p.mvp, `Jersey + MVP helps remember ${p.name}.`);
-        addQ('🎯', 2, `If ${p.name} made ${p.jersey} two-pointers, how many points is that?`, p.jersey * 2, `${p.jersey} two-pointers score ${p.jersey * 2} points.`);
-        addQ('🔥', 3, `If ${p.name} hit ${p.mvp + 3} threes in a game, points from threes?`, (p.mvp + 3) * 3, `Three-point scoring is makes x 3.`);
-        addQ('🧮', 3, `What is ${p.draft} minus ${p.jersey}?`, p.draft - p.jersey, `Arithmetic challenge tied to ${p.name}.`);
       });
 
       TEAM_TITLES.forEach((t) => {
@@ -420,13 +407,8 @@
         addQ(r.icon, r.level, r.q, r.answer, r.fact);
       });
 
-      const uniquePlayers = PLAYER_FACTS.map((p) => p.name);
-      uniquePlayers.forEach((name, idx) => {
-        const p = PLAYER_FACTS[idx];
-        addQ('👕', 1, `${name} is most commonly associated with which jersey number?`, p.jersey, `${name} is associated with jersey #${p.jersey}.`);
-        addQ('🗓️', 1, `In what year did ${name} enter the NBA via the draft?`, p.draft, `${name} was drafted in ${p.draft}.`);
-        addQ('🏆', 2, `How many NBA championships does ${name} have?`, p.titles, `${name} has ${p.titles} championship${p.titles === 1 ? '' : 's'}.`);
-        addQ('🏅', 2, `How many regular-season MVPs has ${name} won?`, p.mvp, `${name} has ${p.mvp} MVP award${p.mvp === 1 ? '' : 's'}.`);
+      TEAM_LOGO_QUESTIONS.forEach((x) => {
+        addQ(x.icon, x.level, x.q, x.answer, x.fact);
       });
 
       const finalsFacts = [
@@ -447,7 +429,7 @@
       const tieredPool = questions.slice();
       while (tieredPool.length < TARGET_POOL_SIZE) {
         const seed = questions[tieredPool.length % questions.length];
-        const altQ = `${seed.q} (Official NBA trivia)`;
+        const altQ = `${seed.q} (NBA fact check)`;
         addQ(seed.icon, seed.level, altQ, seed.answer, seed.fact);
         tieredPool.push({ icon: seed.icon, level: seed.level, q: altQ, answer: seed.answer, fact: seed.fact });
       }
@@ -518,7 +500,8 @@
     let roundResolved = false;
 
     function setText(id, text) {
-      document.getElementById(id).textContent = text;
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
     }
 
     function refreshGame() {
@@ -588,7 +571,7 @@
     function showEnd() {
       const pct = Math.round((score / SESSION_SIZE) * 100);
       setText('endTitle', pct >= 85 ? '🏀 Elite Run!' : (pct >= 60 ? '🔥 Nice Progress!' : '💪 Keep Going!'));
-      setText('endBody', `You completed ${SESSION_SIZE} balanced questions (${pct}% revealed). New games draw from 300 unique questions with easy/medium/hard tiers.`);
+      setText('endBody', `You completed ${SESSION_SIZE} balanced questions (${pct}% revealed). New games draw from ${TARGET_POOL_SIZE} factual basketball questions.`);
       document.getElementById('endOverlay').classList.add('show');
     }
 
