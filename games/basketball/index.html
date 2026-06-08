@@ -23,19 +23,21 @@
         radial-gradient(circle at 88% 25%, rgba(255, 138, 0, 0.22), transparent 45%),
         radial-gradient(circle at 15% 88%, rgba(255, 111, 0, 0.22), transparent 45%),
         linear-gradient(160deg, var(--bg1), var(--bg2));
-      display: grid;
-      place-items: center;
-      padding: 14px;
+      padding: 0;
     }
 
     .screen {
-      width: min(900px, 98vw);
+      width: 100vw;
+      max-width: 100vw;
+      min-height: 100vh;
       border: 2px solid rgba(255, 255, 255, 0.2);
-      border-radius: 22px;
+      border-radius: 0;
       background: rgba(0, 0, 0, 0.24);
       backdrop-filter: blur(4px);
-      padding: 16px;
-      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.35);
+      padding: 14px;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
     }
 
     .topline {
@@ -77,6 +79,8 @@
       padding: 16px;
       display: grid;
       gap: 10px;
+      flex: 1;
+      align-content: center;
     }
 
     .q-head {
@@ -91,24 +95,11 @@
       font-size: clamp(2.4rem, 8vw, 3.4rem);
     }
 
-    .level {
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 3px 10px;
-      font-size: 0.78rem;
-      font-weight: 800;
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .level.easy { color: #8efcb2; }
-    .level.medium { color: #ffe08a; }
-    .level.hard { color: #ffad9a; }
-
     .q-text {
       text-align: center;
-      font-size: clamp(1.6rem, 5.2vw, 2.6rem);
+      font-size: clamp(2.1rem, 8.8vw, 4.6rem);
       line-height: 1.22;
-      min-height: 150px;
+      min-height: 38vh;
       font-weight: 900;
     }
 
@@ -194,6 +185,18 @@
     }
 
     @media (max-width: 640px) {
+      .screen {
+        padding: 12px;
+      }
+
+      .card {
+        padding: 12px;
+      }
+
+      .q-text {
+        font-size: clamp(2.4rem, 10.5vw, 5.2rem);
+        min-height: 44vh;
+      }
     }
   </style>
 </head>
@@ -205,12 +208,11 @@
     </div>
 
     <div class="title">🏀 Basketball Wits &amp; Wagers</div>
-    <div class="subtitle">Balanced round: easy + medium + hard. Tap once to reveal answer.</div>
+    <div class="subtitle">Tap once to reveal answer.</div>
 
     <div class="card">
       <div class="q-head">
         <div class="q-icon" id="qIcon">🏀</div>
-        <div class="level easy" id="qLevel">Easy</div>
       </div>
       <div class="q-text" id="qText"></div>
       <div class="hint">No typing required. Reveal answer, read the fact, then go next.</div>
@@ -526,10 +528,6 @@
       setText('qText', q.q);
       setText('status', '');
 
-      const levelEl = document.getElementById('qLevel');
-      levelEl.textContent = LEVELS[q.level] || 'Easy';
-      levelEl.className = 'level ' + (q.level === 1 ? 'easy' : q.level === 2 ? 'medium' : 'hard');
-
       document.getElementById('revealBtn').disabled = false;
       document.getElementById('nextBtn').style.display = 'none';
 
@@ -571,7 +569,7 @@
     function showEnd() {
       const pct = Math.round((score / SESSION_SIZE) * 100);
       setText('endTitle', pct >= 85 ? '🏀 Elite Run!' : (pct >= 60 ? '🔥 Nice Progress!' : '💪 Keep Going!'));
-      setText('endBody', `You completed ${SESSION_SIZE} balanced questions (${pct}% revealed). New games draw from ${TARGET_POOL_SIZE} factual basketball questions.`);
+      setText('endBody', `You completed ${SESSION_SIZE} questions (${pct}% revealed). New games draw from ${TARGET_POOL_SIZE} factual basketball questions.`);
       document.getElementById('endOverlay').classList.add('show');
     }
 
