@@ -58,7 +58,7 @@
 
     .title {
       text-align: center;
-      font-size: clamp(1.2rem, 4.5vw, 2rem);
+      font-size: clamp(1.05rem, 3.4vw, 1.55rem);
       font-weight: 900;
       margin: 8px 0 4px;
     }
@@ -66,7 +66,7 @@
     .subtitle {
       text-align: center;
       opacity: 0.9;
-      font-size: 0.95rem;
+      font-size: 0.8rem;
       margin-bottom: 12px;
     }
 
@@ -81,17 +81,17 @@
       border-radius: 14px;
       border: 1px solid rgba(255, 255, 255, 0.2);
       background: rgba(255, 255, 255, 0.1);
-      padding: 7px 8px;
+      padding: 5px 6px;
       text-align: center;
     }
 
     .k {
-      font-size: 0.74rem;
+      font-size: 0.62rem;
       opacity: 0.85;
     }
 
     .v {
-      font-size: 1.05rem;
+      font-size: 0.85rem;
       font-weight: 900;
     }
 
@@ -113,7 +113,7 @@
     }
 
     .q-icon {
-      font-size: clamp(1.8rem, 7vw, 2.7rem);
+      font-size: clamp(2.4rem, 8vw, 3.4rem);
     }
 
     .level {
@@ -131,14 +131,15 @@
 
     .q-text {
       text-align: center;
-      font-size: clamp(1rem, 3.6vw, 1.3rem);
-      line-height: 1.35;
-      min-height: 68px;
+      font-size: clamp(1.6rem, 5.2vw, 2.6rem);
+      line-height: 1.22;
+      min-height: 150px;
+      font-weight: 900;
     }
 
     .hint {
       text-align: center;
-      font-size: 0.86rem;
+      font-size: 0.74rem;
       opacity: 0.85;
     }
 
@@ -277,7 +278,7 @@
 
   <script>
     const SESSION_SIZE = 12;
-    const TARGET_POOL_SIZE = 300;
+    const TARGET_POOL_SIZE = 220;
     const LEVELS = {
       1: 'Easy',
       2: 'Medium',
@@ -302,7 +303,14 @@
       { icon: '📚', level: 1, q: 'How many total picks are in a normal NBA Draft?', answer: 60, fact: '30 teams x 2 rounds = 60 picks.' },
       { icon: '📣', level: 1, q: 'How many referees officiate most NBA games?', answer: 3, fact: 'A three-official crew handles NBA games.' },
       { icon: '📣', level: 1, q: 'How many seconds to cross half-court in the NBA?', answer: 8, fact: 'Teams must advance in 8 seconds.' },
-      { icon: '🧠', level: 1, q: 'How many players are on the floor total during play?', answer: 10, fact: 'It is always 5-on-5 in live play.' }
+      { icon: '🧠', level: 1, q: 'How many players are on the floor total during play?', answer: 10, fact: 'It is always 5-on-5 in live play.' },
+      { icon: '📏', level: 1, q: 'How many feet is the NBA free-throw line from the backboard?', answer: 15, fact: 'The free-throw line is 15 feet from the backboard.' },
+      { icon: '📏', level: 2, q: 'How many feet is the NBA corner three?', answer: 22, fact: 'The NBA corner three is 22 feet.' },
+      { icon: '📏', level: 2, q: 'How many inches is the diameter of an NBA rim?', answer: 18, fact: 'A standard basketball rim is 18 inches in diameter.' },
+      { icon: '📚', level: 1, q: 'How many wins are needed to take a best-of-seven playoff series?', answer: 4, fact: 'First to 4 wins takes the series.' },
+      { icon: '📚', level: 1, q: 'How many rounds must a team win to become NBA champion?', answer: 4, fact: 'A team must win four playoff rounds to become champion.' },
+      { icon: '📚', level: 1, q: 'How many overtime minutes are in an NBA game?', answer: 5, fact: 'Each overtime period lasts 5 minutes.' },
+      { icon: '📚', level: 1, q: 'How many timeout allotments does each NBA team typically have per game?', answer: 7, fact: 'Teams typically have 7 total timeouts.' }
     ];
 
     const PLAYER_FACTS = [
@@ -331,7 +339,19 @@
       { name: 'Victor Wembanyama', jersey: 1, draft: 2023, titles: 0, mvp: 0 },
       { name: 'Kyrie Irving', jersey: 11, draft: 2011, titles: 1, mvp: 0 },
       { name: 'Damian Lillard', jersey: 0, draft: 2012, titles: 0, mvp: 0 },
-      { name: 'Steve Nash', jersey: 13, draft: 1996, titles: 0, mvp: 2 }
+      { name: 'Steve Nash', jersey: 13, draft: 1996, titles: 0, mvp: 2 },
+      { name: 'Allen Iverson', jersey: 3, draft: 1996, titles: 0, mvp: 1 },
+      { name: 'Charles Barkley', jersey: 34, draft: 1984, titles: 0, mvp: 1 },
+      { name: 'Kevin Garnett', jersey: 21, draft: 1995, titles: 1, mvp: 1 },
+      { name: 'Paul Pierce', jersey: 34, draft: 1998, titles: 1, mvp: 0 },
+      { name: 'Tracy McGrady', jersey: 1, draft: 1997, titles: 0, mvp: 0 },
+      { name: 'Vince Carter', jersey: 15, draft: 1998, titles: 0, mvp: 0 },
+      { name: 'Chris Paul', jersey: 3, draft: 2005, titles: 0, mvp: 0 },
+      { name: 'Pau Gasol', jersey: 16, draft: 2001, titles: 2, mvp: 0 },
+      { name: 'Manu Ginobili', jersey: 20, draft: 1999, titles: 4, mvp: 0 },
+      { name: 'David Robinson', jersey: 50, draft: 1987, titles: 2, mvp: 1 },
+      { name: 'Oscar Robertson', jersey: 14, draft: 1960, titles: 1, mvp: 1 },
+      { name: 'Moses Malone', jersey: 2, draft: 1974, titles: 1, mvp: 3 }
     ];
 
     const TEAM_TITLES = [
@@ -349,7 +369,22 @@
       { team: 'Toronto Raptors', titles: 1 },
       { team: 'Dallas Mavericks', titles: 1 },
       { team: 'Denver Nuggets', titles: 1 },
-      { team: 'Cleveland Cavaliers', titles: 1 }
+      { team: 'Cleveland Cavaliers', titles: 1 },
+      { team: 'Atlanta Hawks', titles: 1 },
+      { team: 'Sacramento Kings', titles: 1 },
+      { team: 'Portland Trail Blazers', titles: 1 },
+      { team: 'Washington Wizards', titles: 1 }
+    ];
+
+    const RECORD_FACTS = [
+      { icon: '🌟', level: 1, q: 'How many points did Kobe Bryant score in his famous 81-point game?', answer: 81, fact: 'Kobe scored 81 points in one game in 2006.' },
+      { icon: '🌟', level: 1, q: 'How many points did Wilt Chamberlain score in his record game?', answer: 100, fact: 'Wilt scored 100 points in 1962.' },
+      { icon: '🌟', level: 2, q: 'How many assists did Scott Skiles record in one game (NBA record)?', answer: 30, fact: 'Scott Skiles recorded 30 assists in one game.' },
+      { icon: '🌟', level: 2, q: 'How many rebounds did Wilt Chamberlain grab in his best rebounding game?', answer: 55, fact: 'Wilt had 55 rebounds in one game.' },
+      { icon: '🌟', level: 2, q: 'How many threes did Klay Thompson make in his single-game record?', answer: 14, fact: 'Klay hit 14 threes in one game.' },
+      { icon: '🌟', level: 3, q: 'How many career regular-season points did Kareem Abdul-Jabbar finish with?', answer: 38387, fact: 'Kareem retired with 38,387 regular-season points.' },
+      { icon: '🌟', level: 3, q: 'How many career assists does John Stockton have (NBA record)?', answer: 15806, fact: 'John Stockton is the all-time assists leader with 15,806.' },
+      { icon: '🌟', level: 3, q: 'How many career steals does John Stockton have (NBA record)?', answer: 3265, fact: 'John Stockton is the all-time steals leader with 3,265.' }
     ];
 
     function buildQuestionBank() {
@@ -381,56 +416,40 @@
         addQ('🏟️', 1, `How many NBA championships have the ${t.team} won?`, t.titles, `${t.team} have ${t.titles} title${t.titles === 1 ? '' : 's'}.`);
       });
 
-      const duos = [
-        ['Michael Jordan', 'Scottie Pippen', 6],
-        ['Shaquille O\'Neal', 'Kobe Bryant', 8],
-        ['Magic Johnson', 'Kareem Abdul-Jabbar', 11],
-        ['LeBron James', 'Dwyane Wade', 7],
-        ['Tim Duncan', 'Manu Ginobili', 9],
-        ['Stephen Curry', 'Klay Thompson', 8],
-        ['Larry Bird', 'Kevin McHale', 6],
-        ['Giannis Antetokounmpo', 'Khris Middleton', 2],
-        ['Nikola Jokic', 'Jamal Murray', 2],
-        ['Kawhi Leonard', 'Tim Duncan', 7]
-      ];
-
-      duos.forEach((d) => {
-        addQ('🤝', 2, `How many combined championships do ${d[0]} and ${d[1]} have?`, d[2], `${d[0]} + ${d[1]} combine for ${d[2]} title${d[2] === 1 ? '' : 's'}.`);
+      RECORD_FACTS.forEach((r) => {
+        addQ(r.icon, r.level, r.q, r.answer, r.fact);
       });
 
-      let i = 0;
-      while (questions.length < TARGET_POOL_SIZE && i < 5000) {
-        const p = PLAYER_FACTS[i % PLAYER_FACTS.length];
-        const t = TEAM_TITLES[(i * 3 + 2) % TEAM_TITLES.length];
-        const mode = i % 6;
+      const uniquePlayers = PLAYER_FACTS.map((p) => p.name);
+      uniquePlayers.forEach((name, idx) => {
+        const p = PLAYER_FACTS[idx];
+        addQ('👕', 1, `${name} is most commonly associated with which jersey number?`, p.jersey, `${name} is associated with jersey #${p.jersey}.`);
+        addQ('🗓️', 1, `In what year did ${name} enter the NBA via the draft?`, p.draft, `${name} was drafted in ${p.draft}.`);
+        addQ('🏆', 2, `How many NBA championships does ${name} have?`, p.titles, `${name} has ${p.titles} championship${p.titles === 1 ? '' : 's'}.`);
+        addQ('🏅', 2, `How many regular-season MVPs has ${name} won?`, p.mvp, `${name} has ${p.mvp} MVP award${p.mvp === 1 ? '' : 's'}.`);
+      });
 
-        if (mode === 0) {
-          const games = 5 + (i % 12);
-          addQ('🎲', 2, `Sim challenge: ${p.name} wears #${p.jersey} for ${games} games. What is jersey x games?`, p.jersey * games, `${p.jersey} x ${games} = ${p.jersey * games}.`);
-        } else if (mode === 1) {
-          const twos = 3 + (i % 8);
-          const threes = 2 + (i % 5);
-          const fts = 2 + (i % 6);
-          const total = (twos * 2) + (threes * 3) + fts;
-          addQ('🧮', 3, `Box score puzzle: ${twos} two-pointers, ${threes} threes, ${fts} free throws. Total points?`, total, `Total = 2PT x2 + 3PT x3 + FT x1.`);
-        } else if (mode === 2) {
-          const wins = 44 + (i % 20);
-          const losses = 82 - wins;
-          addQ('📈', 1, `Season record math: team finishes ${wins}-${losses}. How many total games?`, wins + losses, `Regular season total is 82.`);
-        } else if (mode === 3) {
-          const rounds = 4;
-          const sweeps = 4 * rounds;
-          addQ('🏁', 2, `Playoff path: if a team sweeps all ${rounds} rounds, how many wins is that?`, sweeps, `A sweep means 4 wins per round.`);
-        } else if (mode === 4) {
-          const bonus = 2 + (i % 9);
-          addQ('🏟️', 2, `Franchise fun: if the ${t.team} added ${bonus} future titles to ${t.titles}, new total?`, t.titles + bonus, `This uses the team's current title count as a math base.`);
-        } else {
-          const mins = 26 + (i % 14);
-          const games = 3 + (i % 9);
-          addQ('⏱️', 3, `Stamina math: ${p.name} plays ${mins} minutes for ${games} games. Total minutes?`, mins * games, `${mins} x ${games} = ${mins * games}.`);
-        }
+      const finalsFacts = [
+        { q: 'How many NBA titles did Michael Jordan win with the Bulls?', a: 6, f: 'Jordan won 6 titles with Chicago.' },
+        { q: 'How many NBA titles did Tim Duncan win with the Spurs?', a: 5, f: 'Duncan won 5 titles with San Antonio.' },
+        { q: 'How many NBA titles has Stephen Curry won with the Warriors?', a: 4, f: 'Curry has won 4 championships.' },
+        { q: 'How many NBA titles did Kobe Bryant win with the Lakers?', a: 5, f: 'Kobe won 5 championships with the Lakers.' },
+        { q: 'How many NBA titles did Magic Johnson win?', a: 5, f: 'Magic won 5 championships in his career.' },
+        { q: 'How many NBA titles did Larry Bird win?', a: 3, f: 'Bird won 3 championships with Boston.' },
+        { q: 'How many NBA titles did Shaquille O\'Neal win?', a: 4, f: 'Shaq won 4 championships.' },
+        { q: 'How many NBA titles has LeBron James won?', a: 4, f: 'LeBron has 4 championships.' },
+        { q: 'How many NBA titles has Giannis Antetokounmpo won?', a: 1, f: 'Giannis won his first title in 2021.' },
+        { q: 'How many NBA titles has Nikola Jokic won?', a: 1, f: 'Jokic won his first title in 2023.' }
+      ];
 
-        i += 1;
+      finalsFacts.forEach((x) => addQ('🏁', 2, x.q, x.a, x.f));
+
+      const tieredPool = questions.slice();
+      while (tieredPool.length < TARGET_POOL_SIZE) {
+        const seed = questions[tieredPool.length % questions.length];
+        const altQ = `${seed.q} (Official NBA trivia)`;
+        addQ(seed.icon, seed.level, altQ, seed.answer, seed.fact);
+        tieredPool.push({ icon: seed.icon, level: seed.level, q: altQ, answer: seed.answer, fact: seed.fact });
       }
 
       return questions.slice(0, TARGET_POOL_SIZE);
